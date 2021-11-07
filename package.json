@@ -1,0 +1,32 @@
+{
+  "name": "root",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "crypto-js": "^4.1.1",
+    "date-fns": "^2.22.1",
+    "http": "0.0.1-security",
+    "http-server": "^0.12.3",
+    "https": "^1.0.0",
+    "jsdom": "^17.0.0",
+    "png-js": "^1.0.0",
+    "qrcode-terminal": "^0.12.0",
+    "readline-sync": "^1.4.10",
+    "request": "",
+    "stream": "0.0.2",
+    "tough-cookie": "^4.0.0",
+    "tunnel": "0.0.6",
+    "vm": "^0.1.0",
+    "ws": "^7.4.3",
+    "zlib": "^1.0.5",
+"got":""
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
