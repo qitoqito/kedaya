@@ -1,5 +1,7 @@
+
 !(async () => {
-        let filename = process.mainModule.filename.match(/(\w+).js/)[1]
+        let prefix = process.env.CREAT_PREFIX ||''
+        let filename = process.mainModule.filename.replace(prefix,'').match(/(\w+).js/)[1]
         let dirname = process.mainModule.path
         let type = filename.split('_')[0]
         if (['js', 'jx', 'jr', 'jw'].includes(type)) {
@@ -12,3 +14,4 @@
 )().catch((e) => {
     console.log(e.message)
 })
+
