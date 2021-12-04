@@ -15,6 +15,11 @@ class Main extends Template {
 
     async prepare() {
         this.algo = new this.modules.jdAlgo()
+        this.algo.set({
+            'appId': 10028,
+            type: 'pingou',
+            // verify: 1
+        })
         let url = `https://wq.jd.com/bases/orderlist/list?order_type=3&start_page=1&last_page=0&page_size=10&callersource=newbiz&t=${this.timestamp}&traceid=&g_ty=ls&g_tk=606717070`
         for (let j of this.cookies['help']) {
             this.setCookie(j);
