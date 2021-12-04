@@ -66,18 +66,24 @@ class Main extends Template {
             for (let i of this.random(fcode, 7)) {
                 console.log("删除好友:", i)
                 let sc = await this.curl({
-                    'url': `https://api.m.jd.com/client.action?functionId=friendListInitForFarm&body={"shareCode":${i},"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                    'url': `https://api.m.jd.com/client.action?functionId=deleteFriendForFarm&body={"shareCode":"${i}","version":8,"channel":1}&appid=wh5&client=apple&clientVersion=10.2.4`,
                     // 'form':``,
                     cookie
                 })
                 console.log("添加好友:", i)
                 let tj = await this.curl({
-                        'url': `https://api.m.jd.com/client.action?functionId=initForFarm&body={"mpin":"RnFkkW8KPGeNntRE9sYjCq4","utm_campaign":"t_335139774","utm_medium":"appshare","shareCode":"${i}-inviteFriend","utm_term":"Wxfriends","utm_source":"iosapp","imageUrl":"","nickName":"","version":14,"channel":2,"babelChannel":0}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                        'url': `https://api.m.jd.com/client.action?functionId=initForFarm&body={"mpin":"","utm_campaign":"","utm_medium":"appshare","shareCode":"${i}-inviteFriend","utm_term":"Wxfriends","utm_source":"iosapp","imageUrl":"","nickName":"","version":14,"channel":2,"babelChannel":0}&appid=wh5&client=apple&clientVersion=10.2.4`,
                         // 'form':``,
                         cookie
                     }
                 )
             }
+            await this.curl({
+                    'url': `https://api.m.jd.com/client.action?functionId=awardInviteFriendForFarm&body={}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                    // 'form':``,
+                    cookie
+                }
+            )
         }
         let qdd = await this.curl({
                 'url': `https://api.m.jd.com/client.action?functionId=clockInForFarm&body={"type":1,"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
@@ -500,7 +506,7 @@ class Main extends Template {
                 }
             )
             if (!exc.f) {
-                for (let i of exc.assistStageList) {
+                for (let i of exc.assistStageList || []) {
                     if (i.percentage == '100%') {
                         let excc = await this.curl({
                                 'url': `https://api.m.jd.com/client.action?functionId=receiveStageEnergy&body={"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
