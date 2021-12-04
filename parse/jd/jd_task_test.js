@@ -7,6 +7,7 @@ class Main extends Template {
         this.cron = "12 0,13 * * *"
         this.help = 2
         this.task = 'test'
+        this.readme= "这里是测试信息"
     }
 
     async prepare() {
