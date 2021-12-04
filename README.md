@@ -1,0 +1,3 @@
+# kedaya
+为避免第三方库滥用,请自行添加环境变量
+export QITOQITO=UdlM2TYTZzADOwM:cb3d623b4bdf699c8464b50ad61c25dcbc655711
