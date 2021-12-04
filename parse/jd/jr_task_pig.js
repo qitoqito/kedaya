@@ -4,12 +4,13 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东金融养猪"
-        this.cron = "41 */4 * * *"
+        this.cron = "41 1,5,6-23 * * *"
+        this.task = 'local'
+        this.thread = 6
     }
 
     async main(p) {
         let cookie = p.cookie
- 
         let s = await this.curl({
             url: 'https://ms.jr.jd.com/gw/generic/uc/h5/m/pigPetLogin',
             form: 'reqData={"source":2,"channelLV":"juheye","riskDeviceParam":"{}"}',
@@ -21,28 +22,28 @@ class Main extends Template {
             console.log("可兑换: ", reward)
             this.notices(`${reward}可以兑换了`, p.user)
         }
-        let s1 = await this.curl({
-            url: 'https://ms.jr.jd.com/gw/generic/uc/h5/m/pigPetSignIndex',
-            form: 'reqData={"source":2,"channelLV":"juheye","riskDeviceParam":"{}"}',
-            cookie
-        })
-        let day = this.haskey(s1, 'resultData.resultData.today')
-        if (this.haskey(s1, 'resultData.resultData.sign')) {
-            await this.curl({
-                url: 'https://ms.jr.jd.com/gw/generic/uc/h5/m/pigPetSignOne',
-                form: `reqData={"source":2,"channelLV":"juheye","riskDeviceParam":"{}","no":${day}`,
+        if (new Date().getHours()<6) {
+            let s1 = await this.curl({
+                url: 'https://ms.jr.jd.com/gw/generic/uc/h5/m/pigPetSignIndex',
+                form: 'reqData={"source":2,"channelLV":"juheye","riskDeviceParam":"{}"}',
                 cookie
             })
-        }
-        else {
-            console.log(`第${day}天签到`)
-        }
-        let s2 = await this.curl({
-            url: 'https://ms.jr.jd.com/gw/generic/uc/h5/m/pigPetMissionList',
-            form: 'reqData={"source":2,"channelLV":"","riskDeviceParam":"{}"}',
-            cookie
-        })
-        for (let z of Array(2)) {
+            let day = this.haskey(s1, 'resultData.resultData.today')
+            if (this.haskey(s1, 'resultData.resultData.sign')) {
+                await this.curl({
+                    url: 'https://ms.jr.jd.com/gw/generic/uc/h5/m/pigPetSignOne',
+                    form: `reqData={"source":2,"channelLV":"juheye","riskDeviceParam":"{}","no":${day}`,
+                    cookie
+                })
+            }
+            else {
+                console.log(`第${day}天签到`)
+            }
+            let s2 = await this.curl({
+                url: 'https://ms.jr.jd.com/gw/generic/uc/h5/m/pigPetMissionList',
+                form: 'reqData={"source":2,"channelLV":"","riskDeviceParam":"{}"}',
+                cookie
+            })
             for (let i of this.haskey(s2, 'resultData.resultData.missions')) {
                 if (i.status == 3) {
                     console.log("去做任务:", i.missionName)
@@ -78,8 +79,42 @@ class Main extends Template {
                 }
             }
         }
+        // 抽奖
+        let cj = await this.curl({
+                'url': `https://ms.jr.jd.com/gw/generic/uc/h5/m/pigPetLotteryPlay?_=1638626598176`,
+                'form': `reqData={"type":0,"validation":"","channelLV":"","source":2,"riskDeviceParam":"{}"}`,
+                cookie
+            }
+        )
+        console.log('抽奖', this.haskey(cj, 'resultData.resultData.award') || '啥都没有')
+        let f = await this.curl({
+                'url': `https://ms.jr.jd.com/gw/generic/uc/h5/m/pigPetUserBag?_=1638625553273`,
+                'form': `reqData={"category":"1001","channelLV":"","source":2,"riskDeviceParam":"{}"}`,
+                cookie
+            }
+        )
+        for (let i of this.haskey(f, 'resultData.resultData.goods')) {
+            if (i.count>19) {
+                // 每项最多喂食十次
+                for (let k = 0; k<Math.min((i.count / 20), 10); k++) {
+                    let fo = await this.curl({
+                            'url': `https://ms.jr.jd.com/gw/generic/uc/h5/m/pigPetAddFood?_=1638626147115`,
+                            'form': `reqData={"skuId":"${i.sku}","channelLV":"","source":2,"riskDeviceParam":"{}"}`,
+                            cookie
+                        }
+                    )
+                    if (!fo?.resultData?.resultData) {
+                        break
+                    }
+                    console.log(`正在喂食: ${i.goodsName} ,等待12秒进行下一轮喂食`)
+                    await this.wait(12500)
+                }
+            }
+            else {
+                console.log("没有足够的粮食来喂小猪猪", i.goodsName)
+            }
+        }
     }
 }
 
-module
-    .exports = Main;
+module.exports = Main;
