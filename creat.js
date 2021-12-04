@@ -30,7 +30,6 @@ let content= `
 
 `
 
-console.log(pathFile)
 for (let i in dicts) {
     for (let j of dicts[i]) {
        let filename=`${prefix}${j}`
