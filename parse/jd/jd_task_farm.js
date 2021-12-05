@@ -44,7 +44,6 @@ class Main extends Template {
         if (init.farmUserPro.treeState == 2) {
             console.log("可以兑换奖品了")
             this.notices('可以兑换奖品了', p.user)
-            return
         }
         else if (init.farmUserPro.treeState == 0) {
             console.log("正在播种")
@@ -91,11 +90,27 @@ class Main extends Template {
                 cookie
             }
         )
+        // let qdd = await this.curl({
+        //         'url': `https://api.m.jd.com/client.action?functionId=clockInInitForFarm&body={"timestamp":${this.timestamp},"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+        //         // 'form':``,
+        //         cookie
+        //     }
+        // )
         if (qdd.amount) {
             console.log("签到获得水滴", qdd.amount)
         }
         else {
             console.log("已经签到过了")
+        }
+        // 7天奖励
+        let jl = await this.curl({
+                'url': `https://api.m.jd.com/client.action?functionId=clockInForFarm&body={"type":2,"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                // 'form':``,
+                cookie
+            }
+        )
+        if (jl.amount) {
+            console.log("连续签到获得水滴:", jl.amount)
         }
         for (let i of qdd.themes || []) {
             if (!i.hadGot) {
