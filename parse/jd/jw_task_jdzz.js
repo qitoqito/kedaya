@@ -22,14 +22,19 @@ class Main extends Template {
             }
         )
         for (let i of s?.data?.taskDetailResList || []) {
-            if (i.times<i.maxTimes) {
+            if (i.times != i.maxTimes) {
                 let a = await this.curl({
                         'url': `https://api.m.jd.com/client.action?functionId=doInteractTask&body=${encodeURIComponent(this.dumps(i))}&appid=wh5&loginType=2&loginWQBiz=interact&g_ty=ls&g_tk=1294369933`,
                         // 'form':``,
                         cookie
                     }
                 )
-                console.log(a.data.totalNum || a.data)
+                if (a.data.totalNum) {
+                    console.log(`${i.taskName}任务完成`)
+                }
+                else {
+                    console.log(`${i.taskName}任务已经做过了`)
+                }
             }
         }
     }

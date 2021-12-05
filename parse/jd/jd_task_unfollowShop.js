@@ -5,7 +5,7 @@ class Main extends Template {
         super()
         this.title = "京东取关店铺"
         this.cron = "33 23 * * *"
-        this.task = 'all'
+        this.task = 'local'
         this.thread = 3
     }
 
@@ -18,6 +18,7 @@ class Main extends Template {
         let url = `https://wq.jd.com/fav/shop/QueryShopFavList?cp=1&pageSize=20&lastlogintime=${this.timestamp}&_=1629620296971&g_login_type=0&callback=jsonpCBKA&g_tk=1994796340&g_ty=ls&sceneval=2&g_login_type=1`
         let array = []
         let nn = 0
+        let a = 0
         for (let i = 0, n = Math.ceil(this.count / 20); i<=n; i++) {
             let lists = await this.curl({url, cookie: p.cookie})
             if (lists.data) {
@@ -29,12 +30,22 @@ class Main extends Template {
                     }
                 )
                 console.log(ss.msg || ss)
+                if (ss.msg) {
+                    a += lists.data.length
+                }
+                else {
+                    console.log("失败了")
+                    break
+                }
             }
             else {
                 console.log("未获取到店铺关注信息")
+                break
             }
         }
-        // this.notices(`取消关注:\n${array.join("\n")}`, p.user, 1)
+        if (a>0) {
+            this.notices(`取关店铺数: ${a}`, p.user, 30)
+        }
     }
 }
 
