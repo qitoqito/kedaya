@@ -15,6 +15,7 @@ class Main extends Template {
 
     async main(p) {
         let cookie = p.cookie;
+        this.notices('test',p.user)
     }
 }
 
