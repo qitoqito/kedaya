@@ -9,6 +9,8 @@ class Main extends Template {
         this.help = 'main'
         this.import = ['jdAlgo']
         this.verify = 1
+        this.readme = `如需修改查询返现人数,请自行添加环境变量\nexport ${this.filename}_help=人数
+        `
     }
 
     async prepare() {
