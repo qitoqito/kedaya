@@ -6,7 +6,7 @@ class Main extends Template {
         this.title = "京东抽奖机"
         this.cron = "26 0,18 * * *"
         this.help = 'main'
-        this.task = 'main'
+        this.task = 'local'
         this.thread = 6
         this.turn = 1
         this.readme=`如需更改助力人数,请自行添加环境变量\nexport ${this.filename}_help=人数`
