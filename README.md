@@ -5,8 +5,8 @@
 	QITOQITO=UdlM2TYTZzADOwM:cb3d623b4bdf699c8464b50ad61c25dcbc655711
 # 环境变量
 	# COOKIE
-	JD_COOKIES=面板自带,不需要自行添加
-	JD_COOKIES_MAIN=全局主号助力人数
+	JD_COOKIE=面板自带,不需要自行添加
+	JD_COOKIE_MAIN=全局主号助力人数
 
 	# 脚本类, 以文件名 jd_task_test 为例
 	jd_task_test_help=脚本主号助力人数
