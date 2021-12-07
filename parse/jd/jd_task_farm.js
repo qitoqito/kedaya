@@ -41,6 +41,15 @@ class Main extends Template {
             this.notices('账号过期了', p.user)
             return
         }
+        if (!init.farmUserPro) {
+            console.log("尝试种树")
+            await this.curl({
+                    'url': `https://api.m.jd.com/client.action?functionId=choiceGoodsForFarm&body={"imageUrl":"","nickName":"","shareCode":"","goodsType":"mihoutao22","type":"0","babelChannel":"120","sid":"b1482460605540226922b0088199941w","un_area":"16_1341_1347_44750","version":14,"channel":1}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                    // 'form':``,
+                    cookie
+                }
+            )
+        }
         if (init.farmUserPro.treeState == 2) {
             console.log("可以兑换奖品了")
             this.notices('可以兑换奖品了', p.user)
@@ -90,12 +99,7 @@ class Main extends Template {
                 cookie
             }
         )
-        // let qdd = await this.curl({
-        //         'url': `https://api.m.jd.com/client.action?functionId=clockInInitForFarm&body={"timestamp":${this.timestamp},"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
-        //         // 'form':``,
-        //         cookie
-        //     }
-        // )
+
         if (qdd.amount) {
             console.log("签到获得水滴", qdd.amount)
         }
@@ -103,6 +107,12 @@ class Main extends Template {
             console.log("已经签到过了")
         }
         // 7天奖励
+        qdd = await this.curl({
+                'url': `https://api.m.jd.com/client.action?functionId=clockInInitForFarm&body={"timestamp":${this.timestamp},"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                // 'form':``,
+                cookie
+            }
+        )
         let jl = await this.curl({
                 'url': `https://api.m.jd.com/client.action?functionId=clockInForFarm&body={"type":2,"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                 // 'form':``,
