@@ -27,6 +27,7 @@
 	# telegram
 	TELEGRAM_TOKEN=
 	TELEGRAM_ID=
+	TELEGRAM_URL=自定义TG代理链接
 
 	# bark
 	BARK_TOKEN=
