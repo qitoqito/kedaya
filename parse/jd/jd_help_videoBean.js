@@ -62,19 +62,19 @@ class Main extends Template {
             for (let cookie of this.cookies['help']) {
                 let user = this.userName(cookie)
                 if (user == i.user) {
-                    try {
-                        let h = await this.curl({
-                                'url': `https://wq.jd.com/active/getfunction?activeid=${i.activeId}&token=${i.actToken}&sceneval=2&callback=GetFunctionQ&_=1625916052829`,
-                                // 'form':``,
-                                cookie
-                            }, '', `
-                            data=data.replace('JD', 'return val; JD')
-                        `
-                        )
-                        let promotejs = h.function(h.TOKEN)
-                        cookie = `promotejs=${promotejs};${cookie}`
-                    } catch (e) {
-                    }
+                    // try {
+                    //     let h = await this.curl({
+                    //             'url': `https://wq.jd.com/active/getfunction?activeid=${i.activeId}&token=${i.actToken}&sceneval=2&callback=GetFunctionQ&_=1625916052829`,
+                    //             // 'form':``,
+                    //             cookie
+                    //         }, '', `
+                    //         data=data.replace('JD', 'return val; JD')
+                    //     `
+                    //     )
+                    //     let promotejs = h.function(h.TOKEN)
+                    //     cookie = `promotejs=${promotejs};${cookie}`
+                    // } catch (e) {
+                    // }
                     let s = await this.curl({
                             'url': `https://wq.jd.com/activet2/piggybank/draw?activeid=${i.activeId}&token=${i.actToken}&sceneval=2&callback=drawO&_=1625916054011`,
                             // 'form':``,
