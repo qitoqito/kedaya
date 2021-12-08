@@ -68,25 +68,26 @@ class Main extends Template {
                                 // 'form':``,
                                 cookie
                             }, '', `
-            data=data.replace('JD', 'return val; JD')
-        `
+                            data=data.replace('JD', 'return val; JD')
+                        `
                         )
                         let promotejs = h.function(h.TOKEN)
                         cookie = `promotejs=${promotejs};${cookie}`
-                        let s = await this.curl({
-                                'url': `https://wq.jd.com/activet2/piggybank/draw?activeid=${i.activeId}&token=${i.actToken}&sceneval=2&callback=drawO&_=1625916054011`,
-                                // 'form':``,
-                                cookie
-                            }
-                        )
-                        if (s.data) {
-                            console.log('领取奖励成功')
-                        }
-                        else {
-                            console.log("领取奖励失败")
-                        }
                     } catch (e) {
                     }
+                    let s = await this.curl({
+                            'url': `https://wq.jd.com/activet2/piggybank/draw?activeid=${i.activeId}&token=${i.actToken}&sceneval=2&callback=drawO&_=1625916054011`,
+                            // 'form':``,
+                            cookie
+                        }
+                    )
+                    if (typeof (s) == 'object' && s.data) {
+                        console.log('领取奖励成功')
+                    }
+                    else {
+                        console.log("领取奖励失败")
+                    }
+                    await this.wait(1200)
                 }
             }
         }
