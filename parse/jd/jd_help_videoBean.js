@@ -14,6 +14,8 @@ class Main extends Template {
 
     async prepare() {
         this.code = [
+            'https://anmp.jd.com/babelDiy/Zeus/3ZCsX7usDGQf6T6xZiYSF66kzDpr/index.html',
+            'https://anmp.jd.com/babelDiy/Zeus/3doJ9utWY4YtYg1LNDT96Lg8KEbc/index.html',
             'https://anmp.jd.com/babelDiy/Zeus/K9FJhwijt6vahHPzWtgfJJPaUXz/index.html'
         ]
         for (let url of this.code) {
@@ -68,7 +70,7 @@ class Main extends Template {
                     //             // 'form':``,
                     //             cookie
                     //         }, '', `
-                    //         data=data.replace('JD', 'return val; JD')
+                    //         evalData =evalData.replace('JD', 'return val; JD')
                     //     `
                     //     )
                     //     let promotejs = h.function(h.TOKEN)
