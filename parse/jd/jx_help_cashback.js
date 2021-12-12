@@ -56,10 +56,6 @@ class Main extends Template {
                             this.shareCode.push({
                                 'groupid': groupid
                             })
-                            await this.curl({
-                                'url': `http://m-jd.cn/tool/jingxi/?key=${encodeURIComponent(`https://wqsd.jd.com/sns/201907/25/rebate/index.html?groupid=${groupid}`)}`,
-                                cookie: ''
-                            })
                         }
                     }
                 } catch (e) {
