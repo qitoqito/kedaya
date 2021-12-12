@@ -19,6 +19,7 @@ class Main extends Template {
                 cookie
             }
         )
+        let n = 0
         for (let i = ssss.content.finishCount; i<ssss.content.maxTaskCount; i++) {
             let s = await this.curl({
                     'url': `https://ifanli.m.jd.com/rebateapi/task/getTaskList`,
@@ -39,32 +40,40 @@ class Main extends Template {
                 let max = Math.max(...Object.keys(dict).map(d => parseInt(d)));
                 d = dict[max]
             }
-            let sss = await this.curl({
-                    'url': `https://ifanli.m.jd.com/rebateapi/task/saveTaskRecord`,
-                    'json': {
-                        "taskId": d.taskId,
-                        "taskType": d.taskType,
-                        "businessId": d.businessId
-                    },
-                    cookie
-                }
-            )
-            await this.wait(d.watchTime * 1000)
-            let ssss = await this.curl({
-                    'url': `https://ifanli.m.jd.com/rebateapi/task/saveTaskRecord`,
-                    'json': {
-                        "taskId": d.taskId,
-                        "taskType": d.taskType,
-                        "uid": sss.content.uid,
-                        "tt": sss.content.tt,
-                        "businessId": d.businessId
-                    },
-                    cookie
-                }
-            )
-            console.log(ssss.content);
+            try {
+                let sss = await this.curl({
+                        'url': `https://ifanli.m.jd.com/rebateapi/task/saveTaskRecord`,
+                        'json': {
+                            "taskId": d.taskId,
+                            "taskType": d.taskType,
+                            "businessId": d.businessId
+                        },
+                        cookie
+                    }
+                )
+                await this.wait(d.watchTime * 1000)
+                let ssss = await this.curl({
+                        'url': `https://ifanli.m.jd.com/rebateapi/task/saveTaskRecord`,
+                        'json': {
+                            "taskId": d.taskId,
+                            "taskType": d.taskType,
+                            "uid": sss.content.uid,
+                            "tt": sss.content.tt,
+                            "businessId": d.businessId
+                        },
+                        cookie
+                    }
+                )
+                console.log(ssss.content);
+                n += ssss.content.beans
+            } catch (e) {
+                console.log("该账号可能脸黑")
+            }
         }
         console.log("任务已完成")
+        if (n) {
+            this.notices(`获得京豆:${n}`, p.user)
+        }
     }
 }
 
