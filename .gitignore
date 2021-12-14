@@ -8,3 +8,4 @@ extractor/util.js
 *.iml
 .idea/misc.xml
 .idea/modules.xml
+config/jd.js
