@@ -14,8 +14,9 @@ class Main extends Template {
 
     async prepare() {
         this.code = [
-            'https://anmp.jd.com/babelDiy/Zeus/iCc5C4cYeELBq2snuRzgHXK3QX7/index.html',
-            'https://anmp.jd.com/babelDiy/Zeus/2ZmnynfbAr1o6qRddJpiy6YvLK6E/index.html',
+            "https://anmp.jd.com/babelDiy/Zeus/2mk2pSswjLJ6ZYKZYLZeMs4Rcqq5/index.html"
+            // 'https://anmp.jd.com/babelDiy/Zeus/iCc5C4cYeELBq2snuRzgHXK3QX7/index.html',
+            // 'https://anmp.jd.com/babelDiy/Zeus/2ZmnynfbAr1o6qRddJpiy6YvLK6E/index.html',
             // 'https://anmp.jd.com/babelDiy/Zeus/3ZCsX7usDGQf6T6xZiYSF66kzDpr/index.html',
             // 'https://anmp.jd.com/babelDiy/Zeus/3doJ9utWY4YtYg1LNDT96Lg8KEbc/index.html',
             // 'https://anmp.jd.com/babelDiy/Zeus/K9FJhwijt6vahHPzWtgfJJPaUXz/index.html'
@@ -85,7 +86,7 @@ class Main extends Template {
                             cookie
                         }
                     )
-                    if (typeof (s) == 'object' && s.data) {
+                    if (typeof (s) == 'object' && s?.data?.drawflag) {
                         console.log('领取奖励成功')
                     }
                     else {
