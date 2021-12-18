@@ -4,7 +4,7 @@ class Main extends Template {
         super()
         this.title = "京东7天内过期京豆兑换成喜豆"
         this.cron = "12 23 */2 * *"
-        this.task = 'all'
+        this.task = 'local'
     }
     async prepare() {}
     async main(p) {
