@@ -14,7 +14,7 @@
     # 面板类
 	同步解压到scripts目录,运行creat.js生成入口文件
     # 青龙
-	ql repo https://github.com/qitoqito/kedaya.git kedaya && cp -a /ql/repo/qitoqito_kedaya/. /ql/scripts && task creat.js
+	ql repo https://github.com/qitoqito/kedaya.git kedaya && cp -a /ql/repo/qitoqito_kedaya/. /ql/scripts && task creatAll.js
 
 	青龙: task jd_task_test
 	v4面板: jtask|jd jd_task_test
@@ -28,6 +28,7 @@
 	TELEGRAM_TOKEN=
 	TELEGRAM_ID=
 	TELEGRAM_URL=自定义TG代理链接
+	TELEGRAM_PROXY=代理服务器 (http|https|sock)://ip:port, 使用sock需要安装 socks-proxy-agent 模块
 
 	# bark
 	BARK_TOKEN=
