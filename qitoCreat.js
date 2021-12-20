@@ -108,7 +108,7 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
                         if (crontab.includes(`task ${filename}`)) {
                             if (!kedaya.cron) {
                                 for (let z of cron.data) {
-                                    if (z.name.includes("kedaya_") && z.command == `task ${filename}`) {
+                                    if (z.name.includes("kedaya_") && z.command.includes(`task ${filename}`)) {
                                         if (z.isDisabled) {
                                             console.log(`🙊 禁用失败: ${filename} 已经是禁用的`)
                                         } else {
@@ -129,7 +129,7 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
                                 }
                             } else {
                                 for (let z of cron.data) {
-                                    if (z.name.includes("kedaya_") && z.command == `task ${filename}`) {
+                                    if (z.name.includes("kedaya_") && z.command.includes(`task ${filename}`)) {
                                         if (z.isDisabled && sync) {
                                             let disable = await curl({
                                                 'url': `${url}/api/crons/enable?t=1639371766925`,
