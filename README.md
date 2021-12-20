@@ -14,7 +14,7 @@
     # 面板类
 	同步解压到scripts目录,运行creat.js生成入口文件
     # 青龙
-	ql repo https://github.com/qitoqito/kedaya.git kedaya && cp -a /ql/repo/qitoqito_kedaya/. /ql/scripts && task qitoCreat.js
+	rm -rf /ql/repo/qitoqito_kedaya && ql repo https://github.com/qitoqito/kedaya.git kedaya && cp -a /ql/repo/qitoqito_kedaya/. /ql/scripts && task qitoCreat.js
     # v4面板
     rm -rf kedaya && git clone  https://github.com/qitoqito/kedaya.git  && cp -a kedaya/. ./scripts && jtask qitoCreat now
     # 其他

@@ -5,7 +5,7 @@ let command = process.env.QITOQITO_PLATFORM
 if (!command) {
     console.log(`
 请先设置环境变量 QITOQITO_PLATFORM
-qinglong: export QITOQITO_PLATFORM="http://ip:port"
+qinglong: export QITOQITO_PLATFORM=qinglong 或 "http://ip:port"
 V4_jtask: exprot QITOQITO_PLATFORM=jtask
 V4_jd: exprot QITOQITO_PLATFORM=jd
         `)
