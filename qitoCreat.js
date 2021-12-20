@@ -55,6 +55,9 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
     }
     console.log(`\n🦊 正在处理定时任务\n`)
     await new Promise(e => setTimeout(e, 3000))
+    if (command == 'qinglong') {
+        command = 'http://127.0.0.1:5700'
+    }
     if (command.includes('http')) {
         let json = fs.readFileSync('../config/auth.json', "utf-8");
         let auth = JSON.parse(json)
@@ -232,7 +235,7 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
                     }
                 }
                 if (!crontab.includes(i)) {
-                     console.log(`🐻 导入跳过: ${i} 定时没有开启,如需运行请手动添加`)
+                    console.log(`🐻 导入跳过: ${i} 定时没有开启,如需运行请手动添加`)
                 }
             }
         }
