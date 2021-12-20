@@ -130,7 +130,7 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
                             } else {
                                 for (let z of cron.data) {
                                     if (z.name.includes("kedaya_") && z.command == `task ${filename}`) {
-                                        if (z.isDisabled && async) {
+                                        if (z.isDisabled && sync) {
                                             let disable = await curl({
                                                 'url': `${url}/api/crons/enable?t=1639371766925`,
                                                 json: [z._id],
