@@ -130,20 +130,22 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
                             } else {
                                 for (let z of cron.data) {
                                     if (z.name.includes("kedaya_") && z.command.includes(`task ${filename}`)) {
-                                        if (z.isDisabled && sync) {
-                                            let disable = await curl({
-                                                'url': `${url}/api/crons/enable?t=1639371766925`,
-                                                json: [z._id],
-                                                authorization,
-                                                'headers': {
-                                                    'Referer': `${url}/api/crons?searchValue=&t=1638982538292`,
-                                                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:94.0) Gecko/20100101 Firefox/94.0'
-                                                },
-                                                method: 'put'
-                                            })
-                                            console.log(`🐽 开启成功: ${filename} 启用脚本成功`)
-                                        } else {
-                                            console.log(`🐽 开启失败: ${filename} 启用脚本失败,如需同步,请设置 QITOQITO_SYNC`)
+                                        if (z.isDisabled) {
+                                            if (sync) {
+                                                let disable = await curl({
+                                                    'url': `${url}/api/crons/enable?t=1639371766925`,
+                                                    json: [z._id],
+                                                    authorization,
+                                                    'headers': {
+                                                        'Referer': `${url}/api/crons?searchValue=&t=1638982538292`,
+                                                        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:94.0) Gecko/20100101 Firefox/94.0'
+                                                    },
+                                                    method: 'put'
+                                                })
+                                                console.log(`🐽 开启成功: ${filename} 启用脚本成功`)
+                                            } else {
+                                                console.log(`🐽 开启失败: ${filename} 启用脚本失败,如需同步,请设置 QITOQITO_SYNC`)
+                                            }
                                         }
                                         break
                                     }
