@@ -2,7 +2,6 @@ let fs = require("fs")
 let request = require("request")
 let prefix = process.env.CREAT_PREFIX || ''
 let command = process.env.QITOQITO_PLATFORM
-command = 'jd'
 if (!command) {
     console.log(`
 请先设置环境变量 QITOQITO_PLATFORM
