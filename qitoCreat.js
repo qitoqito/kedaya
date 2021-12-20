@@ -2,6 +2,7 @@ let fs = require("fs")
 let request = require("request")
 let prefix = process.env.CREAT_PREFIX || ''
 let command = process.env.QITOQITO_PLATFORM
+let sync = process.env.QITOQITO_SYNC
 if (!command) {
     console.log(`
 请先设置环境变量 QITOQITO_PLATFORM
@@ -129,7 +130,7 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
                             } else {
                                 for (let z of cron.data) {
                                     if (z.name.includes("kedaya_") && z.command == `task ${filename}`) {
-                                        if (z.isDisabled) {
+                                        if (z.isDisabled && async) {
                                             let disable = await curl({
                                                 'url': `${url}/api/crons/enable?t=1639371766925`,
                                                 json: [z._id],
@@ -141,6 +142,8 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
                                                 method: 'put'
                                             })
                                             console.log(`🐽 开启成功: ${filename} 启用脚本成功`)
+                                        } else {
+                                            console.log(`🐽 开启失败: ${filename} 启用脚本失败,如需同步,请设置 QITOQITO_SYNC`)
                                         }
                                         break
                                     }
@@ -207,8 +210,13 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
                     for (let j in spl) {
                         if (match(new RegExp(`(${command}\\s*${i})`), spl[j])) {
                             if (spl[j][0] == '#') {
-                                spl[j] = spl[j].replace('#', '')
-                                console.log(`🐽 开启成功: ${i} 启用脚本成功`)
+                                if (sync) {
+                                    spl[j] = spl[j].replace('#', '')
+                                    console.log(`🐽 开启成功: ${i} 启用脚本成功`)
+                                } else {
+                                    spl[j] = spl[j]
+                                    console.log(`🐽 开启失败: ${i} 启用脚本失败,如需同步,请设置 QITOQITO_SYNC`)
+                                }
                             }
                         }
                     }
