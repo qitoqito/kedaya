@@ -39,8 +39,8 @@ class Main extends Template {
                             cookie
                         }
                     )
+                    let user = this.userName(cookie)
                     if (ss?.data?.shareid && !this.haskey(ss, 'data.prize.0.active')) {
-                        let user = this.userName(cookie)
                         if (ss.data.helper.length<3) {
                             this.shareCode.push({actToken, activeId, shareid: ss.data.shareid, user})
                         }
@@ -57,6 +57,20 @@ class Main extends Template {
                             else {
                                 console.log(user, "领取奖励失败")
                             }
+                        }
+                    }
+                    else {
+                        let s = await this.curl({
+                                'url': `https://wq.jd.com/activet2/piggybank/draw?activeid=${activeId}&token=${actToken}&sceneval=2&callback=drawO&_=1625916054011`,
+                                // 'form':``,
+                                cookie
+                            }
+                        )
+                        if (typeof (s) == 'object' && this.haskey(s, 'data.prize.0.active')) {
+                            console.log(user, '可能已经领取过了')
+                        }
+                        else {
+                            console.log(user, "领取奖励失败")
                         }
                     }
                 } catch (e) {

@@ -1,6 +1,6 @@
 let fs = require("fs")
 let request = require("request")
-let prefix = process.env.CREAT_PREFIX || ''
+let prefix = process.env.QITOQITO_PREFIX || ''
 let command = process.env.QITOQITO_PLATFORM
 let sync = process.env.QITOQITO_SYNC
 if (!command) {
@@ -14,7 +14,7 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
 }!(async () => {
     let content = `
 !(async () => {
-        let prefix = process.env.CREAT_PREFIX ||''
+        let prefix = process.env.QITOQITO_PREFIX ||''
         let filename = process.mainModule.filename.replace(prefix,'').match(/(\\w+).js/)[1]
         let dirname = process.mainModule.path
         let type = filename.split('_')[0]
@@ -39,10 +39,11 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
             dicts[item] = fs.readdirSync(`${dirname}/parse/${item}`)
         }
     })
+    console.log(`🦊 如需强制覆盖,请设置QITOQITO_COVER\n`)
     for (let i in dicts) {
         for (let j of dicts[i]) {
             let filename = `${prefix}${j}`
-            if (pathFile.includes(filename) && !process.env.CREAT_COVER) {
+            if (pathFile.includes(filename) && !process.env.QITOQITO_COVER) {
                 console.log(`🐹 跳过写入: ${filename} 已经在目录了`)
             } else {
                 fs.writeFile(`${dirname}/${filename}`, content, function(err, data) {
