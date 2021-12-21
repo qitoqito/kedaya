@@ -21,9 +21,9 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
         if (['js', 'jx', 'jr', 'jw'].includes(type)) {
             type = 'jd'
         }
-        let main = require(\`\${dirname}/parse/\${type}/\${filename}\`)
-        let a = new main()
-        await a.init({})
+        let qitoqito = require(\`\${dirname}/parse/\${type}/\${filename}\`)
+        let kedaya = new qitoqito()
+        await kedaya.init({})
     }
 )().catch((e) => {
     console.log(e.message)

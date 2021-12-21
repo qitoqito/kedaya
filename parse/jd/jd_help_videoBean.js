@@ -13,9 +13,15 @@ class Main extends Template {
     }
 
     async prepare() {
+        let custom = []
+        if (this[`${this.filename}_custom`]) {
+            custom = typeof (this[`${this.filename}_custom`]) == 'object' ? this[`${this.filename}_custom`] : this[`${this.filename}_custom`].split("|")
+        }
         this.code = [
-            'https://anmp.jd.com/babelDiy/Zeus/3V8MERi7X6vopoAC2gvgbvzDXAcx/index.html'
+            'https://anmp.jd.com/babelDiy/Zeus/2mV9Bm7EcXdzj9qpBv1KQ2oDnC9e/index.html',
+            'https://anmp.jd.com/babelDiy/Zeus/9BkX3FFqtCZPqvBS6oxK7z9BVBM/index.html'
         ]
+        this.code = this.unique([...custom, ...this.code].filter(d => d))
         for (let url of this.code) {
             for (let cookie of this.cookies['help']) {
                 let s = await this.curl({
@@ -35,9 +41,26 @@ class Main extends Template {
                     )
                     if (ss?.data?.shareid && !this.haskey(ss, 'data.prize.0.active')) {
                         let user = this.userName(cookie)
-                        this.shareCode.push({actToken, activeId, shareid: ss.data.shareid, user})
+                        if (ss.data.helper.length<3) {
+                            this.shareCode.push({actToken, activeId, shareid: ss.data.shareid, user})
+                        }
+                        else {
+                            let s = await this.curl({
+                                    'url': `https://wq.jd.com/activet2/piggybank/draw?activeid=${activeId}&token=${actToken}&sceneval=2&callback=drawO&_=1625916054011`,
+                                    // 'form':``,
+                                    cookie
+                                }
+                            )
+                            if (typeof (s) == 'object' && this.haskey(s, 'data.prize.0.active')) {
+                                console.log(user, '领取奖励成功')
+                            }
+                            else {
+                                console.log(user, "领取奖励失败")
+                            }
+                        }
                     }
                 } catch (e) {
+                    console.log(e.message)
                 }
             }
         }

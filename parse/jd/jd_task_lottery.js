@@ -4,12 +4,12 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东抽奖机"
-        this.cron = "26 0,18 * * *"
+        // this.cron = "26 0,18 * * *"
         this.help = 'main'
         this.task = 'local'
         this.thread = 6
         this.turn = 1
-        this.readme=`如需更改助力人数,请自行添加环境变量\nexport ${this.filename}_help=人数`
+        this.readme = `如需更改助力人数,请自行添加环境变量\nexport ${this.filename}_help=人数`
     }
 
     async prepare() {
@@ -21,6 +21,10 @@ class Main extends Template {
                 'home': 'splitHongbao',
                 'url': 'https://h5.m.jd.com/babelDiy/Zeus/4YHatHgm4VUm5QMxfVx32wJi71eJ/index.html'
             },
+            {
+                'title': '冰雪闪耀季',
+                'appId': '1F11Vx64',
+            }
         ]
         for (let cookie of this.cookies['help']) {
             for (let i of this.shareCode) {
