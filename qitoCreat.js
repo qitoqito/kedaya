@@ -99,42 +99,23 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
             for (let i in dicts) {
                 for (let j of dicts[i]) {
                     if (j.includes('.js')) {
-                        let filename = `${prefix}${j}`
-                        let type = filename.split('_')[0]
-                        if (['js', 'jx', 'jr', 'jw'].includes(type)) {
-                            type = 'jd'
-                        }
-                        let main = require(`${dirname}/parse/${type}/${filename}`)
-                        let kedaya = new main()
-                        if (crontab.includes(`task ${filename}`)) {
-                            if (!kedaya.cron) {
-                                for (let z of cron.data) {
-                                    if (z.name.includes("kedaya_") && z.command.includes(`task ${filename}`)) {
-                                        if (z.isDisabled) {
-                                            console.log(`🙊 禁用失败: ${filename} 已经是禁用的`)
-                                        } else {
-                                            let disable = await curl({
-                                                'url': `${url}/api/crons/disable?t=1639371766925`,
-                                                json: [z._id],
-                                                authorization,
-                                                'headers': {
-                                                    'Referer': `${url}/api/crons?searchValue=&t=1638982538292`,
-                                                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:94.0) Gecko/20100101 Firefox/94.0'
-                                                },
-                                                method: 'put'
-                                            })
-                                            console.log(`🐼 禁用成功: ${filename} 已经成功禁用`)
-                                            break
-                                        }
-                                    }
-                                }
-                            } else {
-                                for (let z of cron.data) {
-                                    if (z.name.includes("kedaya_") && z.command.includes(`task ${filename}`)) {
-                                        if (z.isDisabled) {
-                                            if (sync) {
+                        try {
+                            let filename = `${prefix}${j}`
+                            let type = filename.split('_')[0]
+                            if (['js', 'jx', 'jr', 'jw'].includes(type)) {
+                                type = 'jd'
+                            }
+                            let main = require(`${dirname}/parse/${type}/${filename}`)
+                            let kedaya = new main()
+                            if (crontab.includes(`task ${filename}`)) {
+                                if (!kedaya.cron) {
+                                    for (let z of cron.data) {
+                                        if (z.name.includes("kedaya_") && z.command.includes(`task ${filename}`)) {
+                                            if (z.isDisabled) {
+                                                console.log(`🙊 禁用失败: ${filename} 已经是禁用的`)
+                                            } else {
                                                 let disable = await curl({
-                                                    'url': `${url}/api/crons/enable?t=1639371766925`,
+                                                    'url': `${url}/api/crons/disable?t=1639371766925`,
                                                     json: [z._id],
                                                     authorization,
                                                     'headers': {
@@ -143,39 +124,60 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
                                                     },
                                                     method: 'put'
                                                 })
-                                                console.log(`🐽 开启成功: ${filename} 启用脚本成功`)
-                                            } else {
-                                                console.log(`🐽 开启失败: ${filename} 启用脚本失败,如需同步,请设置 QITOQITO_SYNC`)
+                                                console.log(`🐼 禁用成功: ${filename} 已经成功禁用`)
+                                                break
                                             }
                                         }
-                                        break
                                     }
-                                }
-                                console.log(`🐶 导入失败: ${filename} 已经添加过了`)
-                            }
-                        } else {
-                            if (kedaya.cron) {
-                                let crons = typeof(kedaya.cron) == 'object' ? kedaya.cron : [kedaya.cron]
-                                for (let c of crons) {
-                                    console.log(`🐰 导入成功: ${filename} 加入定时成功}`)
-                                    let add = await curl({
-                                        'url': `${url}/api/crons?t=1638983187740`,
-                                        json: {
-                                            "command": `task ${filename}`,
-                                            "name": `kedaya_${kedaya.title}`,
-                                            "schedule": c
-                                        },
-                                        authorization,
-                                        'headers': {
-                                            'Referer': `${url}/api/crons?searchValue=&t=1638982538292`,
-                                            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:94.0) Gecko/20100101 Firefox/94.0'
+                                } else {
+                                    for (let z of cron.data) {
+                                        if (z.name.includes("kedaya_") && z.command.includes(`task ${filename}`)) {
+                                            if (z.isDisabled) {
+                                                if (sync) {
+                                                    let disable = await curl({
+                                                        'url': `${url}/api/crons/enable?t=1639371766925`,
+                                                        json: [z._id],
+                                                        authorization,
+                                                        'headers': {
+                                                            'Referer': `${url}/api/crons?searchValue=&t=1638982538292`,
+                                                            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:94.0) Gecko/20100101 Firefox/94.0'
+                                                        },
+                                                        method: 'put'
+                                                    })
+                                                    console.log(`🐽 开启成功: ${filename} 启用脚本成功`)
+                                                } else {
+                                                    console.log(`🐽 开启失败: ${filename} 启用脚本失败,如需同步,请设置 QITOQITO_SYNC`)
+                                                }
+                                            }
+                                            break
                                         }
-                                    })
+                                    }
+                                    console.log(`🐶 导入失败: ${filename} 已经添加过了`)
                                 }
                             } else {
-                                console.log(`🐻 导入跳过: ${filename} 定时没有开启,如需运行请手动添加`)
+                                if (kedaya.cron) {
+                                    let crons = typeof(kedaya.cron) == 'object' ? kedaya.cron : [kedaya.cron]
+                                    for (let c of crons) {
+                                        console.log(`🐰 导入成功: ${filename} 加入定时成功}`)
+                                        let add = await curl({
+                                            'url': `${url}/api/crons?t=1638983187740`,
+                                            json: {
+                                                "command": `task ${filename}`,
+                                                "name": `kedaya_${kedaya.title}`,
+                                                "schedule": c
+                                            },
+                                            authorization,
+                                            'headers': {
+                                                'Referer': `${url}/api/crons?searchValue=&t=1638982538292`,
+                                                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:94.0) Gecko/20100101 Firefox/94.0'
+                                            }
+                                        })
+                                    }
+                                } else {
+                                    console.log(`🐻 导入跳过: ${filename} 定时没有开启,如需运行请手动添加`)
+                                }
                             }
-                        }
+                        } catch (ee) {}
                     }
                 }
             }
