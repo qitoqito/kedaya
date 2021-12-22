@@ -13,15 +13,10 @@ class Main extends Template {
     }
 
     async prepare() {
-        let custom = []
-        if (this[`${this.filename}_custom`]) {
-            custom = typeof (this[`${this.filename}_custom`]) == 'object' ? this[`${this.filename}_custom`] : this[`${this.filename}_custom`].split("|")
-        }
         this.code = [
-            'https://anmp.jd.com/babelDiy/Zeus/2mV9Bm7EcXdzj9qpBv1KQ2oDnC9e/index.html',
-            'https://anmp.jd.com/babelDiy/Zeus/9BkX3FFqtCZPqvBS6oxK7z9BVBM/index.html'
+            'https://anmp.jd.com/babelDiy/Zeus/3msK1MqkPzgbuNRQP2u6Uii1ViEF/index.html'
         ]
-        this.code = this.unique([...custom, ...this.code].filter(d => d))
+        this.code = this.unique([...this.getValue('custom'), ...this.code].filter(d => d))
         for (let url of this.code) {
             for (let cookie of this.cookies['help']) {
                 let s = await this.curl({
