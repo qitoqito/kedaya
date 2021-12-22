@@ -3,6 +3,7 @@ let request = require("request")
 let prefix = process.env.QITOQITO_PREFIX || ''
 let command = process.env.QITOQITO_PLATFORM
 let sync = process.env.QITOQITO_SYNC
+let label = process.enc.QITOQITO_LABEL || 'kedaya_'
 if (!command) {
     console.log(`
 请先设置环境变量 QITOQITO_PLATFORM
@@ -101,17 +102,17 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
                     if (j.includes('.js')) {
                         try {
                             let filename = `${prefix}${j}`
-                            let type = filename.split('_')[0]
+                            let type = j.split('_')[0]
                             if (['js', 'jx', 'jr', 'jw'].includes(type)) {
                                 type = 'jd'
                             }
-                            let main = require(`${dirname}/parse/${type}/${filename}`)
+                            let main = require(`${dirname}/parse/${type}/${j}`)
                             let kedaya = new main()
                             if (crontab.includes(`task ${filename}`)) {
                                 if (!kedaya.cron) {
                                     for (let z of cron.data) {
                                         try {
-                                            if (z.name.includes("kedaya_") && z.command.includes(`task ${filename}`)) {
+                                            if (z.name.includes(label) && z.command.includes(`task ${filename}`)) {
                                                 if (z.isDisabled) {
                                                     console.log(`🙊 禁用失败: ${filename} 已经是禁用的`)
                                                 } else {
@@ -136,7 +137,7 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
                                 } else {
                                     for (let z of cron.data) {
                                         try {
-                                            if (z.name.includes("kedaya_") && z.command.includes(`task ${filename}`)) {
+                                            if (z.name.includes(label) && z.command.includes(`task ${filename}`)) {
                                                 if (z.isDisabled) {
                                                     if (sync) {
                                                         let disable = await curl({
@@ -171,7 +172,7 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
                                             'url': `${url}/api/crons?t=1638983187740`,
                                             json: {
                                                 "command": `task ${filename}`,
-                                                "name": `kedaya_${kedaya.title}`,
+                                                "name": `${label}${kedaya.title}`,
                                                 "schedule": c
                                             },
                                             authorization,
@@ -203,7 +204,7 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
         for (let i in dicts) {
             for (let j of dicts[i]) {
                 try {
-                    let script = j.replace('.js', '')
+                    let script = `${prefix}${j.replace('.js', '')}`
                     let main = require(`${dirname}/parse/${i}/${j}`)
                     let kedaya = new main()
                     if (kedaya.cron) {
@@ -242,14 +243,14 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
                     let crons = typeof(yaya.cron) == 'object' ? yaya.cron : [yaya.cron]
                     for (let j of crons) {
                         let c = `${j} bash ${command} ${i}`
-                        let a = (`${c}${new Array(64-c.length).join(' ')}#kedaya_${yaya.title}`)
+                        let a = (`${c}${new Array(64-c.length).join(' ')}#${label}${yaya.title}`)
                         spl.push(a)
                         console.log(`🐰 导入成功: ${i} 加入定时成功`)
                     }
                 }
             } else {
                 for (let j in spl) {
-                    if (match(new RegExp(`(${command}\\s*${i})\\s*#kedaya_`), spl[j])) {
+                    if (match(new RegExp(`(${command}\\s*${i})\\s*#${lable}`), spl[j])) {
                         // spl[j] = ''
                         if (spl[j][0] == '#') {
                             console.log(`🙊 禁用失败: ${i} 已经是禁用的`)
