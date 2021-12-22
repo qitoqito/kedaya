@@ -2,7 +2,7 @@ let fs = require("fs")
 let dirname = process.mainModule.path
 let dir = fs.readdirSync(`${dirname}/parse`);
 let dicts = {}
-let prefix=process.env.CREAT_PREFIX ||''
+let prefix=process.env.QITOQITO_PREFIX ||''
 dir.forEach(function(item, index) {
     let stat = fs.lstatSync(`${dirname}/parse/` + item)
     if (stat.isDirectory() === true) {
@@ -13,7 +13,7 @@ let pathFile = fs.readdirSync(dirname)
 
 let content= `
 !(async () => {
-        let prefix = process.env.CREAT_PREFIX ||''
+        let prefix = process.env.QITOQITO_PREFIX ||''
         let filename = process.mainModule.filename.replace(prefix,'').match(/(\\w+).js/)[1]
         let dirname = process.mainModule.path
         let type = filename.split('_')[0]

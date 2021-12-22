@@ -129,7 +129,9 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
                                                     break
                                                 }
                                             }
-                                        } catch (eee) {}
+                                        } catch (eee) {
+                                            console.log(eee)
+                                        }
                                     }
                                 } else {
                                     for (let z of cron.data) {
@@ -154,7 +156,9 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
                                                 }
                                                 break
                                             }
-                                        } catch (eee) {}
+                                        } catch (eee) {
+                                            console.log(eee)
+                                        }
                                     }
                                     console.log(`🐶 导入失败: ${filename} 已经添加过了`)
                                 }
@@ -162,7 +166,7 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
                                 if (kedaya.cron) {
                                     let crons = typeof(kedaya.cron) == 'object' ? kedaya.cron : [kedaya.cron]
                                     for (let c of crons) {
-                                        console.log(`🐰 导入成功: ${filename} 加入定时成功}`)
+                                        console.log(`🐰 导入成功: ${filename} 加入定时成功`)
                                         let add = await curl({
                                             'url': `${url}/api/crons?t=1638983187740`,
                                             json: {
@@ -181,7 +185,9 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
                                     console.log(`🐻 导入跳过: ${filename} 定时没有开启,如需运行请手动添加`)
                                 }
                             }
-                        } catch (ee) {}
+                        } catch (ee) {
+                            console.log(ee)
+                        }
                     }
                 }
             }
@@ -209,7 +215,9 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
                         cron: kedaya.cron,
                         title: kedaya.title
                     }
-                } catch (e) {}
+                } catch (e) {
+                    console.log(e)
+                }
             }
         }
         for (let i in cronDict) {
