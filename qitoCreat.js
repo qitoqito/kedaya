@@ -3,7 +3,7 @@ let request = require("request")
 let prefix = process.env.QITOQITO_PREFIX || ''
 let command = process.env.QITOQITO_PLATFORM
 let sync = process.env.QITOQITO_SYNC
-let label = process.enc.QITOQITO_LABEL || 'kedaya_'
+let label = process.env.QITOQITO_LABEL || 'kedaya_'
 if (!command) {
     console.log(`
 请先设置环境变量 QITOQITO_PLATFORM
@@ -250,7 +250,7 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
                 }
             } else {
                 for (let j in spl) {
-                    if (match(new RegExp(`(${command}\\s*${i})\\s*#${lable}`), spl[j])) {
+                    if (match(new RegExp(`(${command}\\s*${i})\\s*#${label}`), spl[j])) {
                         // spl[j] = ''
                         if (spl[j][0] == '#') {
                             console.log(`🙊 禁用失败: ${i} 已经是禁用的`)
