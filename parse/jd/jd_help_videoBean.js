@@ -13,10 +13,11 @@ class Main extends Template {
     }
 
     async prepare() {
-        this.code = [
-            'https://anmp.jd.com/babelDiy/Zeus/3msK1MqkPzgbuNRQP2u6Uii1ViEF/index.html'
+        let code = [
+            'https://anmp.jd.com/babelDiy/Zeus/WVxCkLsHWgXbRgWPa2WmmLBLf7f/index.html'
         ]
-        this.code = this.unique([...this.getValue('custom'), ...this.code].filter(d => d))
+        this.code = this.unique([...this.getValue('custom'), ...code].map(d => d.includes('http') ? d.split('?')[0] : `https://anmp.jd.com/babelDiy/Zeus/${d}/index.html`))
+        console.log(this.code)
         for (let url of this.code) {
             for (let cookie of this.cookies['help']) {
                 let s = await this.curl({
