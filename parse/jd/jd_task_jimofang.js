@@ -9,9 +9,6 @@ class Main extends Template {
         this.thread = 6
     }
 
-    async prepare() {
-    }
-
     async main(p) {
         let cookie = p.cookie;
         let l = await this.curl({
@@ -24,7 +21,7 @@ class Main extends Template {
         let taskPoolId = l.result.taskPoolInfo.taskPoolId
         for (let i of l.result.taskPoolInfo.taskList) {
             if (!i.taskStatus) {
-                for (let j of Array(i.toastTime + 2)) {
+                for (let j of Array(i.toastTime + 5)) {
                     let sku = this.random([
                         '10025690385788',
                         '100029081460',
@@ -48,8 +45,8 @@ class Main extends Template {
                     )
                     console.log(s.result?.lotteryInfoList || s.result)
                     if (this.haskey(s, 'result.lotteryInfoList')) {
-                        let gift = this.column(s.result.lotteryInfoList, 'name')
-                        if (this.dumps(gift) != '[]') {
+                        let gift = this.column(s.result.lotteryInfoList, 'quantity', 'name')
+                        if (gift) {
                             this.notices(`获得奖励${this.dumps(gift)}`, p.user)
                         }
                     }
@@ -58,6 +55,22 @@ class Main extends Template {
             else {
                 console.log("任务已经完成了")
             }
+        }
+        let lo = await this.curl({
+                'url': `https://api.m.jd.com/client.action?uuid=&client=wh5&clientVersion=10.3.0&osVersion=11.4&networkType=wifi&ext={"prstate":"0"}&appid=content_ecology&functionId=getNewFinalLotteryInfo&t=1640748486454&body={"geo":null,"mcChannel":0,"sign":3,"interactionId":${interactionId}}`,
+                // 'form':``,
+                cookie
+            }
+        )
+        if (this.haskey(lo, 'result.lotteryInfoList')) {
+            console.log(lo?.result?.lotteryInfoList)
+            let gift = this.column(lo.result.lotteryInfoList, 'quantity', 'name')
+            if (gift) {
+                this.notices(`抽奖获得奖励${this.dumps(gift)}`, p.user)
+            }
+        }
+        else {
+            console.log(lo.result)
         }
     }
 }
