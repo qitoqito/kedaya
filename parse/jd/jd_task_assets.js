@@ -238,7 +238,7 @@ class Main extends Template {
             r.pingou = [pingou.length ? this.sum(pingou).toFixed(2) : 0, pingouExcept.length ? this.sum(pingouExcept).toFixed(2) : 0]
             r.healthy = [healthy.length ? this.sum(healthy).toFixed(2) : 0, healthyExcept.length ? this.sum(healthyExcept).toFixed(2) : 0]
         } catch (e) {
-            console.log(e)
+
         }
         this.dict[p.user].redpacket = r
     }
