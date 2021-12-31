@@ -9,6 +9,16 @@ class Main extends Template {
         this.thread = 6
     }
 
+    async prepare() {
+        let s = await this.curl({
+                'url': `https://api.m.jd.com/client.action?client=wh5&clientVersion=10.3.0&osVersion=15.1.1&networkType=wifi&ext=%7B%22prstate%22:%220%22%7D&area=16_1341_1347_44750&functionId=qryCompositeMaterials&t=1640923295510&body=%7B%22geo%22:%7B%22lng%22:%22129.61221885577431%22,%22lat%22:%2293.966160894469766%22%7D,%22mcChannel%22:0,%22activityId%22:%2201128912%22,%22pageId%22:%223288111%22,%22qryParam%22:%22[%7B%5C%22type%5C%22:%5C%22advertGroup%5C%22,%5C%22id%5C%22:%5C%2206066757%5C%22,%5C%22mapTo%5C%22:%5C%22advData%5C%22,%5C%22next%5C%22:[%7B%5C%22type%5C%22:%5C%22productGroup%5C%22,%5C%22mapKey%5C%22:%5C%22desc%5C%22,%5C%22mapTo%5C%22:%5C%22productGroup%5C%22,%5C%22attributes%5C%22:13%7D]%7D]%22,%22applyKey%22:%2221new_products_h%22%7D`,
+            }
+        )
+        let data = this.dumps(s)
+        this.dict.advertId = this.matchAll(/"advertId"\s*:\s*"(\d+)"/g, data)
+        this.dict.skuId = this.matchAll(/"skuId"\s*:\s*"(\d+)"/g, data)
+    }
+
     async main(p) {
         let cookie = p.cookie;
         let l = await this.curl({
@@ -22,7 +32,7 @@ class Main extends Template {
         for (let i of l.result.taskPoolInfo.taskList) {
             if (!i.taskStatus) {
                 for (let j of Array(i.toastTime + 5)) {
-                    let sku = this.random([
+                    let sku = this.random(this.dict.skuId || [
                         '10025690385788',
                         '100029081460',
                         '100027604000',
@@ -36,7 +46,15 @@ class Main extends Template {
                         '100023781630',
                         '100018818732',
                     ], 1)
-                    let advertId = sku
+                    let advertId = this.random(this.dict.advertId || [
+                        '5101603275', '5101603798',
+                        '5101603435', '5101603800',
+                        '5101603935', '5101603797',
+                        '5101603795', '5101605154',
+                        '5101603817', '5101603796',
+                        '5101604844', '5101603799',
+                        '5101604845', '5101604842'
+                    ], 1)
                     let s = await this.curl({
                             'url': `https://api.m.jd.com/client.action?uuid=&client=wh5&clientVersion=10.3.0&osVersion=15.1.1&networkType=wifi&&appid=content_ecology&functionId=executeNewInteractionTask&t=1640607957804&body={"geo":{"lng":"","lat":""},"mcChannel":0,"sign":3,"interactionId":${interactionId},"taskPoolId":${taskPoolId},"taskType":${i.taskId},"sku":"${sku}","advertId":"${advertId}"}`,
                             // 'form':``,
@@ -46,7 +64,7 @@ class Main extends Template {
                     console.log(s.result?.lotteryInfoList || s.result)
                     if (this.haskey(s, 'result.lotteryInfoList')) {
                         let gift = this.column(s.result.lotteryInfoList, 'quantity', 'name')
-                        if (gift) {
+                        if (this.dumps(gift) != '{}') {
                             this.notices(`获得奖励${this.dumps(gift)}`, p.user)
                         }
                     }
@@ -65,7 +83,7 @@ class Main extends Template {
         if (this.haskey(lo, 'result.lotteryInfoList')) {
             console.log(lo?.result?.lotteryInfoList)
             let gift = this.column(lo.result.lotteryInfoList, 'quantity', 'name')
-            if (gift) {
+            if (this.dumps(gift) != '{}') {
                 this.notices(`抽奖获得奖励${this.dumps(gift)}`, p.user)
             }
         }
