@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东资产汇总"
-        this.cron = "30 8,22 * * *" 
+        this.cron = "30 8,22 * * *"
         this.task = 'local'
         this.import = ['crypto-js']
         this.thread = 6
@@ -15,9 +15,9 @@ class Main extends Template {
     }
 
     async main(p) {
+        await this.getRedpacket(p)
         await this.getBean(p)
         await this.getXibean(p)
-        await this.getRedpacket(p)
         await this.getCash(p)
         await this.getMs(p)
         await this.getEarn(p)
@@ -30,51 +30,51 @@ class Main extends Template {
         for (let i in this.dict[p.user]) {
             let data = this.dict[p.user][i]
             switch (i) {
+                case 'redpacket':
+                    t.push(`🦊 当前红包: ${data.all}元`)
+                    t.push(`🦊 即将到期: ${data.expire}元`)
+                    t.push(`🦊 通用红包: ${data.current[0]}元, 过期: ${data.current[1]}元`)
+                    t.push(`🦊 商城红包: ${data.app[0]}元, 过期: ${data.app[1]}元`)
+                    t.push(`🦊 京喜红包: ${data.pingou[0]}元, 过期: ${data.pingou[1]}元`)
+                    t.push(`🦊 极速红包: ${data.lite[0]}元, 过期: ${data.lite[1]}元`)
+                    t.push(`🦊 健康红包: ${data.healthy[0]}元, 过期: ${data.healthy[1]}元`)
+                    break
                 case 'bean':
-                    t.push(`当前京豆: ${data.all}京豆`)
-                    t.push(`今日收入: ${data.today[0]}京豆, 支出: ${data.today[1]}京豆`)
-                    t.push(`昨天收入: ${data.yesterday[0]}京豆, 支出: ${data.yesterday[1]}京豆`)
+                    t.push(`🐶 当前京豆: ${data.all}京豆`)
+                    t.push(`🐶 今日收入: ${data.today[0]}京豆, 支出: ${data.today[1]}京豆`)
+                    t.push(`🐶 昨天收入: ${data.yesterday[0]}京豆, 支出: ${data.yesterday[1]}京豆`)
                     if (data.expire) {
                         for (let i of data.expire.reverse()) {
-                            t.push(`即将过期: ${i.eventMassage} ${i.amount}京豆`)
+                            t.push(`🐶 即将过期: ${i.eventMassage} ${i.amount}京豆`)
                         }
                     }
                     break
                 case 'xibean':
-                    t.push(`当前喜豆: ${data || 0}喜豆`)
-                    break
-                case 'redpacket':
-                    t.push(`当前红包: ${data.all}元`)
-                    t.push(`即将到期: ${data.expire}元`)
-                    t.push(`通用红包: ${data.current[0]}元, 过期: ${data.current[1]}元`)
-                    t.push(`商城红包: ${data.app[0]}元, 过期: ${data.app[1]}元`)
-                    t.push(`京喜红包: ${data.pingou[0]}元, 过期: ${data.pingou[1]}元`)
-                    t.push(`极速红包: ${data.lite[0]}元, 过期: ${data.lite[1]}元`)
-                    t.push(`健康红包: ${data.healthy[0]}元, 过期: ${data.healthy[1]}元`)
+                    t.push(`🐻 当前喜豆: ${data || 0}喜豆`)
                     break
                 case'cash':
-                    t.push(`换领现金: 可兑换${data || 0}元`)
+                    t.push(`🐰 换领现金: 可兑换${data || 0}元`)
                     break
                 case 'ms':
-                    t.push(`换秒秒币: 可兑换${(data / 1000).toFixed(2)}元`)
+                    t.push(`🦁 换秒秒币: 可兑换${(data / 1000).toFixed(2)}元`)
                     break
                 case 'earn':
-                    t.push(`京东赚赚: 可兑换${(data / 10000).toFixed(2)}元`)
+                    t.push(`🐹 京东赚赚: 可兑换${(data / 10000).toFixed(2)}元`)
                     break
                 case 'coin':
-                    t.push(`极速金币: 可兑换${(data / 10000).toFixed(2)}元`)
+                    t.push(`🐯 极速金币: 可兑换${(data / 10000).toFixed(2)}元`)
                     break
                 case 'cattle':
-                    t.push(`牛牛福利: 可兑换${(data / 1000).toFixed(2)}元`)
+                    t.push(`🐮 牛牛福利: 可兑换${(data / 1000).toFixed(2)}元`)
                     break
                 case 'egg':
-                    t.push(`京喜牧场: 可兑换鸡蛋${data || 0}个`)
+                    t.push(`🐥 京喜牧场: 可兑换鸡蛋${data || 0}个`)
                     break
                 case 'pet':
-                    t.push(`东东萌宠: ${data.goods}, 完成: ${data.complete}-${data.percent}%/${data.exchange}`)
+                    t.push(`🐶 东东萌宠: ${data.goods}, 完成: ${data.complete}-${data.percent}%/${data.exchange}`)
                     break
                 case 'farm':
-                    t.push(`东东农场: ${data.goods}, 完成: ${data.complete}/${data.exchange}, 还需浇水: ${(data.exchange - data.complete) / 100}次, 进度: ${data.percent}%`)
+                    t.push(`🐨 东东农场: ${data.goods}, 完成: ${data.complete}/${data.exchange}, 还需浇水: ${(data.exchange - data.complete) / 100}次, 进度: ${data.percent}%`)
                     break
                 default:
                     console.log(i)
@@ -82,7 +82,7 @@ class Main extends Template {
             }
         }
         t.push('=============================================')
-        console.log([...[`当前用户: ${p.user}`], ...t].join("\n"))
+        console.log([...[`🐽 当前用户: ${p.user}`], ...t].join("\n"))
         this.dict[p.user].echo = [...[`京东资产`], ...t].join("\n")
     }
 
@@ -273,7 +273,6 @@ class Main extends Template {
             let x = this.getDate(this.timestamp, 0, '-')
             let y = this.getDate(this.timestamp, -1, '-')
             let r = new RegExp(`${x}|${y}`)
-            let array = []
             let xs = []
             let ys = []
             for (let i = 1; i<50; i++) {
@@ -294,7 +293,6 @@ class Main extends Template {
                         ys.push(k.amount)
                     }
                 }
-                array = [...array, ...s.detailList]
             }
             let xsa = xs.filter(d => d>0)
             let xsb = xs.filter(d => d<0)
