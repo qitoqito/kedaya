@@ -13,19 +13,21 @@ class Main extends Template {
     }
 
     async prepare() {
-        this.shareCode = [
-            {
-                'title': '金榜年终奖',
-                'appId': '1EFVXxg',
-                'lottery': 'splitHongbao',
-                'home': 'splitHongbao',
-                'url': 'https://h5.m.jd.com/babelDiy/Zeus/4YHatHgm4VUm5QMxfVx32wJi71eJ/index.html'
-            },
-            {
-                'title': '冰雪闪耀季',
-                'appId': '1F11Vx64',
+        let custom = this.getValue('custom')
+        if (custom.length) {
+            for (let c of custom) {
+                let dict = this.query(c, '&', 'split')
+                this.shareCode.push(dict)
             }
-        ]
+        }
+        else {
+            this.shareCode = [
+                {
+                    'title': 'joy的年味之旅',
+                    'appId': '1GVFUx6g',
+                }
+            ]
+        }
         for (let cookie of this.cookies['help']) {
             for (let i of this.shareCode) {
                 let s = await this.curl({
@@ -183,7 +185,7 @@ class Main extends Template {
     }
 
     async extra() {
-        for (let cookie of this.cookies['help']) {
+        for (let cookie of this.cookies[this.task]) {
             let user = this.userName(cookie)
             for (let i of this.shareCode) {
                 let s = await this.curl({
@@ -211,6 +213,20 @@ class Main extends Template {
                             console.log(user, '抽奖获得', c.data.result)
                         }
                     }
+                }
+                let c = await this.curl({
+                        'url': `https://api.m.jd.com/`,
+                        'form': `appid=wh5&clientVersion=1.0.0&functionId=${i.collect || 'harmony'}_getMyRecord&body={"appId":"${i.appId}"}`,
+                        cookie
+                    }
+                )
+                let prize = (this.matchAll(/"prizeName"\s*:\s*"([^\"]+)"/g, this.dumps(c)))
+                if (prize.length) {
+                    console.log(user, `奖品列表 : ${prize.join(" ")}`)
+                    this.notices(`奖品列表 : ${prize.join(" ")}`, user)
+                }
+                else {
+                    console.log(user, '什么也没有')
                 }
             }
         }
