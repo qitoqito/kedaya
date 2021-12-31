@@ -74,7 +74,7 @@ class Main extends Template {
                     t.push(`🐶 东东萌宠: ${data.goods}, 完成: ${data.complete}-${data.percent}%/${data.exchange}`)
                     break
                 case 'farm':
-                    t.push(`🐨 东东农场: ${data.goods}, 完成: ${data.complete}/${data.exchange}, 还需浇水: ${(data.exchange - data.complete) / 100}次, 进度: ${data.percent}%`)
+                    t.push(`🐨 东东农场: ${data.goods}, 完成: ${data.complete}/${data.exchange}, 还需浇水: ${(data.exchange - data.complete) / 10}次, 进度: ${data.percent}%`)
                     break
                 default:
                     console.log(i)
