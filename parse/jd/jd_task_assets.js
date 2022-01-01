@@ -311,7 +311,8 @@ class Main extends Template {
     async extra() {
         for (let cookie of this.cookies[this.task]) {
             let user = decodeURIComponent(this.userName(cookie))
-            this.notices(this.dict[user].echo, user, 6)
+            await this.notices(this.dict[user].echo, user, 6)
+            // await this.wait(50)
         }
     }
 }
