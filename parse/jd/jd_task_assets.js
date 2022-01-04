@@ -15,6 +15,7 @@ class Main extends Template {
     }
 
     async main(p) {
+        await this.getScore(p)
         await this.getRedpacket(p)
         await this.getBean(p)
         await this.getXibean(p)
@@ -30,6 +31,9 @@ class Main extends Template {
         for (let i in this.dict[p.user]) {
             let data = this.dict[p.user][i]
             switch (i) {
+                case 'score':
+                    t.push(`🐵 有京享值: ${data || 0}分`)
+                    break
                 case 'redpacket':
                     t.push(`🦊 当前红包: ${data.all}元`)
                     t.push(`🦊 即将到期: ${data.expire}元`)
@@ -45,7 +49,7 @@ class Main extends Template {
                     t.push(`🐶 昨天收入: ${data.yesterday[0]}京豆, 支出: ${data.yesterday[1]}京豆`)
                     if (data.expire) {
                         for (let i of data.expire.reverse()) {
-                            t.push(`🐶 即将过期: ${i.eventMassage} ${i.amount}京豆`)
+                            t.push(`🙊 即将过期: ${i.eventMassage} ${i.amount}京豆`)
                         }
                     }
                     break
@@ -71,7 +75,7 @@ class Main extends Template {
                     t.push(`🐥 京喜牧场: 可兑换鸡蛋${data || 0}个`)
                     break
                 case 'pet':
-                    t.push(`🐶 东东萌宠: ${data.goods}, 完成: ${data.complete}-${data.percent}%/${data.exchange}`)
+                    t.push(`🐙 东东萌宠: ${data.goods}, 完成: ${data.complete}-${data.percent}%/${data.exchange}`)
                     break
                 case 'farm':
                     t.push(`🐨 东东农场: ${data.goods}, 完成: ${data.complete}/${data.exchange}, 还需浇水: ${(data.exchange - data.complete) / 10}次, 进度: ${data.percent}%`)
@@ -103,6 +107,15 @@ class Main extends Template {
             }
         } catch (e) {
         }
+    }
+
+    async getScore(p) {
+        let s = await this.curl({
+                'url': `https://kai.jd.com/client?appId=applet_jpass&body=%257B%257D&functionId=UserExportService.getUserInfo&requestId=0.72076678870461081641259143802&sign=431fa578b3a6c82c50b37ed7e6406973&_s=2&_i=55`,
+                cookie: p.cookie
+            }
+        )
+        this.dict[p.user].score = this.haskey(s, 'data.data.score')
     }
 
     async getPet(p) {
