@@ -87,7 +87,7 @@ class Main extends Template {
         }
         t.push('=============================================')
         console.log([...[`🐽 当前用户: ${p.user}`], ...t].join("\n"))
-        this.dict[p.user].echo = [...[`京东资产`], ...t].join("\n")
+        this.dict[p.user].echo = [...[`🐽 京东资产`], ...t].join("\n")
     }
 
     async getFarm(p) {

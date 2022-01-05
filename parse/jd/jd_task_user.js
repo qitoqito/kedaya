@@ -23,13 +23,22 @@ class Main extends Template {
         )
         console.log(s.data)
         try {
-            this.dict[s.data.data.pin] = s.data.data
+            this.dict[s.data.data.pin] = {
+                pin: s.data.data.pin,
+                userName: s.data.data.userName || s.data.data.pin,
+                index: parseInt(p.index) + 1
+            }
         } catch {
+            let pin = this.userPin(cookie)
+            this.dict[pin] = {
+                pin,
+                userName: pin,
+                index: parseInt(p.index) + 1
+            }
         }
     }
 
     async extra() {
-        console.log(this.dict)
         if (this.dumps(this.dict) != '{}') {
             let data = `module.exports = ${JSON.stringify(this.dict, null, 4)}`
             this.modules.fs.writeFile(this.dirname + "/config/jdUser.js", data, function(err, data) {
@@ -38,7 +47,7 @@ class Main extends Template {
                 }
                 console.log("user写入成功")
             })
-            this.notices("user写入成功", 'user')
+            this.notices("user写入成功" )
         }
     }
 }
