@@ -4,14 +4,11 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东用户信息获取"
-        this.cron = "12 22 * * *"
+        // this.cron = "12 22 * * *"
         this.help = 2
         this.task = 'all'
-        this.thread = 6
+        // this.thread = 6
         this.import = ['fs']
-    }
-
-    async prepare() {
     }
 
     async main(p) {
@@ -22,18 +19,23 @@ class Main extends Template {
             }
         )
         console.log(s.data)
+        let pin = this.userPin(cookie)
+        let nickName = ''
+        if (this.userDict[pin] && this.userDict[pin].nickName) {
+            nickName = this.userDict[pin].nickName
+        }
         try {
             this.dict[s.data.data.pin] = {
                 pin: s.data.data.pin,
-                userName: s.data.data.userName || s.data.data.pin,
-                index: parseInt(p.index) + 1
+                userName: s.data.data.userName || s.data.data.pin, nickName,
+                index: parseInt(p.index) + 1,
             }
         } catch {
             let pin = this.userPin(cookie)
             this.dict[pin] = {
                 pin,
-                userName: pin,
-                index: parseInt(p.index) + 1
+                userName: pin, nickName,
+                index: parseInt(p.index) + 1,
             }
         }
     }
@@ -47,7 +49,7 @@ class Main extends Template {
                 }
                 console.log("user写入成功")
             })
-            this.notices("user写入成功" )
+            this.notices("user写入成功")
         }
     }
 }
