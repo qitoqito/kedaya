@@ -5,14 +5,15 @@ class Main extends Template {
         super()
         this.title = "京东互动赢京豆"
         // this.cron = "33 0,22 * * *"
-        this.task = 'local'
+        this.task = 'all'
         this.help = 'main'
         this.thread = 6
     }
 
     async prepare() {
-        let array = ['e71eadcf410d4fe5b79ea7b227488a2b']
+        let array = ['3d83678471e74b84940b99d16d8848b5']
         this.code = this.custom ? this.getValue('custom') : array
+        let type = 'a'
         for (let activityId of this.code) {
             let pin = []
             for (let i of this.cookies['help']) {
@@ -23,27 +24,40 @@ class Main extends Template {
                     }
                 )
                 if (s.data) {
+                    type = 'b'
                     pin.push(this.haskey(s, 'data.jdpin'))
                 }
                 else {
-                    break
+                    let s2 = await this.curl({
+                            'url': `https://jdjoy.jd.com/module/task/draw/get?configCode=${activityId}&unionCardCode=`,
+                            // 'form':``,
+                            cookie: i
+                        }
+                    )
+                    if (s2.data) {
+                        type = 'c'
+                    }
+                    else {
+                        break
+                    }
                 }
             }
             pin = pin.filter(d => d)
-            this.shareCode.push({activityId, pin})
+            this.shareCode.push({activityId, pin, type})
         }
     }
 
     async main(p) {
         let cookie = p.cookie
+        let id = p.inviter.activityId
         let eid = this.uuid(90).toUpperCase();
         let fp = this.uuid(40)
         let n = 0
         let a = {}
-        if (p.inviter.pin) {
+        if (p.inviter.type == 'b') {
             for (let j = 0; j<80; j++) {
                 let l = await this.curl({
-                        'url': `https://jdjoy.jd.com/module/freshgoods/getMyTask?code=${p.inviter.activityId}`,
+                        'url': `https://jdjoy.jd.com/module/freshgoods/getMyTask?code=${id}`,
                         // 'form':``,
                         cookie
                     }
@@ -62,7 +76,7 @@ class Main extends Template {
                             // await this.wait(3000)
                         }
                         let body = {
-                            "code": p.inviter.activityId,
+                            "code": id,
                             "taskType": i.taskType,
                             "taskId": i.taskId,
                             "eid": eid,
@@ -87,8 +101,8 @@ class Main extends Template {
                         console.log(p.user, '任务', s.success)
                     }
                 }
-                if (n>5) {
-                    console.log(p.user, '连续6次没有获取到任务列表,跳出循环')
+                if (n>2) {
+                    console.log(p.user, '连续3次没有获取到任务列表,跳出循环')
                     break
                 }
                 if (k == 0) {
@@ -98,7 +112,7 @@ class Main extends Template {
             }
             for (let pin of this.inviter.pin) {
                 var b = await this.curl({
-                        'url': `https://jdjoy.jd.com/module/freshgoods/getActivityPage?code=${p.inviter.activityId}&friendPin=${encodeURIComponent(pin)}`,
+                        'url': `https://jdjoy.jd.com/module/freshgoods/getActivityPage?code=${id}&friendPin=${encodeURIComponent(pin)}`,
                         // 'form':``,
                         cookie
                     }
@@ -108,7 +122,7 @@ class Main extends Template {
                 let g = []
                 for (let i = 0; i<Math.floor(b.data.remainPoints / 100); i++) {
                     let c = await this.curl({
-                            'url': `https://jdjoy.jd.com/module/freshgoods/draw?code=${p.inviter.activityId}&eid=${eid}&fp=${fp}`,
+                            'url': `https://jdjoy.jd.com/module/freshgoods/draw?code=${id}&eid=${eid}&fp=${fp}`,
                             // 'form':``,
                             cookie
                         }
@@ -126,10 +140,88 @@ class Main extends Template {
                 }
             }
         }
+        else if (p.inviter.type == 'c') {
+            for (let j = 0; j<80; j++) {
+                a = await this.curl({
+                        'url': `https://jdjoy.jd.com/module/task/draw/get?configCode=${id}&unionCardCode=`,
+                        // 'form':``,
+                        cookie
+                    }
+                )
+                let k = 0
+                for (let i of this.haskey(a, 'data.taskConfig') || []) {
+                    if (i.hasFinish) {
+                        console.log(p.user, `${i.taskType}任务已经完成`)
+                    }
+                    else {
+                        k = 1
+                        if (i.viewTime) {
+                            await this.wait(i.viewTime * 1000)
+                        }
+                        let body = {
+                            "configCode": id,
+                            "taskType": i.taskType,
+                            "taskId": i.id
+                        }
+                        if (this.haskey(i, 'taskItem.itemId')) {
+                            body.itemId = i.taskItem.itemId
+                        }
+                        let s = await this.curl({
+                                'url': `https://jdjoy.jd.com/module/task/draw/doTask`,
+                                body,
+                                cookie
+                            }
+                        )
+                        console.log(p.user, '任务', s.success)
+                        if (!s.success) {
+                            n++
+                            await this.wait(1000)
+                        }
+                        else {
+                            let r = await this.curl({
+                                    'url': `https://jdjoy.jd.com/module/task/draw/getReward`,
+                                    body,
+                                    cookie
+                                }
+                            )
+                            n = 0
+                        }
+                    }
+                }
+                if (n>2) {
+                    console.log(p.user, '连续3次没有获取到任务列表,跳出循环')
+                    break
+                }
+                if (k == 0) {
+                    n++
+                    await this.wait(1000)
+                }
+            }
+            let chanceLeft = this.haskey(a, 'data.chanceLeft')
+            {
+                let gift = []
+                for (let i = 0; i<chanceLeft; i++) {
+                    let s = await this.curl({
+                            'url': `https://jdjoy.jd.com/module/task/draw/join?configCode=${id}&fp=undefined&eid=undefined`,
+                            // 'form':``,
+                            cookie
+                        }
+                    )
+                    let r = this.haskey(s, 'data.rewardName')
+                    if (r && r != '谢谢参与') {
+                        gift.push(r)
+                    }
+                    console.log(p.user, r || '什么也没有')
+                }
+                if (gift.length) {
+                    this.notices(`抽奖获得: ${this.dumps(gift)}`, p.user)
+                }
+            }
+        }
         else {
             for (let j = 0; j<80; j++) {
                 a = await this.curl({
-                        'url': `https://jdjoy.jd.com/module/task/v2/getActivity?configCode=${p.inviter.activityId}&eid=${eid}&fp=${fp}`,
+                        'url': `https://jdjoy.jd.com/module/task/v2/getActivity?configCode=${id}&eid=${eid}&fp=${fp}`,
                         cookie,
                     }
                 )
@@ -169,8 +261,8 @@ class Main extends Template {
                         }
                     }
                 }
-                if (n>5) {
-                    console.log(p.user, '连续6次没有获取到任务列表,跳出循环')
+                if (n>2) {
+                    console.log(p.user, '连续3次没有获取到任务列表,跳出循环')
                     break
                 }
                 if (k == 0) {
