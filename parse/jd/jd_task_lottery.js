@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东抽奖机"
-        // this.cron = "26 0,18 * * *"
+        this.cron = "26 0,18 * * *"
         this.help = 'main'
         this.task = 'local'
         this.thread = 6
@@ -16,15 +16,19 @@ class Main extends Template {
         let custom = this.getValue('custom')
         if (custom.length) {
             for (let c of custom) {
-                let dict = this.query(c, '&', 'split')
+                let dict = c.includes("=") ? this.query(c, '&', 'split') : {'appId': c}
                 this.shareCode.push(dict)
             }
         }
         else {
             this.shareCode = [
                 {
-                    'title': 'joy的年味之旅',
-                    'appId': '1GVFUx6g',
+                    appId: '1FFVQyqw',
+                },
+                {appId: '1GVFUx6g'},
+                {appId: '1E1xZy6s'},
+                {
+                    appId: '1GVJWyqg',
                 }
             ]
         }
@@ -194,7 +198,10 @@ class Main extends Template {
                         cookie
                     }
                 )
-                this.assert(this.haskey(s, 'data.result.taskVos'), '活动已经执行过或者无权访问')
+                if (!this.haskey(s, 'data.result.taskVos')) {
+                    console.log('活动已经执行过或者无权访问')
+                    continue
+                }
                 for (let z = 0; z<s.data.result.userInfo.lotteryNum; z++) {
                     let c = await this.curl({
                             'url': `https://api.m.jd.com/client.action`,
@@ -222,11 +229,11 @@ class Main extends Template {
                 )
                 let prize = (this.matchAll(/"prizeName"\s*:\s*"([^\"]+)"/g, this.dumps(c)))
                 if (prize.length) {
-                    console.log(user, `奖品列表 : ${prize.join(" ")}`)
-                    this.notices(`奖品列表 : ${prize.join(" ")}`, user)
+                    console.log(user, `${i.appId}奖品列表 : ${prize.join(" ")}`)
+                    this.notices(`${i.appId}奖品列表 : ${prize.join(" ")}`, user)
                 }
                 else {
-                    console.log(user, '什么也没有')
+                    console.log(user, `${i.appId}什么也没有`)
                 }
             }
         }

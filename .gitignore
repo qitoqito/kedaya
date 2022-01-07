@@ -10,3 +10,4 @@ extractor/util.js
 .idea/modules.xml
 config/jd.js
 qlCreat.js
+config/jdUser.js
