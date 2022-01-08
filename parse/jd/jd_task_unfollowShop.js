@@ -10,7 +10,7 @@ class Main extends Template {
     }
 
     async prepare() {
-        this.count = this.count || 60
+        this.custom = this.custom || 100
     }
 
     async main(p) {
@@ -19,7 +19,7 @@ class Main extends Template {
         let array = []
         let nn = 0
         let a = 0
-        for (let i = 0, n = Math.ceil(this.count / 20); i<=n; i++) {
+        for (let i = 0, n = Math.ceil(this.custom / 20); i<n; i++) {
             let lists = await this.curl({url, cookie: p.cookie})
             if (lists.data) {
                 // console.log(lists.data)
