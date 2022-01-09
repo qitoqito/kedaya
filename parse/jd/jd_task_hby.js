@@ -13,7 +13,7 @@ class Main extends Template {
         let cookie = p.cookie
         let s = await this.curl({
                 'url': `https://api.m.jd.com/client.action`,
-                'form': `functionId=hby_lottery&appid=publicUseApi&body={"babelProjectId":"01128912","babelPageId":"3195530"}&t=${this.timestamp}&client=wh5&clientVersion=1.0.0&networkType=&ext={"prstate":"0"}`,
+                'form': `functionId=hby_lottery&appid=publicUseApi&body={"babelProjectId":"01142214","babelPageId":"3310562"}&t=${this.timestamp}&client=wh5&clientVersion=1.0.0&networkType=&ext={"prstate":"0"}`,
                 cookie
             }
         )
