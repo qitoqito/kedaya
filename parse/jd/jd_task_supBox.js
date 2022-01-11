@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东年货超级盒子"
-        this.cron = "12 0,22 * * *"
+        this.cron = "12 0 * * *"
         this.task = 'local'
         this.thread = 6
     }
@@ -71,6 +71,8 @@ class Main extends Template {
             gifts.push(c.data.discount)
         }
         if (gifts.length) {
+            console.log(gifts)
+            gifts = gifts.filter(d => /^\d+(?:.\d+)$/.test(d))
             console.log(p.user, `活动奖励: ${this.sum(gifts)}元`)
             this.notices(`活动奖励: ${this.sum(gifts)}元`, p.user)
         }
