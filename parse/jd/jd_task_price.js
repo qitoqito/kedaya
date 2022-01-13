@@ -39,12 +39,13 @@ class Main extends Template {
         let text
         if (s2.flag) {
             text = `本次保价金额: ${s2.succAmount}`
+            this.notices(text, p.user)
         }
         else {
             text = "本次无保价订单"
         }
         console.log(text)
-        this.notices(text, p.user)
+
     }
 
     async extra() {
