@@ -8,7 +8,7 @@ if (!command) {
     console.log(`
 请先设置环境变量 QITOQITO_PLATFORM
 qinglong: export QITOQITO_PLATFORM=qinglong 或 "http://ip:port"
-V4_jtask: exprot QITOQITO_PLATFORM=jtask
+V4_jtask: export QITOQITO_PLATFORM=jtask
 V4_jd: exprot QITOQITO_PLATFORM=jd
         `)
     return
@@ -33,6 +33,11 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
     let dicts = {};
     let dirname = process.mainModule.path
     let pathFile = fs.readdirSync(dirname);
+    let common
+    try {
+        common = require(`${dirname}/util/common`)
+    } catch (e) {}
+    let msg = []
     let dir = fs.readdirSync(`${dirname}/parse`);
     dir.forEach(function(item, index) {
         let stat = fs.lstatSync(`${dirname}/parse/` + item)
@@ -118,7 +123,7 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
                                                 } else {
                                                     let disable = await curl({
                                                         'url': `${url}/api/crons/disable?t=1639371766925`,
-                                                        json: [z._id],
+                                                        json: [z._id || z.id],
                                                         authorization,
                                                         'headers': {
                                                             'Referer': `${url}/api/crons?searchValue=&t=1638982538292`,
@@ -126,6 +131,7 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
                                                         },
                                                         method: 'put'
                                                     })
+                                                    msg.push(`🐼 禁用成功: ${filename}`)
                                                     console.log(`🐼 禁用成功: ${filename} 已经成功禁用`)
                                                     break
                                                 }
@@ -142,7 +148,7 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
                                                     if (sync) {
                                                         let disable = await curl({
                                                             'url': `${url}/api/crons/enable?t=1639371766925`,
-                                                            json: [z._id],
+                                                            json: [z._id || z.id],
                                                             authorization,
                                                             'headers': {
                                                                 'Referer': `${url}/api/crons?searchValue=&t=1638982538292`,
@@ -150,6 +156,7 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
                                                             },
                                                             method: 'put'
                                                         })
+                                                        msg.push(`🐽 开启成功: ${filename}`)
                                                         console.log(`🐽 开启成功: ${filename} 启用脚本成功`)
                                                     } else {
                                                         console.log(`🐽 开启失败: ${filename} 启用脚本失败,如需同步,请设置 QITOQITO_SYNC`)
@@ -167,6 +174,7 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
                                 if (kedaya.cron) {
                                     let crons = typeof(kedaya.cron) == 'object' ? kedaya.cron : [kedaya.cron]
                                     for (let c of crons) {
+                                        msg.push(`🐰 导入成功: ${filename}`)
                                         console.log(`🐰 导入成功: ${filename} 加入定时成功`)
                                         let add = await curl({
                                             'url': `${url}/api/crons?t=1638983187740`,
@@ -230,6 +238,7 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
                             if (spl[j][0] == '#') {
                                 if (sync) {
                                     spl[j] = spl[j].replace('#', '')
+                                    msg.push(`🐽 开启成功: ${i}`)
                                     console.log(`🐽 开启成功: ${i} 启用脚本成功`)
                                 } else {
                                     spl[j] = spl[j]
@@ -245,6 +254,7 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
                         let c = `${j} bash ${command} ${i}`
                         let a = (`${c}${new Array(64-c.length).join(' ')}#${label}${yaya.title}`)
                         spl.push(a)
+                        msg.push(`🐰 导入成功: ${i}`)
                         console.log(`🐰 导入成功: ${i} 加入定时成功`)
                     }
                 }
@@ -256,6 +266,7 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
                             console.log(`🙊 禁用失败: ${i} 已经是禁用的`)
                         } else {
                             spl[j] = `#${spl[j]}`
+                            msg.push(`🐼 禁用成功: ${i}`)
                             console.log(`🐼 禁用成功: ${i} 已经成功禁用`)
                         }
                     }
@@ -267,6 +278,18 @@ V4_jd: exprot QITOQITO_PLATFORM=jd
         }
         spl = spl.filter(d => d)
         fs.writeFileSync('../config/crontab.list', spl.filter(d => d).join("\n"))
+    }
+    if (command && msg.length) {
+        console.log(msg)
+        let c = new common()
+        for (let i in process.env) {
+            c[i] = process.env[i]
+        }
+        c.title = `QITOQITO 任务变更`
+        for (let i of msg) {
+            c.notices(i)
+        }
+        await c.notify()
     }
 })().catch((e) => {
     console.log(e)
