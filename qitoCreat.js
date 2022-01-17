@@ -9,7 +9,7 @@ if (!command) {
 请先设置环境变量 QITOQITO_PLATFORM
 qinglong: export QITOQITO_PLATFORM=qinglong 或 "http://ip:port"
 V4_jtask: export QITOQITO_PLATFORM=jtask
-V4_jd: exprot QITOQITO_PLATFORM=jd
+V4_jd: export QITOQITO_PLATFORM=jd
         `)
     return
 }!(async () => {
