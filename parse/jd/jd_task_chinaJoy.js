@@ -42,7 +42,7 @@ class Main extends Template {
                 )
                 try {
                     if (s.data) {
-                        this.shareCode.push({shareId: s.data})
+                        this.shareCode.push({shareId: s.data, functionId: i.functionId})
                     }
                 } catch (e) {
                 }
@@ -54,7 +54,7 @@ class Main extends Template {
         let cookie = p.cookie;
         let s = await this.curl({
                 'url': `https://api.m.jd.com/api`,
-                'form': `appid=china-joy&functionId=${functionId}&body={"shareId":"${p.inviter.shareId}","apiMapping":"/api/task/support/doSupport"}&t=1642248336552&loginType=2`,
+                'form': `appid=china-joy&functionId=${p.inviter.functionId}&body={"shareId":"${p.inviter.shareId}","apiMapping":"/api/task/support/doSupport"}&t=1642248336552&loginType=2`,
                 cookie
             }
         )
