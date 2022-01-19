@@ -56,7 +56,9 @@ class Main extends Template {
             })
             // console.log(ssss.data || ssss);
             if (this.haskey(ssss, 'data.discount')) {
-                gifts.push(ssss.data.discount)
+                if (ssss.data.rewardType == 2) {
+                    gifts.push(ssss.data.discount)
+                }
             }
             if (ssss.errMsg == '没有抽奖次数') {
                 break
@@ -68,7 +70,9 @@ class Main extends Template {
         })
         console.log('任务满抽奖', c.data)
         if (this.haskey(c, 'data.discount')) {
-            gifts.push(c.data.discount)
+            if (c.data.rewardType == 2) {
+                gifts.push(c.data.discount)
+            }
         }
         if (gifts.length) {
             console.log(gifts)
