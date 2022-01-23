@@ -71,11 +71,11 @@ class Main extends Template {
         this.options.headers.lks = this.md5(`${this['jd_invokeKey']}${this.timestamp}${p.inviter.activityCode}`)
         try {
             await this.curl({
-                'url': `https://sendbeans.jd.com/common/api/bean/activity/detail?activityCode=${p.inviter.activityCode}&activityId=${p.inviter.activityId}&timestap=${this.timestamp}&userSource=mp&jdChannelId=&inviteUserPin=${p.inviter.userPin}&appId=wxccb5c536b0ecd1bf&invokeKey=${this['jd_invokeKey']}`,
+                'url': `https://sendbeans.jd.com/common/api/bean/activity/detail?activityCode=${p.inviter.activityCode}&activityId=${p.inviter.activityId}&timestap=${this.timestamp}&userSource=mp&jdChannelId=&inviteUserPin=${encodeURIComponent(p.inviter.userPin)}&appId=wxccb5c536b0ecd1bf&invokeKey=${this['jd_invokeKey']}`,
                 'cookie': p.cookie
             })
             let s = await this.curl({
-                'url': `https://sendbeans.jd.com/common/api/bean/activity/participate?activityCode=${p.inviter.activityCode}&activityId=${p.inviter.activityId}&inviteUserPin=${p.inviter.userPin}&invokeKey=${this['jd_invokeKey']}&timestap=${this.source.currentTime}`,
+                'url': `https://sendbeans.jd.com/common/api/bean/activity/participate?activityCode=${p.inviter.activityCode}&activityId=${p.inviter.activityId}&inviteUserPin=${encodeURIComponent(p.inviter.userPin)}&invokeKey=${this['jd_invokeKey']}&timestap=${this.source.currentTime}`,
                 'form': {},
                 'cookie': p.cookie
             })
