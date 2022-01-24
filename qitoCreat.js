@@ -251,7 +251,8 @@ V4_jd: export QITOQITO_PLATFORM=jd
                 } else {
                     let crons = typeof(yaya.cron) == 'object' ? yaya.cron : [yaya.cron]
                     for (let j of crons) {
-                        let c = `${j} bash ${command} ${i}`
+                        let b = (command == 'jtask') ? command : `bash ${command}`
+                        let c = `${j} ${b} ${i}`
                         let a = (`${c}${new Array(64-c.length).join(' ')}#${label}${yaya.title}`)
                         spl.push(a)
                         msg.push(`🐰 导入成功: ${i}`)
