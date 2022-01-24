@@ -10,16 +10,17 @@ class Main extends Template {
     }
 
     async main(p) {
+        let hby = this.custom || '{"babelProjectId":"01142214","babelPageId":"3344189"}'
         let cookie = p.cookie
         let s = await this.curl({
                 'url': `https://api.m.jd.com/client.action`,
-                'form': `functionId=hby_lottery&appid=publicUseApi&body={"babelProjectId":"01142214","babelPageId":"3310562"}&t=${this.timestamp}&client=wh5&clientVersion=1.0.0&networkType=&ext={"prstate":"0"}`,
+                'form': `functionId=hby_lottery&appid=publicUseApi&body=${hby}&t=${this.timestamp}&client=wh5&clientVersion=1.0.0&networkType=&ext={"prstate":"0"}`,
                 cookie
             }
         )
         try {
             console.log(p.user, s.data.result.hbInfo.discount)
-            this.notices(s.data.result.hbInfo.discount, p.user)
+            this.notices(`获得红包: ${s.data.result.hbInfo.discount}元`, p.user)
         } catch (e) {
             console.log("没有获得红包")
         }
