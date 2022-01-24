@@ -8,18 +8,8 @@ class Main extends Template {
         this.task = 'local'
     }
 
-    async prepare() {
-    }
-
     async main(p) {
         let cookie = p.cookie;
-        // let q = await this.curl({
-        //         'url': `https://api.m.jd.com/client.action`,
-        //         'form': `functionId=queryInteractiveRewardInfo&appid=publicUseApi&body={"encryptProjectId":"MD6S5z8gGgtP2VLJkLqmWPuDtHe","sourceCode":"aceaceglqd20211215","detailEncryptAssignmentIds":"2uHxYWamFumkQfAL2aVVfF7EYT8u","ext":{"pageSize":30,"detailTypeFlag":2,"currentPage":1}}&t=1641173758103&client=wh5&clientVersion=1.0.0&uuid=&area=16_1341_1347_44750&networkType=&ext={"prstate":"0"}`,
-        //         cookie
-        //     }
-        // )
-        // console.log(q)
         let s = await this.curl({
                 'url': `https://api.m.jd.com/client.action`,
                 'form': `functionId=doInteractiveAssignment&appid=publicUseApi&body={"encryptProjectId":"MD6S5z8gGgtP2VLJkLqmWPuDtHe","encryptAssignmentId":"2uHxYWamFumkQfAL2aVVfF7EYT8u","sourceCode":"aceaceglqd20211215","completionFlag":true}&t=1641173777223&client=wh5&clientVersion=1.0.0&sid=&uuid=&networkType=&ext={"prstate":"0"}`,
@@ -36,11 +26,15 @@ class Main extends Template {
         }
         let r = await this.curl({
                 'url': `https://api.m.jd.com/client.action`,
-                'form': `functionId=doInteractiveAssignment&appid=publicUseApi&body={"encryptProjectId":"MD6S5z8gGgtP2VLJkLqmWPuDtHe","encryptAssignmentId":"3zAY4QQsr7owiM6f5dEPfDFC81GN","sourceCode":"aceaceglqd20211215","completionFlag":true,"ext":{"exchangeNum":1}}&t=1641696003976&client=wh5&clientVersion=1.0.0&uuid=&networkType=&ext={"prstate":"0"}`,
+                'form': `functionId=doInteractiveAssignment&appid=publicUseApi&body={"encryptProjectId":"MD6S5z8gGgtP2VLJkLqmWPuDtHe","encryptAssignmentId":"3Cj9QK8af2jdy6xWm9v5fbhUW2zU","sourceCode":"aceaceglqd20211215","completionFlag":true,"ext":{"exchangeNum":1}}&t=1641696003976&client=wh5&clientVersion=1.0.0&uuid=&networkType=&ext={"prstate":"0"}`,
                 cookie
             }
         )
-        console.log(r?.successRewards?.rewardsInfo || r.msg)
+        console.log(this.haskey(r, 'rewardsInfo.successRewards') || r)
+        let reward = this.matchAll(/"rewardName"\s*:\s*"([^\"]+)"/g, this.dumps(r))
+        if (reward.length) {
+            this.notices(`获得满签奖励: ${reward.join("\n")}`, p.user)
+        }
     }
 }
 
