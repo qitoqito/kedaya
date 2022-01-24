@@ -16,7 +16,7 @@ V4_jd: export QITOQITO_PLATFORM=jd
     let content = `
 !(async () => {
         let prefix = process.env.QITOQITO_PREFIX ||''
-        let filename = process.mainModule.filename.replace(prefix,'').match(/(\\w+).js/)[1]
+        let filename = process.mainModule.filename.replace(prefix,'').match(/(\\w+)\\.js/)[1]
         let dirname = process.mainModule.path
         let type = filename.split('_')[0]
         if (['js', 'jx', 'jr', 'jw'].includes(type)) {

@@ -35,22 +35,24 @@ class Main extends Template {
                 console.log(p.user, '什么也没有')
             }
         }
-        let l = await this.curl({
-                'url': `https://api.m.jd.com/?functionId=superRedBagList&body={"pageNum":1,"pageSize":10,"associateLinkId":"DUE8grc3lu-A932miriTFg","business":"SpringFestival","linkId":"Eu7-E0CUzqYyhZJo9d3YkQ","inviter":""}&t=1643042027781&appid=activities_platform`,
-                // 'form':``,
-                cookie
-            }
-        )
-        for (let i of l.data.items) {
-            if (i.prizeType == 4 && i.state == 0) {
-                let r = await this.curl({
-                        'url': `https://api.m.jd.com/`,
-                        'form': `functionId=apCashWithDraw&body={"businessSource":"NONE","base":{"id":${i.id},"business":null,"poolBaseId":${i.poolBaseId},"prizeGroupId":${i.prizeGroupId},"prizeBaseId":${i.prizeBaseId},"prizeType":${i.prizeType},"activityId":"${i.activityId}"},"linkId":"Eu7-E0CUzqYyhZJo9d3YkQ","inviter":""}&t=1643042044178&appid=activities_platform`,
-                        cookie
-                    }
-                )
-                console.log(p.user, `正在提现:${i.amount}`)
-                this.notices(`提现:${i.amount}`, p.user)
+        for (let n = 1; n<4; n++) {
+            let l = await this.curl({
+                    'url': `https://api.m.jd.com/?functionId=superRedBagList&body={"pageNum":${n},"pageSize":10,"associateLinkId":"DUE8grc3lu-A932miriTFg","business":"SpringFestival","linkId":"Eu7-E0CUzqYyhZJo9d3YkQ","inviter":""}&t=1643042027781&appid=activities_platform`,
+                    // 'form':``,
+                    cookie
+                }
+            )
+            for (let i of l.data.items) {
+                if (i.prizeType == 4 && i.state == 0) {
+                    let r = await this.curl({
+                            'url': `https://api.m.jd.com/`,
+                            'form': `functionId=apCashWithDraw&body={"businessSource":"NONE","base":{"id":${i.id},"business":null,"poolBaseId":${i.poolBaseId},"prizeGroupId":${i.prizeGroupId},"prizeBaseId":${i.prizeBaseId},"prizeType":${i.prizeType},"activityId":"${i.activityId}"},"linkId":"Eu7-E0CUzqYyhZJo9d3YkQ","inviter":""}&t=1643042044178&appid=activities_platform`,
+                            cookie
+                        }
+                    )
+                    console.log(p.user, `正在提现:${i.amount}`)
+                    this.notices(`提现:${i.amount}`, p.user)
+                }
             }
         }
     }

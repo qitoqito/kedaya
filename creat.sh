@@ -1,7 +1,7 @@
 if [ $1 ]; then
 cat> $1.js <<EOF
 !(async () => {
-        let filename = process.mainModule.filename.match(/(\w+).js/)[1]
+        let filename = process.mainModule.filename.match(/(\w+)\\.js/)[1]
         let dirname = process.mainModule.path
         let type = filename.split('_')[0]
         if (['js', 'jx', 'jr', 'jw'].includes(type)) {
