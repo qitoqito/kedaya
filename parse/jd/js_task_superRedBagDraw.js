@@ -17,6 +17,7 @@ class Main extends Template {
         this.algo = new this.modules.jdAlgo({
             type: 'lite', 'appId': '6e8d7',
         })
+        console.log(this.match(/(\w+)\.js/,'/ql/scripts/js_task_super.js'))
     }
 
     async main(p) {
@@ -35,7 +36,7 @@ class Main extends Template {
                 console.log(p.user, '什么也没有')
             }
         }
-        for (let n = 1; n<4; n++) {
+        for (let n = 1; n<6; n++) {
             let l = await this.curl({
                     'url': `https://api.m.jd.com/?functionId=superRedBagList&body={"pageNum":${n},"pageSize":10,"associateLinkId":"DUE8grc3lu-A932miriTFg","business":"SpringFestival","linkId":"Eu7-E0CUzqYyhZJo9d3YkQ","inviter":""}&t=1643042027781&appid=activities_platform`,
                     // 'form':``,
