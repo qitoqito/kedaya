@@ -3,18 +3,53 @@ const Template = require('../../template');
 class Main extends Template {
     constructor() {
         super()
-        this.title = "京东年货红包雨"
+        this.title = "京东红包雨"
         this.cron = "1 19-23 * * *"
         this.task = 'local'
         this.thread = 6
     }
 
+    async prepare() {
+        let body = {}
+        if (this.custom) {
+            if (isNaN(this.custom)) {
+                try {
+                    body = this.loads(this.custom)
+                } catch {
+                    let url
+                    if (this.match(/^http/, this.custom)) {
+                        url = this.custom
+                    }
+                    else {
+                        url = `https://prodev.m.jd.com/mall/active/${this.custom}/index.html`
+                    }
+                    let s = await this.curl({
+                            'url': `https://prodev.m.jd.com/mall/active/${this.custom}/index.html`,
+                        }
+                    )
+                    let babelProjectId = this.match(/"activityId"\s*:\s*"(\d+)"/s)
+                    let babelPageId = this.match(/"pageId"\s*:\s*"(\d+)"/, s)
+                    if (babelPageId && babelProjectId) {
+                        body = {babelProjectId, babelPageId}
+                    }
+                }
+            }
+            else {
+                body = {"babelProjectId": this.custom.toString(), "babelPageId": "3351872"}
+            }
+        }
+        if (this.dumps(body) == '{}') {
+            body = {"babelProjectId": "01142214", "babelPageId": "3351872"}
+        }
+        this.dict = body
+        console.log('当前红包雨:', this.dumps(this.dict))
+    }
+
     async main(p) {
-        let hby = this.custom || '{"babelProjectId":"01142214","babelPageId":"3344189"}'
         let cookie = p.cookie
         let s = await this.curl({
                 'url': `https://api.m.jd.com/client.action`,
-                'form': `functionId=hby_lottery&appid=publicUseApi&body=${hby}&t=${this.timestamp}&client=wh5&clientVersion=1.0.0&networkType=&ext={"prstate":"0"}`,
+                'form': `functionId=hby_lottery&appid=publicUseApi&body=${this.dumps(this.dict)}&t=${this.timestamp}&client=wh5&clientVersion=1.0.0&networkType=&ext={"prstate":"0"}`,
                 cookie
             }
         )
