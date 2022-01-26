@@ -30,6 +30,14 @@ class Main extends Template {
 
     async main(p) {
         let cookie = p.cookie;
+        // let a = await this.curl({
+        //         'url': `https://api.m.jd.com/client.action`,
+        //         'form': `functionId=collect_exchangeAward&body={"type":3}&appid=wh5&client=apple&clientVersion=10.2.4`,
+        //         cookie
+        //     }
+        // )
+        // console.log(a.result||a)
+        // return
         let init = await this.curl({
                 'url': 'https://api.m.jd.com/client.action?functionId=initForFarm',
                 'form': `body={"version":11,"channel":3}&client=apple&clientVersion=10.0.4&osVersion=13.7&appid=wh5&loginType=2&loginWQBiz=interact`,
@@ -42,7 +50,7 @@ class Main extends Template {
             return
         }
         if (!init.farmUserPro) {
-            console.log("尝试种树")
+            console.log("正在播种")
             await this.curl({
                     'url': `https://api.m.jd.com/client.action?functionId=choiceGoodsForFarm&body={"imageUrl":"","nickName":"","shareCode":"","goodsType":"mihoutao22","type":"0","babelChannel":"120","sid":"b1482460605540226922b0088199941w","un_area":"16_1341_1347_44750","version":14,"channel":1}&appid=wh5&client=apple&clientVersion=10.2.4`,
                     // 'form':``,
@@ -53,6 +61,19 @@ class Main extends Template {
         if (init.farmUserPro.treeState == 2) {
             console.log("可以兑换奖品了")
             this.notices('可以兑换奖品了', p.user)
+            // await this.curl({
+            //         'url': `https://api.m.jd.com/client.action?functionId=initForFarm&body={"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+            //         // 'form':``,
+            //         cookie
+            //     }
+            // )
+            //   await this.curl({
+            //         'url': `https://api.m.jd.com/client.action?functionId=choiceGoodsForFarm&body={"imageUrl":"","nickName":"","shareCode":"","goodsType":"mihoutao22","type":"0","babelChannel":"120","sid":"b1482460605540226922b0088199941w","un_area":"16_1341_1347_44750","version":14,"channel":1}&appid=wh5&client=apple&clientVersion=10.2.4`,
+            //         // 'form':``,
+            //         cookie
+            //     }
+            // )
+            // return
         }
         else if (init.farmUserPro.treeState == 0) {
             console.log("正在播种")
@@ -99,7 +120,12 @@ class Main extends Template {
                 cookie
             }
         )
-
+        // let qdd = await this.curl({
+        //         'url': `https://api.m.jd.com/client.action?functionId=clockInInitForFarm&body={"timestamp":${this.timestamp},"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+        //         // 'form':``,
+        //         cookie
+        //     }
+        // )
         if (qdd.amount) {
             console.log("签到获得水滴", qdd.amount)
         }
@@ -114,7 +140,7 @@ class Main extends Template {
             }
         )
         let jl = await this.curl({
-                'url': `https://api.m.jd.com/client.action?functionId=clockInForFarm&body={"type":2,"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                'url': `https://api.m.jd.com/client.action?functionId=clockInForFarm&body={"type":2,"version":14,"channel":2,"babelChannel":0}&appid=wh5&client=apple&clientVersion=10.2.4`,
                 // 'form':``,
                 cookie
             }
@@ -159,7 +185,8 @@ class Main extends Template {
         )
         for (let i of ly.buildings || []) {
             if (i.name.includes('泡泡龙') || i.name.includes("天天红包")) {
-                if (i.topResource.task.status == 1) {
+                if (this.haskey(i, 'topResource.task.status', 1)) {
+                    console.log(i)
                     console.log(`正在浏览:${i.name}`)
                     let pp = await this.curl({
                             'url': `https://api.m.jd.com/client.action`,
@@ -334,6 +361,20 @@ class Main extends Template {
                             console.log('当前不在定时领水时间或者已经领过')
                         }
                         break
+                    case 'treasureBoxInit':
+                        if (!dotask.f) {
+                            let s = await this.curl({
+                                    'url': `https://api.m.jd.com/client.action?functionId=ddnc_getTreasureBoxAward&body={"babelChannel":"11","line":"","channel":3,"type":1,"version":14}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                                    cookie
+                                }
+                            )
+                            await this.curl({
+                                    'url': `https://api.m.jd.com/client.action?functionId=ddnc_getTreasureBoxAward&body={"babelChannel":"11","line":"","channel":3,"type":2,"version":14}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                                    cookie
+                                }
+                            )
+                        }
+                        break
                     case 'totalWaterTaskInit':
                         if (!dotask.f) {
                             if (dotask.totalWaterTaskTimes<dotask.totalWaterTaskLimit) {
@@ -371,24 +412,24 @@ class Main extends Template {
                                     cookie
                                 }
                             )
-                            await this.curl({
-                                    'url': `https://api.m.jd.com/client.action?functionId=findBeanScene`,
-                                    'form': 'functionId=findBeanScene&body=%7B%22rnClient%22%3A%222%22%2C%22viewChannel%22%3A%22AppHome%22%2C%22source%22%3A%22AppHome%22%2C%22rnVersion%22%3A%224.7%22%7D&uuid=b39756aeea55b9cebae9f&client=apple&clientVersion=10.0.10&st=1638541231790&sv=100&sign=f7c5657c19354b17600ed5d59a6c0047',
-                                    cookie
-                                }
-                            )
-                            await this.curl({
-                                    'url': `https://api.m.jd.com/client.action?functionId=beanTaskList`,
-                                    'form': 'functionId=beanTaskList&body=%7B%22viewChannel%22%3A%22AppHome%22%7D&uuid=a2874756f39b780840&client=apple&clientVersion=10.0.10&st=1638541338389&sv=100&sign=f1aff99ef35e77739fef2967328475d1',
-                                    cookie
-                                }
-                            )
-                            await this.curl({
-                                    'url': `https://api.m.jd.com/client.action?functionId=farmMarkStatus&body={"version":14,"channel":1,"babelChannel":"98"}&appid=wh5&client=apple&clientVersion=10.2.4`,
-                                    // 'form':``,
-                                    cookie
-                                }
-                            )
+                            // await this.curl({
+                            //         'url': `https://api.m.jd.com/client.action?functionId=findBeanScene`,
+                            //         'form': 'functionId=findBeanScene&body=%7B%22rnClient%22%3A%222%22%2C%22viewChannel%22%3A%22AppHome%22%2C%22source%22%3A%22AppHome%22%2C%22rnVersion%22%3A%224.7%22%7D&uuid=b39756aeea55b9cebae9f&client=apple&clientVersion=10.0.10&st=1638541231790&sv=100&sign=f7c5657c19354b17600ed5d59a6c0047',
+                            //         cookie
+                            //     }
+                            // )
+                            // await this.curl({
+                            //         'url': `https://api.m.jd.com/client.action?functionId=beanTaskList`,
+                            //         'form': 'functionId=beanTaskList&body=%7B%22viewChannel%22%3A%22AppHome%22%7D&uuid=a2874756f39b780840&client=apple&clientVersion=10.0.10&st=1638541338389&sv=100&sign=f1aff99ef35e77739fef2967328475d1',
+                            //         cookie
+                            //     }
+                            // )
+                            // await this.curl({
+                            //         'url': `https://api.m.jd.com/client.action?functionId=farmMarkStatus&body={"version":14,"channel":1,"babelChannel":"98"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                            //         // 'form':``,
+                            //         cookie
+                            //     }
+                            // )
                             await this.curl({
                                     'url': `https://api.m.jd.com/client.action?functionId=ddnc_getTreasureBoxAward&body={"type":2,"babelChannel":"98","line":"getBean","version":14,"channel":1}&appid=wh5&client=apple&clientVersion=10.2.4`,
                                     // 'form':``,
@@ -492,8 +533,12 @@ class Main extends Template {
             }
         }
         let codess = [...this.code, ...this.code]
-        for (let i = 0; i<3; i++) {
+        for (let i = 0; i<5; i++) {
             let codd = (codess[i + p.index + 3] || codess[i] || codess[0]).shareCode
+            if (i>3) {
+                // 把一些错误剩余没有助力到的给主号
+                codd = codess[this.rand(0, 3)].shareCode
+            }
             console.log("天天红包助力", codd)
             let he = await this.curl({
                     'url': `https://api.m.jd.com/client.action?functionId=initForFarm&body={"shareCode":"${codd}-3","lng":"0.000000","lat":"0.000000","sid":"2871ac0252645ef0e2731aa7d03c1d3w","un_area":"16_1341_1347_44750","version":14,"channel":1,"babelChannel":0}&appid=wh5`,
