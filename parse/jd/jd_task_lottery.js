@@ -8,12 +8,12 @@ class Main extends Template {
         this.help = 'main'
         this.task = 'local'
         this.thread = 6
-        this.turn = 1
-        this.readme = `如需更改助力人数,请自行添加环境变量\nexport ${this.filename}_help=人数`
+        this.filter = 'appId'
     }
 
     async prepare() {
         let custom = this.getValue('custom')
+        let add = this.getValue('add')
         if (custom.length) {
             for (let c of custom) {
                 let dict = c.includes("=") ? this.query(c, '&', 'split') : {'appId': c}
@@ -22,15 +22,22 @@ class Main extends Template {
         }
         else {
             this.shareCode = [
+                {appId: '1GFNRxq8'},
+                {appId: '1GFRRyqo'},
                 {
                     appId: '1FFVQyqw',
                 },
-                {appId: '1GVFUx6g'},
                 {appId: '1E1xZy6s'},
                 {
                     appId: '1GVJWyqg',
                 }
             ]
+            if (add.length) {
+                for (let c of add) {
+                    let dict = c.includes("=") ? this.query(c, '&', 'split') : {'appId': c}
+                    this.shareCode.push(dict)
+                }
+            }
         }
         for (let cookie of this.cookies['help']) {
             for (let i of this.shareCode) {
@@ -55,6 +62,10 @@ class Main extends Template {
         }
     }
 
+    async middle(p) {
+        this.dict[p.user] = {gifts: []}
+    }
+
     async main(p) {
         let cookie = p.cookie;
         let home = p.inviter.home || 'healthyDay'
@@ -71,6 +82,8 @@ class Main extends Template {
                 cookie
             }
         )
+        let gifts = []
+        let text = ''
         this.assert(this.haskey(l, 'data.result.taskVos'), '活动已经执行过或者无权访问')
         for (let i of l.data.result.taskVos) {
             if (i.status == 1 || i.status == 3) {
@@ -145,7 +158,7 @@ class Main extends Template {
                             form: `functionId=${collect}_collectScore&body=${JSON.stringify(body)}&client=wh5&clientVersion=1.0.0`,
                             cookie
                         })
-                        console.log(p.index, '获得奖励:', collectScore.data.result.score);
+                        console.log(p.index, '获得奖励:', this.haskey(collectScore, 'data.result.score'));
                     }
                 }
             }
@@ -176,65 +189,68 @@ class Main extends Template {
             )
             if (c.data.result) {
                 if (this.haskey(c, 'data.result.userAwardsCacheDto.redPacketVO')) {
-                    console.log(p.index, "获得红包:", c.data.result.userAwardsCacheDto.redPacketVO.value)
+                    text = `获得红包: ${c.data.result.userAwardsCacheDto.redPacketVO.value}`
+                    console.log(p.user, text)
+                    gifts.push(text)
                 }
                 else if (this.haskey(c, 'data.result.userAwardsCacheDto.jBeanAwardVo')) {
-                    console.log(p.index, "获得红包:", c.data.result.userAwardsCacheDto.jBeanAwardVo.value)
+                    text = `获得京豆:${c.data.result.userAwardsCacheDto.jBeanAwardVo.quantity}`
+                    console.log(p.user, text)
+                    gifts.push(text)
+                }
+                else if (this.haskey(c, 'data.result.userAwardsCacheDto.couponVo')) {
+                    text = `获得优惠券${c.data.result.userAwardsCacheDto.couponVo.prizeName}:${c.data.result.userAwardsCacheDto.couponVo.usageThreshold}-${c.data.result.userAwardsCacheDto.couponVo.quota}`
+                    console.log(p.user, text)
+                    gifts.push(text)
                 }
                 else {
-                    console.log(p.index, '抽奖获得', c.data.result)
+                    console.log(p.user, '抽奖获得', c.data.result)
                 }
             }
         }
+        let s = await this.curl({
+                'url': `https://api.m.jd.com/client.action`,
+                'form': `functionId=${home}_getHomeData&body={"appId":"${appId}","taskToken":""}&client=wh5&clientVersion=1.0.0`,
+                cookie
+            }
+        )
+        for (let z = 0; z<s.data.result.userInfo.lotteryNum; z++) {
+            let c = await this.curl({
+                    'url': `https://api.m.jd.com/client.action`,
+                    'form': `functionId=${lottery}_getLotteryResult&body={"appId":"${appId}"}&client=wh5&clientVersion=1.0.0`,
+                    cookie
+                }
+            )
+            if (c.data.result) {
+                if (this.haskey(c, 'data.result.userAwardsCacheDto.redPacketVO')) {
+                    text = `获得红包: ${c.data.result.userAwardsCacheDto.redPacketVO.value}`
+                    console.log(p.user, text)
+                    gifts.push(text)
+                }
+                else if (this.haskey(c, 'data.result.userAwardsCacheDto.jBeanAwardVo')) {
+                    text = `获得京豆:${c.data.result.userAwardsCacheDto.jBeanAwardVo.quantity}`
+                    console.log(p.user, text)
+                    gifts.push(text)
+                }
+                else if (this.haskey(c, 'data.result.userAwardsCacheDto.couponVo')) {
+                    text = `获得优惠券${c.data.result.userAwardsCacheDto.couponVo.prizeName}:${c.data.result.userAwardsCacheDto.couponVo.usageThreshold}-${c.data.result.userAwardsCacheDto.couponVo.quota}`
+                    console.log(p.user, text)
+                    gifts.push(text)
+                }
+                else {
+                    console.log(p.user, '抽奖获得', c.data.result)
+                }
+            }
+        }
+        this.dict[p.user]['gifts'] = [...this.dict[p.user]['gifts'], ...gifts]
     }
 
     async extra() {
         for (let cookie of this.cookies[this.task]) {
             let user = this.userName(cookie)
-            for (let i of this.shareCode) {
-                let s = await this.curl({
-                        'url': `https://api.m.jd.com/client.action`,
-                        'form': `functionId=${i.home || 'healthyDay'}_getHomeData&body={"appId":"${i.appId}","taskToken":""}&client=wh5&clientVersion=1.0.0`,
-                        cookie
-                    }
-                )
-                if (!this.haskey(s, 'data.result.taskVos')) {
-                    console.log('活动已经执行过或者无权访问')
-                    continue
-                }
-                for (let z = 0; z<s.data.result.userInfo.lotteryNum; z++) {
-                    let c = await this.curl({
-                            'url': `https://api.m.jd.com/client.action`,
-                            'form': `functionId=${i.lottery}_getLotteryResult&body={"appId":"${i.appId}"}&client=wh5&clientVersion=1.0.0`,
-                            cookie
-                        }
-                    )
-                    if (c.data.result) {
-                        if (this.haskey(c, 'data.result.userAwardsCacheDto.redPacketVO')) {
-                            console.log(user, "获得红包:", c.data.result.userAwardsCacheDto.redPacketVO.value)
-                        }
-                        else if (this.haskey(c, 'data.result.userAwardsCacheDto.jBeanAwardVo')) {
-                            console.log(user, "获得红包:", c.data.result.userAwardsCacheDto.jBeanAwardVo.value)
-                        }
-                        else {
-                            console.log(user, '抽奖获得', c.data.result)
-                        }
-                    }
-                }
-                let c = await this.curl({
-                        'url': `https://api.m.jd.com/`,
-                        'form': `appid=wh5&clientVersion=1.0.0&functionId=${i.collect || 'harmony'}_getMyRecord&body={"appId":"${i.appId}"}`,
-                        cookie
-                    }
-                )
-                let prize = (this.matchAll(/"prizeName"\s*:\s*"([^\"]+)"/g, this.dumps(c)))
-                if (prize.length) {
-                    console.log(user, `${i.appId}奖品列表 : ${prize.join(" ")}`)
-                    this.notices(`${i.appId}奖品列表 : ${prize.join(" ")}`, user)
-                }
-                else {
-                    console.log(user, `${i.appId}什么也没有`)
-                }
+            if (this.dict[user].gifts.length) {
+                console.log(user, `本次运行奖励:\n${this.dict[user].gifts.join("\n")}`)
+                this.notices(this.dict[user].gifts.join("\n"), user)
             }
         }
     }
