@@ -4,12 +4,12 @@
 	某些面板不支持项目文件整体拉取,会破坏拉取的项目结构,请先翻阅README了解
 	环境变量不能有shareCode
 
-# 项目结构
-	util: 项目调用函数文件夹
-	parse: 解析脚本存放目录
+# 框架结构
+	util: 调用函数目录
+	parse: 解析脚本目录
     temp: 缓存文件目录
 	static: 静态文件目录
-	cookie: cookie文件目录
+	cookie: 数据文件目录
 	config:	配置文件目录
 	log: 日志文件目录
 	template.js: 项目主体文件
@@ -23,8 +23,8 @@
 
 	为避免第三方滥用,请自行添加环境变量
 
-    QITOQITO=UdlM2TYTZzADOwM:cb3d623b4bdf699c8464b50ad61c25dcbc655711
-    QITOQITO_PLATFORM=按照所使用面板正确填写 qinglong|jtask|jd 其中一个 [青龙面板:qinglong, v3系列:jtask, 衍生面板:jd],
+    QITOQITO=IdmM4TZTZGADM0I:a9080b4469208c022bbf584b4ff2a5a40f59dd4ee49645bff009b5b428332a24:QITOQITO    
+	QITOQITO_PLATFORM=按照所使用面板正确填写 qinglong|jtask|jd 其中一个 [青龙面板:qinglong, v3系列:jtask, 衍生面板:jd],
 	QITOQITO_SYNC=1 当有此变量时,面板定时会与项目定时同步,如需自行修改,请勿添加该字段
 	QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的入口文件
 
@@ -40,6 +40,7 @@
     filename_help: 设置助力主号数
     filename_custom: 自定义字段
 	filename_limit: 限制运行账号数
+
 # 食用方法
     # 青龙面板
 	rm -rf /ql/repo/qitoqito_kedaya && ql repo https://github.com/qitoqito/kedaya.git kedaya && cp -a /ql/repo/qitoqito_kedaya/. /ql/scripts && task qitoCreat.js now
@@ -98,5 +99,8 @@
 	运行jd_task_user
     编辑config/jdUser.js
 	找到对应账号的nickName字段填写后保存
+
+# 单独通知
+	框架支持给不同用户推送通知
 
     

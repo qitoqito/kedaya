@@ -17,6 +17,7 @@ class Main extends Template {
     async main(p) {
         await this.getScore(p)
         await this.getRedpacket(p)
+        await this.getJingtie(p)
         await this.getBean(p)
         await this.getXibean(p)
         await this.getCash(p)
@@ -33,6 +34,9 @@ class Main extends Template {
             switch (i) {
                 case 'score':
                     t.push(`🐵 有京享值: ${data || 0}分`)
+                    break
+                case 'jingtie':
+                    t.push(`🦁 账户京贴: ${data || 0}元`)
                     break
                 case 'redpacket':
                     t.push(`🦊 当前红包: ${data.all}元`)
@@ -196,6 +200,26 @@ class Main extends Template {
             }
         )
         this.dict[p.user].earn = this.haskey(s, 'data.totalNum')
+    }
+
+    async getJingtie(p) {
+        let s = await this.curl({
+                url: 'https://api.m.jd.com/client.action',
+                form: 'functionId=getSecondWalletInfo&body=%7B%22newVersionType%22%3A%221%22%7D&uuid=3f8c65e9ff4630fd8d875d&client=apple&clientVersion=10.0.10&st=1643268844042&sv=121&sign=5d02a481067133e6ae075c0ac375ba32',
+                cookie: p.cookie
+            }
+        )
+        try {
+            for (let i of s.floors) {
+                for (let j of i.data.nodes) {
+                    if (j.functionId == 'jingtie') {
+                        this.dict[p.user].jingtie = j.subtitle.value.replace("￥", '')
+                        break
+                    }
+                }
+            }
+        } catch (e) {
+        }
     }
 
     async getRedpacket(p) {
