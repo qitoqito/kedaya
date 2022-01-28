@@ -5,7 +5,7 @@ class Main extends Template {
         super()
         this.title = "京东互动赢京豆"
         // this.cron = "33 0,22 * * *"
-        this.task = 'all'
+        this.task = 'local'
         this.help = 'main'
         this.thread = 6
     }
@@ -136,7 +136,7 @@ class Main extends Template {
                     }
                 }
                 if (g.length) {
-                    this.notices(`抽奖: ${g.join('🐽')}`, p.user)
+                    this.notices(`抽奖获得:\n${g.join('\n')}`, p.user)
                 }
             }
         }

@@ -2,7 +2,7 @@
 	此项目与单脚本结构不同,请不要将无关文件放进parse目录
 	请不要将parse目录文件放scripts目录运行
 	某些面板不支持项目文件整体拉取,会破坏拉取的项目结构,请先翻阅README了解
-	环境变量不能有shareCode
+	环境变量不能有shareCode 
 
 # 框架结构
 	util: 调用函数目录
@@ -32,14 +32,19 @@
 # 环境变量
 	# COOKIE
 	JD_COOKIE=面板自带,不需要自行添加
-	JD_COOKIE_MAIN=全局主号助力人数
+	JD_COOKIE_MAIN=n 全局主号助力人数,假设你有20个账号,当参数设置为5时候,这20个账号会去助力排前面的5个账号
+    msgWhite=fn1|fn2|fn3  通知白名单
+    msgBlack=fn1|fn2|fn3  通知黑名单
+
 
 # 脚本字段
     脚本字段是自行定义某一个脚本运行的一些变量,如果有需求可自行添加环境变量
     
-    filename_help: 设置助力主号数
-    filename_custom: 自定义字段
-	filename_limit: 限制运行账号数
+    filename_help=n 或 pin1|pin2 (设置助力主号数)
+    filename_custom=custom (自定义字段)
+	filename_limit=n (限制运行账号数)
+	filename_msgWork=pin1|pin2|pin3 (通知账号白名单)
+    filename_msgExcept=pin1|pin2|pin3 (通知账号黑名单)
 
 # 食用方法
     # 青龙面板

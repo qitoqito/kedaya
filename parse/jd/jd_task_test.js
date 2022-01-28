@@ -33,7 +33,7 @@ class Main extends Template {
     async main(p) {
         let cookie = p.cookie;
         console.log(p.user, '框架测试')
-        this.notices('框架测试', p.user)
+        this.notices('框架测试\n这边是换行符', p.user)
     }
 }
 module.exports = Main;
