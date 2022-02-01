@@ -11,7 +11,7 @@ class Main extends Template {
     }
 
     async prepare() {
-        let array = ['3d83678471e74b84940b99d16d8848b5']
+        let array = ['c3eb5b947ac44319b74f96b0ad76c534']
         this.code = this.custom ? this.getValue('custom') : array
         let type = 'a'
         for (let activityId of this.code) {
@@ -64,7 +64,7 @@ class Main extends Template {
                 )
                 let k = 0
                 for (let i of this.haskey(l, 'data.myTasks') || []) {
-                    if (i.hasFinish) {
+                    if (i.hasFinish || i.taskCount == i.finishCount) {
                         console.log(p.user, `${i.taskType}任务已经完成`)
                     }
                     else {
@@ -150,8 +150,8 @@ class Main extends Template {
                 )
                 let k = 0
                 for (let i of this.haskey(a, 'data.taskConfig') || []) {
-                    if (i.hasFinish) {
-                        console.log(p.user, `${i.taskType}任务已经完成`)
+                    if (i.hasFinish || i.taskCount == i.finishCount) {
+                        console.log(p.user, `${i.taskName || i.taskType}任务已经完成`)
                     }
                     else {
                         k = 1
@@ -198,7 +198,7 @@ class Main extends Template {
                 }
             }
             let chanceLeft = this.haskey(a, 'data.chanceLeft')
-            {
+            if (chanceLeft) {
                 let gift = []
                 for (let i = 0; i<chanceLeft; i++) {
                     let s = await this.curl({
@@ -214,7 +214,7 @@ class Main extends Template {
                     console.log(p.user, r || '什么也没有')
                 }
                 if (gift.length) {
-                    this.notices(`抽奖获得: ${this.dumps(gift)}`, p.user)
+                    this.notices(`抽奖获得: ${gift.join("\n")}`, p.user)
                 }
             }
         }
@@ -228,8 +228,20 @@ class Main extends Template {
                 let k = 0
                 for (let i of this.haskey(a, 'data.dailyTask.taskList')) {
                     // if (i.taskCount == i.finishCount) {
-                    if (i.hasFinish) {
+                    if (i.hasFinish || i.taskCount == i.finishCount) {
                         console.log(p.user, `${i.groupType}任务已经完成`)
+                        let r = await this.curl({
+                                'url': `https://jdjoy.jd.com/module/task/v2/getReward`,
+                                'body': {
+                                    "groupType": i.groupType || 5,
+                                    "configCode": this.inviter.activityId,
+                                    "itemId": this.haskey(i, 'data.item.itemId') || 1,
+                                    "eid": eid,
+                                    "fp": fp
+                                },
+                                cookie
+                            }
+                        )
                     }
                     else {
                         k = 1

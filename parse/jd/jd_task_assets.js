@@ -232,8 +232,8 @@ class Main extends Template {
         )
         let r = {}
         try {
-            r.all = s.data.balance
-            r.expire = s.data.expiredBalance
+            r.all = this.haskey(s, 'data.balance')
+            r.expire = this.haskey(s, 'data.expiredBalance')
             let current = [], app = [], pingou = [], lite = [], healthy = [], currentExcept = [], appExcept = [],
                 pingouExcept = [], liteExcept = [], healthyExcept = []
             for (let i of this.haskey(s, 'data.useRedInfo.redList') || []) {

@@ -28,10 +28,9 @@
 	QITOQITO_SYNC=1 当有此变量时,面板定时会与项目定时同步,如需自行修改,请勿添加该字段
 	QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的入口文件
 
- 
 # 环境变量
 	# COOKIE
-	JD_COOKIE=面板自带,不需要自行添加
+	JD_COOKIE=ck1&ck2&ck3
 	JD_COOKIE_MAIN=n 全局主号助力人数,假设你有20个账号,当参数设置为5时候,这20个账号会去助力排前面的5个账号
     msgWhite=fn1|fn2|fn3  通知白名单
     msgBlack=fn1|fn2|fn3  通知黑名单

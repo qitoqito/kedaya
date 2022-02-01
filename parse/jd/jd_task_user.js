@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东用户信息获取"
-        // this.cron = "12 22 * * *"
+        this.cron = "12 22 * * *"
         this.help = 2
         this.task = 'all'
         // this.thread = 6
@@ -21,21 +21,42 @@ class Main extends Template {
         console.log(s.data)
         let pin = this.userPin(cookie)
         let nickName = ''
-        if (this.userDict[pin] && this.userDict[pin].nickName) {
-            nickName = this.userDict[pin].nickName
+        let phone = ''
+        let custom = this.getValue('custom')
+        let keys = [...custom, ...['wskey', 'nickName', 'phone', 'verify']]
+        let dict = {}
+        for (let i of keys) {
+            if (this.haskey(this.userDict, `${pin}.${i}`)) {
+                dict[i] = this.haskey(this.userDict, `${pin}.${i}`)
+            }
+            else {
+                dict[i] = ''
+            }
         }
+        // if (this.userDict[pin] && this.userDict[pin].nickName) {
+        //     nickName = this.userDict[pin].nickName
+        // }
+        // if (this.userDict[pin] && this.userDict[pin].phone) {
+        //     phone = this.userDict[pin].phone
+        // }
         try {
             this.dict[s.data.data.pin] = {
-                pin: s.data.data.pin,
-                userName: s.data.data.userName || s.data.data.pin, nickName,
-                index: parseInt(p.index) + 1,
+                ...{
+                    pin: s.data.data.pin,
+                    userName: s.data.data.userName || s.data.data.pin,
+                    nickName,
+                    index: parseInt(p.index), display: parseInt(p.index) + 1,
+                    phone: s.data.data.intactMobile
+                }, ...dict
             }
         } catch {
             let pin = this.userPin(cookie)
             this.dict[pin] = {
-                pin,
-                userName: pin, nickName,
-                index: parseInt(p.index) + 1,
+                ...{
+                    pin,
+                    userName: pin,
+                    index: parseInt(p.index), display: parseInt(p.index) + 1,
+                }, ...dict
             }
         }
     }
