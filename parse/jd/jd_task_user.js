@@ -45,7 +45,8 @@ class Main extends Template {
                     pin: s.data.data.pin,
                     userName: s.data.data.userName || s.data.data.pin,
                     nickName,
-                    index: parseInt(p.index), display: parseInt(p.index) + 1,
+                    index: p.index.toString(),
+                    display: (parseInt(p.index) + 1).toString(),
                     phone: s.data.data.intactMobile
                 }, ...dict
             }
@@ -55,7 +56,8 @@ class Main extends Template {
                 ...{
                     pin,
                     userName: pin,
-                    index: parseInt(p.index), display: parseInt(p.index) + 1,
+                    index: p.index.toString(),
+                    display: (parseInt(p.index) + 1).toString(),
                 }, ...dict
             }
         }
