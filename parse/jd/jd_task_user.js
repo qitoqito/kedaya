@@ -23,7 +23,7 @@ class Main extends Template {
         let nickName = ''
         let phone = ''
         let custom = this.getValue('custom')
-        let keys = [...custom, ...['wskey', 'nickName', 'phone', 'verify']]
+        let keys = [...custom, ...['wskey', 'verify']]
         let dict = {}
         for (let i of keys) {
             if (this.haskey(this.userDict, `${pin}.${i}`)) {
@@ -33,12 +33,12 @@ class Main extends Template {
                 dict[i] = ''
             }
         }
-        // if (this.userDict[pin] && this.userDict[pin].nickName) {
-        //     nickName = this.userDict[pin].nickName
-        // }
-        // if (this.userDict[pin] && this.userDict[pin].phone) {
-        //     phone = this.userDict[pin].phone
-        // }
+        if (this.userDict[pin] && this.userDict[pin].nickName) {
+            nickName = this.userDict[pin].nickName
+        }
+        if (this.userDict[pin] && this.userDict[pin].phone) {
+            phone = this.userDict[pin].phone
+        }
         try {
             this.dict[s.data.data.pin] = {
                 ...{
