@@ -81,7 +81,7 @@ V4_jd: export QITOQITO_PLATFORM=jd
         })
         if (cron.code == 401) {
             let login = await curl({
-                'url': `${url}/api/login?t=1639363615601`,
+                'url': `${url}/api/user/login?t=1639363615601`,
                 json: {
                     "username": auth.username,
                     "password": auth.password
