@@ -14,10 +14,9 @@ class Main extends Template {
     async main(p) {
         let cookie = p.cookie;
         let s = await this.curl({
-                'url': `https://kai.jd.com/client?appId=applet_jpass&body=%257B%257D&functionId=UserExportService.getUserInfo&requestId=0.72076678870461081641259143802&sign=431fa578b3a6c82c50b37ed7e6406973&_s=2&_i=55`,
-                cookie
-            }
-        )
+            'url': `https://kai.jd.com/client?appId=applet_jpass&body=%257B%257D&functionId=UserExportService.getUserInfo&requestId=0.72076678870461081641259143802&sign=431fa578b3a6c82c50b37ed7e6406973&_s=2&_i=55`,
+            cookie
+        })
         console.log(s.data)
         let pin = this.userPin(cookie)
         let nickName = ''
@@ -48,7 +47,8 @@ class Main extends Template {
                     index: p.index.toString(),
                     display: (parseInt(p.index) + 1).toString(),
                     phone: s.data.data.intactMobile
-                }, ...dict
+                },
+                ...dict
             }
         } catch {
             let pin = this.userPin(cookie)
@@ -56,9 +56,12 @@ class Main extends Template {
                 ...{
                     pin,
                     userName: pin,
+                    nickName,
                     index: p.index.toString(),
                     display: (parseInt(p.index) + 1).toString(),
-                }, ...dict
+                    phone,
+                },
+                ...dict
             }
         }
     }
