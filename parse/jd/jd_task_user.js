@@ -68,6 +68,11 @@ class Main extends Template {
 
     async extra() {
         if (this.dumps(this.dict) != '{}') {
+            for (let i in this.userDict) {
+                if (!this.dict[i]) {
+                    this.dict[i] = {...this.userDict[i], ...{index: '', display: ''}}
+                }
+            }
             let data = `module.exports = ${JSON.stringify(this.dict, null, 4)}`
             this.modules.fs.writeFile(this.dirname + "/config/jdUser.js", data, function(err, data) {
                 if (err) {
