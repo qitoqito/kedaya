@@ -19,14 +19,14 @@ class Main extends Template {
         try {
             let encryptAssignmentId
             for (let i of s.assignmentList) {
-                let endTime = new Date(i.assignmentEndTime).getTime()
+                let StartTime = new Date(i.assignmentStartTime).getTime()
                 encryptAssignmentId = i.encryptAssignmentId
-                if (endTime>this.timestamp) {
+                if (StartTime>this.timestamp) {
                     break
                 }
             }
             if (encryptProjectId) {
-                this.shareCode.push({encryptAssignmentId, encryptProjectId})
+                this.shareCode.push({encryptProjectId, encryptAssignmentId})
             }
         } catch (e) {
         }
