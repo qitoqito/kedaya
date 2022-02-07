@@ -21,9 +21,7 @@
 
 # 初始化
 
-	为避免第三方滥用,请自行添加环境变量
-
-    QITOQITO=IdmM4TZTZGADM0I:a9080b4469208c022bbf584b4ff2a5a40f59dd4ee49645bff009b5b428332a24:QITOQITO    
+	为避免第三方滥用,请自行添加环境变量 QITOQITO
 	QITOQITO_PLATFORM=按照所使用面板正确填写 qinglong|jtask|jd 其中一个 [青龙面板:qinglong, v3系列:jtask, 衍生面板:jd],
 	QITOQITO_SYNC=1 当有此变量时,面板定时会与项目定时同步,如需自行修改,请勿添加该字段
 	QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的入口文件
