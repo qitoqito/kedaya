@@ -13,7 +13,7 @@ class Main extends Template {
 
     async prepare() {
         let custom = this.getValue('custom')
-        let add = this.getValue('add')
+        let add = this.getValue('expand')
         if (custom.length) {
             for (let c of custom) {
                 let dict = c.includes("=") ? this.query(c, '&', 'split') : {'appId': c}
