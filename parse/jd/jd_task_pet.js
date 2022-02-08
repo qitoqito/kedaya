@@ -209,18 +209,21 @@ class Main extends Template {
                         cookie,
                     }
                 )
-                if (response.code === '0' && response.resultCode === '0') {
-                    if (response.result.helpStatus === 0) {
-                        console.log(p.user, '助力成功')
-                        i.count++
+                try {
+                    if (response.code === '0' && response.resultCode === '0') {
+                        if (response.result.helpStatus === 0) {
+                            console.log(p.user, '助力成功')
+                            i.count++
+                        }
+                        else {
+                            p.helpStatus = 1
+                            console.log(p.user, '没有助力次数')
+                        }
                     }
                     else {
-                        p.helpStatus = 1
-                        console.log(p.user, '没有助力次数')
+                        console.log(p.user, response.message)
                     }
-                }
-                else {
-                    console.log(p.user, response.message)
+                } catch (e) {
                 }
             }
         }
