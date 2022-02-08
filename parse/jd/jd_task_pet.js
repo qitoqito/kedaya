@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东东东萌宠"
-        this.cron = "23 6,13,20 * * *"
+        this.cron = "23 */6 * * *"
         this.aid = 'local'
         this.task = 'own'
         this.thread = 6
@@ -70,18 +70,6 @@ class Main extends Template {
         }
         else {
             this.shareCode.push({shareCode, count: fs.result.masterHelpPeoples.length})
-        }
-        // 收取小爱心
-        for (let i of this.haskey(home, 'result.petPlaceInfoList')) {
-            if (i.energy) {
-                await this.curl({
-                        'url': `https://api.m.jd.com/client.action`,
-                        'form': `functionId=energyCollect&body={"place":${i.place}}&appid=wh5&client=apple&clientVersion=10.3.6&build=167963&rfs=0000`,
-                        cookie
-                    }
-                )
-                console.log(p.user, `收取好感度: ${i.energy}`)
-            }
         }
         let food = home.result.foodAmount
         // 遛狗
@@ -161,6 +149,20 @@ class Main extends Template {
                         break
                     case 'feedReachInit':
                         console.log(p.user, `正在做: 每日喂狗10次`)
+                        if (food>=(data.feedReachAmount - data.hadFeedAmount)) {
+                            for (let i = 0; i<(data.feedReachAmount - data.hadFeedAmount) / 10; i++) {
+                                let f = await this.curl({
+                                        'url': `https://api.m.jd.com/client.action`,
+                                        'form': `functionId=feedPets&body={"version":1}&appid=wh5&client=apple&clientVersion=10.3.6&build=167963&rfs=0000`,
+                                        cookie
+                                    }
+                                )
+                                if (f.result) {
+                                    console.log(p.user, `喂食成功`)
+                                }
+                                await this.wait(1000)
+                            }
+                        }
                         let zft = await this.curl({
                                 'url': `https://api.m.jd.com/client.action`,
                                 'form': `functionId=getFeedReachReward&body={}&appid=wh5&client=apple&clientVersion=10.3.6&build=167963&rfs=0000`,
@@ -171,6 +173,8 @@ class Main extends Template {
                         break
                     case 'browseSingleShopInit':
                     case 'browseSingleShopInit1':
+                    case 'browseSingleShopInit2':
+                    case 'browseSingleShopInit3':
                         console.log(p.user, `正在做: ${data.title}`)
                         let zb1 = await this.curl({
                                 'url': `https://api.m.jd.com/client.action`,
@@ -190,6 +194,24 @@ class Main extends Template {
             }
             else {
                 console.log(p.user, `${data.title || ''}任务已完成`)
+            }
+        }
+        // 收取小爱心
+        home = await this.curl({
+                'url': `https://api.m.jd.com/client.action`,
+                'form': `functionId=initPetTown&body={"version":1}&appid=wh5&client=apple&clientVersion=10.3.0&build=167903&rfs=0000`,
+                cookie
+            }
+        )
+        for (let i of this.haskey(home, 'result.petPlaceInfoList')) {
+            if (i.energy) {
+                await this.curl({
+                        'url': `https://api.m.jd.com/client.action`,
+                        'form': `functionId=energyCollect&body={"place":${i.place}}&appid=wh5&client=apple&clientVersion=10.3.6&build=167963&rfs=0000`,
+                        cookie
+                    }
+                )
+                console.log(p.user, `收取好感度: ${i.energy}`)
             }
         }
     }
