@@ -20,7 +20,7 @@ class Main extends Template {
     async main(p) {
         let cookie = p.cookie;
         let s = await this.curl({
-                'url': `https://api.m.jd.com/signTask/doSignTask?functionId=SignComponent_doSignTask&appid=hot_channel&loginWQBiz=signcomponent&loginType=2&body={"activityId":"10001"}&g_ty=ls&g_tk=1294369933`,
+                'url': `https://api.m.jd.com/signTask/doSignTask?functionId=SignComponent_doSignTask&appid=hot_channel&loginWQBiz=signcomponent&loginType=2&body={"activityId":"10002"}&g_ty=ls&g_tk=1294369933`,
                 cookie
             }
         )
