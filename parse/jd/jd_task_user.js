@@ -22,7 +22,7 @@ class Main extends Template {
         let nickName = ''
         let phone = ''
         let custom = this.getValue('custom')
-        let keys = [...custom, ...['wskey', 'verify']]
+        let keys = [...custom, ...['wskey', 'verify', 'send']]
         let dict = {}
         for (let i of keys) {
             if (this.haskey(this.userDict, `${pin}.${i}`)) {
@@ -45,7 +45,7 @@ class Main extends Template {
                     userName: s.data.data.userName || s.data.data.pin,
                     nickName,
                     index: p.index.toString(),
-                    display: (parseInt(p.index) + 1).toString(),
+                    // display: (parseInt(p.index) + 1).toString(),
                     phone: s.data.data.intactMobile
                 },
                 ...dict
@@ -58,8 +58,8 @@ class Main extends Template {
                     userName: pin,
                     nickName,
                     index: p.index.toString(),
-                    display: (parseInt(p.index) + 1).toString(),
-                    phone,
+                    // display: (parseInt(p.index) + 1).toString(),
+                    phone
                 },
                 ...dict
             }

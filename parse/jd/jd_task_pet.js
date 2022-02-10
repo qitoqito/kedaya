@@ -84,12 +84,14 @@ class Main extends Template {
                 break
             }
             console.log(p.user, `获得运动狗粮: ${this.haskey(lg, 'result.foodReward') || 0}`)
+            await this.wait(1000)
             await this.curl({
                     'url': `https://api.m.jd.com/client.action`,
                     'form': `functionId=getSportReward&body={}&appid=wh5&client=apple&clientVersion=10.3.6&build=167963&rfs=0000`,
                     cookie
                 }
             )
+            await this.wait(1000)
         }
         // 喂食
         if (food>100) {
