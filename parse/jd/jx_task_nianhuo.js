@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京喜集年货"
-        this.cron = "0 */8 * * *"
+        // this.cron = "0 */8 * * *"
         this.help = 'main'
         this.task = 'local'
         // this.aid = 'own'
