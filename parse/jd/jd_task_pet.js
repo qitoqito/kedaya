@@ -177,6 +177,13 @@ class Main extends Template {
                     case 'browseSingleShopInit1':
                     case 'browseSingleShopInit2':
                     case 'browseSingleShopInit3':
+                    case 'browseSingleShopInit4':
+                    case 'browseSingleShopInit5':
+                    case 'browseSingleShopInit6':
+                    case 'browseSingleShopInit7':
+                    case 'browseSingleShopInit8':
+                    case 'browseSingleShopInit9':
+                    case 'browseSingleShopInit10':
                         console.log(p.user, `正在做: ${data.title}`)
                         let zb1 = await this.curl({
                                 'url': `https://api.m.jd.com/client.action`,
