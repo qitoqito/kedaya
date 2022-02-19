@@ -22,15 +22,13 @@ class Main extends Template {
         }
         else {
             this.shareCode = [
-                {appId: '1GFNRxq8'},
-                {appId: '1GFRRyqo'},
+                {
+                    appId: '1EFRWxKuG',
+                },
                 {
                     appId: '1FFVQyqw',
                 },
                 {appId: '1E1xZy6s'},
-                {
-                    appId: '1GVJWyqg',
-                }
             ]
             if (add.length) {
                 for (let c of add) {
