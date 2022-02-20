@@ -48,7 +48,7 @@ class Main extends Template {
                     }
                 }
                 if (redpacket) {
-                    this.notices(`签到: ${currSignCursor}天, 获得红包: ${redpacket}元`)
+                    this.notices(`签到: ${currSignCursor}天, 获得红包: ${redpacket}元`, p.user)
                 }
             } catch (e) {
             }
