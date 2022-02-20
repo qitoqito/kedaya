@@ -186,7 +186,6 @@ class Main extends Template {
         for (let i of ly.buildings || []) {
             if (i.name.includes('泡泡龙') || i.name.includes("天天红包")) {
                 if (this.haskey(i, 'topResource.task.status', 1)) {
-                    console.log(i)
                     console.log(`正在浏览:${i.name}`)
                     let pp = await this.curl({
                             'url': `https://api.m.jd.com/client.action`,
@@ -407,7 +406,7 @@ class Main extends Template {
                     case 'treasureBoxInit-getBean':
                         if (!dotask.f) {
                             await this.curl({
-                                    'url': `https://api.m.jd.com/client.action?functionId=ddnc_getTreasureBoxAward&body={"type":1,"babelChannel":"120","line":"getBean","version":14,"channel":1}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                                    'url': `https://api.m.jd.com/client.action?functionId=ddnc_getTreasureBoxAward&body={"babelChannel":"11","line":"getBean","channel":3,"type":1,"version":14}&appid=wh5&client=apple&clientVersion=10.2.4`,
                                     // 'form':``,
                                     cookie
                                 }
@@ -431,7 +430,7 @@ class Main extends Template {
                             //     }
                             // )
                             await this.curl({
-                                    'url': `https://api.m.jd.com/client.action?functionId=ddnc_getTreasureBoxAward&body={"type":2,"babelChannel":"98","line":"getBean","version":14,"channel":1}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                                    'url': `https://api.m.jd.com/client.action?functionId=ddnc_getTreasureBoxAward&body={"babelChannel":"11","line":"getBean","channel":3,"type":2,"version":14}&appid=wh5&client=apple&clientVersion=10.2.4`,
                                     // 'form':``,
                                     cookie
                                 }
@@ -598,12 +597,21 @@ class Main extends Template {
             }
         )
         for (let i = 0; i<(init.farmUserPro.totalEnergy - 110) / 10; i++) {
-            let js = await this.curl({
-                    'url': `https://api.m.jd.com/client.action?functionId=waterGoodForFarm&body={"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
-                    // 'form':``,
-                    cookie
+            await this.wait(this.rand(4000, 5000))
+            for (let j = 0; j<3; j++) {
+                var js = await this.curl({
+                        'url': `https://api.m.jd.com/client.action?functionId=waterGoodForFarm&body={"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                        // 'form':``,
+                        cookie
+                    }
+                )
+                if (js.totalEnergy) {
+                    break
                 }
-            )
+                else {
+                    await this.wait(this.rand(300, 500))
+                }
+            }
             if (!js.totalEnergy) {
                 break
             }
