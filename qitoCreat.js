@@ -121,18 +121,22 @@ V4_jd: export QITOQITO_PLATFORM=jd
                                                 if (z.isDisabled) {
                                                     console.log(`🙊 禁用失败: ${filename} 已经是禁用的`)
                                                 } else {
-                                                    let disable = await curl({
-                                                        'url': `${url}/api/crons/disable?t=1639371766925`,
-                                                        json: [z._id || z.id],
-                                                        authorization,
-                                                        'headers': {
-                                                            'Referer': `${url}/api/crons?searchValue=&t=1638982538292`,
-                                                            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:94.0) Gecko/20100101 Firefox/94.0'
-                                                        },
-                                                        method: 'put'
-                                                    })
-                                                    msg.push(`🐼 禁用成功: ${filename}`)
-                                                    console.log(`🐼 禁用成功: ${filename} 已经成功禁用`)
+                                                    if (sync) {
+                                                        let disable = await curl({
+                                                            'url': `${url}/api/crons/disable?t=1639371766925`,
+                                                            json: [z._id || z.id],
+                                                            authorization,
+                                                            'headers': {
+                                                                'Referer': `${url}/api/crons?searchValue=&t=1638982538292`,
+                                                                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:94.0) Gecko/20100101 Firefox/94.0'
+                                                            },
+                                                            method: 'put'
+                                                        })
+                                                        msg.push(`🐼 禁用成功: ${filename}`)
+                                                        console.log(`🐼 禁用成功: ${filename} 已经成功禁用`)
+                                                    } else {
+                                                        console.log(`🙊 禁用失败: ${filename} 禁用脚本失败,请自行禁用,如需同步,请设置 QITOQITO_SYNC`)
+                                                    }
                                                     break
                                                 }
                                             }
@@ -266,9 +270,13 @@ V4_jd: export QITOQITO_PLATFORM=jd
                         if (spl[j][0] == '#') {
                             console.log(`🙊 禁用失败: ${i} 已经是禁用的`)
                         } else {
-                            spl[j] = `#${spl[j]}`
-                            msg.push(`🐼 禁用成功: ${i}`)
-                            console.log(`🐼 禁用成功: ${i} 已经成功禁用`)
+                            if (sync) {
+                                spl[j] = `#${spl[j]}`
+                                msg.push(`🐼 禁用成功: ${i}`)
+                                console.log(`🐼 禁用成功: ${i} 已经成功禁用`)
+                            } else {
+                                console.log(`🙊 禁用失败: ${i} 禁用脚本失败,请自行禁用,如需同步,请设置 QITOQITO_SYNC`)
+                            }
                         }
                     }
                 }
