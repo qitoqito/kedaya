@@ -5,25 +5,20 @@ class Main extends Template {
         super()
         this.title = "京东东东农场"
         this.cron = "33 0,11,17,22 * * *"
-        this.thread = 6
+        this.thread = 3
         this.task = 'local'
         this.help = 'local'
+        this.import = ['fs']
     }
 
     async prepare() {
         console.log("正在获取助力码")
-        for (let i of this.cookies['help']) {
-            let s = await this.curl({
-                'url': 'https://api.m.jd.com/client.action?functionId=initForFarm',
-                'form': `body={"version":11,"channel":3}&client=apple&clientVersion=10.0.4&osVersion=13.7&appid=wh5&loginType=2&loginWQBiz=interact`,
-                cookie: i
-            })
-            try {
-                this.code.push({
-                    'shareCode': s.farmUserPro.shareCode
-                })
-            } catch (e) {
+        try {
+            let txt = this.modules.fs.readFileSync(`${this.dirname}/invite/jd_task_farm.json`).toString()
+            if (txt.includes("shareCode")) {
+                this.code = this.loads(txt)
             }
+        } catch (e) {
         }
         console.log(this.dumps(this.code))
     }
@@ -90,6 +85,12 @@ class Main extends Template {
                 cookie
             }
         )
+        if (!this.dumps(this.code).includes(init.farmUserPro.shareCode)) {
+            this.code.push({
+                shareCode: init.farmUserPro.shareCode
+            })
+        }
+        this.dict[this.userPin(cookie)] = {shareCode: init.farmUserPro.shareCode}
         if (!fi.newFriendMsg) {
             let fcode = this.column([...this.code], 'shareCode')
             for (let i of this.random(fcode, 7)) {
@@ -619,6 +620,22 @@ class Main extends Template {
                 this.notices("可以兑换奖品了", p.user)
             }
             console.log("正在浇水,剩余水滴:", js.totalEnergy, '总共浇水:', js.treeEnergy, '需要水滴', init.farmUserPro.treeTotalEnergy)
+        }
+    }
+
+    async extra() {
+        let json = []
+        for (let cookie of this.cookies.all) {
+            let pin = this.userPin(cookie)
+            if (this.dict[pin]) {
+                json.push(this.dict[pin])
+            }
+        }
+        if (json.length) {
+            await this.modules.fs.writeFile(`${this.dirname}/invite/jd_task_farm.json`, this.dumps(json), (error) => {
+                if (error) return console.log("写入化失败" + error.message);
+                console.log("东东农场ShareCode写入成功");
+            })
         }
     }
 }
