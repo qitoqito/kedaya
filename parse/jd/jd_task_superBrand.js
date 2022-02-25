@@ -94,10 +94,12 @@ class Main extends Template {
                     // console.log(e.message)
                 }
             }
+            else {
+                console.log(`任务完成: ${i.assignmentName}`)
+            }
         }
-        console.log('ok')
         let gifts = []
-        if (new Date().getHours()>18) {
+        if (new Date().getHours()>16) {
             let home = await this.curl({
                     'url': `https://api.m.jd.com/api?functionId=superBrandSecondFloorMainPage&appid=ProductZ4Brand&client=wh5&t=${this.timestamp}&body={"source":"${this.dict.source}"}`,
                     // 'form':``,
