@@ -7,7 +7,7 @@ class Main extends Template {
         // this.cron = "12 0,13 * * *"
         this.task = 'active'
         this.verify = 1
-        this.readme = `filename_custom="url1|url2"`
+        this.readme = `filename_custom="url1|host=id"`
     }
 
     async prepare() {
@@ -20,6 +20,17 @@ class Main extends Template {
                     host: s[0],
                     activityId: s[1]
                 })
+            }
+            else {
+                if (i.includes('=')) {
+                    s = this.match(/\s*([^\=]+)\s*=\s*(\w{32})/, i)
+                    if (s) {
+                        this.shareCode.push({
+                            host: s[0].includes('isvjcloud.com') ? s[0] : `${s[0]}.isvjcloud.com`,
+                            activityId: s[1]
+                        })
+                    }
+                }
             }
         }
     }

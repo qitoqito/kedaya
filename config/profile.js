@@ -3,5 +3,4 @@ module.exports = {
     userRegular: {
         'jd': /pin=([^;]+)/
     },
-    thread: 3,
 }
