@@ -7,8 +7,8 @@ class Main extends Template {
         this.cron = "33 0,11,17,22 * * *"
         this.thread = 3
         this.task = 'local'
-        this.help = 'local'
         this.import = ['fs']
+        this.readme = `水滴换豆: filename_custom='beanCard'\n请检查scripts目录有invite文件夹`
     }
 
     async prepare() {
@@ -48,7 +48,6 @@ class Main extends Template {
             console.log("正在播种")
             await this.curl({
                     'url': `https://api.m.jd.com/client.action?functionId=choiceGoodsForFarm&body={"imageUrl":"","nickName":"","shareCode":"","goodsType":"mihoutao22","type":"0","babelChannel":"120","sid":"b1482460605540226922b0088199941w","un_area":"16_1341_1347_44750","version":14,"channel":1}&appid=wh5&client=apple&clientVersion=10.2.4`,
-                    // 'form':``,
                     cookie
                 }
             )
@@ -56,19 +55,6 @@ class Main extends Template {
         if (init.farmUserPro.treeState == 2) {
             console.log("可以兑换奖品了")
             this.notices('可以兑换奖品了', p.user)
-            // await this.curl({
-            //         'url': `https://api.m.jd.com/client.action?functionId=initForFarm&body={"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
-            //         // 'form':``,
-            //         cookie
-            //     }
-            // )
-            //   await this.curl({
-            //         'url': `https://api.m.jd.com/client.action?functionId=choiceGoodsForFarm&body={"imageUrl":"","nickName":"","shareCode":"","goodsType":"mihoutao22","type":"0","babelChannel":"120","sid":"b1482460605540226922b0088199941w","un_area":"16_1341_1347_44750","version":14,"channel":1}&appid=wh5&client=apple&clientVersion=10.2.4`,
-            //         // 'form':``,
-            //         cookie
-            //     }
-            // )
-            // return
         }
         else if (init.farmUserPro.treeState == 0) {
             console.log("正在播种")
@@ -597,7 +583,25 @@ class Main extends Template {
                 cookie
             }
         )
-        for (let i = 0; i<(init.farmUserPro.totalEnergy - 110) / 10; i++) {
+        let amount = init.farmUserPro.totalEnergy
+        let custom = this.getValue('custom')
+        if (custom.includes('beanCard')) {
+            for (let i = 0; i<Math.min(Math.floor(amount / 100), 3); i++) {
+                let d = await this.curl({
+                        'url': `https://api.m.jd.com/client.action?functionId=userMyCardForFarm&body={"cardType":"beanCard","type":"","version":14,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.4.0`,
+                        cookie
+                    }
+                )
+                if (d.beanCount) {
+                    amount = amount - d.useWater
+                    console.log(p.user, `水滴兑换京豆: ${d.beanCount}`)
+                }
+                else {
+                    break
+                }
+            }
+        }
+        for (let i = 0; i<(amount - 110) / 10; i++) {
             await this.wait(this.rand(4000, 5000))
             for (let j = 0; j<3; j++) {
                 var js = await this.curl({
