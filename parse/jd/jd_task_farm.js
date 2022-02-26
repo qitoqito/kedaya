@@ -5,10 +5,10 @@ class Main extends Template {
         super()
         this.title = "京东东东农场"
         this.cron = "33 0,11,17,22 * * *"
-        this.thread = 3
+        this.thread = 2
         this.task = 'local'
         this.import = ['fs']
-        this.readme = `水滴换豆: filename_custom='beanCard'\n请检查scripts目录有invite文件夹`
+        this.readme = `目前农场容易黑ip,现有模式是每次运行先获取invite/jd_task_farm.json里面的shareCode来逐一助力\n等运行完毕后,获取本次运行的所有账号shareCode,重新写入invite/jd_task_farm.json,由于ip问题,可能漏掉部分账号shareCode\n号多的话,建议缓存js_task_farm.json,此模式是每次运行后不再写入新的shareCode到invite/jd_task_farm.json里面,需要增减需要手动修改json文件\n缓存助力码文件: filename_custom='cache'\n水滴换豆: filename_custom='beanCard'\n水滴换豆+缓存json: filename_custom='beanCard|cache'\n上面的custom看需求选一个添加,请检查scripts目录有invite文件夹`
     }
 
     async prepare() {
@@ -24,6 +24,7 @@ class Main extends Template {
     }
 
     async main(p) {
+        return
         let cookie = p.cookie;
         // let a = await this.curl({
         //         'url': `https://api.m.jd.com/client.action`,
@@ -602,7 +603,7 @@ class Main extends Template {
             }
         }
         for (let i = 0; i<(amount - 110) / 10; i++) {
-            await this.wait(this.rand(4000, 5000))
+            await this.wait(this.rand(3000, 4000))
             for (let j = 0; j<3; j++) {
                 var js = await this.curl({
                         'url': `https://api.m.jd.com/client.action?functionId=waterGoodForFarm&body={"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
@@ -628,18 +629,25 @@ class Main extends Template {
     }
 
     async extra() {
-        let json = []
-        for (let cookie of this.cookies.all) {
-            let pin = this.userPin(cookie)
-            if (this.dict[pin]) {
-                json.push(this.dict[pin])
-            }
+        let custom = this.getValue('custom')
+        if (custom.includes('cache')) {
+            console.log("已经设置缓存JSON,跳过写入")
         }
-        if (json.length) {
-            await this.modules.fs.writeFile(`${this.dirname}/invite/jd_task_farm.json`, this.dumps(json), (error) => {
-                if (error) return console.log("写入化失败" + error.message);
-                console.log("东东农场ShareCode写入成功");
-            })
+        else {
+            console.log("农场有检测,号多容易黑ip,建议缓存JSON文件")
+            let json = []
+            for (let cookie of this.cookies.all) {
+                let pin = this.userPin(cookie)
+                if (this.dict[pin]) {
+                    json.push(this.dict[pin])
+                }
+            }
+            if (json.length) {
+                await this.modules.fs.writeFile(`${this.dirname}/invite/jd_task_farm.json`, this.dumps(json), (error) => {
+                    if (error) return console.log("写入化失败" + error.message);
+                    console.log("东东农场ShareCode写入成功");
+                })
+            }
         }
     }
 }
