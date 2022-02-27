@@ -6,7 +6,7 @@ class Main extends Template {
         this.title = "科技玩家签到"
         // this.cron = "23 0,13 * * *"
         this.task = 'local'
-        this.readme=`密码添加: KEJIWANJIA_COOKIE="username=邮箱1;password=密码1;&username=邮箱2;password=密码2;"`
+        this.readme=`账号添加: KEJIWANJIA_COOKIE="username=邮箱1;password=密码1;&username=邮箱2;password=密码2;"`
     }
 
     async main(p) {
