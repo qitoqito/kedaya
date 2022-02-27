@@ -6,6 +6,7 @@ class Main extends Template {
         this.title = "科技玩家签到"
         // this.cron = "23 0,13 * * *"
         this.task = 'local'
+        this.readme=`密码添加: KEJIWANJIA_COOKIE="username=邮箱1;password=密码1;&username=邮箱2;password=密码2;"`
     }
 
     async main(p) {
@@ -31,12 +32,12 @@ class Main extends Template {
             }
         )
         if (typeof q == 'string') {
-            console.log(`今日已经签到,获得积分: ${q}`)
+            console.log(`今日已经签到了,获得积分: ${q}`)
         }
         else {
             if (this.haskey(q, 'credit')) {
-                console.log(`今日签到积分: ${q}`)
-                this.notices(`今日已经签到,获得积分: ${q}`, p.user)
+                console.log(`今日签到积分: ${q.credit}`)
+                this.notices(`今日签到,获得积分: ${q.credit}`, p.user)
             }
             else {
                 console.log('签到错误')
