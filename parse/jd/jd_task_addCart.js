@@ -7,7 +7,7 @@ class Main extends Template {
         // this.cron = "12 0,13 * * *"
         this.task = 'active'
         this.verify = 1
-        this.readme = `filename_custom="url1|host=id"`
+        this.readme = `filename_custom="url1|host=id|id"`
     }
 
     async prepare() {
@@ -29,21 +29,71 @@ class Main extends Template {
                         activityId: s[1]
                     })
                 }
+                else if (i.length == 32) {
+                    let array = [
+                        "lzkj-isv.isvjcloud.com",
+                        "cjhy-isv.isvjcloud.com",
+                    ]
+                    for (let j of array) {
+                        switch (j) {
+                            case "cjhy-isv.isvjcloud.com":
+                                var h = await this.response({
+                                        'url': `https://${j}/wxCollectionActivity/activity?activityId=${i}`,
+                                    }
+                                )
+                                break
+                            default:
+                                var h = await this.response({
+                                        'url': `https://${j}/wxCollectionActivity/activity2/${i}?activityId=${i}`,
+                                    }
+                                )
+                                break
+                        }
+                        let shop = await this.curl({
+                                'url': `https://${j}/wxCollectionActivity/shopInfo`,
+                                'form': `activityId=${i}`,
+                                cookie: h.cookie
+                            }
+                        )
+                        if (this.haskey(shop, 'data.sid')) {
+                            this.shareCode.push(
+                                {
+                                    host: j,
+                                    activityId: i,
+                                    venderId: shop.data.sid
+                                }
+                            )
+                            break
+                        }
+                    }
+                }
             }
         }
         for (let i of this.shareCode) {
-            let h = await this.response({
-                    'url': `https://${i.host}/wxCollectionActivity/activity2/${i.activityId}?activityId=${i.activityId}`,
+            if (!i.venderId) {
+                switch (i.host) {
+                    case "cjhy-isv.isvjcloud.com":
+                        var h = await this.response({
+                                'url': `https://${i.host}/wxCollectionActivity/activity?activityId=${i.activityId}`,
+                            }
+                        )
+                        break
+                    default:
+                        var h = await this.response({
+                                'url': `https://${i.host}/wxCollectionActivity/activity2/${i.activityId}?activityId=${i.activityId}`,
+                            }
+                        )
+                        break
                 }
-            )
-            let shop = await this.curl({
-                    'url': `https://${i.host}/wxCollectionActivity/shopInfo`,
-                    'form': `activityId=${i.activityId}`,
-                    cookie: h.cookie
+                let shop = await this.curl({
+                        'url': `https://${i.host}/wxCollectionActivity/shopInfo`,
+                        'form': `activityId=${i.activityId}`,
+                        cookie: h.cookie
+                    }
+                )
+                if (this.haskey(shop, 'data.sid')) {
+                    i.venderId = shop.data.sid
                 }
-            )
-            if (this.haskey(shop, 'data.sid')) {
-                i.venderId = shop.data.sid
             }
         }
     }
@@ -64,11 +114,20 @@ class Main extends Template {
             form: 'functionId=isvObfuscator&body=%7B%22id%22%3A%22%22%2C%22url%22%3A%22https%3A%2F%2Fddsj-dz.isvjcloud.com%22%7D&uuid=5162ca82aed35fc52e8&client=apple&clientVersion=10.0.10&st=1631884203742&sv=112&sign=fd40dc1c65d20881d92afe96c4aec3d0',
             cookie
         })
-        let h = await this.response({
-                'url': `https://${host}/wxCollectionActivity/activity2/${activityId}?activityId=${activityId}`,
-                cookie
-            }
-        )
+        switch (host) {
+            case "cjhy-isv.isvjcloud.com":
+                var h = await this.response({
+                        'url': `https://${host}/wxCollectionActivity/activity?activityId=${activityId}`,
+                    }
+                )
+                break
+            default:
+                var h = await this.response({
+                        'url': `https://${host}/wxCollectionActivity/activity2/${activityId}?activityId=${activityId}`,
+                    }
+                )
+                break
+        }
         let info = await this.response({
                 'url': `https://${host}/customer/getSimpleActInfoVo`,
                 form: `activityId=${activityId}`,
@@ -88,7 +147,7 @@ class Main extends Template {
                 var venderId = shop.data.sid
             }
         }
-        let getPin = await this.response({
+        var getPin = await this.response({
                 'url': `https://${host}/customer/getMyPing`,
                 form: `userId=${venderId}&token=${isvObfuscator.token}&fromType=APP`,
                 cookie: info.cookie
@@ -110,12 +169,27 @@ class Main extends Template {
                 cookie: `${info.cookie};${getPin.cookie}`
             }
         )
-        let add = await this.response({
-                'url': `https://${host}/wxCollectionActivity/oneKeyAddCart`,
-                form: `activityId=${activityId}&pin=${encodeURIComponent(getPin.content.data.secretPin)}&productIds=${this.dumps(this.column(skus.skus, 'skuId'))}`,
-                cookie: `${member.cookie};${getPin.cookie}`
+        let wxFollow = await this.response({
+                'url': `https://lzkj-isv.isvjcloud.com/wxActionCommon/followShop`,
+                'form': `userId=${venderId}&buyerNick=${encodeURIComponent(getPin.content.data.secretPin)}&activityId=${activityId}&activityType=6`,
+                cookie: `${info.cookie};${getPin.cookie}`
             }
         )
+        for (let z = 0; z<3; z++) {
+            var add = await this.response({
+                    'url': `https://${host}/wxCollectionActivity/oneKeyAddCart`,
+                    form: `activityId=${activityId}&pin=${encodeURIComponent(getPin.content.data.secretPin)}&productIds=${this.dumps(this.column(skus.skus, 'skuId'))}`,
+                    cookie: `${member.cookie};${getPin.cookie}`
+                }
+            )
+            await this.wait(1000)
+        }
+        // info = await this.response({
+        //         'url': `https://${host}/customer/getSimpleActInfoVo`,
+        //         form: `activityId=${activityId}`,
+        //         cookie: h.cookie
+        //     }
+        // )
         cookie = `${add.cookie};AUTH_C_USER=${getPin.content.data.secretPin};`
         let getPrize = await this.curl({
                 'url': `https://${host}/wxCollectionActivity/getPrize`,
