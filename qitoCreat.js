@@ -3,13 +3,15 @@ let request = require("request")
 let prefix = process.env.QITOQITO_PREFIX || ''
 let command = process.env.QITOQITO_PLATFORM
 let sync = process.env.QITOQITO_SYNC
+let disable = process.env.QITOQITO_DISABLE
 let label = process.env.QITOQITO_LABEL || 'kedaya_'
 if (!command) {
     console.log(`
-请先设置环境变量 QITOQITO_PLATFORM
-qinglong: export QITOQITO_PLATFORM=qinglong 或 "http://ip:port"
-V4_jtask: export QITOQITO_PLATFORM=jtask
-V4_jd: export QITOQITO_PLATFORM=jd
+请先设置环境变量
+QITOQITO_PLATFORM=按照所使用面板正确填写 qinglong|jtask|jd 其中一个 [青龙面板:qinglong, v3系列:jtask, 衍生面板:jd]
+QITOQITO_SYNC=1 当有此变量时,面板脚本定时会与项目定时同步,如需自行修改,请勿添加该字段
+QITOQITO_DISABLE=1 当有此变量时,如遇活动失效,面板脚本会根据项目自动禁用
+QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的入口文件
         `)
     return
 }!(async () => {
@@ -121,7 +123,7 @@ V4_jd: export QITOQITO_PLATFORM=jd
                                                 if (z.isDisabled) {
                                                     console.log(`🙊 禁用失败: ${filename} 已经是禁用的`)
                                                 } else {
-                                                    if (sync) {
+                                                    if (disable) {
                                                         let disable = await curl({
                                                             'url': `${url}/api/crons/disable?t=1639371766925`,
                                                             json: [z._id || z.id],
@@ -135,7 +137,7 @@ V4_jd: export QITOQITO_PLATFORM=jd
                                                         msg.push(`🐼 禁用成功: ${filename}`)
                                                         console.log(`🐼 禁用成功: ${filename} 已经成功禁用`)
                                                     } else {
-                                                        console.log(`🙊 禁用失败: ${filename} 禁用脚本失败,请自行禁用,如需同步,请设置 QITOQITO_SYNC`)
+                                                        console.log(`🙊 禁用失败: ${filename} 禁用脚本失败,请自行禁用,如需同步,请设置 QITOQITO_DISABLE`)
                                                     }
                                                     break
                                                 }
@@ -270,12 +272,12 @@ V4_jd: export QITOQITO_PLATFORM=jd
                         if (spl[j][0] == '#') {
                             console.log(`🙊 禁用失败: ${i} 已经是禁用的`)
                         } else {
-                            if (sync) {
+                            if (disable) {
                                 spl[j] = `#${spl[j]}`
                                 msg.push(`🐼 禁用成功: ${i}`)
                                 console.log(`🐼 禁用成功: ${i} 已经成功禁用`)
                             } else {
-                                console.log(`🙊 禁用失败: ${i} 禁用脚本失败,请自行禁用,如需同步,请设置 QITOQITO_SYNC`)
+                                console.log(`🙊 禁用失败: ${i} 禁用脚本失败,请自行禁用,如需同步,请设置 QITOQITO_DISABLE`)
                             }
                         }
                     }
