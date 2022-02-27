@@ -36,6 +36,7 @@ class Main extends Template {
         else {
             if (this.haskey(q, 'credit')) {
                 console.log(`今日签到积分: ${q}`)
+                this.notices(`今日已经签到,获得积分: ${q}`, p.user)
             }
             else {
                 console.log('签到错误')
