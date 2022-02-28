@@ -230,7 +230,7 @@ class Main extends Template {
         }
         await this.curl({
             'url': 'https://api.m.jd.com/client.action?g_ty=ls&g_tk=518274330',
-            'form': `functionId=followShop&body={"follow":"false","shopId":"${p.inviter.venderId}","award":"true","sourceRpc":"shop_app_home_follow"}&osVersion=13.7&appid=wh5&clientVersion=9.2.0&loginType=2&loginWQBiz=interact`,
+            'form': `functionId=followShop&body={"follow":"false","shopId":"${shopId}","venderId":"${venderId}","award":"true","sourceRpc":"shop_app_home_follow"}&osVersion=13.7&appid=wh5&clientVersion=9.2.0&loginType=2&loginWQBiz=interact`,
             cookie: p.cookie
         })
         if (skuList.length) {
