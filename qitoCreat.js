@@ -294,7 +294,7 @@ if (!command) {
                         console.log(`🐯 导入跳过: ${i} 如需运行请手动添加定时`)
                     }
                 } else {
-                    console.log(`🐹 跳过操作: ${filename} 操作脚本失败,请手动运行该脚本`)
+                    console.log(`🐹 跳过操作: ${i} 操作脚本失败,请手动运行该脚本`)
                 }
             }
         }
