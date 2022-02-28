@@ -8,6 +8,7 @@ class Main extends Template {
         this.task = 'active'
         this.verify = 1
         this.readme = `filename_custom="url1|host=id|id"`
+
     }
 
     async prepare() {
@@ -241,6 +242,8 @@ class Main extends Template {
         //         cookie: h.cookie
         //     }
         // )
+        console.log("加购有延迟,等待3秒...")
+        await this.wait(3000)
         let getPrize = await this.curl({
                 'url': `https://${host}/wxCollectionActivity/getPrize`,
                 form: `activityId=${activityId}&pin=${secretPin}`,
@@ -260,8 +263,8 @@ class Main extends Template {
             cookie: p.cookie
         })
         let s = await this.curl({
-                'url': `https://wq.jd.com/cart/view?g_ty=mp&g_tk=1117882496`,
-                'form': `scene=0&all=0&type=0&callersrc=xcxcart&fckr=0&datatype=0&traceid=`,
+                'url': `https://wq.jd.com/deal/mshopcart/rmvCmdy?sceneval=2&g_login_type=1&g_ty=ajax`,
+                'form': `pingouchannel=0&commlist=123,,1,123,11,123,0,skuUuid:aaa@@useUuid:0&type=0&checked=0&locationid=&templete=1&reg=1&scene=0&version=20190418&traceid=1394319544881167891&tabMenuType=1&sceneval=2`,
                 cookie: p.cookie
             }
         )
@@ -269,27 +272,23 @@ class Main extends Template {
         let name = []
         let n = 0
         try {
-            for (let i of this.haskey(s, 'cartInfo.vendors')) {
-                let sorteds = i.sorteds
-                for (let j of sorteds) {
-                    for (let items of j.items) {
-                        if (skuList.includes(items.id.toString())) {
-                            name.push(`${items.id} -- ${items.name}`)
-                            let dict = {
-                                "skuId": items.id,
-                                "num": items.num,
-                                "itemType": items.itemType,
-                                "skuUuid": items.skuUuid,
-                                "useUuid": 0
+            let cart = s.cart.venderCart
+            for (let i of cart) {
+                for (let items of i.sortedItems) {
+                    for (let products of items.polyItem.products) {
+                        if (skuList.includes(products.mainSku.id.toString())) {
+                            if (this.haskey(items, 'polyItem.promotion.pid')) {
+                                list.push(`${products.mainSku.id},,1,${products.mainSku.id},11,${items.polyItem.promotion.pid},0,skuUuid:${products.skuUuid}@@useUuid:0`)
                             }
-                            if (j.promotionId) {
-                                dict.promotionId = j.promotionId
+                            else {
+                                list.push(
+                                    `${products.mainSku.id},,1,${products.mainSku.id},1,,0,skuUuid:${products.skuUuid}@@useUuid:0`
+                                )
                             }
-                            if (j.isJingXi) {
-                                dict.isJingXi = j.isJingXi
-                            }
-                            list.push(dict)
-                            n++;
+                            name.push(
+                                `${products.mainSku.id} -- ${products.mainSku.name}`
+                            )
+                            n++
                         }
                     }
                 }
@@ -297,13 +296,13 @@ class Main extends Template {
         } catch (e) {
         }
         if (list.length) {
-            let ss = await this.curl({
-                    'url': `https://wq.jd.com/cart/remove?g_ty=mp&g_tk=1117882496`,
-                    'form': `locationid=&scene=0&all=0&type=0&callersrc=xcxcart&skus=${this.dumps(list)}&datatype=0&traceid=1394373979296293568`,
-                    cookie
+            s = await this.curl({
+                    'url': `https://wq.jd.com/deal/mshopcart/rmvCmdy?sceneval=2&g_login_type=1&g_ty=ajax`,
+                    'form': `pingouchannel=0&commlist=${list.join("$")}&checked=0&locationid=&templete=1&reg=1&scene=0&version=20190418&traceid=&tabMenuType=1&sceneval=2`,
+                    cookie: p.cookie
                 }
             )
-            console.log(`删除加购商品数: ${list.length}`)
+            console.log(`删除购物车商品数: ${list.length}`)
         }
     }
 }
