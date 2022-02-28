@@ -62,7 +62,7 @@ if (!command) {
                     if (err) {
                         throw err;
                     }
-                    console.log(`🐻‍❄️ 写入成功: ${filename} 写入目录成功`)
+                    console.log(`🐯‍❄️ 写入成功: ${filename} 写入目录成功`)
                 })
             }
         }
@@ -126,7 +126,7 @@ if (!command) {
                                             try {
                                                 if (z.name.includes(label) && z.command.includes(`task ${filename}`)) {
                                                     if (z.isDisabled) {
-                                                        console.log(`🙊 禁用失败: ${filename} 已经是禁用的`)
+                                                        console.log(`🦊 禁用失败: ${filename} 已经是禁用的`)
                                                     } else {
                                                         if (disable) {
                                                             let disable = await curl({
@@ -142,7 +142,7 @@ if (!command) {
                                                             msg.push(`🐼 禁用成功: ${filename}`)
                                                             console.log(`🐼 禁用成功: ${filename} 已经成功禁用`)
                                                         } else {
-                                                            console.log(`🙊 禁用失败: ${filename} 禁用脚本失败`)
+                                                            console.log(`🦊 禁用失败: ${filename} 禁用脚本失败`)
                                                         }
                                                         break
                                                     }
@@ -186,8 +186,8 @@ if (!command) {
                                 if (kedaya.cron) {
                                     let crons = typeof(kedaya.cron) == 'object' ? kedaya.cron : [kedaya.cron]
                                     for (let c of crons) {
-                                        msg.push(`🐰 导入成功: ${filename}`)
-                                        console.log(`🐰 导入成功: ${filename} 加入定时成功`)
+                                        msg.push(`🦁 导入成功: ${filename}`)
+                                        console.log(`🦁 导入成功: ${filename} 加入定时成功`)
                                         let add = await curl({
                                             'url': `${url}/api/crons?t=1638983187740`,
                                             json: {
@@ -203,7 +203,7 @@ if (!command) {
                                         })
                                     }
                                 } else {
-                                    console.log(`🐻 导入跳过: ${filename} 没有定时,如需运行请手动添加`)
+                                    console.log(`🐯 导入跳过: ${filename} 如需运行请手动添加定时`)
                                 }
                             }
                         } catch (ee) {
@@ -268,8 +268,8 @@ if (!command) {
                         let c = `${j} ${b} ${i}`
                         let a = (`${c}${new Array(64-c.length).join(' ')}#${label}${yaya.title}`)
                         spl.push(a)
-                        msg.push(`🐰 导入成功: ${i}`)
-                        console.log(`🐰 导入成功: ${i} 加入定时成功`)
+                        msg.push(`🦁 导入成功: ${i}`)
+                        console.log(`🦁 导入成功: ${i} 加入定时成功`)
                     }
                 }
             } else {
@@ -278,20 +278,20 @@ if (!command) {
                         if (match(new RegExp(`(${command}\\s*${i})\\s*#${label}`), spl[j])) {
                             // spl[j] = ''
                             if (spl[j][0] == '#') {
-                                console.log(`🙊 禁用失败: ${i} 已经是禁用的`)
+                                console.log(`🦊 禁用失败: ${i} 已经是禁用的`)
                             } else {
                                 if (disable) {
                                     spl[j] = `#${spl[j]}`
                                     msg.push(`🐼 禁用成功: ${i}`)
                                     console.log(`🐼 禁用成功: ${i} 已经成功禁用`)
                                 } else {
-                                    console.log(`🙊 禁用失败: ${i} 禁用脚本失败`)
+                                    console.log(`🦊 禁用失败: ${i} 禁用脚本失败`)
                                 }
                             }
                         }
                     }
                     if (!crontab.includes(i)) {
-                        console.log(`🐻 导入跳过: ${i} 没有定时,如需运行请手动添加`)
+                        console.log(`🐯 导入跳过: ${i} 如需运行请手动添加定时`)
                     }
                 } else {
                     console.log(`🐹 跳过操作: ${filename} 操作脚本失败,请手动运行该脚本`)
