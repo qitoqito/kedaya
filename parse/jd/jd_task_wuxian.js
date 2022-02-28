@@ -8,10 +8,12 @@ class Main extends Template {
         this.verify = 1
         this.manual = 1
         this.readme = `暂时只支持加购和转盘\nfilename_custom="url1|host=id|id"`
+        this.import = ['fs']
+        // this.work = 1
     }
 
     async prepare() {
-        this.assert(this.custom, '请先添加加购地址')
+        this.assert(this.custom, '请先添加环境变量')
         let custom = this.getValue('custom')
         for (let i of custom) {
             let s = this.match(/\/\/([^\/]+)\/.+?(\w{32})/, i)
@@ -46,12 +48,34 @@ class Main extends Template {
                         'url': `https://${host}/wxCommonInfo/token`,
                     }
                 )
-                let s = await this.curl({
+                var s = await this.curl({
                         'url': `https://${host}/customer/getSimpleActInfoVo`,
                         'form': `activityId=${i.activityId}`,
                         cookie: p.cookie
                     }
                 )
+                if (!this.haskey(s, 'data')) {
+                    switch (host) {
+                        case "cjhy-isv.isvjcloud.com":
+                            var h = await this.response({
+                                    'url': `https://${host}/wxCollectionActivity/activity?activityId=${i.activityId}`,
+                                }
+                            )
+                            break
+                        default:
+                            var h = await this.response({
+                                    'url': `https://${host}/wxCollectionActivity/activity2/${i.activityId}?activityId=${i.activityId}`,
+                                }
+                            )
+                            break
+                    }
+                    s = await this.curl({
+                            'url': `https://${host}/customer/getSimpleActInfoVo`,
+                            form: `activityId=${i.activityId}`,
+                            cookie: h.cookie
+                        }
+                    )
+                }
                 if (this.haskey(s, 'data')) {
                     let data = s.data
                     data.host = host
@@ -59,6 +83,7 @@ class Main extends Template {
                         case 6:
                             data.type = 'addCart'
                             break
+                        case 12:
                         case 13:
                             data.type = 'drawActivity'
                             break
@@ -67,6 +92,9 @@ class Main extends Template {
                             break
                         case 46:
                             data.type = 'openCard'
+                            break
+                        case 26:
+                            data.type = 'wxDraw'
                             break
                     }
                     this.shareCode.push(data)
@@ -77,6 +105,7 @@ class Main extends Template {
     }
 
     async main(p) {
+        let pin = this.userPin(p.cookie)
         let host = p.inviter.host
         let activityId = p.inviter.activityId
         let type = p.inviter.type
@@ -99,41 +128,72 @@ class Main extends Template {
                 'url': `https://${host}/wxCommonInfo/token`,
             }
         )
-        let getPin = await this.response({
+        var getPin = await this.response({
                 'url': `https://${host}/customer/getMyPing`,
                 form: `userId=${venderId}&token=${isvObfuscator.token}&fromType=APP`,
                 cookie: token.cookie
             }
         )
         if (!this.haskey(getPin, 'content.data.secretPin')) {
+            switch (host) {
+                case "cjhy-isv.isvjcloud.com":
+                    var h = await this.response({
+                            'url': `https://${host}/wxCollectionActivity/activity?activityId=${activityId}`,
+                        }
+                    )
+                    break
+                default:
+                    var h = await this.response({
+                            'url': `https://${host}/wxCollectionActivity/activity2/${activityId}?activityId=${activityId}`,
+                        }
+                    )
+                    break
+            }
+            let info = await this.response({
+                    'url': `https://${host}/customer/getSimpleActInfoVo`,
+                    form: `activityId=${activityId}`,
+                    cookie: h.cookie
+                }
+            )
+            var getPin = await this.response({
+                    'url': `https://${host}/customer/getMyPing`,
+                    form: `userId=${venderId}&token=${isvObfuscator.token}&fromType=APP`,
+                    cookie: info.cookie
+                }
+            )
+        }
+        if (!this.haskey(getPin, 'content.data.secretPin')) {
             console.log(`可能是黑号或者黑ip,停止运行`)
             return
         }
+        var secretPin = getPin.content.data.secretPin
+        console.log('secretPin', secretPin)
         switch (host) {
             case "cjhy-isv.isvjcloud.com":
-                var secretPin = escape(encodeURIComponent(getPin.content.data.secretPin))
+                secretPin = escape(encodeURIComponent(secretPin))
                 break
             default:
-                var secretPin = encodeURIComponent(getPin.content.data.secretPin)
+                secretPin = encodeURIComponent(secretPin)
                 break
         }
-        console.log('secretPin', secretPin)
         if (['drawActivity'].includes(type)) {
-            var activityContent = await this.response({
-                    'url': `https://${host}/wxDrawActivity/activityContent`,
-                    'form': `pin=${secretPin}&activityId=${activityId}`,
-                    cookie: `${getPin.cookie}`
-                }
-            )
+            var url = `https://${host}/wxDrawActivity/activityContent`
+        }
+        else if (['wxDraw'].includes(type)) {
+            var url = `https://${host}/wxPointDrawActivity/activityContent`
         }
         else if (['addCart'].includes(type)) {
-            var activityContent = await this.response({
-                    'url': `https://${host}/wxCollectionActivity/activityContent`,
-                    'form': `pin=${secretPin}&activityId=${activityId}`,
-                    cookie: `${getPin.cookie}`
-                }
-            )
+            var url = `https://${host}/wxCollectionActivity/activityContent`
         }
+        else {
+            var url = `https://${host}/wxCollectionActivity/activityContent`
+        }
+        var activityContent = await this.response({
+                url,
+                'form': `pin=${secretPin}&activityId=${activityId}`,
+                cookie: `${getPin.cookie};`
+            }
+        )
         if (!this.haskey(activityContent, 'content.result')) {
             console.log("活动可能失效或者不在支持的范围内,跳出运行")
             return
@@ -157,30 +217,7 @@ class Main extends Template {
         if (skuList.length) {
             console.log(`加购列表: ${this.dumps(skuList)}`)
         }
-        if (['drawActivity'].includes(type)) {
-            while (1) {
-                let draw = await this.curl({
-                        'url': `https://${host}/wxDrawActivity/start`,
-                        'form': `pin=${secretPin}&activityId=${activityId}`,
-                        cookie: `${getPin.cookie}`
-                    }
-                )
-                if (this.haskey(draw, 'data.drawOk')) {
-                    gifts.push(draw.data.drawInfo.name)
-                    console.log(`获得奖品: ${draw.data.drawInfo.name}`)
-                }
-                else {
-                    console.log(draw)
-                }
-                if (!this.haskey(draw, 'count')) {
-                    break
-                }
-            }
-            if (gifts.length) {
-                this.notices(gifts.join("\n"), p.user)
-            }
-        }
-        else if (['addCart'].includes(type)) {
+        if (['addCart'].includes(type)) {
             switch (host) {
                 case "cjhy-isv.isvjcloud.com":
                     cookie = `${getPin.cookie}`
@@ -192,11 +229,10 @@ class Main extends Template {
                             }
                         )
                         console.log(`加购: ${k}`)
-                        console.log(addOne)
                         if (this.haskey(addOne, 'data.hasAddCartSize') == need) {
                             break
                         }
-                        var cookie = `${addOne.cookie};AUTH_C_USER=${getPin.content.data.secretPin};`
+                        var cookie = `${addOne.cookie};AUTH_C_USER=${secretPin};`
                     }
                     break
                 default:
@@ -209,24 +245,68 @@ class Main extends Template {
                         )
                         await this.wait(1000)
                     }
-                    var cookie = `${add.cookie};AUTH_C_USER=${getPin.content.data.secretPin};`
+                    var cookie = `${add.cookie};AUTH_C_USER=${secretPin};`
                     break
             }
             console.log("加购有延迟,等待3秒...")
             await this.wait(3000)
-            let getPrize = await this.curl({
-                    'url': `https://${host}/wxCollectionActivity/getPrize`,
-                    form: `activityId=${activityId}&pin=${secretPin}`,
-                    cookie
+            while (1) {
+                let getPrize = await this.curl({
+                        'url': `https://${host}/wxCollectionActivity/getPrize`,
+                        form: `activityId=${activityId}&pin=${secretPin}`,
+                        cookie
+                    }
+                )
+                if (this.haskey(getPrize, 'data.drawOk')) {
+                    console.log(`获得: ${getPrize.data.name}`)
+                    gifts.push(getPrize.data.name)
                 }
-            )
-            if (this.haskey(getPrize, 'data.drawOk')) {
-                console.log(`获得: ${getPrize.data.name}`)
-                this.notices(`获得: ${getPrize.data.name}`, p.user)
+                else {
+                    console.log(getPrize.errorMessage);
+                }
+                if (!this.haskey(getPrize, 'data.canDrawTimes')) {
+                    break
+                }
             }
-            else {
-                console.log(getPrize.errorMessage);
+        }
+        else if (['drawActivity'].includes(type)) {
+            while (1) {
+                let draw = await this.curl({
+                        'url': `https://${host}/wxDrawActivity/start`,
+                        'form': `pin=${secretPin}&activityId=${activityId}`,
+                        cookie: `${getPin.cookie}`
+                    }
+                )
+                console.log(draw)
+                if (this.haskey(draw, 'data.drawOk')) {
+                    gifts.push(draw.data.drawInfo.name)
+                    console.log(`获得奖品: ${draw.data.drawInfo.name}`)
+                }
+                if (!this.haskey(draw, 'data.canDrawTimes')) {
+                    break
+                }
             }
+        }
+        else if (['wxDraw'].includes(type)) {
+            while (1) {
+                let draw = await this.curl({
+                        'url': `https://${host}/wxPointDrawActivity/start`,
+                        'form': `pin=${secretPin}&activityId=${activityId}`,
+                        cookie: `${getPin.cookie}`
+                    }
+                )
+                console.log(draw)
+                if (this.haskey(draw, 'data.drawOk')) {
+                    gifts.push(draw.data.drawInfo.name)
+                    console.log(`获得奖品: ${draw.data.drawInfo.name}`)
+                }
+                if (!this.haskey(draw, 'data.canDrawTimes')) {
+                    break
+                }
+            }
+        }
+        if (gifts.length) {
+            this.notices(gifts.join("\n"), p.user)
         }
         await this.curl({
             'url': 'https://api.m.jd.com/client.action?g_ty=ls&g_tk=518274330',
