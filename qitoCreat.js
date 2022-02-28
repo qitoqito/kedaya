@@ -5,14 +5,14 @@ let command = process.env.QITOQITO_PLATFORM
 let sync = process.env.QITOQITO_SYNC
 let disable = process.env.QITOQITO_DISABLE
 let label = process.env.QITOQITO_LABEL || 'kedaya_'
-if (!command) {
-    console.log(`
+console.log(`
 请先设置环境变量
 QITOQITO_PLATFORM=按照所使用面板正确填写 qinglong|jtask|jd 其中一个 [青龙面板:qinglong, v3系列:jtask, 衍生面板:jd]
 QITOQITO_SYNC=1 当有此变量时,面板脚本定时与仓库有效脚本定时同步
 QITOQITO_DISABLE=1 当有此变量时,部分活动失效时,面板脚本定时随仓库同步禁用
 QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的入口文件
         `)
+if (!command) {
     return
 }!(async () => {
     let content = `
@@ -138,16 +138,16 @@ QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的�
                                                             msg.push(`🐼 禁用成功: ${filename}`)
                                                             console.log(`🐼 禁用成功: ${filename} 已经成功禁用`)
                                                         } else {
-                                                            console.log(`🙊 禁用失败: ${filename} 禁用脚本失败,如需与仓库同步禁用,请设置 QITOQITO_DISABLE=1`)
+                                                            console.log(`🙊 禁用失败: ${filename} 禁用脚本失败`)
                                                         }
                                                         break
                                                     }
                                                 }
-                                            } catch (eee) {
-                                                console.log(`🐹 跳过操作: ${filename} 操作脚本失败,请手动运行该脚本`)
-                                            }
+                                            } catch (eee) {}
                                         }
-                                    } else {}
+                                    } else {
+                                        console.log(`🐹 跳过操作: ${filename} 操作脚本失败,请手动运行该脚本`)
+                                    }
                                 } else {
                                     for (let z of cron.data) {
                                         try {
@@ -167,7 +167,7 @@ QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的�
                                                         msg.push(`🐽 开启成功: ${filename}`)
                                                         console.log(`🐽 开启成功: ${filename} 启用脚本成功`)
                                                     } else {
-                                                        console.log(`🐽 开启失败: ${filename} 启用脚本失败,如需与仓库同步定时,请设置 QITOQITO_SYNC=1`)
+                                                        console.log(`🐽 开启失败: ${filename} 启用脚本失败`)
                                                     }
                                                 }
                                                 break
@@ -251,7 +251,7 @@ QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的�
                                     console.log(`🐽 开启成功: ${i} 启用脚本成功`)
                                 } else {
                                     spl[j] = spl[j]
-                                    console.log(`🐽 开启失败: ${i} 启用脚本失败,如需与仓库同步定时,请设置 QITOQITO_SYNC=1`)
+                                    console.log(`🐽 开启失败: ${i} 启用脚本失败`)
                                 }
                             }
                         }
@@ -281,16 +281,16 @@ QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的�
                                     msg.push(`🐼 禁用成功: ${i}`)
                                     console.log(`🐼 禁用成功: ${i} 已经成功禁用`)
                                 } else {
-                                    console.log(`🙊 禁用失败: ${i} 禁用脚本失败,如需与仓库同步禁用,请设置 QITOQITO_DISABLE=1`)
+                                    console.log(`🙊 禁用失败: ${i} 禁用脚本失败`)
                                 }
                             }
                         }
                     }
+                    if (!crontab.includes(i)) {
+                        console.log(`🐻 导入跳过: ${i} 定时没有开启,如需运行请手动添加`)
+                    }
                 } else {
                     console.log(`🐹 跳过操作: ${filename} 操作脚本失败,请手动运行该脚本`)
-                }
-                if (!crontab.includes(i)) {
-                    console.log(`🐻 导入跳过: ${i} 定时没有开启,如需运行请手动添加`)
                 }
             }
         }
