@@ -7,9 +7,13 @@ let disable = process.env.QITOQITO_DISABLE
 let label = process.env.QITOQITO_LABEL || 'kedaya_'
 console.log(`
 请先设置环境变量
+
 QITOQITO_PLATFORM=按照所使用面板正确填写 qinglong|jtask|jd 其中一个 [青龙面板:qinglong, v3系列:jtask, 衍生面板:jd]
+
 QITOQITO_SYNC=1 当有此变量时,面板脚本定时与仓库有效脚本定时同步
+
 QITOQITO_DISABLE=1 当有此变量时,部分活动失效时,面板脚本定时随仓库同步禁用
+
 QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的入口文件
         `)
 if (!command) {
@@ -199,7 +203,7 @@ if (!command) {
                                         })
                                     }
                                 } else {
-                                    console.log(`🐻 导入跳过: ${filename} 定时没有开启,如需运行请手动添加`)
+                                    console.log(`🐻 导入跳过: ${filename} 没有定时,如需运行请手动添加`)
                                 }
                             }
                         } catch (ee) {
@@ -287,7 +291,7 @@ if (!command) {
                         }
                     }
                     if (!crontab.includes(i)) {
-                        console.log(`🐻 导入跳过: ${i} 定时没有开启,如需运行请手动添加`)
+                        console.log(`🐻 导入跳过: ${i} 没有定时,如需运行请手动添加`)
                     }
                 } else {
                     console.log(`🐹 跳过操作: ${filename} 操作脚本失败,请手动运行该脚本`)
