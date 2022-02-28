@@ -323,15 +323,15 @@ class Main extends Template {
                     cookie: ad.cookie
                 }
             )
-            console.log(ac.content)
             let draw = await this.curl({
                     'url': `https://${host}/wxShopGift/draw`,
                     'form': `activityId=${activityId}&buyerPin=${encodeURIComponent(getPin.content.data.secretPin)}&hasFollow=false&accessType=app`,
                     cookie: ac.cookie
                 }
             )
+            console.log(draw)
             if (draw.result) {
-                console.log(draw)
+                console.log(ac.content)
                 let g = {
                     'jd': '京豆',
                     'jf': '积分'
