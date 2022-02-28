@@ -8,7 +8,7 @@ class Main extends Template {
         this.task = 'active'
         this.verify = 1
         this.readme = `filename_custom="url1|host=id|id"`
-
+        this.manual=1
     }
 
     async prepare() {

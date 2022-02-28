@@ -9,8 +9,8 @@ if (!command) {
     console.log(`
 请先设置环境变量
 QITOQITO_PLATFORM=按照所使用面板正确填写 qinglong|jtask|jd 其中一个 [青龙面板:qinglong, v3系列:jtask, 衍生面板:jd]
-QITOQITO_SYNC=1 当有此变量时,面板脚本定时会与项目定时同步,如需自行修改,请勿添加该字段
-QITOQITO_DISABLE=1 当有此变量时,如遇活动失效,面板脚本会根据项目自动禁用
+QITOQITO_SYNC=1 当有此变量时,面板脚本定时与仓库有效脚本定时同步
+QITOQITO_DISABLE=1 当有此变量时,部分活动失效时,面板脚本定时随仓库同步禁用
 QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的入口文件
         `)
     return
@@ -117,35 +117,37 @@ QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的�
                             let kedaya = new main()
                             if (crontab.includes(`task ${filename}`)) {
                                 if (!kedaya.cron) {
-                                    for (let z of cron.data) {
-                                        try {
-                                            if (z.name.includes(label) && z.command.includes(`task ${filename}`)) {
-                                                if (z.isDisabled) {
-                                                    console.log(`🙊 禁用失败: ${filename} 已经是禁用的`)
-                                                } else {
-                                                    if (disable) {
-                                                        let disable = await curl({
-                                                            'url': `${url}/api/crons/disable?t=1639371766925`,
-                                                            json: [z._id || z.id],
-                                                            authorization,
-                                                            'headers': {
-                                                                'Referer': `${url}/api/crons?searchValue=&t=1638982538292`,
-                                                                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:94.0) Gecko/20100101 Firefox/94.0'
-                                                            },
-                                                            method: 'put'
-                                                        })
-                                                        msg.push(`🐼 禁用成功: ${filename}`)
-                                                        console.log(`🐼 禁用成功: ${filename} 已经成功禁用`)
+                                    if (!kedaya.manual) {
+                                        for (let z of cron.data) {
+                                            try {
+                                                if (z.name.includes(label) && z.command.includes(`task ${filename}`)) {
+                                                    if (z.isDisabled) {
+                                                        console.log(`🙊 禁用失败: ${filename} 已经是禁用的`)
                                                     } else {
-                                                        console.log(`🙊 禁用失败: ${filename} 禁用脚本失败,请自行禁用,如需同步,请设置 QITOQITO_DISABLE`)
+                                                        if (disable) {
+                                                            let disable = await curl({
+                                                                'url': `${url}/api/crons/disable?t=1639371766925`,
+                                                                json: [z._id || z.id],
+                                                                authorization,
+                                                                'headers': {
+                                                                    'Referer': `${url}/api/crons?searchValue=&t=1638982538292`,
+                                                                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:94.0) Gecko/20100101 Firefox/94.0'
+                                                                },
+                                                                method: 'put'
+                                                            })
+                                                            msg.push(`🐼 禁用成功: ${filename}`)
+                                                            console.log(`🐼 禁用成功: ${filename} 已经成功禁用`)
+                                                        } else {
+                                                            console.log(`🙊 禁用失败: ${filename} 禁用脚本失败,如需与仓库同步禁用,请设置 QITOQITO_DISABLE=1`)
+                                                        }
+                                                        break
                                                     }
-                                                    break
                                                 }
+                                            } catch (eee) {
+                                                console.log(`🐹 跳过操作: ${filename} 操作脚本失败,请手动运行该脚本`)
                                             }
-                                        } catch (eee) {
-                                            console.log(eee)
                                         }
-                                    }
+                                    } else {}
                                 } else {
                                     for (let z of cron.data) {
                                         try {
@@ -165,7 +167,7 @@ QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的�
                                                         msg.push(`🐽 开启成功: ${filename}`)
                                                         console.log(`🐽 开启成功: ${filename} 启用脚本成功`)
                                                     } else {
-                                                        console.log(`🐽 开启失败: ${filename} 启用脚本失败,如需同步,请设置 QITOQITO_SYNC`)
+                                                        console.log(`🐽 开启失败: ${filename} 启用脚本失败,如需与仓库同步定时,请设置 QITOQITO_SYNC=1`)
                                                     }
                                                 }
                                                 break
@@ -228,7 +230,8 @@ QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的�
                     }
                     cronDict[script] = {
                         cron: kedaya.cron,
-                        title: kedaya.title
+                        title: kedaya.title,
+                        manual: kedaya.manual
                     }
                 } catch (e) {
                     console.log(e)
@@ -248,7 +251,7 @@ QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的�
                                     console.log(`🐽 开启成功: ${i} 启用脚本成功`)
                                 } else {
                                     spl[j] = spl[j]
-                                    console.log(`🐽 开启失败: ${i} 启用脚本失败,如需同步,请设置 QITOQITO_SYNC`)
+                                    console.log(`🐽 开启失败: ${i} 启用脚本失败,如需与仓库同步定时,请设置 QITOQITO_SYNC=1`)
                                 }
                             }
                         }
@@ -266,21 +269,25 @@ QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的�
                     }
                 }
             } else {
-                for (let j in spl) {
-                    if (match(new RegExp(`(${command}\\s*${i})\\s*#${label}`), spl[j])) {
-                        // spl[j] = ''
-                        if (spl[j][0] == '#') {
-                            console.log(`🙊 禁用失败: ${i} 已经是禁用的`)
-                        } else {
-                            if (disable) {
-                                spl[j] = `#${spl[j]}`
-                                msg.push(`🐼 禁用成功: ${i}`)
-                                console.log(`🐼 禁用成功: ${i} 已经成功禁用`)
+                if (!yaya.manual) {
+                    for (let j in spl) {
+                        if (match(new RegExp(`(${command}\\s*${i})\\s*#${label}`), spl[j])) {
+                            // spl[j] = ''
+                            if (spl[j][0] == '#') {
+                                console.log(`🙊 禁用失败: ${i} 已经是禁用的`)
                             } else {
-                                console.log(`🙊 禁用失败: ${i} 禁用脚本失败,请自行禁用,如需同步,请设置 QITOQITO_DISABLE`)
+                                if (disable) {
+                                    spl[j] = `#${spl[j]}`
+                                    msg.push(`🐼 禁用成功: ${i}`)
+                                    console.log(`🐼 禁用成功: ${i} 已经成功禁用`)
+                                } else {
+                                    console.log(`🙊 禁用失败: ${i} 禁用脚本失败,如需与仓库同步禁用,请设置 QITOQITO_DISABLE=1`)
+                                }
                             }
                         }
                     }
+                } else {
+                    console.log(`🐹 跳过操作: ${filename} 操作脚本失败,请手动运行该脚本`)
                 }
                 if (!crontab.includes(i)) {
                     console.log(`🐻 导入跳过: ${i} 定时没有开启,如需运行请手动添加`)
