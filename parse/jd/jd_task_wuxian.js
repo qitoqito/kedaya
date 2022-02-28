@@ -7,9 +7,8 @@ class Main extends Template {
         this.task = 'local'
         this.verify = 1
         this.manual = 1
-        this.readme = `暂时只支持加购和转盘\nfilename_custom="url1|host=id|id"`
+        this.readme = `filename_custom="url1|host=id|id"`
         this.import = ['fs']
-        // this.work = 1
     }
 
     async prepare() {
@@ -88,6 +87,7 @@ class Main extends Template {
                             data.type = 'drawActivity'
                             break
                         case 24:
+                        case 73:
                             data.type = 'shopGift'
                             break
                         case 46:
@@ -185,17 +185,22 @@ class Main extends Template {
         else if (['addCart'].includes(type)) {
             var url = `https://${host}/wxCollectionActivity/activityContent`
         }
+        else if (['shopGift'].includes(type)) {
+            var url = `https://${host}/wxShopGift/activityContent`
+        }
         else {
             var url = `https://${host}/wxCollectionActivity/activityContent`
         }
         var activityContent = await this.response({
                 url,
-                'form': `pin=${secretPin}&activityId=${activityId}`,
+                'form': `pin=${secretPin}&activityId=${activityId}&buyerPin=${secretPin}`,
                 cookie: `${getPin.cookie};`
             }
         )
+        // console.log(activityContent)
         if (!this.haskey(activityContent, 'content.result')) {
-            console.log("活动可能失效或者不在支持的范围内,跳出运行")
+            console.log(activityContent.content.errorMessage)
+            // console.log("活动可能失效或者不在支持的范围内,跳出运行")
             return
         }
         let need = this.haskey(activityContent, 'content.data.needCollectionSize')
@@ -208,7 +213,7 @@ class Main extends Template {
         )
         let wxFollow = await this.response({
                 'url': `https://${host}/wxActionCommon/followShop`,
-                'form': `userId=${venderId}&buyerNick=${secretPin}&activityId=${activityId}&activityType=6`,
+                'form': `userId=${venderId}&buyerNick=${secretPin}&activityId=${activityId}&activityType=${p.inviter.activityType}`,
                 cookie: `${getPin.cookie}`
             }
         )
@@ -302,6 +307,39 @@ class Main extends Template {
                 }
                 if (!this.haskey(draw, 'data.canDrawTimes')) {
                     break
+                }
+            }
+        }
+        else if (['shopGift'].includes(type)) {
+            let ad = await this.response({
+                    'url': `https://${host}/common/accessLogWithAD`,
+                    'form': `venderId=${venderId}&code=24&pin=${encodeURIComponent(getPin.content.data.secretPin)}&activityId=${activityId}&pageUrl=https%3A%2F%2Flzkj-isv.isvjcloud.com%2FwxShopGift%2Factivity%3FactivityId%3D${activityId}`,
+                    cookie: getPin.cookie
+                }
+            )
+            let ac = await this.response({
+                    'url': `https://${host}/wxShopGift/activityContent`,
+                    'form': `activityId=${activityId}&buyerPin=${encodeURIComponent(getPin.content.data.secretPin)}`,
+                    cookie: ad.cookie
+                }
+            )
+            console.log(ac.content)
+            let draw = await this.curl({
+                    'url': `https://${host}/wxShopGift/draw`,
+                    'form': `activityId=${activityId}&buyerPin=${encodeURIComponent(getPin.content.data.secretPin)}&hasFollow=false&accessType=app`,
+                    cookie: ac.cookie
+                }
+            )
+            if (draw.result) {
+                console.log(draw)
+                let g = {
+                    'jd': '京豆',
+                    'jf': '积分'
+                }
+                for (let i of this.haskey(ac.content, 'data.list')) {
+                    gifts.push(
+                        `${i.takeNum}${g[i.type]}`
+                    )
                 }
             }
         }
