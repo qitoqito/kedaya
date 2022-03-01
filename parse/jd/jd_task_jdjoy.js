@@ -5,16 +5,18 @@ class Main extends Template {
         super()
         this.title = "京东互动赢京豆"
         // this.cron = "33 0,22 * * *"
-        this.task = 'local'
+        this.task = 'active'
         this.help = 'main'
         this.thread = 6
+        this.verify = 1
+        this.manual = 1
     }
 
     async prepare() {
-        let array = ['c3eb5b947ac44319b74f96b0ad76c534']
-        this.code = this.custom ? this.getValue('custom') : array
+        this.assert(this.custom, '请先添加环境变量')
+        let custom = this.getValue('custom')
         let type = 'a'
-        for (let activityId of this.code) {
+        for (let activityId of custom) {
             let pin = []
             for (let i of this.cookies['help']) {
                 let s = await this.curl({
@@ -118,7 +120,7 @@ class Main extends Template {
                     }
                 )
             }
-            if (b?.data?.remainPoints) {
+            if (this.haskey(b, 'data.remainPoints')) {
                 let g = []
                 for (let i = 0; i<Math.floor(b.data.remainPoints / 100); i++) {
                     let c = await this.curl({
@@ -136,7 +138,7 @@ class Main extends Template {
                     }
                 }
                 if (g.length) {
-                    this.notices(`抽奖获得:\n${g.join('\n')}`, p.user)
+                    this.notices(g.join('\n'), p.user)
                 }
             }
         }
@@ -214,7 +216,7 @@ class Main extends Template {
                     console.log(p.user, r || '什么也没有')
                 }
                 if (gift.length) {
-                    this.notices(`抽奖获得: ${gift.join("\n")}`, p.user)
+                    this.notices(gift.join("\n"), p.user)
                 }
             }
         }
