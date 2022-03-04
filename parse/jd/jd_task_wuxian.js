@@ -9,7 +9,6 @@ class Main extends Template {
         this.manual = 1
         this.readme = `filename_custom="url1|host=id|id"`
         this.import = ['fs']
-        // this.work = 2
     }
 
     async prepare() {
@@ -107,6 +106,9 @@ class Main extends Template {
                         case 7:
                             data.type = 'wxGameActivity'
                             break
+                        case 65:
+                            data.type = 'wxBuildActivity'
+                            break
                     }
                     this.shareCode.push(data)
                     break
@@ -200,6 +202,7 @@ class Main extends Template {
                 cookie: `${getPin.cookie};`
             }
         )
+        // console.log(activityContent.content.data)
         if (!this.haskey(activityContent, 'content.result')) {
             console.log(activityContent.content.errorMessage)
             // console.log("活动可能失效或者不在支持的范围内,跳出运行")
@@ -236,8 +239,12 @@ class Main extends Template {
                             }
                         )
                         console.log(`加购: ${k}`)
-                        if (this.haskey(addOne, 'data.hasAddCartSize') == need) {
+                        if (this.haskey(addOne, 'content.data.hasAddCartSize') == need) {
                             break
+                        }
+                        if (this.haskey(addOne, 'content.errorMessage').includes('异常')) {
+                            console.log(addOne.content.errorMessage)
+                            return
                         }
                         var cookie = `${addOne.cookie};AUTH_C_USER=${secretPin};`
                     }
@@ -260,13 +267,22 @@ class Main extends Template {
                 await this.wait(3000)
             }
             while (true) {
-                let getPrize = await this.curl({
-                        'url': `https://${host}/wxCollectionActivity/getPrize`,
-                        form: `activityId=${activityId}&pin=${secretPin}`,
-                        cookie
+                for (let nn = 0; nn<3; nn++) {
+                    var getPrize = await this.curl({
+                            'url': `https://${host}/wxCollectionActivity/getPrize`,
+                            form: `activityId=${activityId}&pin=${secretPin}`,
+                            cookie
+                        }
+                    )
+                    console.log(getPrize)
+                    if (getPrize.errorMessage && getPrize.includes("插肩")) {
+                        console.log('奖品与您擦肩而过了哟,重新获取')
+                        await this.wait(1000)
                     }
-                )
-                console.log(getPrize)
+                    else {
+                        break
+                    }
+                }
                 if (this.haskey(getPrize, 'data.drawOk')) {
                     console.log(`获得: ${getPrize.data.name}`)
                     gifts.push(getPrize.data.name)
@@ -289,8 +305,8 @@ class Main extends Template {
                 )
                 console.log(draw)
                 if (this.haskey(draw, 'data.drawOk')) {
-                    gifts.push(draw.data.drawInfo.name)
-                    console.log(`获得奖品: ${draw.data.drawInfo.name}`)
+                    gifts.push(draw.data.drawInfo.name, draw.data.drawInfo.priceInfo)
+                    console.log(`获得奖品: ${draw.data.drawInfo.name} ${draw.data.drawInfo.priceInfo}`)
                 }
                 if (!this.haskey(draw, 'data.canDrawTimes')) {
                     break
@@ -342,6 +358,7 @@ class Main extends Template {
                     'jf': '积分'
                 }
                 for (let i of this.haskey(ac.content, 'data.list')) {
+                    console.log(`获得: ${i.takeNum}${g[i.type]}`)
                     gifts.push(
                         `${i.takeNum}${g[i.type]}`
                     )
@@ -380,6 +397,37 @@ class Main extends Template {
                     gifts.push(getPrize.data.name)
                 }
                 if (!this.haskey(getPrize, 'data.canDrawTimes')) {
+                    break
+                }
+            }
+        }
+        else if (['wxBuildActivity'].includes(type)) {
+            while (true) {
+                let content = "很好!"
+                if (this.haskey(activityContent, 'content.data.words')) {
+                    content = this.random(activityContent.content.data.words, 1)[0].content
+                }
+                let c = await this.response({
+                        'url': `https://${host}/wxBuildActivity/currentFloor`,
+                        'form': `activityId=${activityId}`,
+                        cookie: getPin.cookie
+                    }
+                )
+                if (this.haskey(c, 'content.data.currentFloors')) {
+                    console.log(`盖楼楼层: ${c.content.data.currentFloors}`)
+                }
+                let getPrize = await this.curl({
+                        'url': `https://${host}/wxBuildActivity/publish`,
+                        'form': `pin=${secretPin}&activityId=${activityId}&content=${encodeURIComponent(content)}`,
+                        cookie: c.cookie
+                    }
+                )
+                console.log(getPrize)
+                if (this.haskey(getPrize, 'data.drawResult.drawOk')) {
+                    console.log(`获得: ${getPrize.data.drawResult.name}`)
+                    gifts.push(getPrize.data.drawResult.name)
+                }
+                if (!this.haskey(getPrize, 'data.drawResult.canDrawTimes')) {
                     break
                 }
             }
