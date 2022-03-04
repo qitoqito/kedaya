@@ -123,6 +123,13 @@ class Main extends Template {
                                 data.type = 'sign'
                                 break
                         }
+                        let shopInfo = await this.curl({
+                                'url': `https://api.m.jd.com/?functionId=lite_getShopHomeBaseInfo&body={"shopId":"${data.shopId}","venderId":"${data.venderId}","source":"appshop"}&t=1646398923902&appid=jdlite-shop-app&client=H5`,
+                            }
+                        )
+                        if (this.haskey(shopInfo, 'result.shopInfo.shopName')) {
+                            data.shopName = shopInfo.result.shopInfo.shopName
+                        }
                         this.shareCode.push(data)
                         break
                     }
@@ -253,6 +260,7 @@ class Main extends Template {
                     cookie: `${getPin.cookie};`
                 }
             )
+            // console.log(activityContent.content.data)
             if (!this.haskey(activityContent, 'content.result')) {
                 console.log(activityContent.content.errorMessage)
                 return
@@ -480,7 +488,7 @@ class Main extends Template {
             }
         }
         if (gifts.length) {
-            gifts.unshift(`运行ID: ${activityId}`)
+            gifts.unshift(`ID: ${activityId} , 店铺: ${p.inviter.shopName}`)
             this.notices(gifts.join("\n"), p.user)
         }
         await this.curl({
