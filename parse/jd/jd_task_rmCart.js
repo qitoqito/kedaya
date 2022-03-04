@@ -9,7 +9,7 @@ class Main extends Template {
         this.readme = `请谨慎使用该脚本\n建议配合filename_work字段,删除指定账户\n如需删除指定个数商品,请使用filename_count字段`
     }
 
-    async main(p) {
+    async backup(p) {
         let cookie = p.cookie
         let list = []
         let name = []
@@ -65,7 +65,7 @@ class Main extends Template {
         }
     }
 
-    async backup(p) {
+    async main(p) {
         let cookie = p.cookie
         let s = await this.curl({
                 'url': `https://wq.jd.com/deal/mshopcart/rmvCmdy?sceneval=2&g_login_type=1&g_ty=ajax`,
