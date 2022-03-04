@@ -7,7 +7,7 @@ class Main extends Template {
         this.task = 'active'
         this.verify = 1
         this.manual = 1
-        this.readme = `filename_custom="url1|host=id|id"`
+        this.readme = `filename_custom="url|id"\n如果显示The ShareCode is empty...\n就是你IP黑了,暂时无法访问活动\n更换ip或者等服务器解除限制方可运行`
         this.import = ['fs']
     }
 
@@ -35,85 +35,111 @@ class Main extends Template {
                         activityId: i
                     })
                 }
+                else {
+                    s = this.match(/(\w{24})/, i)
+                    this.code.push({
+                        activityId: s
+                    })
+                }
             }
         }
         let array = [
             "lzkj-isv.isvjcloud.com",
             "cjhy-isv.isvjcloud.com",
         ]
+        let shopArray = [
+            'txzj-isv.isvjcloud.com'
+        ]
         for (let i of this.code) {
-            for (let host of array) {
-                let p = await this.response({
-                        'url': `https://${host}/wxCommonInfo/token`,
-                    }
-                )
-                var s = await this.curl({
-                        'url': `https://${host}/customer/getSimpleActInfoVo`,
-                        'form': `activityId=${i.activityId}`,
-                        cookie: p.cookie
-                    }
-                )
-                if (!this.haskey(s, 'data')) {
-                    switch (host) {
-                        case "cjhy-isv.isvjcloud.com":
-                            var h = await this.response({
-                                    'url': `https://${host}/wxCollectionActivity/activity?activityId=${i.activityId}`,
-                                }
-                            )
-                            break
-                        default:
-                            var h = await this.response({
-                                    'url': `https://${host}/wxCollectionActivity/activity2/${i.activityId}?activityId=${i.activityId}`,
-                                }
-                            )
-                            break
-                    }
-                    s = await this.curl({
-                            'url': `https://${host}/customer/getSimpleActInfoVo`,
-                            form: `activityId=${i.activityId}`,
-                            cookie: h.cookie
+            if (i.activityId.length == 32) {
+                for (let host of array) {
+                    let p = await this.response({
+                            'url': `https://${host}/wxCommonInfo/token`,
                         }
                     )
-                }
-                if (this.haskey(s, 'data')) {
-                    let data = s.data
-                    data.host = host
-                    switch (data.activityType) {
-                        case 5:
-                        case 6:
-                            data.type = 'wxCollectionActivity'
-                            break
-                        case 12:
-                        case 13:
-                            data.type = 'wxDrawActivity'
-                            break
-                        case 24:
-                        case 73:
-                            data.type = 'wxShopGift'
-                            break
-                        // case 46:
-                        //     data.type = 'openCard'
-                        //     break
-                        case 26:
-                            data.type = 'wxPointDrawActivity'
-                            break
-                        case 17:
-                            data.type = 'wxShopFollowActivity'
-                            break
-                        // case 2001:
-                        //     data.type='drawCenter'
-                        //     break
-                        case 7:
-                            data.type = 'wxGameActivity'
-                            break
-                        case 65:
-                            data.type = 'wxBuildActivity'
-                            break
+                    var s = await this.curl({
+                            'url': `https://${host}/customer/getSimpleActInfoVo`,
+                            'form': `activityId=${i.activityId}`,
+                            cookie: p.cookie
+                        }
+                    )
+                    if (!this.haskey(s, 'data')) {
+                        switch (host) {
+                            case "cjhy-isv.isvjcloud.com":
+                                var h = await this.response({
+                                        'url': `https://${host}/wxCollectionActivity/activity?activityId=${i.activityId}`,
+                                    }
+                                )
+                                break
+                            default:
+                                var h = await this.response({
+                                        'url': `https://${host}/wxCollectionActivity/activity2/${i.activityId}?activityId=${i.activityId}`,
+                                    }
+                                )
+                                break
+                        }
+                        s = await this.curl({
+                                'url': `https://${host}/customer/getSimpleActInfoVo`,
+                                form: `activityId=${i.activityId}`,
+                                cookie: h.cookie
+                            }
+                        )
                     }
-                    this.shareCode.push(data)
-                    break
+                    if (this.haskey(s, 'data')) {
+                        let data = s.data
+                        data.host = host
+                        switch (data.activityType) {
+                            case 5:
+                            case 6:
+                                data.type = 'wxCollectionActivity'
+                                break
+                            case 12:
+                            case 13:
+                                data.type = 'wxDrawActivity'
+                                break
+                            case 24:
+                            case 73:
+                                data.type = 'wxShopGift'
+                                break
+                            // case 46:
+                            //     data.type = 'openCard'
+                            //     break
+                            case 26:
+                                data.type = 'wxPointDrawActivity'
+                                break
+                            case 17:
+                                data.type = 'wxShopFollowActivity'
+                                break
+                            // case 2001:
+                            //     data.type='drawCenter'
+                            //     break
+                            case 7:
+                                data.type = 'wxGameActivity'
+                                break
+                            case 65:
+                                data.type = 'wxBuildActivity'
+                                break
+                            case 15:
+                                data.type = 'sign'
+                                break
+                        }
+                        this.shareCode.push(data)
+                        break
+                    }
                 }
             }
+            // else if (i.activityId.length == 24) {
+            //     for (let host of shopArray) {
+            //         let s = await this.curl({
+            //                 'url': `https://${host}/collect_shop/get_prize_info`,
+            //                 'form': `pid=${i.activityId}`,
+            //             }
+            //         )
+            //         if (this.haskey(s, 'data.type')) {
+            //             this.shareCode.push(s.data)
+            //         }
+            //     }
+            // }
         }
     }
 
@@ -126,6 +152,7 @@ class Main extends Template {
         let venderId = p.inviter.venderId
         let shopId = p.inviter.shopId
         let gifts = []
+        let skuList = []
         if (venderId) {
             let follow = await this.curl({
                 'url': 'https://api.m.jd.com/client.action?g_ty=ls&g_tk=518274330',
@@ -182,253 +209,273 @@ class Main extends Template {
         }
         var secretPin = getPin.content.data.secretPin
         console.log('secretPin', secretPin)
-        if (type == 'wxCollectionActivity') {
-            switch (host) {
-                case "cjhy-isv.isvjcloud.com":
-                    secretPin = escape(encodeURIComponent(secretPin))
-                    break
-                default:
-                    secretPin = encodeURIComponent(secretPin)
-                    break
-            }
+        // if (['wxCollectionActivity', 'wxPointDrawActivity'].includes(type)) {
+        switch (host) {
+            case "cjhy-isv.isvjcloud.com":
+                secretPin = escape(encodeURIComponent(secretPin))
+                break
+            default:
+                secretPin = encodeURIComponent(secretPin)
+                break
         }
-        else {
-            secretPin = encodeURIComponent(secretPin)
-        }
-        var url = `https://${host}/${type}/activityContent`
-        var activityContent = await this.response({
-                url,
-                'form': `pin=${secretPin}&activityId=${activityId}&buyerPin=${secretPin}`,
-                cookie: `${getPin.cookie};`
-            }
-        )
-        // console.log(activityContent.content.data)
-        if (!this.haskey(activityContent, 'content.result')) {
-            console.log(activityContent.content.errorMessage)
-            // console.log("活动可能失效或者不在支持的范围内,跳出运行")
-            return
-        }
-        let need = this.haskey(activityContent, 'content.data.needCollectionSize')
-        let has = this.haskey(activityContent, 'content.data.hasCollectionSize')
-        let skus = await this.curl({
-                'url': `https://${host}/act/common/findSkus`,
-                'form': `actId=${activityId}&userId=${venderId}&type=6`,
-                cookie: `${getPin.cookie}`
-            }
-        )
-        let wxFollow = await this.response({
-                'url': `https://${host}/wxActionCommon/followShop`,
-                'form': `userId=${venderId}&buyerNick=${secretPin}&activityId=${activityId}&activityType=${p.inviter.activityType}`,
-                cookie: `${getPin.cookie}`
-            }
-        )
-        // console.log(wxFollow)
-        let skuList = this.column(skus.skus, 'skuId').map(d => d.toString())
-        if (skuList.length) {
-            console.log(`加购列表: ${this.dumps(skuList)}`)
-        }
-        if (['wxCollectionActivity'].includes(type)) {
-            switch (host) {
-                case "cjhy-isv.isvjcloud.com":
-                    cookie = `${getPin.cookie}`
-                    for (let k of skuList) {
-                        let addOne = await this.response({
-                                'url': `https://${host}/wxCollectionActivity/addCart`,
-                                'form': `activityId=${activityId}&pin=${secretPin}&productId=${k}`,
-                                cookie
-                            }
-                        )
-                        console.log(`加购: ${k}`)
-                        if (this.haskey(addOne, 'content.data.hasAddCartSize') == need) {
-                            break
-                        }
-                        if (this.haskey(addOne, 'content.errorMessage').includes('异常')) {
-                            console.log(addOne.content.errorMessage)
-                            return
-                        }
-                        var cookie = `${addOne.cookie};AUTH_C_USER=${secretPin};`
-                    }
-                    break
-                default:
-                    for (let z = 0; z<3; z++) {
-                        var add = await this.response({
-                                'url': `https://${host}/wxCollectionActivity/oneKeyAddCart`,
-                                form: `activityId=${activityId}&pin=${secretPin}&productIds=${this.dumps(this.column(skus.skus, 'skuId'))}`,
-                                cookie: `${getPin.cookie}`
-                            }
-                        )
-                        await this.wait(1000)
-                    }
-                    var cookie = `${add.cookie};AUTH_C_USER=${secretPin};`
-                    break
-            }
-            if (skuList.length) {
-                console.log("加购有延迟,等待3秒...")
-                await this.wait(3000)
-            }
-            while (true) {
-                for (let nn = 0; nn<3; nn++) {
-                    var getPrize = await this.curl({
-                            'url': `https://${host}/wxCollectionActivity/getPrize`,
-                            form: `activityId=${activityId}&pin=${secretPin}`,
-                            cookie
-                        }
-                    )
-                    console.log(getPrize)
-                    if (getPrize.errorMessage && getPrize.errorMessage.includes("插肩")) {
-                        console.log('奖品与您擦肩而过了哟,重新获取')
-                        await this.wait(1000)
-                    }
-                    else {
-                        break
-                    }
-                }
-                if (this.haskey(getPrize, 'data.drawOk')) {
-                    console.log(`获得: ${getPrize.data.name}`)
-                    gifts.push(getPrize.data.name)
-                }
-                // else {
-                //     console.log(getPrize.errorMessage);
-                // }
-                if (!this.haskey(getPrize, 'data.canDrawTimes')) {
-                    break
-                }
-            }
-        }
-        else if (['wxDrawActivity', 'wxPointDrawActivity'].includes(type)) {
-            while (true) {
-                let draw = await this.curl({
-                        'url': `https://${host}/${type}/start`,
-                        'form': `pin=${secretPin}&activityId=${activityId}`,
-                        cookie: `${getPin.cookie}`
-                    }
-                )
-                console.log(draw)
-                if (this.haskey(draw, 'data.drawOk')) {
-                    gifts.push(draw.data.drawInfo.name, draw.data.drawInfo.priceInfo)
-                    console.log(`获得奖品: ${draw.data.drawInfo.name} ${draw.data.drawInfo.priceInfo}`)
-                }
-                if (!this.haskey(draw, 'data.canDrawTimes')) {
-                    break
-                }
-            }
-        }
-            // else if (['wxPointDrawActivity'].includes(type)) {
-            //     while (1) {
-            //         let draw = await this.curl({
-            //                 'url': `https://${host}/wxPointDrawActivity/start`,
-            //                 'form': `pin=${secretPin}&activityId=${activityId}`,
-            //                 cookie: `${getPin.cookie}`
-            //             }
-            //         )
-            //         console.log(draw)
-            //         if (this.haskey(draw, 'data.drawOk')) {
-            //             gifts.push(draw.data.drawInfo.name)
-            //             console.log(`获得奖品: ${draw.data.drawInfo.name}`)
-            //         }
-            //         if (!this.haskey(draw, 'data.canDrawTimes')) {
-            //             break
-            //         }
-            //     }
         // }
-        else if (['wxShopGift'].includes(type)) {
-            let ad = await this.response({
-                    'url': `https://${host}/common/accessLogWithAD`,
-                    'form': `venderId=${venderId}&code=24&pin=${encodeURIComponent(getPin.content.data.secretPin)}&activityId=${activityId}&pageUrl=https%3A%2F%2Flzkj-isv.isvjcloud.com%2FwxShopGift%2Factivity%3FactivityId%3D${activityId}`,
+        // else {
+        //     secretPin = encodeURIComponent(secretPin)
+        // }
+        if (['sign'].includes(type)) {
+            var activityContent = await this.response({
+                    'url': `https://${host}/sign/wx/getActivity`,
+                    'form': `actId=${activityId}&venderId=${venderId}`,
+                    cookie: `${getPin.cookie};`
+                }
+            )
+            if (!this.haskey(activityContent, 'content.act')) {
+                console.log(activityContent.content.errorMessage || '活动可能失效或者不在支持的范围内,跳出运行')
+                return
+            }
+            let signUp = await this.curl({
+                    'url': `https://${host}/sign/wx/signUp`,
+                    'form': `venderId=${venderId}&pin=${secretPin}&actId=${activityId}`,
                     cookie: getPin.cookie
                 }
             )
-            let ac = await this.response({
-                    'url': `https://${host}/${type}/activityContent`,
-                    'form': `activityId=${activityId}&buyerPin=${encodeURIComponent(getPin.content.data.secretPin)}`,
-                    cookie: ad.cookie
+            console.log(signUp)
+            if (this.haskey(signUp, 'gift.giftName')) {
+                console.log(`获得: ${signUp.gift.giftName}`)
+                gifts.push(signUp.gift.giftName)
+            }
+        }
+        else {
+            var url = `https://${host}/${type}/activityContent`
+            var activityContent = await this.response({
+                    url,
+                    'form': `pin=${secretPin}&activityId=${activityId}&buyerPin=${secretPin}`,
+                    cookie: `${getPin.cookie};`
                 }
             )
-            let draw = await this.curl({
-                    'url': `https://${host}/wxShopGift/draw`,
-                    'form': `activityId=${activityId}&buyerPin=${encodeURIComponent(getPin.content.data.secretPin)}&hasFollow=false&accessType=app`,
-                    cookie: ac.cookie
+            if (!this.haskey(activityContent, 'content.result')) {
+                console.log(activityContent.content.errorMessage)
+                return
+            }
+            let need = this.haskey(activityContent, 'content.data.needCollectionSize')
+            let has = this.haskey(activityContent, 'content.data.hasCollectionSize')
+            let skus = await this.curl({
+                    'url': `https://${host}/act/common/findSkus`,
+                    'form': `actId=${activityId}&userId=${venderId}&type=${p.inviter.activityType}`,
+                    cookie: `${getPin.cookie}`
                 }
             )
-            console.log(draw)
-            if (draw.result) {
-                console.log(this.haskey(ac.content, 'data.list') || ac.content)
-                let g = {
-                    'jd': '京豆',
-                    'jf': '积分'
+            let wxFollow = await this.response({
+                    'url': `https://${host}/wxActionCommon/followShop`,
+                    'form': `userId=${venderId}&buyerNick=${secretPin}&activityId=${activityId}&activityType=${p.inviter.activityType}`,
+                    cookie: `${getPin.cookie}`
                 }
-                for (let i of this.haskey(ac.content, 'data.list')) {
-                    console.log(`获得: ${i.takeNum}${g[i.type]}`)
-                    gifts.push(
-                        `${i.takeNum}${g[i.type]}`
+            )
+            skuList = this.column(skus.skus, 'skuId').map(d => d.toString())
+            if (skuList.length) {
+                console.log(`加购列表: ${this.dumps(skuList)}`)
+            }
+            if (['wxCollectionActivity'].includes(type)) {
+                switch (host) {
+                    case "cjhy-isv.isvjcloud.com":
+                        cookie = `${getPin.cookie}`
+                        for (let k of skuList) {
+                            let addOne = await this.response({
+                                    'url': `https://${host}/wxCollectionActivity/addCart`,
+                                    'form': `activityId=${activityId}&pin=${secretPin}&productId=${k}`,
+                                    cookie
+                                }
+                            )
+                            console.log(`加购: ${k}`)
+                            if (this.haskey(addOne, 'content.data.hasAddCartSize') == need) {
+                                break
+                            }
+                            if (this.haskey(addOne, 'content.errorMessage').includes('异常')) {
+                                console.log(addOne.content.errorMessage)
+                                return
+                            }
+                            var cookie = `${addOne.cookie};AUTH_C_USER=${secretPin};`
+                        }
+                        break
+                    default:
+                        for (let z = 0; z<3; z++) {
+                            var add = await this.response({
+                                    'url': `https://${host}/wxCollectionActivity/oneKeyAddCart`,
+                                    form: `activityId=${activityId}&pin=${secretPin}&productIds=${this.dumps(this.column(skus.skus, 'skuId'))}`,
+                                    cookie: `${getPin.cookie}`
+                                }
+                            )
+                            await this.wait(1000)
+                        }
+                        var cookie = `${add.cookie};AUTH_C_USER=${secretPin};`
+                        break
+                }
+                if (skuList.length) {
+                    console.log("加购有延迟,等待3秒...")
+                    await this.wait(3000)
+                }
+                while (true) {
+                    for (let nn = 0; nn<3; nn++) {
+                        var getPrize = await this.curl({
+                                'url': `https://${host}/wxCollectionActivity/getPrize`,
+                                form: `activityId=${activityId}&pin=${secretPin}`,
+                                cookie
+                            }
+                        )
+                        console.log(getPrize)
+                        if (getPrize.errorMessage && getPrize.errorMessage.includes("插肩")) {
+                            console.log('奖品与您擦肩而过了哟,重新获取')
+                            await this.wait(1000)
+                        }
+                        else {
+                            break
+                        }
+                    }
+                    if (this.haskey(getPrize, 'data.drawOk')) {
+                        console.log(`获得: ${getPrize.data.name}`)
+                        gifts.push(getPrize.data.name)
+                    }
+                    if (!this.haskey(getPrize, 'data.canDrawTimes')) {
+                        break
+                    }
+                }
+            }
+            else if (['wxDrawActivity', 'wxPointDrawActivity'].includes(type)) {
+                while (true) {
+                    let draw = await this.curl({
+                            'url': `https://${host}/${type}/start`,
+                            'form': `pin=${secretPin}&activityId=${activityId}`,
+                            cookie: `${getPin.cookie}`
+                        }
                     )
+                    console.log(draw)
+                    if (this.haskey(draw, 'data.drawOk')) {
+                        gifts.push(draw.data.drawInfo.name, draw.data.drawInfo.priceInfo)
+                        console.log(`获得奖品: ${draw.data.drawInfo.name} ${draw.data.drawInfo.priceInfo}`)
+                    }
+                    if (!this.haskey(draw, 'data.canDrawTimes')) {
+                        break
+                    }
                 }
             }
-        }
-        else if (['wxShopFollowActivity'].includes(type)) {
-            while (true) {
-                let getPrize = await this.curl({
-                        'url': `https://${host}/${type}/getPrize`,
-                        form: `activityId=${activityId}&pin=${secretPin}`,
+                // else if (['wxPointDrawActivity'].includes(type)) {
+                //     while (1) {
+                //         let draw = await this.curl({
+                //                 'url': `https://${host}/${type}/start`,
+                //                 'form': `pin=${secretPin}&activityId=${activityId}`,
+                //                 cookie: `${getPin.cookie}`
+                //             }
+                //         )
+                //         console.log(draw)
+                //         if (this.haskey(draw, 'data.drawOk')) {
+                //             gifts.push(draw.data.drawInfo.name)
+                //             console.log(`获得奖品: ${draw.data.drawInfo.name}`)
+                //         }
+                //         if (!this.haskey(draw, 'data.canDrawTimes')) {
+                //             break
+                //         }
+                //     }
+            // }
+            else if (['wxShopGift'].includes(type)) {
+                let ad = await this.response({
+                        'url': `https://${host}/common/accessLogWithAD`,
+                        'form': `venderId=${venderId}&code=24&pin=${encodeURIComponent(getPin.content.data.secretPin)}&activityId=${activityId}&pageUrl=https%3A%2F%2Flzkj-isv.isvjcloud.com%2FwxShopGift%2Factivity%3FactivityId%3D${activityId}`,
                         cookie: getPin.cookie
                     }
                 )
-                console.log(getPrize)
-                if (this.haskey(getPrize, 'data.drawOk')) {
-                    console.log(`获得: ${getPrize.data.name}`)
-                    gifts.push(getPrize.data.name)
-                }
-                if (!this.haskey(getPrize, 'data.canDrawTimes')) {
-                    break
+                let ac = await this.response({
+                        'url': `https://${host}/${type}/activityContent`,
+                        'form': `activityId=${activityId}&buyerPin=${encodeURIComponent(getPin.content.data.secretPin)}`,
+                        cookie: ad.cookie
+                    }
+                )
+                let draw = await this.curl({
+                        'url': `https://${host}/wxShopGift/draw`,
+                        'form': `activityId=${activityId}&buyerPin=${encodeURIComponent(getPin.content.data.secretPin)}&hasFollow=false&accessType=app`,
+                        cookie: ac.cookie
+                    }
+                )
+                console.log(draw)
+                if (draw.result) {
+                    console.log(this.haskey(ac.content, 'data.list') || ac.content)
+                    let g = {
+                        'jd': '京豆',
+                        'jf': '积分',
+                        'dq': `东券`,
+                    }
+                    for (let i of this.haskey(ac.content, 'data.list')) {
+                        console.log(`获得: ${i.takeNum}${g[i.type]}`)
+                        gifts.push(
+                            `${i.takeNum}${g[i.type]}`
+                        )
+                    }
                 }
             }
-        }
-        else if (['wxGameActivity'].includes(type)) {
-            while (true) {
-                let getPrize = await this.curl({
-                        'url': `https://${host}/${type}/gameOverRecord`,
-                        form: `activityId=${activityId}&pin=${secretPin}&score=${this.rand(1000, 100000)}`,
-                        cookie: getPin.cookie
+            else if (['wxShopFollowActivity'].includes(type)) {
+                while (true) {
+                    let getPrize = await this.curl({
+                            'url': `https://${host}/${type}/getPrize`,
+                            form: `activityId=${activityId}&pin=${secretPin}`,
+                            cookie: getPin.cookie
+                        }
+                    )
+                    console.log(getPrize)
+                    if (this.haskey(getPrize, 'data.drawOk')) {
+                        console.log(`获得: ${getPrize.data.name}`)
+                        gifts.push(getPrize.data.name)
                     }
-                )
-                console.log(getPrize)
-                if (this.haskey(getPrize, 'data.drawOk')) {
-                    console.log(`获得: ${getPrize.data.name}`)
-                    gifts.push(getPrize.data.name)
-                }
-                if (!this.haskey(getPrize, 'data.canDrawTimes')) {
-                    break
+                    if (!this.haskey(getPrize, 'data.canDrawTimes')) {
+                        break
+                    }
                 }
             }
-        }
-        else if (['wxBuildActivity'].includes(type)) {
-            while (true) {
-                let content = "很好!"
-                if (this.haskey(activityContent, 'content.data.words')) {
-                    content = this.random(activityContent.content.data.words, 1)[0].content
-                }
-                let c = await this.response({
-                        'url': `https://${host}/wxBuildActivity/currentFloor`,
-                        'form': `activityId=${activityId}`,
-                        cookie: getPin.cookie
+            else if (['wxGameActivity'].includes(type)) {
+                while (true) {
+                    let getPrize = await this.curl({
+                            'url': `https://${host}/${type}/gameOverRecord`,
+                            form: `activityId=${activityId}&pin=${secretPin}&score=${this.rand(1000, 100000)}`,
+                            cookie: getPin.cookie
+                        }
+                    )
+                    console.log(getPrize)
+                    if (this.haskey(getPrize, 'data.drawOk')) {
+                        console.log(`获得: ${getPrize.data.name}`)
+                        gifts.push(getPrize.data.name)
                     }
-                )
-                if (this.haskey(c, 'content.data.currentFloors')) {
-                    console.log(`盖楼楼层: ${c.content.data.currentFloors}`)
-                }
-                let getPrize = await this.curl({
-                        'url': `https://${host}/wxBuildActivity/publish`,
-                        'form': `pin=${secretPin}&activityId=${activityId}&content=${encodeURIComponent(content)}`,
-                        cookie: c.cookie
+                    if (!this.haskey(getPrize, 'data.canDrawTimes')) {
+                        break
                     }
-                )
-                console.log(getPrize)
-                if (this.haskey(getPrize, 'data.drawResult.drawOk')) {
-                    console.log(`获得: ${getPrize.data.drawResult.name}`)
-                    gifts.push(getPrize.data.drawResult.name)
                 }
-                if (!this.haskey(getPrize, 'data.drawResult.canDrawTimes')) {
-                    break
+            }
+            else if (['wxBuildActivity'].includes(type)) {
+                while (true) {
+                    let content = "很好!"
+                    if (this.haskey(activityContent, 'content.data.words')) {
+                        content = this.random(activityContent.content.data.words, 1)[0].content
+                    }
+                    let c = await this.response({
+                            'url': `https://${host}/${type}/currentFloor`,
+                            'form': `activityId=${activityId}`,
+                            cookie: getPin.cookie
+                        }
+                    )
+                    if (this.haskey(c, 'content.data.currentFloors')) {
+                        console.log(`盖楼楼层: ${c.content.data.currentFloors}`)
+                    }
+                    let getPrize = await this.curl({
+                            'url': `https://${host}/${type}/publish`,
+                            'form': `pin=${secretPin}&activityId=${activityId}&content=${encodeURIComponent(content)}`,
+                            cookie: c.cookie
+                        }
+                    )
+                    console.log(getPrize)
+                    if (this.haskey(getPrize, 'data.drawResult.drawOk')) {
+                        console.log(`获得: ${getPrize.data.drawResult.name}`)
+                        gifts.push(getPrize.data.drawResult.name)
+                    }
+                    if (!this.haskey(getPrize, 'data.drawResult.canDrawTimes')) {
+                        break
+                    }
                 }
             }
         }
