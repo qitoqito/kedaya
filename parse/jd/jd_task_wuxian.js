@@ -275,7 +275,7 @@ class Main extends Template {
                         }
                     )
                     console.log(getPrize)
-                    if (getPrize.errorMessage && getPrize.includes("插肩")) {
+                    if (getPrize.errorMessage && getPrize.errorMessage.includes("插肩")) {
                         console.log('奖品与您擦肩而过了哟,重新获取')
                         await this.wait(1000)
                     }
