@@ -7,8 +7,9 @@ class Main extends Template {
         this.task = 'active'
         this.verify = 1
         this.manual = 1
-        this.readme = `filename_custom="url|id"\n如果显示The ShareCode is empty...\n就是你IP黑了,暂时无法访问活动\n更换ip或者等服务器解除限制方可运行`
+        this.readme = `filename_custom="url|id"\n如果显示The ShareCode is empty...\n就是你IP黑了,暂时无法访问活动\n更换ip或者等服务器解除限制方可运行\n如需开卡,filename_expand="openCard"`
         this.import = ['fs']
+        this.model = 'user'
     }
 
     async prepare() {
@@ -122,6 +123,9 @@ class Main extends Template {
                             case 15:
                                 data.type = 'sign'
                                 break
+                            case 18:
+                                data.type = 'sevenDay'
+                                break
                         }
                         let shopInfo = await this.curl({
                                 'url': `https://api.m.jd.com/?functionId=lite_getShopHomeBaseInfo&body={"shopId":"${data.shopId}","venderId":"${data.venderId}","source":"appshop"}&t=1646398923902&appid=jdlite-shop-app&client=H5`,
@@ -135,18 +139,6 @@ class Main extends Template {
                     }
                 }
             }
-            // else if (i.activityId.length == 24) {
-            //     for (let host of shopArray) {
-            //         let s = await this.curl({
-            //                 'url': `https://${host}/collect_shop/get_prize_info`,
-            //                 'form': `pid=${i.activityId}`,
-            //             }
-            //         )
-            //         if (this.haskey(s, 'data.type')) {
-            //             this.shareCode.push(s.data)
-            //         }
-            //     }
-            // }
         }
     }
 
@@ -154,6 +146,8 @@ class Main extends Template {
         let pin = this.userPin(p.cookie)
         let host = p.inviter.host
         let activityId = p.inviter.activityId
+        console.log(`活动ID: ${activityId}`)
+        let at = p.inviter.activityType
         let type = p.inviter.type
         this.assert(type, "不支持的活动类型")
         let venderId = p.inviter.venderId
@@ -216,6 +210,15 @@ class Main extends Template {
         }
         var secretPin = getPin.content.data.secretPin
         console.log('secretPin', secretPin)
+        if (this.getValue('expand').includes('openCard')) {
+            let o = await this.curl({
+                    'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${venderId}","shopId":"${shopId}","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":${p.inviter.jdActivityId},"channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
+                    // 'form':``,
+                    cookie: p.cookie
+                }
+            )
+            console.log(this.dumps(o))
+        }
         // if (['wxCollectionActivity', 'wxPointDrawActivity'].includes(type)) {
         switch (host) {
             case "cjhy-isv.isvjcloud.com":
@@ -250,6 +253,26 @@ class Main extends Template {
             if (this.haskey(signUp, 'gift.giftName')) {
                 console.log(`获得: ${signUp.gift.giftName}`)
                 gifts.push(signUp.gift.giftName)
+            }
+        }
+        else if (['sevenDay'].includes(type)) {
+            let pageUrl = encodeURIComponent(`https://${host}/sign/sevenDay/signActivity?activityId=${activityId}&venderId=${venderId}`)
+            let log = await this.response({
+                    'url': `https://cjhy-isv.isvjcloud.com/common/accessLog`,
+                    'form': `venderId=${venderId}&code=${at}&pin=${secretPin}&activityId=${activityId}&pageUrl=${pageUrl}&subType=app`,
+                    cookie: getPin.cookie
+                }
+            )
+            let signUp = await this.curl({
+                    'url': `https://${host}/sign/${type}/wx/signUp`,
+                    'form': `venderId=${venderId}&pin=${secretPin}&actId=${activityId}`,
+                    cookie: getPin.cookie
+                }
+            )
+            console.log(signUp)
+            if (this.haskey(signUp, 'signResult.gift.giftName')) {
+                console.log(`获得: ${signUp.signResult.gift.giftName}`)
+                gifts.push(signUp.signResult.gift.giftName)
             }
         }
         else {
@@ -358,7 +381,7 @@ class Main extends Template {
                     )
                     console.log(draw)
                     if (this.haskey(draw, 'data.drawOk')) {
-                        gifts.push(draw.data.drawInfo.name, draw.data.drawInfo.priceInfo)
+                        gifts.push(draw.data.drawInfo.name)
                         console.log(`获得奖品: ${draw.data.drawInfo.name} ${draw.data.drawInfo.priceInfo}`)
                     }
                     if (!this.haskey(draw, 'data.canDrawTimes')) {
