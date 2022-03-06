@@ -209,6 +209,7 @@ class Main extends Template {
             return
         }
         var secretPin = getPin.content.data.secretPin
+        let sp = getPin.content.data.secretPin
         console.log('secretPin', secretPin)
         if (this.getValue('expand').includes('openCard')) {
             for (let kk of Array(3)) {
@@ -238,16 +239,23 @@ class Main extends Template {
         //     secretPin = encodeURIComponent(secretPin)
         // }
         if (['sign'].includes(type)) {
-            var activityContent = await this.response({
-                    'url': `https://${host}/sign/wx/getActivity`,
-                    'form': `actId=${activityId}&venderId=${venderId}`,
-                    cookie: `${getPin.cookie};`
+            // var activityContent = await this.response({
+            //         'url': `https://${host}/sign/wx/getActivity`,
+            //         'form': `actId=${activityId}&venderId=${venderId}`,
+            //         cookie: `${getPin.cookie};`
+            //     }
+            // )
+            // if (!this.haskey(activityContent, 'content.act')) {
+            //     console.log(activityContent.content.errorMessage || '活动可能失效或者不在支持的范围内,跳出运行')
+            //     return
+            // }
+            let pageUrl = encodeURIComponent(`https://${host}/sign/signActivity?activityId=${activityId}&venderId=${venderId}`)
+            let log = await this.response({
+                    'url': `https://cjhy-isv.isvjcloud.com/common/accessLog`,
+                    'form': `venderId=${venderId}&code=${at}&pin=${secretPin}&activityId=${activityId}&pageUrl=${pageUrl}&subType=app`,
+                    cookie: getPin.cookie
                 }
             )
-            if (!this.haskey(activityContent, 'content.act')) {
-                console.log(activityContent.content.errorMessage || '活动可能失效或者不在支持的范围内,跳出运行')
-                return
-            }
             let signUp = await this.curl({
                     'url': `https://${host}/sign/wx/signUp`,
                     'form': `venderId=${venderId}&pin=${secretPin}&actId=${activityId}`,
