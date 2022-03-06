@@ -211,12 +211,17 @@ class Main extends Template {
         var secretPin = getPin.content.data.secretPin
         console.log('secretPin', secretPin)
         if (this.getValue('expand').includes('openCard')) {
-            let o = await this.curl({
-                    'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${venderId}","shopId":"${shopId}","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":${p.inviter.jdActivityId},"channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
-                    // 'form':``,
-                    cookie: p.cookie
+            for (let kk of Array(3)) {
+                var o = await this.curl({
+                        'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${venderId}","shopId":"${shopId}","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":${p.inviter.jdActivityId},"channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
+                        // 'form':``,
+                        cookie: p.cookie
+                    }
+                )
+                if (o.success) {
+                    break
                 }
-            )
+            }
             console.log(this.dumps(o))
         }
         // if (['wxCollectionActivity', 'wxPointDrawActivity'].includes(type)) {
