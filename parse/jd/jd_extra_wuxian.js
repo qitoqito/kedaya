@@ -223,7 +223,8 @@ class Main extends Template {
                     break
                 }
             }
-            console.log(this.dumps(o))
+            console.log(`开卡中`, o.success)
+            // console.log(this.dumps(o))
         }
         // if (['wxCollectionActivity', 'wxPointDrawActivity'].includes(type)) {
         switch (host) {
@@ -262,10 +263,13 @@ class Main extends Template {
                     cookie: getPin.cookie
                 }
             )
-            console.log(signUp)
+            // console.log(signUp)
             if (this.haskey(signUp, 'gift.giftName')) {
                 console.log(`获得: ${signUp.gift.giftName}`)
                 gifts.push(signUp.gift.giftName)
+            }
+            else {
+                console.log(signUp.errorMessage || signUp.msg || "什么也没有")
             }
         }
         else if (['sevenDay'].includes(type)) {
@@ -282,10 +286,13 @@ class Main extends Template {
                     cookie: getPin.cookie
                 }
             )
-            console.log(signUp)
+            // console.log(signUp)
             if (this.haskey(signUp, 'signResult.gift.giftName')) {
                 console.log(`获得: ${signUp.signResult.gift.giftName}`)
                 gifts.push(signUp.signResult.gift.giftName)
+            }
+            else {
+                console.log(signUp.errorMessage || signUp.msg || "什么也没有")
             }
         }
         else {
@@ -366,7 +373,7 @@ class Main extends Template {
                                 cookie
                             }
                         )
-                        console.log(getPrize)
+                        // console.log(getPrize)
                         if (getPrize.errorMessage && getPrize.errorMessage.includes("插肩")) {
                             console.log('奖品与您擦肩而过了哟,重新获取')
                             await this.wait(1000)
@@ -378,6 +385,9 @@ class Main extends Template {
                     if (this.haskey(getPrize, 'data.drawOk')) {
                         console.log(`获得: ${getPrize.data.name}`)
                         gifts.push(getPrize.data.name)
+                    }
+                    else {
+                        console.log(getPrize.errorMessage || getPrize.msg || "什么也没有")
                     }
                     if (!this.haskey(getPrize, 'data.canDrawTimes')) {
                         break
@@ -392,10 +402,13 @@ class Main extends Template {
                             cookie: `${getPin.cookie}`
                         }
                     )
-                    console.log(draw)
+                    // console.log(draw)
                     if (this.haskey(draw, 'data.drawOk')) {
                         gifts.push(draw.data.drawInfo.name)
                         console.log(`获得奖品: ${draw.data.drawInfo.name} ${draw.data.drawInfo.priceInfo}`)
+                    }
+                    else {
+                        console.log(draw.errorMessage || draw.msg || "什么也没有")
                     }
                     if (!this.haskey(draw, 'data.canDrawTimes')) {
                         break
@@ -439,7 +452,7 @@ class Main extends Template {
                         cookie: ac.cookie
                     }
                 )
-                console.log(draw)
+                // console.log(draw)
                 if (draw.result) {
                     console.log(this.haskey(ac.content, 'data.list') || ac.content)
                     let g = {
@@ -454,6 +467,9 @@ class Main extends Template {
                         )
                     }
                 }
+                else {
+                    console.log(draw.errorMessage || draw.msg || `什么也没有`)
+                }
             }
             else if (['wxShopFollowActivity'].includes(type)) {
                 while (true) {
@@ -463,10 +479,13 @@ class Main extends Template {
                             cookie: getPin.cookie
                         }
                     )
-                    console.log(getPrize)
+                    // console.log(getPrize)
                     if (this.haskey(getPrize, 'data.drawOk')) {
                         console.log(`获得: ${getPrize.data.name}`)
                         gifts.push(getPrize.data.name)
+                    }
+                    else {
+                        console.log(getPrize.errorMessage || getPrize.msg || "什么也没有")
                     }
                     if (!this.haskey(getPrize, 'data.canDrawTimes')) {
                         break
@@ -481,10 +500,13 @@ class Main extends Template {
                             cookie: getPin.cookie
                         }
                     )
-                    console.log(getPrize)
+                    // console.log(getPrize)
                     if (this.haskey(getPrize, 'data.drawOk')) {
                         console.log(`获得: ${getPrize.data.name}`)
                         gifts.push(getPrize.data.name)
+                    }
+                    else {
+                        console.log(getPrize.errorMessage || getPrize.msg || "什么也没有")
                     }
                     if (!this.haskey(getPrize, 'data.canDrawTimes')) {
                         break
@@ -512,10 +534,13 @@ class Main extends Template {
                             cookie: c.cookie
                         }
                     )
-                    console.log(getPrize)
+                    // console.log(getPrize)
                     if (this.haskey(getPrize, 'data.drawResult.drawOk')) {
                         console.log(`获得: ${getPrize.data.drawResult.name}`)
                         gifts.push(getPrize.data.drawResult.name)
+                    }
+                    else {
+                        console.log(getPrize.errorMessage || getPrize.msg || "什么也没有")
                     }
                     if (!this.haskey(getPrize, 'data.drawResult.canDrawTimes')) {
                         break
