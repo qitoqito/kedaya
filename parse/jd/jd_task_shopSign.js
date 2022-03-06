@@ -19,31 +19,34 @@ class Main extends Template {
             // '7D7881FDDBBAAFB999F6A794E2036A56'
         ]
         if (this.custom) {
-            array = this.custom.replace(/&/g, '|').replace(/\n/g, '|').split('|')
+            array = this.getValue('custom')
         }
         else if (this.expand) {
-            let expand = this.expand.replace(/&/g, '|').replace(/\n/g, '|').split('|')
+            let expand = this.getValue('expand')
             array = [...expand, ...array]
         }
         for (let i of this.unique(array)) {
-            let url = `https://api.m.jd.com/api?appid=interCenter_shopSign&t=${this.timestamp}&loginType=2&functionId=interact_center_shopSign_getActivityInfo&body={"token":"${i}","venderId":""}`
-            try {
-                let s = await this.curl(url)
-                let info = {
-                    'activityId': s.data.id,
-                    'venderId': s.data.venderId,
-                    'token': i,
-                    continuePrizeRuleList: s.data.continuePrizeRuleList
-                }
-                let shopInfo = await this.curl({
-                        'url': `https://api.m.jd.com/?functionId=lite_getShopHomeBaseInfo&body={"venderId":"${s.data.venderId}","source":"appshop"}&t=1646398923902&appid=jdlite-shop-app&client=H5`,
+            if (i.length == 32) {
+                let url = `https://api.m.jd.com/api?appid=interCenter_shopSign&t=${this.timestamp}&loginType=2&functionId=interact_center_shopSign_getActivityInfo&body={"token":"${i}","venderId":""}`
+                try {
+                    let s = await this.curl(url)
+                    let info = {
+                        'activityId': s.data.id,
+                        'venderId': s.data.venderId,
+                        'token': i,
+                        continuePrizeRuleList: s.data.continuePrizeRuleList
                     }
-                )
-                if (this.haskey(shopInfo, 'result.shopInfo.shopName')) {
-                    info.shopName = shopInfo.result.shopInfo.shopName
+                    let shopInfo = await this.curl({
+                            'url': `https://api.m.jd.com/?functionId=lite_getShopHomeBaseInfo&body={"venderId":"${s.data.venderId}","source":"appshop"}&t=1646398923902&appid=jdlite-shop-app&client=H5`,
+                        }
+                    )
+                    if (this.haskey(shopInfo, 'result.shopInfo.shopName')) {
+                        info.shopName = shopInfo.result.shopInfo.shopName
+                    }
+                    this.shareCode.push(info)
+                } catch
+                    (e) {
                 }
-                this.shareCode.push(info)
-            } catch (e) {
             }
         }
     }
