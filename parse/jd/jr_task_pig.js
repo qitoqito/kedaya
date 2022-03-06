@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东金融养猪"
-        this.cron = "41 1,5,6-23 * * *"
+        // this.cron = "41 1,5,6-23 * * *"
         this.task = 'local'
         // this.thread = 2
     }
@@ -143,6 +143,12 @@ class Main extends Template {
                             break
                         }
                         console.log(`正在喂食: ${i.goodsName} ,等待12秒进行下一轮喂食`)
+                        await this.curl({
+                                'url': `https://ms.jr.jd.com/gw/generic/uc/h5/m/pigPetOpenBox`,
+                                'form': `reqData={"source":2,"type":1,"t":${new Date().getTime()},"channelLV":"","riskDeviceParam":"{}"}`,
+                                cookie
+                            }
+                        )
                         await this.wait(12500)
                     }
                 }

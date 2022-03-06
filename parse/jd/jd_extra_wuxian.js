@@ -252,7 +252,7 @@ class Main extends Template {
             // }
             let pageUrl = encodeURIComponent(`https://${host}/sign/signActivity?activityId=${activityId}&venderId=${venderId}`)
             let log = await this.response({
-                    'url': `https://cjhy-isv.isvjcloud.com/common/accessLog`,
+                    'url': `https://${host}/common/accessLog`,
                     'form': `venderId=${venderId}&code=${at}&pin=${secretPin}&activityId=${activityId}&pageUrl=${pageUrl}&subType=app`,
                     cookie: getPin.cookie
                 }
@@ -275,7 +275,7 @@ class Main extends Template {
         else if (['sevenDay'].includes(type)) {
             let pageUrl = encodeURIComponent(`https://${host}/sign/sevenDay/signActivity?activityId=${activityId}&venderId=${venderId}`)
             let log = await this.response({
-                    'url': `https://cjhy-isv.isvjcloud.com/common/accessLog`,
+                    'url': `https://${host}/common/accessLog`,
                     'form': `venderId=${venderId}&code=${at}&pin=${secretPin}&activityId=${activityId}&pageUrl=${pageUrl}&subType=app`,
                     cookie: getPin.cookie
                 }
@@ -402,6 +402,7 @@ class Main extends Template {
                             cookie: `${getPin.cookie}`
                         }
                     )
+
                     // console.log(draw)
                     if (this.haskey(draw, 'data.drawOk')) {
                         gifts.push(draw.data.drawInfo.name)
