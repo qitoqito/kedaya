@@ -619,8 +619,7 @@ class Main extends Template {
                     }
                 }
             }
-            else if (['wxTeam'].includes(type)) {
-                console.log(activityContent.content.data)
+            else if (['wxTeam'].includes(type)) { 
                 if (this.haskey(activityContent, 'content.data.canJoin')) {
                     console.log("入会有延迟,等待3秒...")
                     await this.wait(3000)
