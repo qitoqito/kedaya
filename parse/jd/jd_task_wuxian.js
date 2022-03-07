@@ -103,9 +103,9 @@ class Main extends Template {
                             case 73:
                                 data.type = 'wxShopGift'
                                 break
-                            // case 46:
-                            //     data.type = 'openCard'
-                            //     break
+                            case 46:
+                                data.type = 'wxTeam'
+                                break
                             case 26:
                                 data.type = 'wxPointDrawActivity'
                                 break
@@ -135,7 +135,12 @@ class Main extends Template {
                         if (this.haskey(shopInfo, 'result.shopInfo.shopName')) {
                             data.shopName = shopInfo.result.shopInfo.shopName
                         }
-                        this.shareCode.push(data)
+                        if (['wxTeam'].includes(data.type)) {
+                            await this.wxTeam(data)
+                        }
+                        else {
+                            this.shareCode.push(data)
+                        }
                         break
                     }
                 }
@@ -143,18 +148,14 @@ class Main extends Template {
         }
     }
 
-    async main(p) {
-        let pin = this.userPin(p.cookie)
+    async getMyPing(p) {
         let host = p.inviter.host
         let activityId = p.inviter.activityId
-        console.log(`活动ID: ${activityId}`)
         let at = p.inviter.activityType
         let type = p.inviter.type
         this.assert(type, "不支持的活动类型")
         let venderId = p.inviter.venderId
         let shopId = p.inviter.shopId
-        let gifts = []
-        let skuList = []
         if (venderId) {
             let follow = await this.curl({
                 'url': 'https://api.m.jd.com/client.action?g_ty=ls&g_tk=518274330',
@@ -209,9 +210,110 @@ class Main extends Template {
             console.log(`可能是黑号或者黑ip,停止运行`)
             return
         }
+        else {
+            return getPin
+        }
+    }
+
+    async wxTeam(data) {
+        for (let cookie of this.cookies['help']) {
+            let p = {
+                cookie, inviter: data
+            }
+            let user = this.userPin(cookie)
+            try {
+                let getPin = await this.getMyPing(p)
+                if (getPin) {
+                    let venderId = p.inviter.venderId
+                    let shopId = p.inviter.shopId
+                    var secretPin = getPin.content.data.secretPin
+                    let activityId = p.inviter.activityId
+                    let host = p.inviter.host
+                    if (this.getValue('expand').includes('openCard')) {
+                        for (let kk of Array(3)) {
+                            var o = await this.curl({
+                                    'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${venderId}","shopId":"${shopId}","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":${p.inviter.jdActivityId},"channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
+                                    // 'form':``,
+                                    cookie: p.cookie
+                                }
+                            )
+                            if (o.success) {
+                                break
+                            }
+                        }
+                        console.log(user, `开卡中`, o.success)
+                    }
+                    switch (host) {
+                        case "cjhy-isv.isvjcloud.com":
+                            secretPin = escape(encodeURIComponent(secretPin))
+                            break
+                        default:
+                            secretPin = encodeURIComponent(secretPin)
+                            break
+                    }
+                    let wxFollow = await this.response({
+                            'url': `https://${p.inviter.host}/wxActionCommon/followShop`,
+                            'form': `userId=${venderId}&buyerNick=${secretPin}&activityId=${p.inviter.activityId}&activityType=${p.inviter.activityType}`,
+                            cookie: `${getPin.cookie}`
+                        }
+                    )
+                    let ac = await this.curl({
+                            'url': `https://${host}/wxTeam/activityContent`,
+                            'form': `activityId=${p.inviter.activityId}&pin=${secretPin}`,
+                            cookie: getPin.cookie
+                        }
+                    )
+                    if (!this.haskey(ac, 'data.joinMap.canSend')) {
+                        console.log(user, "人员已满")
+                    }
+                    else {
+                        if (this.haskey(ac, 'data.signUuid')) {
+                            var signUuid = ac.data.signUuid
+                        }
+                        else {
+                            let catpain = await this.curl({
+                                    'url': `https://${host}/wxTeam/saveCaptain`,
+                                    'form': `activityId=${p.inviter.activityId}&pin=${secretPin}`,
+                                    cookie: getPin.cookie
+                                }
+                            )
+                            if (this.haskey(catpain, 'data.signUuid')) {
+                                var signUuid = catpain.data.signUuid
+                            }
+                        }
+                        if (signUuid) {
+                            console.log(`队伍Id: ${signUuid}`)
+                            data.signUuid = signUuid
+                            this.shareCode.push(data)
+                        }
+                        else {
+                            console.log(user, '没有获取到队伍Id')
+                        }
+                    }
+                }
+            } catch (e) {
+            }
+        }
+    }
+
+    async main(p) {
+        let pin = this.userPin(p.cookie)
+        let host = p.inviter.host
+        let activityId = p.inviter.activityId
+        console.log(`活动ID: ${activityId}`)
+        let at = p.inviter.activityType
+        let type = p.inviter.type
+        this.assert(type, "不支持的活动类型")
+        let venderId = p.inviter.venderId
+        let shopId = p.inviter.shopId
+        let gifts = []
+        let skuList = []
+        let getPin = await this.getMyPing(p)
+        if (!getPin) {
+            return
+        }
         var secretPin = getPin.content.data.secretPin
         let sp = getPin.content.data.secretPin
-        console.log('secretPin', secretPin)
         if (this.getValue('expand').includes('openCard')) {
             for (let kk of Array(3)) {
                 var o = await this.curl({
@@ -227,7 +329,6 @@ class Main extends Template {
             console.log(`开卡中`, o.success)
             // console.log(this.dumps(o))
         }
-        // if (['wxCollectionActivity', 'wxPointDrawActivity'].includes(type)) {
         switch (host) {
             case "cjhy-isv.isvjcloud.com":
                 secretPin = escape(encodeURIComponent(secretPin))
@@ -236,21 +337,7 @@ class Main extends Template {
                 secretPin = encodeURIComponent(secretPin)
                 break
         }
-        // }
-        // else {
-        //     secretPin = encodeURIComponent(secretPin)
-        // }
         if (['sign'].includes(type)) {
-            // var activityContent = await this.response({
-            //         'url': `https://${host}/sign/wx/getActivity`,
-            //         'form': `actId=${activityId}&venderId=${venderId}`,
-            //         cookie: `${getPin.cookie};`
-            //     }
-            // )
-            // if (!this.haskey(activityContent, 'content.act')) {
-            //     console.log(activityContent.content.errorMessage || '活动可能失效或者不在支持的范围内,跳出运行')
-            //     return
-            // }
             let pageUrl = encodeURIComponent(`https://${host}/sign/signActivity?activityId=${activityId}&venderId=${venderId}`)
             let log = await this.response({
                     'url': `https://${host}/common/accessLog`,
@@ -264,7 +351,6 @@ class Main extends Template {
                     cookie: getPin.cookie
                 }
             )
-            // console.log(signUp)
             if (this.haskey(signUp, 'gift.giftName')) {
                 console.log(`获得: ${signUp.gift.giftName}`)
                 gifts.push(signUp.gift.giftName)
@@ -297,10 +383,11 @@ class Main extends Template {
             }
         }
         else {
+            let signUuid = p.inviter.signUuid
             var url = `https://${host}/${type}/activityContent`
             var activityContent = await this.response({
                     url,
-                    'form': `pin=${secretPin}&activityId=${activityId}&buyerPin=${secretPin}`,
+                    'form': `pin=${secretPin}&activityId=${activityId}&buyerPin=${secretPin}&signUuid=${signUuid}`,
                     cookie: `${getPin.cookie};`
                 }
             )
@@ -324,8 +411,10 @@ class Main extends Template {
                 }
             )
             skuList = this.column(skus.skus, 'skuId').map(d => d.toString())
-            if (skuList.length) {
-                console.log(`加购列表: ${this.dumps(skuList)}`)
+            if (!['wxTeam'].includes(type)) {
+                if (skuList.length) {
+                    console.log(`加购列表: ${this.dumps(skuList)}`)
+                }
             }
             if (['wxCollectionActivity'].includes(type)) {
                 switch (host) {
@@ -416,24 +505,6 @@ class Main extends Template {
                     }
                 }
             }
-                // else if (['wxPointDrawActivity'].includes(type)) {
-                //     while (1) {
-                //         let draw = await this.curl({
-                //                 'url': `https://${host}/${type}/start`,
-                //                 'form': `pin=${secretPin}&activityId=${activityId}`,
-                //                 cookie: `${getPin.cookie}`
-                //             }
-                //         )
-                //         console.log(draw)
-                //         if (this.haskey(draw, 'data.drawOk')) {
-                //             gifts.push(draw.data.drawInfo.name)
-                //             console.log(`获得奖品: ${draw.data.drawInfo.name}`)
-                //         }
-                //         if (!this.haskey(draw, 'data.canDrawTimes')) {
-                //             break
-                //         }
-                //     }
-            // }
             else if (['wxShopGift'].includes(type)) {
                 let ad = await this.response({
                         'url': `https://${host}/common/accessLogWithAD`,
@@ -546,6 +617,26 @@ class Main extends Template {
                     if (!this.haskey(getPrize, 'data.drawResult.canDrawTimes')) {
                         break
                     }
+                }
+            }
+            else if (['wxTeam'].includes(type)) {
+                console.log(activityContent.content.data)
+                if (this.haskey(activityContent, 'content.data.canJoin')) {
+                    console.log("入会有延迟,等待3秒...")
+                    await this.wait(3000)
+                    let join = await this.curl({
+                            'url': `https://${host}/${type}/saveMember`,
+                            'form': `pin=${secretPin}&activityId=${activityId}&signUuid=${signUuid}&pinImg=${encodeURIComponent('https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}`,
+                            cookie: getPin.cookie
+                        }
+                    )
+                    console.log(join)
+                    if (this.dumps(join).includes("满员")) {
+                        this.finish.push(p.number)
+                    }
+                }
+                else {
+                    console.log('不能参团,或者已经参加过活动')
                 }
             }
         }
