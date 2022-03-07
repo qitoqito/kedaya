@@ -104,6 +104,7 @@ class Main extends Template {
                                 data.type = 'wxShopGift'
                                 break
                             case 46:
+                            case 102:
                                 data.type = 'wxTeam'
                                 break
                             case 26:
@@ -263,7 +264,7 @@ class Main extends Template {
                             cookie: getPin.cookie
                         }
                     )
-                    if (!this.haskey(ac, 'data.joinMap.canSend')) {
+                    if (this.haskey(ac, 'data.successRetList') && ac.data.successRetList.length == ac.data.active.maxGroup) {
                         console.log(user, "人员已满")
                     }
                     else {
@@ -271,9 +272,16 @@ class Main extends Template {
                             var signUuid = ac.data.signUuid
                         }
                         else {
+                            let pageUrl = encodeURIComponent(`https://${host}/sign/signActivity?activityId=${p.inviter.activityId}&venderId=${venderId}`)
+                            let log = await this.response({
+                                    'url': `https://${host}/common/accessLog`,
+                                    'form': `venderId=${venderId}&code=${p.inviter.activityType}&pin=${secretPin}&activityId=${p.inviter.activityId}&pageUrl=${pageUrl}&subType=app`,
+                                    cookie: getPin.cookie
+                                }
+                            )
                             let catpain = await this.curl({
                                     'url': `https://${host}/wxTeam/saveCaptain`,
-                                    'form': `activityId=${p.inviter.activityId}&pin=${secretPin}`,
+                                    'form': `activityId=${p.inviter.activityId}&pin=${secretPin}&pinImg=${encodeURIComponent('https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}`,
                                     cookie: getPin.cookie
                                 }
                             )
@@ -337,14 +345,21 @@ class Main extends Template {
                 secretPin = encodeURIComponent(secretPin)
                 break
         }
+        let pageUrl = encodeURIComponent(`https://${host}/sign/signActivity?activityId=${activityId}&venderId=${venderId}`)
+        let log = await this.response({
+                'url': `https://${host}/common/accessLog`,
+                'form': `venderId=${venderId}&code=${at}&pin=${secretPin}&activityId=${activityId}&pageUrl=${pageUrl}&subType=app`,
+                cookie: getPin.cookie
+            }
+        )
         if (['sign'].includes(type)) {
-            let pageUrl = encodeURIComponent(`https://${host}/sign/signActivity?activityId=${activityId}&venderId=${venderId}`)
-            let log = await this.response({
-                    'url': `https://${host}/common/accessLog`,
-                    'form': `venderId=${venderId}&code=${at}&pin=${secretPin}&activityId=${activityId}&pageUrl=${pageUrl}&subType=app`,
-                    cookie: getPin.cookie
-                }
-            )
+            // let pageUrl = encodeURIComponent(`https://${host}/sign/signActivity?activityId=${activityId}&venderId=${venderId}`)
+            // let log = await this.response({
+            //         'url': `https://${host}/common/accessLog`,
+            //         'form': `venderId=${venderId}&code=${at}&pin=${secretPin}&activityId=${activityId}&pageUrl=${pageUrl}&subType=app`,
+            //         cookie: getPin.cookie
+            //     }
+            // )
             let signUp = await this.curl({
                     'url': `https://${host}/sign/wx/signUp`,
                     'form': `venderId=${venderId}&pin=${secretPin}&actId=${activityId}`,
@@ -360,13 +375,13 @@ class Main extends Template {
             }
         }
         else if (['sevenDay'].includes(type)) {
-            let pageUrl = encodeURIComponent(`https://${host}/sign/sevenDay/signActivity?activityId=${activityId}&venderId=${venderId}`)
-            let log = await this.response({
-                    'url': `https://${host}/common/accessLog`,
-                    'form': `venderId=${venderId}&code=${at}&pin=${secretPin}&activityId=${activityId}&pageUrl=${pageUrl}&subType=app`,
-                    cookie: getPin.cookie
-                }
-            )
+            // let pageUrl = encodeURIComponent(`https://${host}/sign/sevenDay/signActivity?activityId=${activityId}&venderId=${venderId}`)
+            // let log = await this.response({
+            //         'url': `https://${host}/common/accessLog`,
+            //         'form': `venderId=${venderId}&code=${at}&pin=${secretPin}&activityId=${activityId}&pageUrl=${pageUrl}&subType=app`,
+            //         cookie: getPin.cookie
+            //     }
+            // )
             let signUp = await this.curl({
                     'url': `https://${host}/sign/${type}/wx/signUp`,
                     'form': `venderId=${venderId}&pin=${secretPin}&actId=${activityId}`,
@@ -619,7 +634,7 @@ class Main extends Template {
                     }
                 }
             }
-            else if (['wxTeam'].includes(type)) { 
+            else if (['wxTeam'].includes(type)) {
                 if (this.haskey(activityContent, 'content.data.canJoin')) {
                     console.log("入会有延迟,等待3秒...")
                     await this.wait(3000)
