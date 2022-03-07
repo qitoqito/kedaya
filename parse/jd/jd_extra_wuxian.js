@@ -94,6 +94,7 @@ class Main extends Template {
                             case 6:
                                 data.type = 'wxCollectionActivity'
                                 break
+                            case 11:
                             case 12:
                             case 13:
                                 data.type = 'wxDrawActivity'
@@ -402,7 +403,6 @@ class Main extends Template {
                             cookie: `${getPin.cookie}`
                         }
                     )
-
                     // console.log(draw)
                     if (this.haskey(draw, 'data.drawOk')) {
                         gifts.push(draw.data.drawInfo.name)
