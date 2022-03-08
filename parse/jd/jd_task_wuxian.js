@@ -105,6 +105,7 @@ class Main extends Template {
                                 break
                             case 46:
                             case 102:
+                            case 100:
                                 data.type = 'wxTeam'
                                 break
                             case 26:
@@ -128,6 +129,9 @@ class Main extends Template {
                             case 18:
                                 data.type = 'sevenDay'
                                 break
+                            // case 400:
+                            //     data.type = 'microDz'
+                            //     break
                         }
                         let shopInfo = await this.curl({
                                 'url': `https://api.m.jd.com/?functionId=lite_getShopHomeBaseInfo&body={"shopId":"${data.shopId}","venderId":"${data.venderId}","source":"appshop"}&t=1646398923902&appid=jdlite-shop-app&client=H5`,
@@ -138,6 +142,9 @@ class Main extends Template {
                         }
                         if (['wxTeam'].includes(data.type)) {
                             await this.wxTeam(data)
+                        }
+                        else if (['microDz'].includes(data.type)) {
+                            await this.microDz(data)
                         }
                         else {
                             this.shareCode.push(data)
@@ -213,6 +220,20 @@ class Main extends Template {
         }
         else {
             return getPin
+        }
+    }
+
+    async microDz(data) {
+        for (let cookie of this.cookies['help']) {
+            let p = {
+                cookie, inviter: data
+            }
+            let user = this.userPin(cookie)
+            try {
+                let getPin = await this.getMyPing(p)
+                console.log(getPin)
+            } catch (e) {
+            }
         }
     }
 
