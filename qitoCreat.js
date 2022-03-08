@@ -5,6 +5,8 @@ let command = process.env.QITOQITO_PLATFORM
 let sync = process.env.QITOQITO_SYNC
 let disable = process.env.QITOQITO_DISABLE
 let label = process.env.QITOQITO_LABEL || 'kedaya_'
+let map = process.env.QITOQITO_MAP || ''
+let cover = process.env.QITOQITO_COVER || ''
 console.log(`
 请先设置环境变量
 
@@ -19,6 +21,19 @@ QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的�
 if (!command) {
     return
 }!(async () => {
+    let change = {}
+    if (map) {
+        for (let k of map.replace(/\&/g,"\|").split("|")) {
+            let a = k.split("=")
+            for (let i of a[0].split(',')) {
+                change[i] = {
+                    map: a[1],
+                    type: a[1].split("_")[0]
+                }
+            }
+        }
+        console.log(change)
+    }
     let content = `
 !(async () => {
         let prefix = process.env.QITOQITO_PREFIX ||''
@@ -51,19 +66,46 @@ if (!command) {
             dicts[item] = fs.readdirSync(`${dirname}/parse/${item}`)
         }
     })
+    dicts['extra'] = Object.keys(change)
     console.log(`🦊 如需强制覆盖,请设置QITOQITO_COVER\n`)
     for (let i in dicts) {
         for (let j of dicts[i]) {
             let filename = `${prefix}${j}`
-            if (pathFile.includes(filename) && !process.env.QITOQITO_COVER) {
+            if (pathFile.includes(filename) && !cover) {
                 console.log(`🐹 跳过写入: ${filename} 已经在目录了`)
             } else {
-                fs.writeFile(`${dirname}/${filename}`, content, function(err, data) {
-                    if (err) {
-                        throw err;
-                    }
-                    console.log(`🐯‍❄️ 写入成功: ${filename} 写入目录成功`)
-                })
+                if (i == 'extra') {
+                    let exc = `
+!(async () => {
+        let prefix = process.env.QITOQITO_PREFIX ||''
+        let filename = process.mainModule.filename.replace(prefix,'').match(/(\\w+)\\.js/)[1]
+        let dirname = process.mainModule.path
+        let type = filename.split('_')[0]
+        if (['js', 'jx', 'jr', 'jw'].includes(type)) {
+            type = 'jd'
+        }
+        let qitoqito = require(\`\${dirname}/parse/${change[j].type}/${change[j].map}\`)
+        let kedaya = new qitoqito()
+        await kedaya.init({"filename":"${j}"})
+    }
+)().catch((e) => {
+    console.log(e.message)
+})
+`;
+                    fs.writeFile(`${dirname}/${filename}.js`, exc, function(err, data) {
+                        if (err) {
+                            throw err;
+                        }
+                        console.log(`🐯‍❄️ 写入成功: ${filename}.js 写入目录成功`)
+                    })
+                } else {
+                    fs.writeFile(`${dirname}/${filename}`, content, function(err, data) {
+                        if (err) {
+                            throw err;
+                        }
+                        console.log(`🐯‍❄️ 写入成功: ${filename} 写入目录成功`)
+                    })
+                }
             }
         }
     }
