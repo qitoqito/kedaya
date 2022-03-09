@@ -584,6 +584,20 @@ class Main extends Template {
                 }
             }
             else if (['microDz'].includes(type)) {
+                for (let kkk of p.inviter.venderIds || []) {
+                    for (let kk of Array(3)) {
+                        var o = await this.curl({
+                                'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${kkk}","shopId":"","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":"","channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
+                                // 'form':``,
+                                cookie: p.cookie
+                            }
+                        )
+                        if (o.success) {
+                            break
+                        }
+                    }
+                    console.log(kkk, `开卡中`, o.success)
+                }
                 let f = await this.curl({
                         'url': `https://${host}/microDz/invite/activity/wx/acceptInvite
                         `,
@@ -720,8 +734,9 @@ class Main extends Template {
                             cookie: getPin.cookie
                         }
                     )
+                    let venderIds = []
                     if (this.haskey(acc, 'data.venderIds')) {
-                        let venderIds = acc.data.venderIds.split(",")
+                        venderIds = acc.data.venderIds.split(",")
                         if (this.getValue('expand').includes('openCard')) {
                             for (let kkk of venderIds) {
                                 for (let kk of Array(3)) {
@@ -747,6 +762,7 @@ class Main extends Template {
                     )
                     if (this.haskey(inviter, 'data.inviterNick')) {
                         data.inviter = secretPin
+                        data.venderIds = venderIds
                         // delete inviter.data.list
                         this.shareCode.push({...data, ...inviter.data})
                     }
