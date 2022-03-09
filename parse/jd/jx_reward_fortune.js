@@ -9,7 +9,7 @@ class Main extends Template {
         this.thread = 2
         this.task = 'local'
         this.import = ['jdAlgo']
-        this.readme = `兑换金额: filename_custom=兑换1|兑换2\n只运行账户: filename_task=pin1|pin2\n建议只跑要兑换的账号`
+        this.readme = `兑换金额: filename_custom=兑换1|兑换2\n只运行账户: filename_work=pin1|pin2\n建议只跑要兑换的账号`
     }
 
     async prepare() {
