@@ -10,6 +10,7 @@ class Main extends Template {
         this.readme = `filename_custom="url|id"\n如果显示The ShareCode is empty...\n就是你IP黑了,暂时无法访问活动\n更换ip或者等服务器解除限制方可运行\n如需开卡,filename_expand="openCard"`
         this.import = ['fs']
         this.model = 'user'
+        this.filter = "activityId"
     }
 
     async prepare() {
@@ -145,9 +146,9 @@ class Main extends Template {
                                 case 18:
                                     data.type = 'sevenDay'
                                     break
-                                // case 400:
-                                //     data.type = 'microDz'
-                                //     break
+                                case 400:
+                                    data.type = 'microDz'
+                                    break
                             }
                             let shopInfo = await this.curl({
                                     'url': `https://api.m.jd.com/?functionId=lite_getShopHomeBaseInfo&body={"shopId":"${data.shopId}","venderId":"${data.venderId}","source":"appshop"}&t=1646398923902&appid=jdlite-shop-app&client=H5`,
@@ -302,17 +303,22 @@ class Main extends Template {
         }
         else {
             let signUuid = p.inviter.signUuid
-            var url = `https://${host}/${type}/activityContent`
-            var activityContent = await this.response({
-                    url,
-                    'form': `pin=${secretPin}&activityId=${activityId}&buyerPin=${secretPin}&signUuid=${signUuid}`,
-                    cookie: `${getPin.cookie};`
+            if (['microDz'].includes(type)) {
+                // 这边不做限制
+            }
+            else {
+                var url = `https://${host}/${type}/activityContent`
+                var activityContent = await this.response({
+                        url,
+                        'form': `pin=${secretPin}&activityId=${activityId}&buyerPin=${secretPin}&signUuid=${signUuid}`,
+                        cookie: `${getPin.cookie};`
+                    }
+                )
+                // console.log(activityContent.content.data)
+                if (!this.haskey(activityContent, 'content.result')) {
+                    console.log(activityContent.content.errorMessage)
+                    return
                 }
-            )
-            // console.log(activityContent.content.data)
-            if (!this.haskey(activityContent, 'content.result')) {
-                console.log(activityContent.content.errorMessage)
-                return
             }
             let need = this.haskey(activityContent, 'content.data.needCollectionSize')
             let has = this.haskey(activityContent, 'content.data.hasCollectionSize')
@@ -357,14 +363,14 @@ class Main extends Template {
                         }
                         break
                     default:
-                        for (let z = 0; z<3; z++) {
+                        for (let z = 0; z<6; z++) {
                             var add = await this.response({
                                     'url': `https://${host}/wxCollectionActivity/oneKeyAddCart`,
                                     form: `activityId=${activityId}&pin=${secretPin}&productIds=${this.dumps(this.column(skus.skus, 'skuId'))}`,
                                     cookie: `${getPin.cookie}`
                                 }
                             )
-                            await this.wait(1000)
+                            await this.wait(500)
                         }
                         var cookie = `${add.cookie};AUTH_C_USER=${secretPin};`
                         break
@@ -577,6 +583,21 @@ class Main extends Template {
                     console.log("没有积分可以兑换")
                 }
             }
+            else if (['microDz'].includes(type)) {
+                let f = await this.curl({
+                        'url': `https://${host}/microDz/invite/activity/wx/acceptInvite
+                        `,
+                        'form': `activityId=${activityId}&invitee=${secretPin}&inviteeNick=abc&inviteeImg=${encodeURIComponent('https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}&inviter=${p.inviter.inviter}&inviterNick=${p.inviter.inviterNick}&inviterImg=${p.inviter.imgUrl}`,
+                        cookie: getPin.cookie
+                    }
+                )
+                if (f.result) {
+                    console.log("加团成功")
+                }
+                else {
+                    console.log(f.errorMessage)
+                }
+            }
         }
         if (gifts.length) {
             gifts.unshift(`ID: ${activityId} , 店铺: ${p.inviter.shopName}`)
@@ -666,6 +687,7 @@ class Main extends Template {
     }
 
     async microDz(data) {
+        data.sid = 599119
         for (let cookie of this.cookies['help']) {
             let p = {
                 cookie, inviter: data
@@ -673,7 +695,57 @@ class Main extends Template {
             let user = this.userPin(cookie)
             try {
                 let getPin = await this.getMyPing(p)
-                console.log(getPin)
+                if (getPin) {
+                    let venderId = p.inviter.venderId
+                    let shopId = p.inviter.shopId
+                    var secretPin = getPin.content.data.secretPin
+                    let activityId = p.inviter.activityId
+                    let host = p.inviter.host
+                    switch (host) {
+                        case "cjhy-isv.isvjcloud.com":
+                            secretPin = escape(encodeURIComponent(secretPin))
+                            break
+                        default:
+                            secretPin = encodeURIComponent(secretPin)
+                            break
+                    }
+                    let acc = await this.curl({
+                            'url': `https://${host}/microDz/invite/activity/wx/getActivityInfo`,
+                            'form': `activityId=${activityId}`,
+                            cookie: getPin.cookie
+                        }
+                    )
+                    if (this.haskey(acc, 'data.venderIds')) {
+                        let venderIds = acc.data.venderIds.split(",")
+                        if (this.getValue('expand').includes('openCard')) {
+                            for (let kkk of venderIds) {
+                                for (let kk of Array(3)) {
+                                    var o = await this.curl({
+                                            'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${kkk}","shopId":"","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":"","channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
+                                            // 'form':``,
+                                            cookie: p.cookie
+                                        }
+                                    )
+                                    if (o.success) {
+                                        break
+                                    }
+                                }
+                                console.log(kkk, `开卡中`, o.success)
+                            }
+                        }
+                    }
+                    let inviter = await this.curl({
+                            'url': `https://${host}/microDz/invite/activity/wx/inviteRecord`,
+                            'form': `activityId=${activityId}&inviter=${secretPin}&pageNo=1&pageSize=15&type=0`,
+                            cookie: getPin.cookie
+                        }
+                    )
+                    if (this.haskey(inviter, 'data.inviterNick')) {
+                        data.inviter = secretPin
+                        // delete inviter.data.list
+                        this.shareCode.push({...data, ...inviter.data})
+                    }
+                }
             } catch (e) {
             }
         }
@@ -775,6 +847,7 @@ class Main extends Template {
         this.assert(type, "不支持的活动类型")
         let venderId = p.inviter.venderId
         let shopId = p.inviter.shopId
+        let sid = p.inviter.sid || ''
         if (venderId) {
             let follow = await this.curl({
                 'url': 'https://api.m.jd.com/client.action?g_ty=ls&g_tk=518274330',
@@ -787,44 +860,44 @@ class Main extends Template {
             form: 'functionId=isvObfuscator&body=%7B%22id%22%3A%22%22%2C%22url%22%3A%22https%3A%2F%2Fddsj-dz.isvjcloud.com%22%7D&uuid=5162ca82aed35fc52e8&client=apple&clientVersion=10.0.10&st=1631884203742&sv=112&sign=fd40dc1c65d20881d92afe96c4aec3d0',
             cookie: p.cookie
         })
-        let token = await this.response({
-                'url': `https://${host}/wxCommonInfo/token`,
+        // let token = await this.response({
+        //         'url': `https://${host}/wxCommonInfo/token`,
+        //     }
+        // )
+        // var getPin = await this.response({
+        //         'url': `https://${host}/customer/getMyPing`,
+        //         form: `userId=${sid || venderId}&token=${isvObfuscator.token}&fromType=APP`,
+        //         cookie: token.cookie
+        //     }
+        // )
+        // if (!this.haskey(getPin, 'content.data.secretPin')) {
+        switch (host) {
+            case "cjhy-isv.isvjcloud.com":
+                var h = await this.response({
+                        'url': `https://${host}/wxCollectionActivity/activity?activityId=${activityId}`,
+                    }
+                )
+                break
+            default:
+                var h = await this.response({
+                        'url': `https://${host}/wxCollectionActivity/activity2/${activityId}?activityId=${activityId}`,
+                    }
+                )
+                break
+        }
+        let info = await this.response({
+                'url': `https://${host}/customer/getSimpleActInfoVo`,
+                form: `activityId=${activityId}`,
+                cookie: h.cookie
             }
         )
         var getPin = await this.response({
                 'url': `https://${host}/customer/getMyPing`,
-                form: `userId=${venderId}&token=${isvObfuscator.token}&fromType=APP`,
-                cookie: token.cookie
+                form: `userId=${sid || venderId}&token=${isvObfuscator.token}&fromType=APP`,
+                cookie: info.cookie
             }
         )
-        if (!this.haskey(getPin, 'content.data.secretPin')) {
-            switch (host) {
-                case "cjhy-isv.isvjcloud.com":
-                    var h = await this.response({
-                            'url': `https://${host}/wxCollectionActivity/activity?activityId=${activityId}`,
-                        }
-                    )
-                    break
-                default:
-                    var h = await this.response({
-                            'url': `https://${host}/wxCollectionActivity/activity2/${activityId}?activityId=${activityId}`,
-                        }
-                    )
-                    break
-            }
-            let info = await this.response({
-                    'url': `https://${host}/customer/getSimpleActInfoVo`,
-                    form: `activityId=${activityId}`,
-                    cookie: h.cookie
-                }
-            )
-            var getPin = await this.response({
-                    'url': `https://${host}/customer/getMyPing`,
-                    form: `userId=${venderId}&token=${isvObfuscator.token}&fromType=APP`,
-                    cookie: info.cookie
-                }
-            )
-        }
+        // }
         if (!this.haskey(getPin, 'content.data.secretPin')) {
             console.log(`可能是黑号或者黑ip,停止运行`)
             return
