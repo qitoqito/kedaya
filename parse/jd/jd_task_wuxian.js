@@ -37,10 +37,18 @@ class Main extends Template {
                     })
                 }
                 else {
-                    s = this.match(/(\w{24})/, i)
-                    this.code.push({
-                        activityId: s
-                    })
+                    let n = this.match(/(\d{12,17})/, i)
+                    if (n) {
+                        this.code.push({
+                            activityId: n
+                        })
+                    }
+                    else {
+                        s = this.match(/(\w{24})/, i)
+                        this.code.push({
+                            activityId: s
+                        })
+                    }
                 }
             }
         }
@@ -149,6 +157,30 @@ class Main extends Template {
                         else {
                             this.shareCode.push(data)
                         }
+                        break
+                    }
+                }
+            }
+            else if (! isNaN(i.activityId)) {
+                let venderId = i.activityId.substr(4, i.activityId.length - 6)
+                for (let host of array) {
+                    let token = await this.response({
+                            'url': `https://${host}/wxCommonInfo/token`,
+                        }
+                    )
+                    let s = await this.curl({
+                            'url': `https://${host}/pointExchange/activityContent`,
+                            'form': `activityId=${i.activityId}&pin=werwr36235244`,
+                            cookie: token.cookie
+                        }
+                    )
+                    if (this.haskey(s, 'data.activity')) {
+                        this.shareCode.push({
+                            "venderId": venderId,
+                            "activityId": i.activityId,
+                            type: 'pointExchange',
+                            host
+                        })
                         break
                     }
                 }
@@ -672,6 +704,28 @@ class Main extends Template {
                 }
                 else {
                     console.log('不能参团,或者已经参加过活动')
+                }
+            }
+            else if (['pointExchange'].includes(type)) {
+                let g = await this.response({
+                        'url': `https://${host}/common/pointRedeem/getGiftList`,
+                        'form': `pin=${secretPin}&venderId=${venderId}`,
+                        cookie: getPin.cookie
+                    }
+                )
+                if (this.haskey(g, 'content.point')) {
+                    let point = g.content.point
+                    console.log('有积分:', point)
+                    let reward = await this.curl({
+                            'url': `https://${host}/pointExchange/exchange`,
+                            'form': `pin=${secretPin}&activityId=${venderId}&beanCount=${point}`,
+                            cookie: getPin.cookie
+                        }
+                    )
+                    console.log(reward)
+                }
+                else {
+                    console.log("没有积分可以兑换")
                 }
             }
         }
