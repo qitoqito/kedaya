@@ -587,7 +587,7 @@ class Main extends Template {
                 let f = await this.curl({
                         'url': `https://${host}/microDz/invite/activity/wx/acceptInvite
                         `,
-                        'form': `activityId=${activityId}&invitee=${secretPin}&inviteeNick=abc&inviteeImg=${encodeURIComponent('https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}&inviter=${p.inviter.inviter}&inviterNick=${p.inviter.inviterNick}&inviterImg=${p.inviter.imgUrl}`,
+                        'form': `activityId=${activityId}&invitee=${secretPin}&inviteeNick=${pin}&inviteeImg=${encodeURIComponent('https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}&inviter=${p.inviter.inviter}&inviterNick=${p.inviter.inviterNick}&inviterImg=${p.inviter.imgUrl}`,
                         cookie: getPin.cookie
                     }
                 )
@@ -694,7 +694,12 @@ class Main extends Template {
             }
             let user = this.userPin(cookie)
             try {
-                let getPin = await this.getMyPing(p)
+                for (let nnn = 0; nnn<2; nnn++) {
+                    var getPin = await this.getMyPing(p)
+                    if (getPin) {
+                        break
+                    }
+                }
                 if (getPin) {
                     let venderId = p.inviter.venderId
                     let shopId = p.inviter.shopId
@@ -758,7 +763,12 @@ class Main extends Template {
             }
             let user = this.userPin(cookie)
             try {
-                let getPin = await this.getMyPing(p)
+                for (let nnn = 0; nnn<2; nnn++) {
+                    var getPin = await this.getMyPing(p)
+                    if (getPin) {
+                        break
+                    }
+                }
                 if (getPin) {
                     let venderId = p.inviter.venderId
                     let shopId = p.inviter.shopId
