@@ -161,7 +161,7 @@ class Main extends Template {
                     }
                 }
             }
-            else if (! isNaN(i.activityId)) {
+            else if (!isNaN(i.activityId)) {
                 let venderId = i.activityId.substr(4, i.activityId.length - 6)
                 for (let host of array) {
                     let token = await this.response({
@@ -531,8 +531,7 @@ class Main extends Template {
                                 cookie
                             }
                         )
-                        // console.log(getPrize)
-                        if (getPrize.errorMessage && getPrize.errorMessage.includes("插肩")) {
+                        if (getPrize.errorMessage && getPrize.errorMessage.includes("擦肩")) {
                             console.log('奖品与您擦肩而过了哟,重新获取')
                             await this.wait(1000)
                         }
