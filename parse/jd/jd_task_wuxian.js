@@ -149,7 +149,7 @@ class Main extends Template {
                                     break
                                 case 7:
                                     data.type = 'wxGameActivity'
-                                    data.title = ""
+                                    // data.title = ""
                                     break
                                 case 65:
                                     data.type = 'wxBuildActivity'
@@ -170,6 +170,11 @@ class Main extends Template {
                                     data.type = 'microDz'
                                     data.title = "微定制"
                                     break
+                                // case 40:
+                                //     data.type = 'wxInviteActivity'
+                                //     data.title = "邀请关注有礼"
+                                //     data.pageUrl = `https://${host}/wxInviteActivity/invitee?activityId=${i.activityId}`
+                                //     break
                             }
                             if (!data.pageUrl) {
                                 data.pageUrl = i.activityId
@@ -221,7 +226,7 @@ class Main extends Template {
             }
         }
         if (this.shareCode.length<1) {
-            console.log("没获取到数据,可能IP黑了")
+            console.log("没获取到数据,可能IP黑了或者类型不支持")
         }
     }
 
@@ -406,7 +411,7 @@ class Main extends Template {
                                 cookie
                             }
                         )
-                        if (getPrize.errorMessage && getPrize.errorMessage.includes("擦肩")) {
+                        if (getPrize.errorMessage && (getPrize.errorMessage.includes("擦肩") || getPrize.errorMessage.includes("未达到领奖条件"))) {
                             console.log('奖品与您擦肩而过了哟,重新获取')
                             await this.wait(1000)
                         }
@@ -633,6 +638,19 @@ class Main extends Template {
                 )
                 if (f.result) {
                     console.log("加团成功")
+                    for (let kkk of this.venderIds || []) {
+                        for (let kk of Array(3)) {
+                            var o = await this.algo.curl({
+                                    'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${kkk}","shopId":"","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":"","channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
+                                    cookie: p.cookie
+                                }
+                            )
+                            if (o.success) {
+                                break
+                            }
+                        }
+                        console.log(kkk, `开卡中`, o.success)
+                    }
                 }
                 else {
                     console.log(f.errorMessage)
@@ -953,10 +971,10 @@ class Main extends Template {
     }
 
     async extra() {
-        if (this.getValue('expand').includes('openCard')) {
+        if (this.venderIds.length) {
             for (let cookie of this.cookies[this.task]) {
                 console.log(`正在运行: ${this.userPin(cookie)}`)
-                for (let kkk of this.venderIds || []) {
+                for (let kkk of this.venderIds) {
                     for (let kk of Array(3)) {
                         var o = await this.algo.curl({
                                 'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${kkk}","shopId":"","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":"","channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
