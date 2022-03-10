@@ -8,7 +8,7 @@ class Main extends Template {
         this.verify = 1
         this.manual = 1
         this.readme = `filename_custom="url|id"\n如果显示The ShareCode is empty...\n就是你IP黑了,暂时无法访问活动\n更换ip或者等服务器解除限制方可运行\n如需开卡,filename_expand="openCard"`
-        this.import = ['fs']
+        this.import = ['fs', 'jdAlgo']
         this.model = 'user'
         this.filter = "activityId"
     }
@@ -16,6 +16,11 @@ class Main extends Template {
     async prepare() {
         this.assert(this.custom, '请先添加环境变量')
         let custom = this.getValue('custom')
+        this.algo = new this.modules.jdAlgo({
+            appId: "8adfb",
+            type: 'app',
+            fp: "8389547038003203",
+        })
         for (let i of custom) {
             let query = this.query(i, '&', 1)
             if (query.actId && i.includes('exchangeActDetail')) {
@@ -110,45 +115,64 @@ class Main extends Template {
                                 case 5:
                                 case 6:
                                     data.type = 'wxCollectionActivity'
+                                    data.title = "加购有礼"
+                                    data.pageUrl = `https://${host}/wxCollectionActivity/activity2/${i.activityId}?activityId=${i.activityId}`
                                     break
                                 case 11:
                                 case 12:
                                 case 13:
                                     data.type = 'wxDrawActivity'
+                                    data.title = "幸运大转盘"
+                                    data.pageUrl = `https://${host}/${data.type}/activity?activityId=${i.activityId}`
                                     break
                                 case 24:
                                 case 73:
                                     data.type = 'wxShopGift'
+                                    data.title = "店铺礼包"
                                     break
                                 case 46:
                                 case 102:
                                 case 100:
                                     data.type = 'wxTeam'
+                                    data.title = "组队瓜分"
                                     break
                                 case 26:
                                     data.type = 'wxPointDrawActivity'
                                     break
                                 case 17:
                                     data.type = 'wxShopFollowActivity'
+                                    data.title = "关注店铺"
                                     break
-                                // case 2001:
-                                //     data.type='drawCenter'
-                                //     break
+                                case 2001:
+                                    data.type = 'drawCenter'
+                                    data.title = '老虎抽奖机'
+                                    break
                                 case 7:
                                     data.type = 'wxGameActivity'
+                                    data.title = ""
                                     break
                                 case 65:
                                     data.type = 'wxBuildActivity'
+                                    data.tittle = "盖楼有礼"
+                                    data.pageUrl = `https://${host}/wxBuildActivity/activity?activityId=${i.activityId}`
                                     break
                                 case 15:
+                                    // case 16:
                                     data.type = 'sign'
+                                    data.title = "签到有礼"
+                                    data.pageUrl = `https://${host}/sign/signActivity2?activityId=${i.activityId}`
                                     break
                                 case 18:
                                     data.type = 'sevenDay'
+                                    data.title = "七天签到"
                                     break
                                 case 400:
                                     data.type = 'microDz'
+                                    data.title = "微定制"
                                     break
+                            }
+                            if (!data.pageUrl) {
+                                data.pageUrl = i.activityId
                             }
                             let shopInfo = await this.curl({
                                     'url': `https://api.m.jd.com/?functionId=lite_getShopHomeBaseInfo&body={"shopId":"${data.shopId}","venderId":"${data.venderId}","source":"appshop"}&t=1646398923902&appid=jdlite-shop-app&client=H5`,
@@ -196,6 +220,9 @@ class Main extends Template {
                 }
             }
         }
+        if (this.shareCode.length<1) {
+            console.log("没获取到数据,可能IP黑了")
+        }
     }
 
     async main(p) {
@@ -212,12 +239,18 @@ class Main extends Template {
         let pin = this.userPin(p.cookie)
         let host = p.inviter.host
         let activityId = p.inviter.activityId
-        console.log(`活动ID: ${activityId}`)
         let at = p.inviter.activityType
         let type = p.inviter.type
+        console.log(`活动ID: ${activityId}`)
         this.assert(type, "不支持的活动类型")
         let venderId = p.inviter.venderId
         let shopId = p.inviter.shopId
+        if (p.inviter.pageUrl) {
+            console.log(`活动地址: ${p.inviter.pageUrl}`)
+        }
+        if (p.inviter.shopName) {
+            console.log(`活动店铺: ${p.inviter.shopName}`)
+        }
         let gifts = []
         let skuList = []
         let getPin = await this.getMyPing(p)
@@ -228,7 +261,7 @@ class Main extends Template {
         let sp = getPin.content.data.secretPin
         if (this.getValue('expand').includes('openCard')) {
             for (let kk of Array(3)) {
-                var o = await this.curl({
+                var o = await this.algo.curl({
                         'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${venderId}","shopId":"${shopId}","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":${p.inviter.jdActivityId},"channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
                         // 'form':``,
                         cookie: p.cookie
@@ -239,7 +272,6 @@ class Main extends Template {
                 }
             }
             console.log(`开卡中`, o.success)
-            // console.log(this.dumps(o))
         }
         switch (host) {
             case "cjhy-isv.isvjcloud.com":
@@ -257,13 +289,6 @@ class Main extends Template {
             }
         )
         if (['sign'].includes(type)) {
-            // let pageUrl = encodeURIComponent(`https://${host}/sign/signActivity?activityId=${activityId}&venderId=${venderId}`)
-            // let log = await this.response({
-            //         'url': `https://${host}/common/accessLog`,
-            //         'form': `venderId=${venderId}&code=${at}&pin=${secretPin}&activityId=${activityId}&pageUrl=${pageUrl}&subType=app`,
-            //         cookie: getPin.cookie
-            //     }
-            // )
             let signUp = await this.curl({
                     'url': `https://${host}/sign/wx/signUp`,
                     'form': `venderId=${venderId}&pin=${secretPin}&actId=${activityId}`,
@@ -279,20 +304,12 @@ class Main extends Template {
             }
         }
         else if (['sevenDay'].includes(type)) {
-            // let pageUrl = encodeURIComponent(`https://${host}/sign/sevenDay/signActivity?activityId=${activityId}&venderId=${venderId}`)
-            // let log = await this.response({
-            //         'url': `https://${host}/common/accessLog`,
-            //         'form': `venderId=${venderId}&code=${at}&pin=${secretPin}&activityId=${activityId}&pageUrl=${pageUrl}&subType=app`,
-            //         cookie: getPin.cookie
-            //     }
-            // )
             let signUp = await this.curl({
                     'url': `https://${host}/sign/${type}/wx/signUp`,
                     'form': `venderId=${venderId}&pin=${secretPin}&actId=${activityId}`,
                     cookie: getPin.cookie
                 }
             )
-            // console.log(signUp)
             if (this.haskey(signUp, 'signResult.gift.giftName')) {
                 console.log(`获得: ${signUp.signResult.gift.giftName}`)
                 gifts.push(signUp.signResult.gift.giftName)
@@ -310,7 +327,7 @@ class Main extends Template {
                 var url = `https://${host}/${type}/activityContent`
                 var activityContent = await this.response({
                         url,
-                        'form': `pin=${secretPin}&activityId=${activityId}&buyerPin=${secretPin}&signUuid=${signUuid}`,
+                        'form': `pin=${secretPin}&activityId=${activityId}&buyerPin=${secretPin}&signUuid=${signUuid}&nick=${pin}`,
                         cookie: `${getPin.cookie};`
                     }
                 )
@@ -363,16 +380,18 @@ class Main extends Template {
                         }
                         break
                     default:
-                        for (let z = 0; z<6; z++) {
+                        for (let z = 0; z<4; z++) {
                             var add = await this.response({
                                     'url': `https://${host}/wxCollectionActivity/oneKeyAddCart`,
                                     form: `activityId=${activityId}&pin=${secretPin}&productIds=${this.dumps(this.column(skus.skus, 'skuId'))}`,
                                     cookie: `${getPin.cookie}`
                                 }
                             )
-                            await this.wait(500)
+                            await this.wait(1000)
                         }
-                        var cookie = `${add.cookie};AUTH_C_USER=${secretPin};`
+                        if (add.cookie) {
+                            var cookie = `${add.cookie};AUTH_C_USER=${secretPin};`
+                        }
                         break
                 }
                 if (skuList.length) {
@@ -395,6 +414,27 @@ class Main extends Template {
                             break
                         }
                     }
+                    if (this.haskey(getPrize, 'data.drawOk')) {
+                        console.log(`获得: ${getPrize.data.name}`)
+                        gifts.push(getPrize.data.name)
+                    }
+                    else {
+                        console.log(getPrize.errorMessage || getPrize.msg || "什么也没有")
+                    }
+                    if (!this.haskey(getPrize, 'data.canDrawTimes')) {
+                        break
+                    }
+                }
+            }
+            else if (['drawCenter'].includes(type)) {
+                while (true) {
+                    let getPrize = await this.curl({
+                            'url': `https://${host}/drawCenter/draw/luckyDraw`,
+                            form: `activityId=${activityId}&pin=${secretPin}`,
+                            cookie: getPin.cookie
+                        }
+                    )
+                    // console.log(getPrize)
                     if (this.haskey(getPrize, 'data.drawOk')) {
                         console.log(`获得: ${getPrize.data.name}`)
                         gifts.push(getPrize.data.name)
@@ -600,7 +640,7 @@ class Main extends Template {
             }
         }
         if (gifts.length) {
-            gifts.unshift(`ID: ${activityId} , 店铺: ${p.inviter.shopName}`)
+            gifts.unshift(`活动店铺: ${p.inviter.shopName}\n活动链接: ${p.inviter.pageUrl}`)
             this.notices(gifts.join("\n"), p.user)
         }
         await this.curl({
@@ -664,6 +704,12 @@ class Main extends Template {
         this.assert(type, "不支持的活动类型")
         let venderId = p.inviter.venderId
         let shopId = p.inviter.shopId
+        if (p.inviter.pageUrl) {
+            console.log(`活动地址: ${p.inviter.pageUrl}`)
+        }
+        if (p.inviter.shopName) {
+            console.log(`活动店铺: ${p.inviter.shopName}`)
+        }
         let gifts = []
         let skuList = []
         if (type == 'exchangeActDetail') {
@@ -727,7 +773,7 @@ class Main extends Template {
                         if (this.getValue('expand').includes('openCard')) {
                             for (let kkk of venderIds) {
                                 for (let kk of Array(3)) {
-                                    var o = await this.curl({
+                                    var o = await this.algo.curl({
                                             'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${kkk}","shopId":"","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":"","channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
                                             // 'form':``,
                                             cookie: p.cookie
@@ -750,7 +796,6 @@ class Main extends Template {
                     if (this.haskey(inviter, 'data.inviterNick')) {
                         data.inviter = secretPin
                         data.venderIds = venderIds
-                        // delete inviter.data.list
                         this.shareCode.push({...data, ...inviter.data})
                     }
                 }
@@ -780,9 +825,8 @@ class Main extends Template {
                     let host = p.inviter.host
                     if (this.getValue('expand').includes('openCard')) {
                         for (let kk of Array(3)) {
-                            var o = await this.curl({
+                            var o = await this.algo.curl({
                                     'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${venderId}","shopId":"${shopId}","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":${p.inviter.jdActivityId},"channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
-                                    // 'form':``,
                                     cookie: p.cookie
                                 }
                             )
@@ -873,17 +917,6 @@ class Main extends Template {
             form: 'functionId=isvObfuscator&body=%7B%22id%22%3A%22%22%2C%22url%22%3A%22https%3A%2F%2Fddsj-dz.isvjcloud.com%22%7D&uuid=5162ca82aed35fc52e8&client=apple&clientVersion=10.0.10&st=1631884203742&sv=112&sign=fd40dc1c65d20881d92afe96c4aec3d0',
             cookie: p.cookie
         })
-        // let token = await this.response({
-        //         'url': `https://${host}/wxCommonInfo/token`,
-        //     }
-        // )
-        // var getPin = await this.response({
-        //         'url': `https://${host}/customer/getMyPing`,
-        //         form: `userId=${sid || venderId}&token=${isvObfuscator.token}&fromType=APP`,
-        //         cookie: token.cookie
-        //     }
-        // )
-        // if (!this.haskey(getPin, 'content.data.secretPin')) {
         switch (host) {
             case "cjhy-isv.isvjcloud.com":
                 var h = await this.response({
@@ -910,7 +943,6 @@ class Main extends Template {
                 cookie: info.cookie
             }
         )
-        // }
         if (!this.haskey(getPin, 'content.data.secretPin')) {
             console.log(`可能是黑号或者黑ip,停止运行`)
             return
@@ -926,7 +958,7 @@ class Main extends Template {
                 console.log(`正在运行: ${this.userPin(cookie)}`)
                 for (let kkk of this.venderIds || []) {
                     for (let kk of Array(3)) {
-                        var o = await this.curl({
+                        var o = await this.algo.curl({
                                 'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${kkk}","shopId":"","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":"","channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
                                 cookie
                             }
