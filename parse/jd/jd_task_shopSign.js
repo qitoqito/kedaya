@@ -72,7 +72,7 @@ class Main extends Template {
                 cookie
             }
         )
-        signIn.success ? console.log(p.user, `签到成功`) : console.log(p.user, `签到失败或者已经签到`)
+        signIn.success ? console.log(p.user, `签到成功`) : console.log(p.user, signIn.msg || `签到失败或者已经签到`)
         let s = await this.curl({
                 'url': `https://api.m.jd.com/api?appid=interCenter_shopSign&loginType=2&functionId=interact_center_shopSign_getSignRecord&body={"token":"${p.inviter.token}","venderId":${p.inviter.venderId},"activityId":${p.inviter.activityId},"type":56,"actionType":7}&jsonp=jsonp1004`,
                 // 'form':``,
