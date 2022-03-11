@@ -15,6 +15,44 @@ class Main extends Template {
 
     async prepare() {
         this.assert(this.custom, '请先添加环境变量')
+        this.dict = {
+            'lzkj-isv.isvjcloud.com': [
+                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Flzkj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=1d9f7760c9ffaad4eb&client=apple&clientVersion=10.0.10&st=1646999134752&sv=112&sign=d14c9517190f8a8b0e253e3dbbdee87a',
+                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Flzkj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=18a17aa99f7fcfff35&client=apple&clientVersion=10.0.10&st=1646999134761&sv=121&sign=e930b0308cbfaf4200b2b84b941c6788',
+                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Flzkj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=db9c771d90d938b86b&client=apple&clientVersion=10.0.10&st=1646999134762&sv=112&sign=08221e9c89bbd9ae2c60f2051b7ce505',
+                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Flzkj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=2da6b0bb5954112f4a&client=apple&clientVersion=10.0.10&st=1646999134763&sv=100&sign=32911674584d97be1a250b98533e12f1',
+                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Flzkj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=5353d1987de933bbed&client=apple&clientVersion=10.0.10&st=1646999134765&sv=111&sign=02fabfeb6991fd0942113b8b91daa064',
+                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Flzkj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=5d0ff914dc2f99d1ed&client=apple&clientVersion=10.0.10&st=1646999134767&sv=100&sign=4d926e0ced742ced8a4374811713af51',
+                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Flzkj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=09007f4b53f42ea76a&client=apple&clientVersion=10.0.10&st=1646999134772&sv=112&sign=8b69bb949ac5098e8f0db4697e0ec84a',
+                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Flzkj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=829d99df24e49cdacb&client=apple&clientVersion=10.0.10&st=1646999134773&sv=112&sign=87dbe2a552abef974cfd6d97a7f74b97',
+                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Flzkj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=e8c798cb6d7b13c75b&client=apple&clientVersion=10.0.10&st=1646999134784&sv=112&sign=198854a1e8da61b030924ea640e61b74',
+                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Flzkj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=b024526b380d35c9e3&client=apple&clientVersion=10.0.10&st=1646999134786&sv=102&sign=7d796bf73559e6ef06ad746fdc5445c0'
+            ],
+            'cjhy-isv.isvjcloud.com': [
+                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Fcjhy-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=b024526b380d35c9e3&client=apple&clientVersion=10.0.10&st=1646999134786&sv=111&sign=fd9417f9d8e872da6c55102bd69da99f',
+                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Fcjhy-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=c13998164739530b4b&client=apple&clientVersion=10.0.10&st=1646999134787&sv=112&sign=6c8bea1dbcaec6e17841d5e66ed590ed',
+                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Fcjhy-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=1d70cd0a0c7096e86d&client=apple&clientVersion=10.0.10&st=1646999134788&sv=111&sign=026a782e2d60aa8e7fbb76f000bcbc7e',
+                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Fcjhy-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=293231f92a043e7bee&client=apple&clientVersion=10.0.10&st=1646999134791&sv=112&sign=e13574f1c25f5adf23d0a68bb0728e01',
+                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Fcjhy-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=147dc74e2f03ec5e23&client=apple&clientVersion=10.0.10&st=1646999134792&sv=112&sign=5b14dad0922821a65d7acb1da36c0d38',
+                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Fcjhy-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=cdea9eb9e5e369c041&client=apple&clientVersion=10.0.10&st=1646999134793&sv=100&sign=a9f78dae735cecf0e4447c6621d0b870',
+                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Fcjhy-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=615a2eeca9d867f5f8&client=apple&clientVersion=10.0.10&st=1646999134794&sv=121&sign=afaf2c7b1756cd2dbdc3a0bf2aa72f38',
+                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Fcjhy-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=baab1229681d350dd0&client=apple&clientVersion=10.0.10&st=1646999134803&sv=102&sign=91292e8c482052f55bf4a8d90f57d48c',
+                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Fcjhy-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=baab1229681d350dd0&client=apple&clientVersion=10.0.10&st=1646999134804&sv=120&sign=0fe8ba286231503a9c8c642995b444bd',
+                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Fcjhy-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=f7fc9bef85a8620cdf&client=apple&clientVersion=10.0.10&st=1646999134805&sv=121&sign=0339e05b0ee85e7a9346eb8c1ed7056d'
+            ],
+            'txzj-isv.isvjcloud.com': [
+                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Ftxzj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=f7fc9bef85a8620cdf&client=apple&clientVersion=10.0.10&st=1646999134805&sv=121&sign=bbe137e2f52dbf3a1f10fa2ffe749d05',
+                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Ftxzj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=2d055826a369eb2fc6&client=apple&clientVersion=10.0.10&st=1646999134807&sv=112&sign=fa00234b1f237624970aed51543c49e2',
+                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Ftxzj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=d5f0ab2b97d36ba178&client=apple&clientVersion=10.0.10&st=1646999134809&sv=112&sign=04895a606933f02321a35f9fca56e807',
+                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Ftxzj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=f491462298964da08f&client=apple&clientVersion=10.0.10&st=1646999134810&sv=111&sign=003c222fc32323957a3da441eb1d0a0d',
+                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Ftxzj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=f491462298964da08f&client=apple&clientVersion=10.0.10&st=1646999134810&sv=111&sign=003c222fc32323957a3da441eb1d0a0d',
+                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Ftxzj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=f491462298964da08f&client=apple&clientVersion=10.0.10&st=1646999134810&sv=112&sign=2fc24960c23983f65ef975d306b21615',
+                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Ftxzj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=d75765b6c47fc7eb46&client=apple&clientVersion=10.0.10&st=1646999134814&sv=102&sign=9753902a4c8467ab9dffcc44ffd82aad',
+                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Ftxzj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=118c532769d7022cc6&client=apple&clientVersion=10.0.10&st=1646999134817&sv=121&sign=44a1b5c6597802dcee364ba80079d668',
+                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Ftxzj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=3d709b9f33d7c423b9&client=apple&clientVersion=10.0.10&st=1646999134834&sv=120&sign=477724fcebcd7c8b54417694714406f1',
+                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Ftxzj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=3d709b9f33d7c423b9&client=apple&clientVersion=10.0.10&st=1646999134834&sv=102&sign=4d1031329bce14b47ae31bbdf03cd5f4'
+            ]
+        }
         this.isSend = []
         let custom = this.getValue('custom')
         this.algo = new this.modules.jdAlgo({
@@ -179,6 +217,11 @@ class Main extends Template {
                                     data.type = 'microDz'
                                     data.title = "微定制"
                                     data.pageUrl = `https://${host}/microDz/invite/activity/wx/view/index?activityId=${i.activityId}`
+                                    break
+                                case 104:
+                                    data.type = "wxMcLevelAndBirthGifts"
+                                    data.title = "等级礼包"
+                                    data.pageUrl = `https://${host}/mc/wxMcLevelAndBirthGifts/activity?activityId=${i.activityId}`
                                     break
                                 // case 40:
                                 //     data.type = 'wxInviteActivity'
@@ -350,6 +393,9 @@ class Main extends Template {
             }
             else {
                 var url = `https://${host}/${type}/activityContent`
+                if (type == 'wxMcLevelAndBirthGifts') {
+                    url = `https://${host}/mc/wxMcLevelAndBirthGifts/activityContent`
+                }
                 var activityContent = await this.response({
                         url,
                         'form': `pin=${secretPin}&activityId=${activityId}&buyerPin=${secretPin}&signUuid=${signUuid}&nick=${pin}`,
@@ -682,6 +728,47 @@ class Main extends Template {
                     console.log('不能参团,或者已经参加过活动')
                 }
             }
+            else if (['wxMcLevelAndBirthGifts'].includes(type)) {
+                let getMemberLevel = await this.curl({
+                        'url': `https://${host}/mc/wxMcLevelAndBirthGifts/getMemberLevel`,
+                        'form': `venderId=${venderId}&pin=${secretPin}&activityId=${activityId}`,
+                        cookie: getPin.cookie
+                    }
+                )
+                if (this.haskey(getMemberLevel, 'data.level')) {
+                    if (!this.haskey(activityContent, 'content.data.isReceived')) {
+                        let level = parseInt(getMemberLevel.data.level)
+                        for (let ll = 1; ll<=level; ll++) {
+                            let s = await this.curl({
+                                    'url': `https://${host}/mc/wxMcLevelAndBirthGifts/sendLevelGifts`,
+                                    'form': `venderId=${venderId}&pin=${secretPin}&level=${ll}&activityId=${activityId}`,
+                                    cookie: getPin.cookie
+                                }
+                            )
+                            if (this.haskey(s, 'data.levelData')) {
+                                if (s.data.levelData.length) {
+                                    for (let k of s.data.levelData) {
+                                        console.log(k)
+                                        this.notices(`获得奖励: ${k.beanNum} ${k.name}`)
+                                    }
+                                }
+                                else {
+                                    console.log(s.data.levelError || "可能已经获取过奖励了")
+                                }
+                            }
+                            else {
+                                console.log("什么奖励也没有")
+                            }
+                        }
+                    }
+                    else {
+                        console.log(`没有获取到等级信息`)
+                    }
+                }
+                else {
+                    console.log("已经领取过了")
+                }
+            }
             else if (['pointExchange'].includes(type)) {
                 let g = await this.response({
                         'url': `https://${host}/common/pointRedeem/getGiftList`,
@@ -1008,7 +1095,8 @@ class Main extends Template {
         }
         let isvObfuscator = await this.curl({
             url: 'https://api.m.jd.com/client.action',
-            form: 'functionId=isvObfuscator&body=%7B%22id%22%3A%22%22%2C%22url%22%3A%22https%3A%2F%2Fddsj-dz.isvjcloud.com%22%7D&uuid=5162ca82aed35fc52e8&client=apple&clientVersion=10.0.10&st=1631884203742&sv=112&sign=fd40dc1c65d20881d92afe96c4aec3d0',
+            // form: 'functionId=isvObfuscator&body=%7B%22id%22%3A%22%22%2C%22url%22%3A%22https%3A%2F%2Fddsj-dz.isvjcloud.com%22%7D&uuid=5162ca82aed35fc52e8&client=apple&clientVersion=10.0.10&st=1631884203742&sv=112&sign=fd40dc1c65d20881d92afe96c4aec3d0',
+            form: this.random(this.dict[host], 1)[0],
             cookie: p.cookie
         })
         switch (host) {
