@@ -203,7 +203,6 @@ class Main extends Template {
                                     data.pageUrl = `https://${host}/wxBuildActivity/activity?activityId=${i.activityId}`
                                     break
                                 case 15:
-                                    // case 16:
                                     data.type = 'sign'
                                     data.title = "签到有礼"
                                     data.pageUrl = `https://${host}/sign/signActivity2?activityId=${i.activityId}`
@@ -228,6 +227,11 @@ class Main extends Template {
                                 //     data.title = "邀请关注有礼"
                                 //     data.pageUrl = `https://${host}/wxInviteActivity/invitee?activityId=${i.activityId}`
                                 //     break
+                                case 16:
+                                    data.type = "daily"
+                                    data.title = "每日抢"
+                                    data.pageUrl = `https://${host}/activity/daily/wx/indexPage1/${i.activityId}?activityId=${i.activityId}`
+                                    break
                             }
                             if (!data.pageUrl) {
                                 data.pageUrl = i.activityId
@@ -384,6 +388,21 @@ class Main extends Template {
             }
             else {
                 console.log(signUp.errorMessage || signUp.msg || "什么也没有")
+            }
+        }
+        else if (['daily'].includes(type)) {
+            let draw = await this.curl({
+                    'url': `https://${host}/activity/daily/wx/grabGift`,
+                    'form': `actId=${activityId}&pin=${secretPin}`,
+                    cookie: getPin.cookie
+                }
+            )
+            if (draw.isOk) {
+                // 这边还没获取到正确的返回,后期添加
+                console.log(this.dumps(draw))
+            }
+            else {
+                console.log(draw.msg || "什么也没有抢到")
             }
         }
         else {
