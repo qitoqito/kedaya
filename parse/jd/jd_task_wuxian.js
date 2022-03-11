@@ -15,6 +15,7 @@ class Main extends Template {
 
     async prepare() {
         this.assert(this.custom, '请先添加环境变量')
+        this.isSend = []
         let custom = this.getValue('custom')
         this.algo = new this.modules.jdAlgo({
             appId: "8adfb",
@@ -129,27 +130,34 @@ class Main extends Template {
                                 case 73:
                                     data.type = 'wxShopGift'
                                     data.title = "店铺礼包"
+                                    data.pageUrl = `https://${host}/wxShopGift/activity?activityId=${i.activityId}`
                                     break
                                 case 46:
                                 case 102:
                                 case 100:
                                     data.type = 'wxTeam'
                                     data.title = "组队瓜分"
+                                    data.pageUrl = `https://${host}/wxTeam/activity2?activityId=${i.activityId}`
                                     break
                                 case 26:
                                     data.type = 'wxPointDrawActivity'
+                                    data.title = "积分兑换"
+                                    data.pageUrl = `https://${host}/wxPointDrawActivity/activity?activityId=${i.activityId}`
                                     break
                                 case 17:
                                     data.type = 'wxShopFollowActivity'
                                     data.title = "关注店铺"
+                                    data.pageUrl = `https://${host}/wxShopFollowActivity/activity?activityId=${i.activityId}`
                                     break
                                 case 2001:
                                     data.type = 'drawCenter'
                                     data.title = '老虎抽奖机'
+                                    data.pageUrl = `https://${host}/drawCenter/activity?activityId=${i.activityId}`
                                     break
                                 case 7:
                                     data.type = 'wxGameActivity'
-                                    // data.title = ""
+                                    data.title = "无线游戏"
+                                    data.pageUrl = `https://${host}/wxGameActivity/activity?activityId=${i.activityId}`
                                     break
                                 case 65:
                                     data.type = 'wxBuildActivity'
@@ -165,10 +173,12 @@ class Main extends Template {
                                 case 18:
                                     data.type = 'sevenDay'
                                     data.title = "七天签到"
+                                    data.pageUrl = `https://${host}/sign/sevenDay/signActivity?activityId=${i.activityId}`
                                     break
                                 case 400:
                                     data.type = 'microDz'
                                     data.title = "微定制"
+                                    data.pageUrl = `https://${host}/microDz/invite/activity/wx/view/index?activityId=${i.activityId}`
                                     break
                                 // case 40:
                                 //     data.type = 'wxInviteActivity'
@@ -232,6 +242,16 @@ class Main extends Template {
 
     async main(p) {
         let type = p.inviter.type
+        if (!this.isSend.includes(this.md5(`${p.inviter.activityId},${p.inviter.signUuid}`))) {
+            let text = `🐽🐽\n活动店铺: ${p.inviter.shopName}\n活动地址: ${p.inviter.pageUrl}\n活动ID: ${p.inviter.activityId}\n活动名称: ${p.inviter.title}\n活动类型: ${p.inviter.type}`
+            if (p.inviter.signUuid) {
+                text += `\n${p.inviter.signUuid}`
+            }
+            this.notices(text, "当前活动信息")
+            this.isSend.push(
+                this.md5(`${p.inviter.activityId},${p.inviter.signUuid}`)
+            )
+        }
         if (type == 'exchangeActDetail') {
             await this.rType(p)
         }
@@ -714,7 +734,7 @@ class Main extends Template {
             }
         }
         if (gifts.length) {
-            gifts.unshift(`活动店铺: ${p.inviter.shopName}\n活动ID: ${activityId}`)
+            // gifts.unshift(`活动店铺: ${p.inviter.shopName}\n活动ID: ${activityId}`)
             this.notices(gifts.join("\n"), p.user)
         }
         await this.curl({
