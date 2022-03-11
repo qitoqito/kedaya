@@ -363,41 +363,97 @@ class Main extends Template {
                 }
             }
             if (['wxCollectionActivity'].includes(type)) {
-                switch (host) {
-                    case "cjhy-isv.isvjcloud.com":
-                        cookie = `${getPin.cookie}`
-                        for (let k of skuList) {
-                            let addOne = await this.response({
-                                    'url': `https://${host}/wxCollectionActivity/addCart`,
-                                    'form': `activityId=${activityId}&pin=${secretPin}&productId=${k}`,
-                                    cookie
-                                }
-                            )
-                            console.log(`加购: ${k}`)
-                            if (this.haskey(addOne, 'content.data.hasAddCartSize') == need) {
-                                break
+                // switch (host) {
+                //     case "cjhy-isv.isvjcloud.com":
+                //         cookie = `${getPin.cookie}`
+                //         for (let k of skuList) {
+                //             let addOne = await this.response({
+                //                     'url': `https://${host}/wxCollectionActivity/addCart`,
+                //                     'form': `activityId=${activityId}&pin=${secretPin}&productId=${k}`,
+                //                     cookie
+                //                 }
+                //             )
+                //             console.log(`加购: ${k}`)
+                //             if (this.haskey(addOne, 'content.data.hasAddCartSize') == need) {
+                //                 break
+                //             }
+                //             if (this.haskey(addOne, 'content.errorMessage').includes('异常')) {
+                //                 console.log(addOne.content.errorMessage)
+                //                 return
+                //             }
+                //             var cookie = `${addOne.cookie};AUTH_C_USER=${secretPin};`
+                //         }
+                //         break
+                //     default:
+                //         if (this.haskey(activityContent, 'content.data.oneKeyAddCart')) {
+                //             for (let z = 0; z<4; z++) {
+                //                 var add = await this.response({
+                //                         'url': `https://${host}/wxCollectionActivity/oneKeyAddCart`,
+                //                         form: `activityId=${activityId}&pin=${secretPin}&productIds=${this.dumps(this.column(skus.skus, 'skuId'))}`,
+                //                         cookie: `${getPin.cookie}`
+                //                     }
+                //                 )
+                //                 await this.wait(1000)
+                //             }
+                //             if (add.cookie) {
+                //                 var cookie = `${add.cookie};AUTH_C_USER=${secretPin};`
+                //             }
+                //         }
+                //         else {
+                //             cookie = `${getPin.cookie}`
+                //             for (let k of skuList) {
+                //                 let addOne = await this.response({
+                //                         'url': `https://${host}/wxCollectionActivity/addCart`,
+                //                         'form': `activityId=${activityId}&pin=${secretPin}&productId=${k}`,
+                //                         cookie
+                //                     }
+                //                 )
+                //                 console.log(`加购: ${k}`)
+                //                 if (this.haskey(addOne, 'content.data.hasAddCartSize') == need) {
+                //                     break
+                //                 }
+                //                 if (this.haskey(addOne, 'content.errorMessage').includes('异常')) {
+                //                     console.log(addOne.content.errorMessage)
+                //                     return
+                //                 }
+                //                 var cookie = `${addOne.cookie};AUTH_C_USER=${secretPin};`
+                //             }
+                //         }
+                //         break
+                // }
+                if (this.haskey(activityContent, 'content.data.oneKeyAddCart')) {
+                    for (let z = 0; z<4; z++) {
+                        var add = await this.response({
+                                'url': `https://${host}/wxCollectionActivity/oneKeyAddCart`,
+                                form: `activityId=${activityId}&pin=${secretPin}&productIds=${this.dumps(this.column(skus.skus, 'skuId'))}`,
+                                cookie: `${getPin.cookie}`
                             }
-                            if (this.haskey(addOne, 'content.errorMessage').includes('异常')) {
-                                console.log(addOne.content.errorMessage)
-                                return
+                        )
+                        await this.wait(1000)
+                    }
+                    if (add.cookie) {
+                        var cookie = `${add.cookie};AUTH_C_USER=${secretPin};`
+                    }
+                }
+                else {
+                    cookie = `${getPin.cookie}`
+                    for (let k of skuList) {
+                        let addOne = await this.response({
+                                'url': `https://${host}/wxCollectionActivity/addCart`,
+                                'form': `activityId=${activityId}&pin=${secretPin}&productId=${k}`,
+                                cookie
                             }
-                            var cookie = `${addOne.cookie};AUTH_C_USER=${secretPin};`
+                        )
+                        console.log(`加购: ${k}`)
+                        if (this.haskey(addOne, 'content.data.hasAddCartSize') == need) {
+                            break
                         }
-                        break
-                    default:
-                        for (let z = 0; z<4; z++) {
-                            var add = await this.response({
-                                    'url': `https://${host}/wxCollectionActivity/oneKeyAddCart`,
-                                    form: `activityId=${activityId}&pin=${secretPin}&productIds=${this.dumps(this.column(skus.skus, 'skuId'))}`,
-                                    cookie: `${getPin.cookie}`
-                                }
-                            )
-                            await this.wait(1000)
+                        if (this.haskey(addOne, 'content.errorMessage').includes('异常')) {
+                            console.log(addOne.content.errorMessage)
+                            return
                         }
-                        if (add.cookie) {
-                            var cookie = `${add.cookie};AUTH_C_USER=${secretPin};`
-                        }
-                        break
+                        var cookie = `${addOne.cookie};AUTH_C_USER=${secretPin};`
+                    }
                 }
                 if (skuList.length) {
                     console.log("加购有延迟,等待3秒...")
@@ -658,7 +714,7 @@ class Main extends Template {
             }
         }
         if (gifts.length) {
-            gifts.unshift(`活动店铺: ${p.inviter.shopName}\n活动链接: ${p.inviter.pageUrl}`)
+            gifts.unshift(`活动店铺: ${p.inviter.shopName}\n活动ID: ${activityId}`)
             this.notices(gifts.join("\n"), p.user)
         }
         await this.curl({
@@ -971,7 +1027,7 @@ class Main extends Template {
     }
 
     async extra() {
-        if (this.venderIds.length) {
+        if (this.venderIds && this.venderIds.length) {
             for (let cookie of this.cookies[this.task]) {
                 console.log(`正在运行: ${this.userPin(cookie)}`)
                 for (let kkk of this.venderIds) {
