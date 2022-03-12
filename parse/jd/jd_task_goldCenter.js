@@ -4,9 +4,9 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东金榜勋章点亮"
-        this.cron = "39 6,22 * * *"
+        // this.cron = "39 6,22 * * *"
         this.task = 'local'
-        this.thread = 6
+        // this.thread = 6
     }
 
     async main(p) {
