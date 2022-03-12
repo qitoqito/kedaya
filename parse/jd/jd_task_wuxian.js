@@ -69,41 +69,9 @@ class Main extends Template {
                 this.shareCode.push(query)
             }
             else {
-                let s = this.match(/\/\/([^\/]+)\/.+?(\w{32})/, i)
-                if (s) {
-                    this.code.push({
-                        host: s[0],
-                        activityId: s[1],
-                    })
-                }
-                else {
-                    s = this.match(/\s*([^\=]+)\s*=\s*(\w{32})/, i)
-                    if (s) {
-                        this.code.push({
-                            host: s[0].includes('isvjcloud.com') ? s[0] : `${s[0]}.isvjcloud.com`,
-                            activityId: s[1],
-                        })
-                    }
-                    else if (i.length == 32) {
-                        this.code.push({
-                            activityId: i
-                        })
-                    }
-                    else {
-                        let n = this.match(/(\d{12,17})/, i)
-                        if (n) {
-                            this.code.push({
-                                activityId: n
-                            })
-                        }
-                        else {
-                            s = this.match(/(\w{24})/, i)
-                            this.code.push({
-                                activityId: s
-                            })
-                        }
-                    }
-                }
+                this.code.push({
+                    activityId: this.match([/(\w{32})/, /(\w{24})/, /(\d{12,17})/], i),
+                })
             }
             let array = [
                 "lzkj-isv.isvjcloud.com",
@@ -188,8 +156,9 @@ class Main extends Template {
                                     data.pageUrl = `https://${host}/wxShopFollowActivity/activity?activityId=${i.activityId}`
                                     break
                                 case 2001:
+                                case 2003:
                                     data.type = 'drawCenter'
-                                    data.title = '老虎抽奖机'
+                                    data.title = '幸运抽奖'
                                     data.pageUrl = `https://${host}/drawCenter/activity?activityId=${i.activityId}`
                                     break
                                 case 7:
@@ -232,6 +201,11 @@ class Main extends Template {
                                     data.title = "每日抢"
                                     data.pageUrl = `https://${host}/activity/daily/wx/indexPage1/${i.activityId}?activityId=${i.activityId}`
                                     break
+                                // case 66:
+                                //     data.type = "WxHbShareActivity"
+                                //     data.title = "拼手气赢红包"
+                                //     data.pageUrl = `https://${host}/WxHbShareActivity/view/activity/${i.activityId}?activityId=${i.activityId}`
+                                //     break
                             }
                             if (!data.pageUrl) {
                                 data.pageUrl = i.activityId
@@ -248,6 +222,9 @@ class Main extends Template {
                             }
                             else if (['microDz'].includes(data.type)) {
                                 await this.microDz(data)
+                            }
+                            else if (['WxHbShareActivity'].includes(data.type)) {
+                                await this.WxHbShareActivity(data)
                             }
                             else {
                                 this.shareCode.push(data)
@@ -331,6 +308,7 @@ class Main extends Template {
         }
         var secretPin = getPin.content.data.secretPin
         let sp = getPin.content.data.secretPin
+        // 判断开卡
         if (this.getValue('expand').includes('openCard')) {
             for (let kk of Array(3)) {
                 var o = await this.algo.curl({
@@ -345,6 +323,7 @@ class Main extends Template {
             }
             console.log(`开卡中`, o.success)
         }
+        // 不同域名下的secretPin形式不一样
         switch (host) {
             case "cjhy-isv.isvjcloud.com":
                 secretPin = escape(encodeURIComponent(secretPin))
@@ -353,6 +332,7 @@ class Main extends Template {
                 secretPin = encodeURIComponent(secretPin)
                 break
         }
+        // 认证getPin信息
         let pageUrl = encodeURIComponent(`https://${host}/sign/signActivity?activityId=${activityId}&venderId=${venderId}`)
         let log = await this.response({
                 'url': `https://${host}/common/accessLog`,
@@ -372,6 +352,7 @@ class Main extends Template {
                 gifts.push(signUp.gift.giftName)
             }
             else {
+                console.log(signUp)
                 console.log(signUp.errorMessage || signUp.msg || "什么也没有")
             }
         }
@@ -387,6 +368,7 @@ class Main extends Template {
                 gifts.push(signUp.signResult.gift.giftName)
             }
             else {
+                console.log(signUp)
                 console.log(signUp.errorMessage || signUp.msg || "什么也没有")
             }
         }
@@ -448,66 +430,9 @@ class Main extends Template {
                 }
             }
             if (['wxCollectionActivity'].includes(type)) {
-                // switch (host) {
-                //     case "cjhy-isv.isvjcloud.com":
-                //         cookie = `${getPin.cookie}`
-                //         for (let k of skuList) {
-                //             let addOne = await this.response({
-                //                     'url': `https://${host}/wxCollectionActivity/addCart`,
-                //                     'form': `activityId=${activityId}&pin=${secretPin}&productId=${k}`,
-                //                     cookie
-                //                 }
-                //             )
-                //             console.log(`加购: ${k}`)
-                //             if (this.haskey(addOne, 'content.data.hasAddCartSize') == need) {
-                //                 break
-                //             }
-                //             if (this.haskey(addOne, 'content.errorMessage').includes('异常')) {
-                //                 console.log(addOne.content.errorMessage)
-                //                 return
-                //             }
-                //             var cookie = `${addOne.cookie};AUTH_C_USER=${secretPin};`
-                //         }
-                //         break
-                //     default:
-                //         if (this.haskey(activityContent, 'content.data.oneKeyAddCart')) {
-                //             for (let z = 0; z<4; z++) {
-                //                 var add = await this.response({
-                //                         'url': `https://${host}/wxCollectionActivity/oneKeyAddCart`,
-                //                         form: `activityId=${activityId}&pin=${secretPin}&productIds=${this.dumps(this.column(skus.skus, 'skuId'))}`,
-                //                         cookie: `${getPin.cookie}`
-                //                     }
-                //                 )
-                //                 await this.wait(1000)
-                //             }
-                //             if (add.cookie) {
-                //                 var cookie = `${add.cookie};AUTH_C_USER=${secretPin};`
-                //             }
-                //         }
-                //         else {
-                //             cookie = `${getPin.cookie}`
-                //             for (let k of skuList) {
-                //                 let addOne = await this.response({
-                //                         'url': `https://${host}/wxCollectionActivity/addCart`,
-                //                         'form': `activityId=${activityId}&pin=${secretPin}&productId=${k}`,
-                //                         cookie
-                //                     }
-                //                 )
-                //                 console.log(`加购: ${k}`)
-                //                 if (this.haskey(addOne, 'content.data.hasAddCartSize') == need) {
-                //                     break
-                //                 }
-                //                 if (this.haskey(addOne, 'content.errorMessage').includes('异常')) {
-                //                     console.log(addOne.content.errorMessage)
-                //                     return
-                //                 }
-                //                 var cookie = `${addOne.cookie};AUTH_C_USER=${secretPin};`
-                //             }
-                //         }
-                //         break
-                // }
+                // 判断数据中是否存在一键加购字段
                 if (this.haskey(activityContent, 'content.data.oneKeyAddCart')) {
-                    for (let z = 0; z<4; z++) {
+                    for (let z = 0; z<3; z++) {
                         var add = await this.response({
                                 'url': `https://${host}/wxCollectionActivity/oneKeyAddCart`,
                                 form: `activityId=${activityId}&pin=${secretPin}&productIds=${this.dumps(this.column(skus.skus, 'skuId'))}`,
@@ -843,11 +768,13 @@ class Main extends Template {
             // gifts.unshift(`活动店铺: ${p.inviter.shopName}\n活动ID: ${activityId}`)
             this.notices(gifts.join("\n"), p.user)
         }
+        // 取消关注店铺
         await this.curl({
             'url': 'https://api.m.jd.com/client.action?g_ty=ls&g_tk=518274330',
             'form': `functionId=followShop&body={"follow":"false","shopId":"${shopId}","venderId":"${venderId}","award":"true","sourceRpc":"shop_app_home_follow"}&osVersion=13.7&appid=wh5&clientVersion=9.2.0&loginType=2&loginWQBiz=interact`,
             cookie: p.cookie
         })
+        // 删除加购
         if (skuList.length) {
             let s = await this.curl({
                     'url': `https://wq.jd.com/deal/mshopcart/rmvCmdy?sceneval=2&g_login_type=1&g_ty=ajax`,
@@ -1096,6 +1023,27 @@ class Main extends Template {
         }
     }
 
+    async WxHbShareActivity(data) {
+        // 有空再加
+        for (let cookie of this.cookies['help']) {
+            let p = {
+                cookie, inviter: data
+            }
+            let user = this.userPin(cookie)
+            try {
+                for (let nnn = 0; nnn<2; nnn++) {
+                    var getPin = await this.getMyPing(p)
+                    if (getPin) {
+                        break
+                    }
+                }
+                if (getPin) {
+                }
+            } catch (e) {
+            }
+        }
+    }
+
     async getMyPing(p) {
         let host = p.inviter.host
         let activityId = p.inviter.activityId
@@ -1114,7 +1062,6 @@ class Main extends Template {
         }
         let isvObfuscator = await this.curl({
             url: 'https://api.m.jd.com/client.action',
-            // form: 'functionId=isvObfuscator&body=%7B%22id%22%3A%22%22%2C%22url%22%3A%22https%3A%2F%2Fddsj-dz.isvjcloud.com%22%7D&uuid=5162ca82aed35fc52e8&client=apple&clientVersion=10.0.10&st=1631884203742&sv=112&sign=fd40dc1c65d20881d92afe96c4aec3d0',
             form: this.random(this.dict[host], 1)[0],
             cookie: p.cookie
         })
@@ -1154,6 +1101,7 @@ class Main extends Template {
     }
 
     async extra() {
+        // 此处用来跑组队开卡
         if (this.venderIds && this.venderIds.length) {
             for (let cookie of this.cookies[this.task]) {
                 console.log(`正在运行: ${this.userPin(cookie)}`)
