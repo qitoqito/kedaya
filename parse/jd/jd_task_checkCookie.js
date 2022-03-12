@@ -5,7 +5,6 @@ class Main extends Template {
         super()
         this.title = "京东cookie检测"
         this.cron = "50 7-23 * * *"
-        // this.help = 2
         this.thread = 6
         this.task = 'all'
     }
@@ -24,10 +23,11 @@ class Main extends Template {
             }
         )
         if ((s.islogin == '0' && s2.errCode == '13')) {
-            this.notices("账号过期了呀🐶", p.user) 
+            console.log(p.user, "账号过期了呀🐶")
+            this.notices("账号过期了呀🐶", p.user)
         }
         else {
-            console.log("账号还没过期呢🍀")
+            console.log(p.user, "账号还没过期呢🍀")
         }
     }
 }
