@@ -381,7 +381,8 @@ class Main extends Template {
             )
             if (draw.isOk) {
                 // 这边还没获取到正确的返回,后期添加
-                console.log(this.dumps(draw))
+                console.log(this.haskey(draw, 'gift.gift.name'))
+                this.notices(this.haskey(draw, 'gift.gift.name'), p.user)
             }
             else {
                 console.log(draw.msg || "什么也没有抢到")
