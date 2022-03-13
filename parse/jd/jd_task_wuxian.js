@@ -69,9 +69,28 @@ class Main extends Template {
                 this.shareCode.push(query)
             }
             else {
-                this.code.push({
-                    activityId: this.match([/(\w{32})/, /(\w{24})/, /(\d{12,17})/], i),
-                })
+                let acid = this.match([/(\w{32})/, /(\w{24})/, /(\d{12,17})/], i)
+                if (acid) {
+                    this.code.push({
+                        activityId: acid,
+                    })
+                }
+                else {
+                    let vid = this.match(/(\d+)/, i)
+                    let u = await this.curl({
+                            'url': `https://fjzy-isv.isvjcloud.com/index.php?mod=games&action=buyerTokenJson`,
+                            'form': `buyerTokenJson={"state":"0","data":"","msg":""}&venderId=${vid}&yxId=5510`,
+                        }
+                    )
+                    if (u.buyPin) {
+                        this.code.push({
+                            activityId: this.match(/(\d+)/, i),
+                            title: '幸运大抽奖',
+                            pageUrl: `https://fjzy-isv.isvjcloud.com/index.php?mod=games&c=redpape&venderId=${vid}&yxId=5510`,
+                            type: "lucky"
+                        })
+                    }
+                }
             }
             let array = [
                 "lzkj-isv.isvjcloud.com",
@@ -83,38 +102,38 @@ class Main extends Template {
             for (let i of this.code) {
                 if (i.activityId.length == 32) {
                     for (let host of array) {
-                        let p = await this.response({
-                                'url': `https://${host}/wxCommonInfo/token`,
-                            }
-                        )
-                        var s = await this.curl({
-                                'url': `https://${host}/customer/getSimpleActInfoVo`,
-                                'form': `activityId=${i.activityId}`,
-                                cookie: p.cookie
-                            }
-                        )
-                        if (!this.haskey(s, 'data')) {
-                            switch (host) {
-                                case "cjhy-isv.isvjcloud.com":
-                                    var h = await this.response({
-                                            'url': `https://${host}/wxCollectionActivity/activity?activityId=${i.activityId}`,
-                                        }
-                                    )
-                                    break
-                                default:
-                                    var h = await this.response({
-                                            'url': `https://${host}/wxCollectionActivity/activity2/${i.activityId}?activityId=${i.activityId}`,
-                                        }
-                                    )
-                                    break
-                            }
-                            s = await this.curl({
-                                    'url': `https://${host}/customer/getSimpleActInfoVo`,
-                                    form: `activityId=${i.activityId}`,
-                                    cookie: h.cookie
-                                }
-                            )
+                        // let p = await this.response({
+                        //         'url': `https://${host}/wxCommonInfo/token`,
+                        //     }
+                        // )
+                        // var s = await this.curl({
+                        //         'url': `https://${host}/customer/getSimpleActInfoVo`,
+                        //         'form': `activityId=${i.activityId}`,
+                        //         cookie: p.cookie
+                        //     }
+                        // )
+                        // if (!this.haskey(s, 'data')) {
+                        switch (host) {
+                            case "cjhy-isv.isvjcloud.com":
+                                var h = await this.response({
+                                        'url': `https://${host}/wxCollectionActivity/activity?activityId=${i.activityId}`,
+                                    }
+                                )
+                                break
+                            default:
+                                var h = await this.response({
+                                        'url': `https://${host}/wxCollectionActivity/activity2/${i.activityId}?activityId=${i.activityId}`,
+                                    }
+                                )
+                                break
                         }
+                        let s = await this.curl({
+                                'url': `https://${host}/customer/getSimpleActInfoVo`,
+                                form: `activityId=${i.activityId}`,
+                                cookie: h.cookie
+                            }
+                        )
+                        // }
                         if (this.haskey(s, 'data')) {
                             let data = s.data
                             data.host = host
@@ -234,26 +253,31 @@ class Main extends Template {
                     }
                 }
                 else if (!isNaN(i.activityId)) {
-                    let venderId = i.activityId.substr(4, i.activityId.length - 6)
-                    for (let host of array) {
-                        let token = await this.response({
-                                'url': `https://${host}/wxCommonInfo/token`,
+                    if (this.haskey(i, 'type', 'lucky')) {
+                        this.shareCode.push(i)
+                    }
+                    else {
+                        let venderId = i.activityId.substr(4, i.activityId.length - 6)
+                        for (let host of array) {
+                            let token = await this.response({
+                                    'url': `https://${host}/wxCommonInfo/token`,
+                                }
+                            )
+                            let s = await this.curl({
+                                    'url': `https://${host}/pointExchange/activityContent`,
+                                    'form': `activityId=${i.activityId}&pin=werwr36235244`,
+                                    cookie: token.cookie
+                                }
+                            )
+                            if (this.haskey(s, 'data.activity')) {
+                                this.shareCode.push({
+                                    "venderId": venderId,
+                                    "activityId": i.activityId,
+                                    type: 'pointExchange',
+                                    host
+                                })
+                                break
                             }
-                        )
-                        let s = await this.curl({
-                                'url': `https://${host}/pointExchange/activityContent`,
-                                'form': `activityId=${i.activityId}&pin=werwr36235244`,
-                                cookie: token.cookie
-                            }
-                        )
-                        if (this.haskey(s, 'data.activity')) {
-                            this.shareCode.push({
-                                "venderId": venderId,
-                                "activityId": i.activityId,
-                                type: 'pointExchange',
-                                host
-                            })
-                            break
                         }
                     }
                 }
@@ -278,6 +302,9 @@ class Main extends Template {
         }
         if (type == 'exchangeActDetail') {
             await this.rType(p)
+        }
+        else if (type == 'lucky') {
+            await this.lType(p)
         }
         else {
             await this.dType(p)
@@ -380,7 +407,6 @@ class Main extends Template {
                 }
             )
             if (draw.isOk) {
-                // 这边还没获取到正确的返回,后期添加
                 console.log(this.haskey(draw, 'gift.gift.name'))
                 this.notices(this.haskey(draw, 'gift.gift.name'), p.user)
             }
@@ -857,6 +883,34 @@ class Main extends Template {
             )
             console.log(this.dumps(reward))
             return
+        }
+    }
+
+    async lType(p) {
+        let isvObfuscator = await this.curl({
+            url: 'https://api.m.jd.com/client.action',
+            form: 'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Flzkj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=2da6b0bb5954112f4a&client=apple&clientVersion=10.0.10&st=1646999134763&sv=100&sign=32911674584d97be1a250b98533e12f1',
+            cookie: p.cookie
+        })
+        let u = await this.curl({
+                'url': `https://fjzy-isv.isvjcloud.com/index.php?mod=games&action=buyerTokenJson`,
+                'form': `buyerTokenJson={"state":"0","data":"${isvObfuscator.token}","msg":""}&venderId=${p.inviter.activityId}&yxId=5510`,
+                cookie: `IsvToken:${isvObfuscator.token}`
+            }
+        )
+        if (u.drawNum) {
+            let r = await this.curl({
+                    'url': `https://fjzy-isv.isvjcloud.com/index.php?mod=games&action=check&venderId=${p.inviter.activityId}&actId=6&yxId=5510&token=undefined&buyPin=${u.buyPin}`,
+                    cookie: `IsvToken:${isvObfuscator.token}`
+                }
+            )
+            console.log(r.result.prize)
+            if (this.haskey(r, 'result.grade', 1)) {
+                this.notices(r.result.prize, p.user)
+            }
+        }
+        else {
+            console.log('没有抽奖机会')
         }
     }
 
