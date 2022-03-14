@@ -65,7 +65,7 @@ class Main extends Template {
                         }
                     )
                     if (!d) {
-                        await this.wait(1000)
+                        await this.wait(3000)
                         continue
                     }
                     console.log(i, d.msg || d.errorMsg)
@@ -75,7 +75,7 @@ class Main extends Template {
                     if (!d.succ) {
                         break
                     }
-                    await this.wait(1000)
+                    await this.wait(3000)
                 }
             }
             for (let n = 0; n<3 - (this.haskey(t, `data.favouriteShop`) || 0); n++) {
@@ -99,7 +99,7 @@ class Main extends Template {
                         }
                     )
                     if (!follow) {
-                        await this.wait(1000)
+                        await this.wait(3000)
                         continue
                     }
                     if (!follow.succ) {
@@ -109,7 +109,7 @@ class Main extends Template {
                     if (follow.msg == '今日已完成该任务') {
                         break
                     }
-                    await this.wait(1000)
+                    await this.wait(3000)
                 }
                 else {
                     console.log('follow', loadShopGroup.errorMsg)
@@ -127,7 +127,7 @@ class Main extends Template {
                     }
                 )
                 if (!loadItemGroup) {
-                    await this.wait(1000)
+                    await this.wait(3000)
                     continue
                 }
                 if (loadItemGroup.succ) {
@@ -145,7 +145,7 @@ class Main extends Template {
                         break
                     }
                     console.log('add', add.msg)
-                    await this.wait(1000)
+                    await this.wait(3000)
                 }
                 else {
                     console.log('add', loadItemGroup.errorMsg)
@@ -180,11 +180,11 @@ class Main extends Template {
                         }
                     )
                     if (!start) {
-                        await this.wait(1000)
+                        await this.wait(3000)
                         continue
                     }
                     if (start.succ) {
-                        await this.wait(3000)
+                        await this.wait(5000)
                         let game = await this.curl({
                                 'url': `https://mpdz-car-dz.isvjcloud.com/ql/front/carPlayUpdate`,
                                 body: {
@@ -199,7 +199,7 @@ class Main extends Template {
                         if (!game.succ) {
                             break
                         }
-                        await this.wait(3000)
+                        await this.wait(5000)
                     }
                     else {
                         break
