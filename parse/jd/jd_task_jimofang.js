@@ -5,7 +5,7 @@ class Main extends Template {
         super()
         this.title = "京东集魔方赢大奖"
         this.cron = "22 0,22 * * *"
-        this.task = 'zong'
+        this.task = 'local'
         this.thread = 3
         this.verify = 1
     }
