@@ -7,7 +7,7 @@ class Main extends Template {
         this.task = 'active'
         this.verify = 1
         this.manual = 1
-        this.readme = `filename_custom="url|id"\n如果显示The ShareCode is empty...\n就是你IP黑了,暂时无法访问活动\n更换ip或者等服务器解除限制方可运行\n如需开卡,filename_expand="openCard"`
+        this.readme = `filename_custom="url|id"\n如果显示The ShareCode is empty...\n就是你IP黑了,暂时无法访问活动\n更换ip或者等服务器解除限制方可运行\n如需开卡,filename_expand="openCard=1"\n组团这类请配合分身使用\nfilename_help=pin1|pin2\nfilename_count=n(最多参团人数)`
         this.import = ['fs', 'jdAlgo']
         this.model = 'user'
         this.filter = "activityId"
@@ -291,6 +291,35 @@ class Main extends Template {
         if (this.shareCode.length<1) {
             console.log("没获取到数据,可能IP黑了或者类型不支持")
         }
+        else {
+            let query = this.query(this.expand, '\\|', 1)
+            if (query.noCache) {
+                let shareCode = this.shareCode
+                this.shareCode = []
+                this.cacheId = []
+                try {
+                    let txt = this.modules.fs.readFileSync(`${this.dirname}/temp/${this.filename}.txt`).toString()
+                    this.cacheId = txt.split("\n").map(d => d)
+                } catch (e) {
+                }
+                for (let i of shareCode) {
+                    // 检测到不缓存类型,直接push
+                    if (query.noCache.includes(i.type)) {
+                        this.cacheId.push(i.activityId)
+                        this.shareCode.push(i)
+                    }
+                    else {
+                        if (this.cacheId.includes(i.activityId)) {
+                            console.log(`跳过运行: ${i.activityId} 已经在${this.filename}.txt里面了哦,类型为: ${i.type}`)
+                        }
+                        else {
+                            this.cacheId.push(i.activityId)
+                            this.shareCode.push(i)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     async main(p) {
@@ -304,16 +333,15 @@ class Main extends Template {
             this.isSend.push(
                 this.md5(`${p.inviter.activityId},${p.inviter.signUuid}`)
             )
+            this.notices(text, "当前活动信息")
         }
         if (type == 'exchangeActDetail') {
-            this.notices(text, "当前活动信息")
             await this.rType(p)
         }
         else if (type == 'lucky') {
             await this.lType(p)
         }
         else {
-            this.notices(text, "当前活动信息")
             await this.dType(p)
         }
     }
@@ -794,18 +822,24 @@ class Main extends Template {
                 }
             }
             else if (['microDz'].includes(type)) {
-                let f = await this.curl({
-                        'url': `https://${host}/microDz/invite/activity/wx/acceptInvite
-                        `,
-                        'form': `activityId=${activityId}&invitee=${secretPin}&inviteeNick=${pin}&inviteeImg=${encodeURIComponent('https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}&inviter=${p.inviter.inviter}&inviterNick=${p.inviter.inviterNick}&inviterImg=${p.inviter.imgUrl}`,
-                        cookie: getPin.cookie
-                    }
-                )
-                if (f.result) {
-                    console.log("加团成功")
+                if (p.inviter.aid.includes(pin)) {
+                    p.finish = 1
+                    console.log('已经组队过了')
                 }
                 else {
-                    console.log(f.errorMessage)
+                    let f = await this.curl({
+                            'url': `https://${host}/microDz/invite/activity/wx/acceptInvite
+                        `,
+                            'form': `activityId=${activityId}&invitee=${secretPin}&inviteeNick=${pin}&inviteeImg=${encodeURIComponent('https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}&inviter=${p.inviter.inviter}&inviterNick=${p.inviter.inviterNick}&inviterImg=${p.inviter.imgUrl}`,
+                            cookie: getPin.cookie
+                        }
+                    )
+                    if (f.result) {
+                        console.log("加团成功")
+                    }
+                    else {
+                        console.log(f.errorMessage)
+                    }
                 }
                 if (this.getValue('expand').includes('openCard')) {
                     for (let kkk of this.venderIds || []) {
@@ -829,8 +863,16 @@ class Main extends Template {
                     }
                 )
                 if (this.haskey(get, 'data.reward')) {
+                    p.finish = 1
+                    p.inviter.aid.push(pin)
                     console.log(`获得奖励: ${get.data.reward}`)
                     this.notices(`获得奖励: ${get.data.reward}`, p.user)
+                }
+                if (this.count) {
+                    if (this.unique(p.inviter.aid).length>=parseInt(this.count)) {
+                        console.log(`组队满足: ${this.count}`)
+                        this.finish.push(p.number)
+                    }
                 }
             }
         }
@@ -954,6 +996,8 @@ class Main extends Template {
     }
 
     async microDz(data) {
+        this.model = 'share'
+        this.filter = ''
         data.sid = 599119
         for (let cookie of this.cookies['help']) {
             let p = {
@@ -1004,7 +1048,7 @@ class Main extends Template {
                                         break
                                     }
                                 }
-                                console.log(kkk, `开卡中`, o.success)
+                                console.log(user, `开卡: ${kkk}`, o.success)
                             }
                         }
                     }
@@ -1014,11 +1058,23 @@ class Main extends Template {
                             cookie: getPin.cookie
                         }
                     )
+                    let aid = []
+                    if (this.haskey(inviter, 'data.list')) {
+                        aid = this.column(inviter.data.list, 'inviteeNick')
+                        delete inviter.data.list
+                    }
                     if (this.haskey(inviter, 'data.inviterNick')) {
+                        data.aid = aid
                         data.inviter = secretPin
                         data.venderIds = venderIds
                         this.shareCode.push({...data, ...inviter.data})
                     }
+                    let get = await this.curl({
+                            'url': `https://${host}/microDz/invite/activity/wx/getOpenCardAllStatuesNew`,
+                            'form': `isInvited=1&activityId=${activityId}&pin=${secretPin}`,
+                            cookie: getPin.cookie
+                        }
+                    )
                 }
             } catch (e) {
             }
@@ -1026,6 +1082,8 @@ class Main extends Template {
     }
 
     async wxTeam(data) {
+        this.model = 'share'
+        this.filter = ''
         for (let cookie of this.cookies['help']) {
             let p = {
                 cookie, inviter: data
@@ -1195,8 +1253,14 @@ class Main extends Template {
     }
 
     async extra() {
+        if (this.cacheId) {
+            await this.modules.fs.writeFile(`${this.dirname}/temp/${this.filename}.txt`, this.cacheId.join("\n"), (error) => {
+                if (error) return console.log("写入化失败" + error.message);
+                console.log("ID写入成功");
+            })
+        }
         // 此处用来跑组队开卡
-        if (this.getValue('expand').includes('openCard')) {
+        if (this.getValue('expand').includes('openCard') && this.shareCode.length) {
             if (this.venderIds && this.venderIds.length) {
                 for (let cookie of this.cookies[this.task]) {
                     console.log(`正在运行: ${this.userPin(cookie)}`)
