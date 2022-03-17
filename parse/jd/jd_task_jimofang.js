@@ -98,16 +98,16 @@ class Main extends Template {
                         let gift = this.column(s.result.lotteryInfoList, 'quantity', 'name')
                         if (this.dumps(gift) != '{}') {
                             this.notices(`${this.dumps(gift)}`, p.user)
-                            console.log(`获得奖励: ${this.dumps(gift)}`, p.user)
+                            console.log(p.user, `获得奖励: ${this.dumps(gift)}`)
                         }
                     }
                     else {
-                        console.log("什么也没有", p.user)
+                        console.log(p.user, `浏览: ${i.taskName} 但什么也没有`)
                     }
                 }
             }
             else {
-                console.log("任务已经完成了", p.user)
+                console.log(p.user,`${i.taskName}任务已经完成了` )
             }
         }
         let lo = await this.curl({
@@ -117,15 +117,12 @@ class Main extends Template {
             }
         )
         if (this.haskey(lo, 'result.lotteryInfoList')) {
-            console.log(lo?.result?.lotteryInfoList)
+            console.log(lo.result.lotteryInfoList)
             let gift = this.column(lo.result.lotteryInfoList, 'quantity', 'name')
             if (this.dumps(gift) != '{}') {
                 console.log(`${this.dumps(gift)}`, p.user)
                 this.notices(`${this.dumps(gift)}`, p.user)
             }
-        }
-        else {
-            console.log(lo.result)
         }
     }
 }
