@@ -55,6 +55,9 @@ class Main extends Template {
         }
         let query = this.query((this.getValue('expand').join("|") || ''), '\\|', 1)
         this.dict = {...this.dict, ...query}
+        if (this.dict.hasOwnProperty("openCard")) {
+            this.dict.openCard = 1
+        }
         this.dicts = {}
         this.isSend = []
         let custom = this.getValue('custom')
