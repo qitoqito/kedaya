@@ -7,7 +7,7 @@ class Main extends Template {
         this.task = 'active'
         this.verify = 1
         this.manual = 1
-        this.readme = `filename_custom="url|id"\n如果显示The ShareCode is empty...\n就是你IP黑了,暂时无法访问活动\n更换ip或者等服务器解除限制方可运行\n如需开卡,filename_expand="openCard=1"\n组团这类请配合分身使用\nfilename_help=pin1|pin2\nfilename_count=n(最多参团人数)`
+        this.readme = `filename_custom="url|id"\n如果显示The ShareCode is empty...\n就是你IP黑了,暂时无法访问活动\n更换ip或者等服务器解除限制方可运行\n如需开卡,filename_expand="openCard=1"\n组团这类请配合分身使用\nfilename_help=pin1|pin2\nfilename_expand="count=50"(有效参团人数)`
         this.import = ['fs', 'jdAlgo']
         this.model = 'user'
         this.filter = "activityId"
@@ -288,11 +288,14 @@ class Main extends Template {
                 }
             }
         }
+        let expand=this.getValue('expand')
+        console.log()
+        let query = this.query((this.expand || ''), '\\|', 1)
+        this.dict = {...this.dict, ...query}
         if (this.shareCode.length<1) {
             console.log("没获取到数据,可能IP黑了或者类型不支持")
         }
         else {
-            let query = this.query(this.expand, '\\|', 1)
             if (query.noCache) {
                 let shareCode = this.shareCode
                 this.shareCode = []
@@ -822,6 +825,21 @@ class Main extends Template {
                 }
             }
             else if (['microDz'].includes(type)) {
+                if (this.getValue('expand').includes('openCard')) {
+                    for (let kkk of this.venderIds || []) {
+                        for (let kk of Array(3)) {
+                            var o = await this.algo.curl({
+                                    'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${kkk}","shopId":"","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":"","channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
+                                    cookie: p.cookie
+                                }
+                            )
+                            if (o.success) {
+                                break
+                            }
+                        }
+                        console.log(kkk, `开卡中`, o.success)
+                    }
+                }
                 if (p.inviter.aid.includes(pin)) {
                     p.finish = 1
                     console.log('已经组队过了')
@@ -838,24 +856,14 @@ class Main extends Template {
                         console.log("加团成功")
                     }
                     else {
-                        console.log(f.errorMessage)
-                    }
-                }
-                if (this.getValue('expand').includes('openCard')) {
-                    for (let kkk of this.venderIds || []) {
-                        for (let kk of Array(3)) {
-                            var o = await this.algo.curl({
-                                    'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${kkk}","shopId":"","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":"","channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
-                                    cookie: p.cookie
-                                }
-                            )
-                            if (o.success) {
-                                break
-                            }
+                        let error = f.errorMessage || ''
+                        console.log(error)
+                        if (error.includes('队伍已经满员')) {
+                            this.finish(p.n)
                         }
-                        console.log(kkk, `开卡中`, o.success)
                     }
                 }
+                await this.wait(1000)
                 let get = await this.curl({
                         'url': `https://${host}/microDz/invite/activity/wx/getOpenCardAllStatuesNew`,
                         'form': `isInvited=1&activityId=${activityId}&pin=${secretPin}`,
@@ -868,9 +876,12 @@ class Main extends Template {
                     console.log(`获得奖励: ${get.data.reward}`)
                     this.notices(`获得奖励: ${get.data.reward}`, p.user)
                 }
-                if (this.count) {
-                    if (this.unique(p.inviter.aid).length>=parseInt(this.count)) {
-                        console.log(`组队满足: ${this.count}`)
+                else {
+                    console.log("可能已经领取奖励了")
+                }
+                if (this.dict.count) {
+                    if (this.unique(p.inviter.aid).length>=parseInt(this.dict.count)) {
+                        console.log(`组队满足: ${this.dict.count}`)
                         this.finish.push(p.number)
                     }
                 }
@@ -1031,6 +1042,14 @@ class Main extends Template {
                             cookie: getPin.cookie
                         }
                     )
+                    let residualPercentage = this.haskey(acc, 'data.residualPercentage')
+                    if (!residualPercentage) {
+                        console.log("没获取到进度条")
+                        continue
+                    }
+                    else {
+                        console.log(`当前剩余: ${residualPercentage}%`)
+                    }
                     let venderIds = []
                     if (this.haskey(acc, 'data.venderIds')) {
                         venderIds = acc.data.venderIds.split(",")
@@ -1054,7 +1073,7 @@ class Main extends Template {
                     }
                     let inviter = await this.curl({
                             'url': `https://${host}/microDz/invite/activity/wx/inviteRecord`,
-                            'form': `activityId=${activityId}&inviter=${secretPin}&pageNo=1&pageSize=15&type=0`,
+                            'form': `activityId=${activityId}&inviter=${secretPin}&pageNo=1&pageSize=100&type=0`,
                             cookie: getPin.cookie
                         }
                     )
@@ -1069,12 +1088,17 @@ class Main extends Template {
                         data.venderIds = venderIds
                         this.shareCode.push({...data, ...inviter.data})
                     }
+                    await this.wait(2000)
                     let get = await this.curl({
                             'url': `https://${host}/microDz/invite/activity/wx/getOpenCardAllStatuesNew`,
                             'form': `isInvited=1&activityId=${activityId}&pin=${secretPin}`,
                             cookie: getPin.cookie
                         }
                     )
+                    if (this.haskey(get, 'data.reward')) {
+                        console.log(`获得奖励: ${get.data.reward}`)
+                        this.notices(`获得奖励: ${get.data.reward}`, p.user)
+                    }
                 }
             } catch (e) {
             }
