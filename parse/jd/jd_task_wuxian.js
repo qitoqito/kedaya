@@ -372,7 +372,7 @@ class Main extends Template {
         var secretPin = getPin.content.data.secretPin
         let sp = getPin.content.data.secretPin
         // 判断开卡
-        if (this.getValue('expand').includes('openCard')) {
+        if (this.dict.openCard) {
             for (let kk of Array(3)) {
                 var o = await this.algo.curl({
                         'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${venderId}","shopId":"${shopId}","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":${p.inviter.jdActivityId},"channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
@@ -824,7 +824,7 @@ class Main extends Template {
                 }
             }
             else if (['microDz'].includes(type)) {
-                if (this.getValue('expand').includes('openCard')) {
+                if (this.dict.openCard) {
                     for (let kkk of this.venderIds || []) {
                         for (let kk of Array(3)) {
                             var o = await this.algo.curl({
@@ -1061,7 +1061,7 @@ class Main extends Template {
                     if (this.haskey(acc, 'data.venderIds')) {
                         venderIds = acc.data.venderIds.split(",")
                         this.venderIds = venderIds
-                        if (this.getValue('expand').includes('openCard')) {
+                        if (this.dict.openCard) {
                             for (let kkk of venderIds) {
                                 for (let kk of Array(3)) {
                                     var o = await this.algo.curl({
@@ -1107,7 +1107,7 @@ class Main extends Template {
                         this.notices(`获得奖励: ${get.data.reward}`, p.user)
                     }
                     this.dicts[user] = {
-                        cookie ,
+                        cookie,
                         repeat: {
                             'url': `https://${host}/microDz/invite/activity/wx/getOpenCardAllStatuesNew`,
                             'form': `isInvited=1&activityId=${activityId}&pin=${secretPin}`,
@@ -1141,7 +1141,7 @@ class Main extends Template {
                     var secretPin = getPin.content.data.secretPin
                     let activityId = p.inviter.activityId
                     let host = p.inviter.host
-                    if (this.getValue('expand').includes('openCard')) {
+                    if (this.dict.openCard) {
                         for (let kk of Array(3)) {
                             var o = await this.algo.curl({
                                     'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${venderId}","shopId":"${shopId}","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":${p.inviter.jdActivityId},"channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
@@ -1292,17 +1292,10 @@ class Main extends Template {
     }
 
     async extra() {
-        if (this.cacheId) {
-            await this.modules.fs.writeFile(`${this.dirname}/temp/${this.filename}.txt`, this.cacheId.join("\n"), (error) => {
-                if (error) return console.log("写入化失败" + error.message);
-                console.log("ID写入成功");
-            })
-        }
         // 此处用来跑组队开卡
-        if (this.getValue('expand').includes('openCard') && this.shareCode.length) {
-            console.log(this.dicts)
-            for (let i in this.dicts) {
-                console.log(`正在运行: ${i}`)
+        for (let i in this.dicts) {
+            console.log(`正在运行: ${i}`)
+            if (this.dict.openCard && this.shareCode.length) {
                 if (this.venderIds && this.venderIds.length) {
                     for (let kkk of this.venderIds) {
                         for (let kk of Array(3)) {
@@ -1318,15 +1311,24 @@ class Main extends Template {
                         console.log(i, `开卡中${kkk}`, o.success)
                     }
                 }
-                if (this.dicts[i].repeat) {
-                    let get = await this.curl(this.dicts[i].repeat
-                    )
-                    if (this.haskey(get, 'data.reward')) {
-                        console.log(`获得奖励: ${get.data.reward}`)
-                        this.notices(`获得奖励: ${get.data.reward}`, i)
-                    }
+            }
+            if (this.dicts[i].repeat) {
+                let get = await this.curl(this.dicts[i].repeat
+                )
+                if (this.haskey(get, 'data.reward')) {
+                    console.log(`获得奖励: ${get.data.reward}`)
+                    this.notices(`获得奖励: ${get.data.reward}`, i)
+                }
+                else {
+                    console.log('可能已经领取过奖励')
                 }
             }
+        }
+        if (this.cacheId) {
+            await this.modules.fs.writeFile(`${this.dirname}/temp/${this.filename}.txt`, this.cacheId.map(d => d).join("\n"), (error) => {
+                if (error) return console.log("写入化失败" + error.message);
+                console.log("ID写入成功");
+            })
         }
     }
 }
