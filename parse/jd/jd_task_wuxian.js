@@ -53,6 +53,9 @@ class Main extends Template {
                 'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Ftxzj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=3d709b9f33d7c423b9&client=apple&clientVersion=10.0.10&st=1646999134834&sv=102&sign=4d1031329bce14b47ae31bbdf03cd5f4'
             ]
         }
+        let query = this.query((this.getValue('expand').join("|") || ''), '\\|', 1)
+        this.dict = {...this.dict, ...query}
+        this.dicts = {}
         this.isSend = []
         let custom = this.getValue('custom')
         this.algo = new this.modules.jdAlgo({
@@ -288,8 +291,6 @@ class Main extends Template {
                 }
             }
         }
-        let query = this.query((this.getValue('expand').join("|") || ''), '\\|', 1)
-        this.dict = {...this.dict, ...query}
         if (this.shareCode.length<1) {
             console.log("没获取到数据,可能IP黑了或者类型不支持")
         }
@@ -851,6 +852,8 @@ class Main extends Template {
                         }
                     )
                     if (f.result) {
+                        p.finish = 1
+                        p.inviter.aid.push(pin)
                         console.log("加团成功")
                     }
                     else {
@@ -869,8 +872,6 @@ class Main extends Template {
                     }
                 )
                 if (this.haskey(get, 'data.reward')) {
-                    p.finish = 1
-                    p.inviter.aid.push(pin)
                     console.log(`获得奖励: ${get.data.reward}`)
                     this.notices(`获得奖励: ${get.data.reward}`, p.user)
                 }
@@ -881,6 +882,14 @@ class Main extends Template {
                     if (this.unique(p.inviter.aid).length>=parseInt(this.dict.count)) {
                         console.log(`组队满足: ${this.dict.count}`)
                         this.finish.push(p.number)
+                    }
+                }
+                this.dicts[pin] = {
+                    cookie: p.cookie,
+                    repeat: {
+                        'url': `https://${host}/microDz/invite/activity/wx/getOpenCardAllStatuesNew`,
+                        'form': `isInvited=1&activityId=${activityId}&pin=${secretPin}`,
+                        cookie: getPin.cookie
                     }
                 }
             }
@@ -1097,6 +1106,14 @@ class Main extends Template {
                         console.log(`获得奖励: ${get.data.reward}`)
                         this.notices(`获得奖励: ${get.data.reward}`, p.user)
                     }
+                    this.dicts[user] = {
+                        cookie ,
+                        repeat: {
+                            'url': `https://${host}/microDz/invite/activity/wx/getOpenCardAllStatuesNew`,
+                            'form': `isInvited=1&activityId=${activityId}&pin=${secretPin}`,
+                            cookie: getPin.cookie
+                        }
+                    }
                 }
             } catch (e) {
             }
@@ -1283,21 +1300,30 @@ class Main extends Template {
         }
         // 此处用来跑组队开卡
         if (this.getValue('expand').includes('openCard') && this.shareCode.length) {
-            if (this.venderIds && this.venderIds.length) {
-                for (let cookie of this.cookies[this.task]) {
-                    console.log(`正在运行: ${this.userPin(cookie)}`)
+            console.log(this.dicts)
+            for (let i in this.dicts) {
+                console.log(`正在运行: ${i}`)
+                if (this.venderIds && this.venderIds.length) {
                     for (let kkk of this.venderIds) {
                         for (let kk of Array(3)) {
                             var o = await this.algo.curl({
                                     'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${kkk}","shopId":"","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":"","channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
-                                    cookie
+                                    cookie: this.dicts[i].cookie
                                 }
                             )
                             if (o.success) {
                                 break
                             }
                         }
-                        console.log(kkk, `开卡中`, o.success)
+                        console.log(i, `开卡中${kkk}`, o.success)
+                    }
+                }
+                if (this.dicts[i].repeat) {
+                    let get = await this.curl(this.dicts[i].repeat
+                    )
+                    if (this.haskey(get, 'data.reward')) {
+                        console.log(`获得奖励: ${get.data.reward}`)
+                        this.notices(`获得奖励: ${get.data.reward}`, i)
                     }
                 }
             }
