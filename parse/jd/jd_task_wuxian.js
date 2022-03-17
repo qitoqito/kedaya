@@ -288,9 +288,7 @@ class Main extends Template {
                 }
             }
         }
-        let expand=this.getValue('expand')
-        console.log()
-        let query = this.query((this.expand || ''), '\\|', 1)
+        let query = this.query((this.getValue('expand').join("|") || ''), '\\|', 1)
         this.dict = {...this.dict, ...query}
         if (this.shareCode.length<1) {
             console.log("没获取到数据,可能IP黑了或者类型不支持")
