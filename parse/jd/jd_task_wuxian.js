@@ -69,7 +69,7 @@ class Main extends Template {
                 this.shareCode.push(query)
             }
             else {
-                let acid = this.match([/(\w{32})/, /(\w{24})/, /(\d{12,17})/], i)
+                let acid = this.match([/(\w{32})/, /(\w{24,27})/, /(\d{12,17})/], i)
                 if (acid) {
                     this.code.push({
                         activityId: acid,
@@ -87,7 +87,7 @@ class Main extends Template {
                             activityId: this.match(/(\d+)/, i),
                             title: '幸运大抽奖',
                             pageUrl: `https://fjzy-isv.isvjcloud.com/index.php?mod=games&c=redpape&venderId=${vid}&yxId=5510`,
-                            type: "lucky"
+                            type: "lucky",
                         })
                     }
                 }
@@ -225,6 +225,11 @@ class Main extends Template {
                                 //     data.title = "拼手气赢红包"
                                 //     data.pageUrl = `https://${host}/WxHbShareActivity/view/activity/${i.activityId}?activityId=${i.activityId}`
                                 //     break
+                                case 204:
+                                    data.pageUrl = `https://cjhy-isv.isvjcloud.com/mc/wxPointShopView/pointExgBeans?giftId=${i.activityId}`
+                                    data.title = "积分换豆"
+                                    data.type = 'wxPointShop'
+                                    break
                             }
                             if (!data.pageUrl) {
                                 data.pageUrl = i.activityId
@@ -290,23 +295,25 @@ class Main extends Template {
 
     async main(p) {
         let type = p.inviter.type
+        let text = ''
         if (!this.isSend.includes(this.md5(`${p.inviter.activityId},${p.inviter.signUuid}`))) {
-            let text = `🐽🐽\n活动店铺: ${p.inviter.shopName}\n活动地址: ${p.inviter.pageUrl}\n活动ID: ${p.inviter.activityId}\n活动名称: ${p.inviter.title}\n活动类型: ${p.inviter.type}`
+            text = `🐽🐽\n活动店铺: ${p.inviter.shopName}\n活动地址: ${p.inviter.pageUrl}\n活动ID: ${p.inviter.activityId}\n活动名称: ${p.inviter.title}\n活动类型: ${p.inviter.type}`
             if (p.inviter.signUuid) {
                 text += `\n${p.inviter.signUuid}`
             }
-            this.notices(text, "当前活动信息")
             this.isSend.push(
                 this.md5(`${p.inviter.activityId},${p.inviter.signUuid}`)
             )
         }
         if (type == 'exchangeActDetail') {
+            this.notices(text, "当前活动信息")
             await this.rType(p)
         }
         else if (type == 'lucky') {
             await this.lType(p)
         }
         else {
+            this.notices(text, "当前活动信息")
             await this.dType(p)
         }
     }
@@ -327,7 +334,6 @@ class Main extends Template {
         if (p.inviter.shopName) {
             console.log(`活动店铺: ${p.inviter.shopName}`)
         }
-        let gifts = []
         let skuList = []
         let getPin = await this.getMyPing(p)
         if (!getPin) {
@@ -376,7 +382,7 @@ class Main extends Template {
             )
             if (this.haskey(signUp, 'gift.giftName')) {
                 console.log(`获得: ${signUp.gift.giftName}`)
-                gifts.push(signUp.gift.giftName)
+                this.notices(signUp.gift.giftName, p.user)
             }
             else {
                 console.log(signUp)
@@ -392,7 +398,7 @@ class Main extends Template {
             )
             if (this.haskey(signUp, 'signResult.gift.giftName')) {
                 console.log(`获得: ${signUp.signResult.gift.giftName}`)
-                gifts.push(signUp.signResult.gift.giftName)
+                this.notices(signUp.signResult.gift.giftName, p.user)
             }
             else {
                 console.log(signUp)
@@ -412,6 +418,31 @@ class Main extends Template {
             }
             else {
                 console.log(draw.msg || "什么也没有抢到")
+            }
+        }
+        else if (['wxPointShop'].includes(type)) {
+            let c = await this.curl({
+                    'url': `https://${host}/mc/beans/selectBeansForC`,
+                    'form': `giftId=${activityId}&venderId=${venderId}&buyerPin=${secretPin}&beansLevel=1`,
+                    cookie: getPin.cookie
+                }
+            )
+            if (this.haskey(c, 'data.usedNum')) {
+                let r = await this.curl({
+                        'url': `https://${host}/mc/wxPointShop/exgBeans`,
+                        'form': `buyerPin=${secretPin}&buyerNick=${getPin.content.data.pin}&giftId=${activityId}&venderId=${venderId}&beansLevel=${c.data.beansLevel}&exgBeanNum=${c.data.beansLevelCount}`,
+                        cookie: getPin.cookie
+                    }
+                )
+                if (r.result) {
+                    console.log(r)
+                }
+                else {
+                    console.log(r.errorMessage)
+                }
+            }
+            else {
+                console.log(`没获取到用户积分信息`)
             }
         }
         else {
@@ -514,7 +545,7 @@ class Main extends Template {
                     }
                     if (this.haskey(getPrize, 'data.drawOk')) {
                         console.log(`获得: ${getPrize.data.name}`)
-                        gifts.push(getPrize.data.name)
+                        this.notices(getPrize.data.name, p.user)
                     }
                     else {
                         console.log(getPrize.errorMessage || getPrize.msg || "什么也没有")
@@ -535,7 +566,7 @@ class Main extends Template {
                     // console.log(getPrize)
                     if (this.haskey(getPrize, 'data.drawOk')) {
                         console.log(`获得: ${getPrize.data.name}`)
-                        gifts.push(getPrize.data.name)
+                        this.notices(getPrize.data.name, p.user)
                     }
                     else {
                         console.log(getPrize.errorMessage || getPrize.msg || "什么也没有")
@@ -555,7 +586,7 @@ class Main extends Template {
                     )
                     // console.log(draw)
                     if (this.haskey(draw, 'data.drawOk')) {
-                        gifts.push(draw.data.drawInfo.name)
+                        this.notices(draw.data.drawInfo.name, p.user)
                         console.log(`获得奖品: ${draw.data.drawInfo.name} ${draw.data.drawInfo.priceInfo}`)
                     }
                     else {
@@ -595,8 +626,8 @@ class Main extends Template {
                     }
                     for (let i of this.haskey(ac.content, 'data.list')) {
                         console.log(`获得: ${i.takeNum}${g[i.type]}`)
-                        gifts.push(
-                            `${i.takeNum}${g[i.type]}`
+                        this.notices(
+                            `${i.takeNum}${g[i.type]}`, p.user
                         )
                     }
                 }
@@ -615,7 +646,7 @@ class Main extends Template {
                     // console.log(getPrize)
                     if (this.haskey(getPrize, 'data.drawOk')) {
                         console.log(`获得: ${getPrize.data.name}`)
-                        gifts.push(getPrize.data.name)
+                        this.notices(getPrize.data.name, p.user)
                     }
                     else {
                         console.log(getPrize.errorMessage || getPrize.msg || "什么也没有")
@@ -636,7 +667,7 @@ class Main extends Template {
                     // console.log(getPrize)
                     if (this.haskey(getPrize, 'data.drawOk')) {
                         console.log(`获得: ${getPrize.data.name}`)
-                        gifts.push(getPrize.data.name)
+                        this.notices(getPrize.data.name, p.user)
                     }
                     else {
                         console.log(getPrize.errorMessage || getPrize.msg || "什么也没有")
@@ -670,7 +701,7 @@ class Main extends Template {
                     // console.log(getPrize)
                     if (this.haskey(getPrize, 'data.drawResult.drawOk')) {
                         console.log(`获得: ${getPrize.data.drawResult.name}`)
-                        gifts.push(getPrize.data.drawResult.name)
+                        this.notices(getPrize.data.drawResult.name, p.user)
                     }
                     else {
                         console.log(getPrize.errorMessage || getPrize.msg || "什么也没有")
@@ -772,6 +803,11 @@ class Main extends Template {
                 )
                 if (f.result) {
                     console.log("加团成功")
+                }
+                else {
+                    console.log(f.errorMessage)
+                }
+                if (this.getValue('expand').includes('openCard')) {
                     for (let kkk of this.venderIds || []) {
                         for (let kk of Array(3)) {
                             var o = await this.algo.curl({
@@ -786,14 +822,17 @@ class Main extends Template {
                         console.log(kkk, `开卡中`, o.success)
                     }
                 }
-                else {
-                    console.log(f.errorMessage)
+                let get = await this.curl({
+                        'url': `https://${host}/microDz/invite/activity/wx/getOpenCardAllStatuesNew`,
+                        'form': `isInvited=1&activityId=${activityId}&pin=${secretPin}`,
+                        cookie: getPin.cookie
+                    }
+                )
+                if (this.haskey(get, 'data.reward')) {
+                    console.log(`获得奖励: ${get.data.reward}`)
+                    this.notices(`获得奖励: ${get.data.reward}`, p.user)
                 }
             }
-        }
-        if (gifts.length) {
-            // gifts.unshift(`活动店铺: ${p.inviter.shopName}\n活动ID: ${activityId}`)
-            this.notices(gifts.join("\n"), p.user)
         }
         // 取消关注店铺
         await this.curl({
@@ -1157,21 +1196,23 @@ class Main extends Template {
 
     async extra() {
         // 此处用来跑组队开卡
-        if (this.venderIds && this.venderIds.length) {
-            for (let cookie of this.cookies[this.task]) {
-                console.log(`正在运行: ${this.userPin(cookie)}`)
-                for (let kkk of this.venderIds) {
-                    for (let kk of Array(3)) {
-                        var o = await this.algo.curl({
-                                'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${kkk}","shopId":"","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":"","channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
-                                cookie
+        if (this.getValue('expand').includes('openCard')) {
+            if (this.venderIds && this.venderIds.length) {
+                for (let cookie of this.cookies[this.task]) {
+                    console.log(`正在运行: ${this.userPin(cookie)}`)
+                    for (let kkk of this.venderIds) {
+                        for (let kk of Array(3)) {
+                            var o = await this.algo.curl({
+                                    'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${kkk}","shopId":"","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":"","channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
+                                    cookie
+                                }
+                            )
+                            if (o.success) {
+                                break
                             }
-                        )
-                        if (o.success) {
-                            break
                         }
+                        console.log(kkk, `开卡中`, o.success)
                     }
-                    console.log(kkk, `开卡中`, o.success)
                 }
             }
         }
