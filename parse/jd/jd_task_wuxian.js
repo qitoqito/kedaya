@@ -1282,7 +1282,8 @@ class Main extends Template {
         var getPin = await this.response({
                 'url': `https://${host}/customer/getMyPing`,
                 form: `userId=${sid || venderId}&token=${isvObfuscator.token}&fromType=APP`,
-                cookie: info.cookie
+                cookie: info.cookie,
+                referer: `https://${host}/`
             }
         )
         if (!this.haskey(getPin, 'content.data.secretPin')) {
