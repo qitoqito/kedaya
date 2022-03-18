@@ -803,35 +803,40 @@ class Main extends Template {
                         await this.wait(3000)
                         let join = await this.curl({
                                 'url': `https://${host}/${type}/saveCandidate`,
-                                'form': `pin=${secretPin}&activityId=${activityId}&signUuid=${signUuid}&pinImg=${encodeURIComponent('https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}`,
+                                'form': `pin=${secretPin}&activityId=${activityId}&signUuid=${signUuid}&pinImg=${encodeURIComponent('https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}&jdNick=${encodeURIComponent(pin)}`,
                                 cookie: getPin.cookie
                             }
                         )
                         console.log(join)
                         if (this.haskey(join, 'result')) {
+                            console.log("参团成功")
                             p.inviter.aid.push(sp)
+                            if (this.dict.openCard) {
+                                for (let kk of Array(3)) {
+                                    var o = await this.algo.curl({
+                                            'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${venderId}","shopId":"${shopId}","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":"","channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
+                                            // 'form':``,
+                                            cookie: p.cookie
+                                        }
+                                    )
+                                    if (o.success) {
+                                        break
+                                    }
+                                }
+                                console.log(`开卡中`, o.message)
+                            }
                         }
                         if (this.dumps(join).includes("满员")) {
                             this.finish.push(p.number)
                         }
-                        for (let kk of Array(3)) {
-                            var o = await this.algo.curl({
-                                    'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${venderId}","shopId":"${shopId}","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":"","channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
-                                    // 'form':``,
-                                    cookie: p.cookie
-                                }
-                            )
-                            if (o.success) {
-                                break
-                            }
-                        }
-                        console.log(`开卡中`, o.message)
                     }
                     else {
                         console.log('不能参团,或者已经参加过活动')
                     }
                 }
-                if (p.inviter.aid.length>=80) {
+                let count = this.dict.count || 80
+                if (p.inviter.aid.length>=parseInt(count)) {
+                    console.log("开团上限了,换个队伍")
                     this.finish.push(p.number)
                 }
             }
@@ -920,8 +925,7 @@ class Main extends Template {
                 }
                 else {
                     let f = await this.curl({
-                            'url': `https://${host}/microDz/invite/activity/wx/acceptInvite
-                        `,
+                            'url': `https://${host}/microDz/invite/activity/wx/acceptInvite`,
                             'form': `activityId=${activityId}&invitee=${secretPin}&inviteeNick=${pin}&inviteeImg=${encodeURIComponent('https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}&inviter=${p.inviter.inviter}&inviterNick=${p.inviter.inviterNick}&inviterImg=${p.inviter.imgUrl}`,
                             cookie: getPin.cookie
                         }
@@ -1427,6 +1431,7 @@ class Main extends Template {
                     if (this.haskey(ac, 'data.successRetList')) {
                         try {
                             for (let kk of ac.data.successRetList) {
+                                let member = (this.column(kk.memberList, 'jdNick')).join("  ")
                                 let c = kk.memberList[0].captainId
                                 let s = await this.curl({
                                         'url': `https://${data.host}/pool/updateCaptain`,
@@ -1434,10 +1439,13 @@ class Main extends Template {
                                         cookie: data.cookie
                                     }
                                 )
-                                this.notice(`${c} ${s.errorMessage}`, i)
+                                this.notice(`${c} ${s.errorMessage}\n组队成员: ${member}`, i)
                                 console.log(c, s.errorMessage)
+                                console.log(`组队成员: ${member}`)
+                                await this.wait(2000)
                             }
                         } catch (e2) {
+                            console.log(e2.message)
                         }
                     }
                 } catch (e) {
