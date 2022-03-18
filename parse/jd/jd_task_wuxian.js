@@ -261,6 +261,31 @@ class Main extends Template {
                             }
                             break
                         }
+                        else {
+                            let html = await this.curl({
+                                    'url': `https://${host}/pool/captain/${i.activityId}?activityId=${i.activityId}`,
+                                }
+                            )
+                            if (html.includes("瓜分")) {
+                                let venderId = this.match(/id="venderId"\s*value="(\d+)"/, html)
+                                if (venderId) {
+                                    let shopInfo = await this.curl({
+                                            'url': `https://api.m.jd.com/?functionId=lite_getShopHomeBaseInfo&body={"venderId":"${venderId}","source":"appshop"}&t=1646398923902&appid=jdlite-shop-app&client=H5`,
+                                        }
+                                    )
+                                    await this.wxTeam({
+                                        activityId: i.activityId,
+                                        pageUrl: `https://${host}/pool/captain/${i.activityId}?activityId=${i.activityId}`,
+                                        title: "组队瓜分",
+                                        type: 'pool',
+                                        host, venderId,
+                                        shopId: shopInfo.result.shopInfo.shopId,
+                                        shopName: shopInfo.result.shopInfo.shopName
+                                    })
+                                }
+                                break
+                            }
+                        }
                     }
                 }
                 else if (!isNaN(i.activityId)) {
@@ -378,7 +403,7 @@ class Main extends Template {
         if (this.dict.openCard) {
             for (let kk of Array(3)) {
                 var o = await this.algo.curl({
-                        'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${venderId}","shopId":"${shopId}","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":${p.inviter.jdActivityId},"channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
+                        'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${venderId}","shopId":"${shopId}","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":"","channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
                         // 'form':``,
                         cookie: p.cookie
                     }
@@ -515,7 +540,7 @@ class Main extends Template {
                 }
             )
             skuList = this.column(skus.skus, 'skuId').map(d => d.toString())
-            if (!['wxTeam'].includes(type)) {
+            if (!['wxTeam', 'pool'].includes(type)) {
                 if (skuList.length) {
                     console.log(`加购列表: ${this.dumps(skuList)}`)
                 }
@@ -745,22 +770,57 @@ class Main extends Template {
                 }
             }
             else if (['wxTeam'].includes(type)) {
-                if (this.haskey(activityContent, 'content.data.canJoin')) {
-                    console.log("入会有延迟,等待3秒...")
-                    await this.wait(3000)
-                    let join = await this.curl({
-                            'url': `https://${host}/${type}/saveMember`,
-                            'form': `pin=${secretPin}&activityId=${activityId}&signUuid=${signUuid}&pinImg=${encodeURIComponent('https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}`,
-                            cookie: getPin.cookie
-                        }
-                    )
-                    console.log(join)
-                    if (this.dumps(join).includes("满员")) {
-                        this.finish.push(p.number)
-                    }
+                if (p.inviter.aid.includes(sp)) {
+                    console.log("已经在队伍里面了哦")
                 }
                 else {
-                    console.log('不能参团,或者已经参加过活动')
+                    if (this.haskey(activityContent, 'content.data.canJoin')) {
+                        console.log("入会有延迟,等待3秒...")
+                        await this.wait(3000)
+                        let join = await this.curl({
+                                'url': `https://${host}/${type}/saveMember`,
+                                'form': `pin=${secretPin}&activityId=${activityId}&signUuid=${signUuid}&pinImg=${encodeURIComponent('https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}`,
+                                cookie: getPin.cookie
+                            }
+                        )
+                        console.log(join)
+                        if (this.dumps(join).includes("满员")) {
+                            this.finish.push(p.number)
+                        }
+                    }
+                    else {
+                        console.log('不能参团,或者已经参加过活动')
+                    }
+                }
+            }
+            else if (['pool'].includes(type)) {
+                if (p.inviter.aid.includes(sp)) {
+                    console.log("已经在队伍里面了哦")
+                }
+                else {
+                    if (this.haskey(activityContent, 'content.data.canJoin')) {
+                        console.log("入会有延迟,等待3秒...")
+                        await this.wait(3000)
+                        let join = await this.curl({
+                                'url': `https://${host}/${type}/saveCandidate`,
+                                'form': `pin=${secretPin}&activityId=${activityId}&signUuid=${signUuid}&pinImg=${encodeURIComponent('https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}`,
+                                cookie: getPin.cookie
+                            }
+                        )
+                        console.log(join)
+                        if (this.haskey(join, 'result')) {
+                            p.inviter.aid.push(sp)
+                        }
+                        if (this.dumps(join).includes("满员")) {
+                            this.finish.push(p.number)
+                        }
+                    }
+                    else {
+                        console.log('不能参团,或者已经参加过活动')
+                    }
+                }
+                if (p.inviter.aid.length>=80) {
+                    this.finish.push(p.number)
                 }
             }
             else if (['wxMcLevelAndBirthGifts'].includes(type)) {
@@ -1147,7 +1207,7 @@ class Main extends Template {
                     if (this.dict.openCard) {
                         for (let kk of Array(3)) {
                             var o = await this.algo.curl({
-                                    'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${venderId}","shopId":"${shopId}","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":${p.inviter.jdActivityId},"channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
+                                    'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${venderId}","shopId":"${shopId}","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":"","channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
                                     cookie: p.cookie
                                 }
                             )
@@ -1172,12 +1232,23 @@ class Main extends Template {
                         }
                     )
                     let ac = await this.curl({
-                            'url': `https://${host}/wxTeam/activityContent`,
+                            'url': `https://${host}/${p.inviter.type}/activityContent`,
                             'form': `activityId=${p.inviter.activityId}&pin=${secretPin}`,
                             cookie: getPin.cookie
                         }
                     )
-                    if (this.haskey(ac, 'data.successRetList') && ac.data.successRetList.length == ac.data.active.maxGroup) {
+                    let aid = []
+                    let captainId = []
+                    if (this.haskey(ac, 'data.successRetList')) {
+                        try {
+                            for (let kk of ac.data.successRetList) {
+                                // captainId = this.unique([...aid, ...this.column(kk.memberList, 'captainId')])
+                                aid = this.unique([...aid, ...this.column(kk.memberList, 'pin')])
+                            }
+                        } catch (e2) {
+                        }
+                    }
+                    if (this.haskey(ac, 'data.successRetList') && this.haskey(ac, 'data.active.maxGroup') && ac.data.successRetList.length == ac.data.active.maxGroup) {
                         console.log(user, "人员已满")
                     }
                     else {
@@ -1193,7 +1264,7 @@ class Main extends Template {
                                 }
                             )
                             let catpain = await this.curl({
-                                    'url': `https://${host}/wxTeam/saveCaptain`,
+                                    'url': `https://${host}/${p.inviter.type}/saveCaptain`,
                                     'form': `activityId=${p.inviter.activityId}&pin=${secretPin}&pinImg=${encodeURIComponent('https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}`,
                                     cookie: getPin.cookie
                                 }
@@ -1205,7 +1276,16 @@ class Main extends Template {
                         if (signUuid) {
                             console.log(`队伍Id: ${signUuid}`)
                             data.signUuid = signUuid
+                            data.aid = aid
                             this.shareCode.push(data)
+                            this.dicts[user] = {
+                                'pool': {
+                                    'url': `https://${host}/${p.inviter.type}/activityContent`,
+                                    'form': `activityId=${p.inviter.activityId}&pin=${secretPin}`,
+                                    cookie: getPin.cookie,
+                                    host
+                                }
+                            }
                         }
                         else {
                             console.log(user, '没有获取到队伍Id')
@@ -1213,10 +1293,11 @@ class Main extends Template {
                     }
                 }
             } catch (e) {
+                console.log(e)
             }
         }
     }
-
+    
     async WxHbShareActivity(data) {
         // 有空再加
         for (let cookie of this.cookies['help']) {
@@ -1325,6 +1406,28 @@ class Main extends Template {
                 }
                 else {
                     console.log('可能已经领取过奖励')
+                }
+            }
+            if (this.dicts[i].pool) {
+                try {
+                    let data = this.dicts[i].pool
+                    let ac = await this.curl(data)
+                    if (this.haskey(ac, 'data.successRetList')) {
+                        try {
+                            for (let kk of ac.data.successRetList) {
+                                let c = kk.memberList[0].captainId
+                                let s = await this.curl({
+                                        'url': `https://${data.host}/pool/updateCaptain`,
+                                        'form': `uuid=${c}`,
+                                        cookie: data.cookie
+                                    }
+                                )
+                                console.log(c, s.errorMessage)
+                            }
+                        } catch (e2) {
+                        }
+                    }
+                } catch (e) {
                 }
             }
         }
