@@ -412,7 +412,7 @@ class Main extends Template {
                     break
                 }
             }
-            console.log(`开卡中`, o.success)
+            console.log(`开卡中`, o.message)
         }
         // 不同域名下的secretPin形式不一样
         switch (host) {
@@ -899,7 +899,7 @@ class Main extends Template {
                                 break
                             }
                         }
-                        console.log(kkk, `开卡中`, o.success)
+                        console.log(kkk, `开卡中`, o.message)
                     }
                 }
                 if (p.inviter.aid.includes(pin)) {
@@ -1215,7 +1215,7 @@ class Main extends Template {
                                 break
                             }
                         }
-                        console.log(user, `开卡中`, o.success)
+                        console.log(user, `开卡中`, o.message)
                     }
                     switch (host) {
                         case "cjhy-isv.isvjcloud.com":
@@ -1297,7 +1297,7 @@ class Main extends Template {
             }
         }
     }
-    
+
     async WxHbShareActivity(data) {
         // 有空再加
         for (let cookie of this.cookies['help']) {
@@ -1393,7 +1393,7 @@ class Main extends Template {
                                 break
                             }
                         }
-                        console.log(i, `开卡中${kkk}`, o.success)
+                        console.log(i, `开卡中${kkk}`, o.message)
                     }
                 }
             }
@@ -1422,6 +1422,7 @@ class Main extends Template {
                                         cookie: data.cookie
                                     }
                                 )
+                                this.notice(`${c} ${s.errorMessage}`, i)
                                 console.log(c, s.errorMessage)
                             }
                         } catch (e2) {
