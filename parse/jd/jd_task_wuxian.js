@@ -276,7 +276,7 @@ class Main extends Template {
                                     await this.wxTeam({
                                         activityId: i.activityId,
                                         pageUrl: `https://${host}/pool/captain/${i.activityId}?activityId=${i.activityId}`,
-                                        title: "组队瓜分",
+                                        title: "组队瓜分京豆",
                                         type: 'pool',
                                         host, venderId,
                                         shopId: shopInfo.result.shopInfo.shopId,
@@ -400,7 +400,7 @@ class Main extends Template {
         var secretPin = getPin.content.data.secretPin
         let sp = getPin.content.data.secretPin
         // 判断开卡
-        if (this.dict.openCard) {
+        if (this.dict.openCard && !['pool'].includes(type)) {
             for (let kk of Array(3)) {
                 var o = await this.algo.curl({
                         'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${venderId}","shopId":"${shopId}","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":"","channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
@@ -814,6 +814,18 @@ class Main extends Template {
                         if (this.dumps(join).includes("满员")) {
                             this.finish.push(p.number)
                         }
+                        for (let kk of Array(3)) {
+                            var o = await this.algo.curl({
+                                    'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${venderId}","shopId":"${shopId}","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":"","channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
+                                    // 'form':``,
+                                    cookie: p.cookie
+                                }
+                            )
+                            if (o.success) {
+                                break
+                            }
+                        }
+                        console.log(`开卡中`, o.message)
                     }
                     else {
                         console.log('不能参团,或者已经参加过活动')
