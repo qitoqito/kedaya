@@ -1439,7 +1439,7 @@ class Main extends Template {
                                         cookie: data.cookie
                                     }
                                 )
-                                this.notice(`${c} ${s.errorMessage}\n组队成员: ${member}`, i)
+                                this.notices(`${c} ${s.errorMessage}\n组队成员: ${member}`, i)
                                 console.log(c, s.errorMessage)
                                 console.log(`组队成员: ${member}`)
                                 await this.wait(2000)
