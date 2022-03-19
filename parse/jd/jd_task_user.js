@@ -23,6 +23,7 @@ class Main extends Template {
         let phone = ''
         let custom = this.getValue('custom')
         let keys = [...custom, ...['nickName', 'phone', 'msgWhite', 'msgBlack', 'send', 'wskey', 'verify']]
+        let query = this.expand ? this.query(this['expand'], '\\|', 1) : {}
         let dict = {}
         for (let i of keys) {
             if (this.haskey(this.userDict, `${pin}.${i}`)) {
@@ -31,6 +32,9 @@ class Main extends Template {
             else {
                 dict[i] = ''
             }
+        }
+        if (query.verify) {
+            dict.verify = query.verify
         }
         // if (this.userDict[pin] && this.userDict[pin].nickName) {
         //     nickName = this.userDict[pin].nickName
