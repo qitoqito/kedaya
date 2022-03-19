@@ -3,7 +3,7 @@ const Template = require('../../template');
 class Main extends Template {
     constructor() {
         super()
-        this.title = "京东无线活动整合"
+        this.title = "京东超级互动城"
         this.task = 'active'
         this.verify = 1
         this.manual = 1
@@ -232,15 +232,20 @@ class Main extends Template {
                                 //     data.pageUrl = `https://${host}/WxHbShareActivity/view/activity/${i.activityId}?activityId=${i.activityId}`
                                 //     break
                                 case 204:
-                                    data.pageUrl = `https://cjhy-isv.isvjcloud.com/mc/wxPointShopView/pointExgBeans?giftId=${i.activityId}`
+                                    data.pageUrl = `https://${host}/mc/wxPointShopView/pointExgBeans?giftId=${i.activityId}`
                                     data.title = "积分换豆"
                                     data.type = 'wxPointShop'
                                     break
                                 case 42:
-                                    data.pageUrl = `https://lzkjdz-isv.isvjcloud.com/wxCollectCard/activity?activityId=${i.activityId}`
+                                    data.pageUrl = `https://${host}/wxCollectCard/activity?activityId=${i.activityId}`
                                     data.title = "集卡有礼"
                                     data.type = 'wxCollectCard'
                                     break
+                                // case 3:
+                                //     data.pageUrl = `https://${host}/wxUnPackingActivity/activity/${i.activityId}?activityId=${i.activityId}`
+                                //     data.title = "让福袋飞"
+                                //     data.type = 'wxUnPackingActivity'
+                                //     break
                             }
                             if (!data.pageUrl) {
                                 data.pageUrl = i.activityId
@@ -252,17 +257,8 @@ class Main extends Template {
                             if (this.haskey(shopInfo, 'result.shopInfo.shopName')) {
                                 data.shopName = shopInfo.result.shopInfo.shopName
                             }
-                            if (['wxTeam'].includes(data.type)) {
-                                await this.wxTeam(data)
-                            }
-                            else if (['microDz'].includes(data.type)) {
-                                await this.microDz(data)
-                            }
-                            else if (['WxHbShareActivity'].includes(data.type)) {
-                                await this.WxHbShareActivity(data)
-                            }
-                            else if (['wxCollectCard'].includes(data.type)) {
-                                await this.wxCollectCard(data)
+                            if (['wxTeam', 'microDz', 'WxHbShareActivity', 'wxCollectCard', 'wxUnPackingActivity'].includes(data.type)) {
+                                await this[data.type](data)
                             }
                             else {
                                 this.shareCode.push(data)
@@ -1405,8 +1401,69 @@ class Main extends Template {
         }
     }
 
+    async wxUnPackingActivity(data) {
+        this.model = 'team'
+        this.filter = ''
+        for (let cookie of this.cookies['help']) {
+            let p = {
+                cookie, inviter: data
+            }
+            let pin = this.userPin(cookie)
+            try {
+                for (let nnn = 0; nnn<2; nnn++) {
+                    var getPin = await this.getMyPing(p)
+                    if (getPin) {
+                        break
+                    }
+                }
+                if (getPin) {
+                    let venderId = p.inviter.venderId
+                    let shopId = p.inviter.shopId
+                    var secretPin = getPin.content.data.secretPin
+                    let activityId = p.inviter.activityId
+                    let jdActivityId = p.inviter.jdActivityId
+                    let host = p.inviter.host
+                    await this.bindWithVender(venderId, jdActivityId, p.cookie)
+                    switch (host) {
+                        case "cjhy-isv.isvjcloud.com":
+                            secretPin = escape(encodeURIComponent(secretPin))
+                            break
+                        default:
+                            secretPin = encodeURIComponent(secretPin)
+                            break
+                    }
+                    let ac = await this.curl({
+                            'url': `https://${host}/wxUnPackingActivity/activityContent`,
+                            'form': `activityId=${activityId}&buyerNick=${secretPin}&friendUuid=`,
+                            cookie: getPin.cookie
+                        }
+                    )
+                    if (this.haskey(ac, 'data.wucvo')) {
+                        let signUuid = ac.data.wucvo.mySelfId
+                        let inviter = pin
+                        let drawInfoId = ac.data.wdifo.id
+                        let h = await this.curl({
+                                'url': `https://${host}/wxActionPrizeResult/hasPrize`,
+                                'form': `activityId=${activityId}&drawInfoId=${drawInfoId}`,
+                                cookie: getPin.cookie
+                            }
+                        )
+                        this.shareCode.push({
+                            ...data, ...{
+                                inviter, drawInfoId, signUuid
+                            }
+                        })
+                    }
+                }
+            } catch (e) {
+                console.log(e)
+            }
+        }
+    }
+
     async WxHbShareActivity(data) {
-        // 有空再加
+        this.model = 'shuffle'
+        this.filter = ''
         for (let cookie of this.cookies['help']) {
             let p = {
                 cookie, inviter: data
@@ -1420,8 +1477,24 @@ class Main extends Template {
                     }
                 }
                 if (getPin) {
+                    let venderId = p.inviter.venderId
+                    let shopId = p.inviter.shopId
+                    var secretPin = getPin.content.data.secretPin
+                    let activityId = p.inviter.activityId
+                    let jdActivityId = p.inviter.jdActivityId
+                    let host = p.inviter.host
+                    await this.bindWithVender(venderId, jdActivityId, p.cookie)
+                    switch (host) {
+                        case "cjhy-isv.isvjcloud.com":
+                            secretPin = escape(encodeURIComponent(secretPin))
+                            break
+                        default:
+                            secretPin = encodeURIComponent(secretPin)
+                            break
+                    }
                 }
             } catch (e) {
+                console.log(e)
             }
         }
     }
@@ -1489,7 +1562,7 @@ class Main extends Template {
         if (this.dict.openCard) {
             for (let kk of Array(3)) {
                 var o = await this.algo.curl({
-                        'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${venderId}","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":${jdActivityId.toString()},"channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
+                        'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${venderId}","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":"","channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
                         cookie
                     }
                 )
