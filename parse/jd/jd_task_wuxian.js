@@ -388,6 +388,7 @@ class Main extends Template {
         let pin = this.userPin(p.cookie)
         let host = p.inviter.host
         let activityId = p.inviter.activityId
+        let jdActivityId = p.inviter.jdActivityId
         let at = p.inviter.activityType
         let type = p.inviter.type
         console.log(`活动ID: ${activityId}`)
@@ -409,7 +410,7 @@ class Main extends Template {
         let sp = getPin.content.data.secretPin
         // 判断开卡
         if (this.dict.openCard && !['pool'].includes(type)) {
-            await this.bindWithVender(venderId, p.cookie)
+            await this.bindWithVender(venderId, jdActivityId, p.cookie)
         }
         // 不同域名下的secretPin形式不一样
         switch (host) {
@@ -808,7 +809,7 @@ class Main extends Template {
                         if (this.haskey(join, 'result')) {
                             console.log("参团成功")
                             p.inviter.aid.push(sp)
-                            await this.bindWithVender(venderId, p.cookie)
+                            await this.bindWithVender(venderId, jdActivityId, p.cookie)
                         }
                         if (this.dumps(join).includes("满员")) {
                             this.finish.push(p.number)
@@ -889,7 +890,7 @@ class Main extends Template {
             }
             else if (['microDz'].includes(type)) {
                 for (let kkk of this.venderIds || []) {
-                    await this.bindWithVender(kkk, p.cookie)
+                    await this.bindWithVender(kkk, jdActivityId, p.cookie)
                 }
                 if (p.inviter.aid.includes(pin)) {
                     p.finish = 1
@@ -970,7 +971,7 @@ class Main extends Template {
                             cookie: getPin.cookie
                         }
                     )
-                    await this.wait(1000)
+                    await this.wait(200)
                     if (this.haskey(draw, 'errorMessage').includes("上限")) {
                         console.log(draw.errorMessage)
                         break
@@ -983,7 +984,7 @@ class Main extends Template {
                         console.log(draw.errorMessage || "什么也没有抽到")
                     }
                 }
-                await this.wait(1000)
+                await this.wait(200)
                 while (true) {
                     for (let nn = 0; nn<3; nn++) {
                         getPrize = await this.curl({
@@ -1074,6 +1075,7 @@ class Main extends Template {
         let pin = this.userPin(p.cookie)
         let host = p.inviter.host
         let activityId = p.inviter.activityId
+        let jdActivityId = p.inviter.jdActivityId
         console.log(`活动ID: ${activityId}`)
         let at = p.inviter.activityType
         let type = p.inviter.type
@@ -1157,6 +1159,7 @@ class Main extends Template {
                     let shopId = p.inviter.shopId
                     var secretPin = getPin.content.data.secretPin
                     let activityId = p.inviter.activityId
+                    let jdActivityId = p.inviter.jdActivityId
                     let host = p.inviter.host
                     switch (host) {
                         case "cjhy-isv.isvjcloud.com":
@@ -1185,7 +1188,7 @@ class Main extends Template {
                         venderIds = acc.data.venderIds.split(",")
                         this.venderIds = venderIds
                         for (let kkk of venderIds) {
-                            await this.bindWithVender(kkk, p.cookie)
+                            await this.bindWithVender(kkk, jdActivityId, p.cookie)
                         }
                     }
                     let inviter = await this.curl({
@@ -1250,8 +1253,9 @@ class Main extends Template {
                     let shopId = p.inviter.shopId
                     var secretPin = getPin.content.data.secretPin
                     let activityId = p.inviter.activityId
+                    let jdActivityId = p.inviter.jdActivityId
                     let host = p.inviter.host
-                    await this.bindWithVender(venderId, p.cookie)
+                    await this.bindWithVender(venderId, jdActivityId, p.cookie)
                     switch (host) {
                         case "cjhy-isv.isvjcloud.com":
                             secretPin = escape(encodeURIComponent(secretPin))
@@ -1353,8 +1357,9 @@ class Main extends Template {
                     let shopId = p.inviter.shopId
                     var secretPin = getPin.content.data.secretPin
                     let activityId = p.inviter.activityId
+                    let jdActivityId = p.inviter.jdActivityId
                     let host = p.inviter.host
-                    await this.bindWithVender(venderId, p.cookie)
+                    await this.bindWithVender(venderId, jdActivityId, p.cookie)
                     switch (host) {
                         case "cjhy-isv.isvjcloud.com":
                             secretPin = escape(encodeURIComponent(secretPin))
@@ -1424,6 +1429,7 @@ class Main extends Template {
     async getMyPing(p) {
         let host = p.inviter.host
         let activityId = p.inviter.activityId
+        let jdActivityId = p.inviter.jdActivityId
         let at = p.inviter.activityType
         let type = p.inviter.type
         this.assert(type, "不支持的活动类型")
@@ -1478,11 +1484,12 @@ class Main extends Template {
         }
     }
 
-    async bindWithVender(venderId, cookie) {
+    async bindWithVender(venderId, jdActivityId, cookie) {
+        jdActivityId = jdActivityId || ''
         if (this.dict.openCard) {
             for (let kk of Array(3)) {
                 var o = await this.algo.curl({
-                        'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${venderId}","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":"","channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
+                        'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${venderId}","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":${jdActivityId.toString()},"channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
                         cookie
                     }
                 )
@@ -1501,7 +1508,7 @@ class Main extends Template {
             if (this.dict.openCard && this.shareCode.length) {
                 if (this.venderIds && this.venderIds.length) {
                     for (let kkk of this.venderIds) {
-                        await this.bindWithVender(kkk, this.dicts[i].cookie)
+                        await this.bindWithVender(kkk, '', this.dicts[i].cookie)
                     }
                 }
             }
@@ -1509,7 +1516,7 @@ class Main extends Template {
                 while (true) {
                     let getPrize = await this.curl(this.dicts[i].repeat
                     )
-                    await this.wait(1000)
+                    await this.wait(5000)
                     if (this.haskey(getPrize, 'data.drawOk')) {
                         console.log(`获得: ${getPrize.data.name}`)
                         this.notices(getPrize.data.name, i)
