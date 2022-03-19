@@ -951,16 +951,18 @@ class Main extends Template {
                 var form = `sourceId=${p.inviter.signUuid}&activityId=${activityId}&type=1&pinImg=${encodeURIComponent(
                     'https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}&pin=${secretPin}&jdNick=${encodeURIComponent(
                     pin)}`
+                let co = ''
                 for (let z = 0; z<parseInt(n); z++) {
                     if (z == 1) {
-                        let source = await this.curl({
+                        let source = await this.response({
                                 'url': `https://${host}/wxCollectCard/saveSource`,
                                 'form': `activityId=${activityId}&pinImg=${encodeURIComponent('https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}&pin=${secretPin}&jdNick=${encodeURIComponent(pin)}`,
                                 cookie: getPin.cookie
                             }
                         )
-                        let uuid = source.data || p.inviter.signUuid
+                        let uuid = this.haskey(source, 'content.data') || p.inviter.signUuid
                         form = `sourceId=${uuid}&activityId=${activityId}&type=0`
+                        co = source.cookie
                     }
                     let draw = await this.curl({
                             'url': `https://${host}/wxCollectCard/drawCard`,
@@ -968,6 +970,7 @@ class Main extends Template {
                             cookie: getPin.cookie
                         }
                     )
+                    await this.wait(1000)
                     if (this.haskey(draw, 'errorMessage').includes("上限")) {
                         console.log(draw.errorMessage)
                         break
@@ -980,12 +983,13 @@ class Main extends Template {
                         console.log(draw.errorMessage || "什么也没有抽到")
                     }
                 }
+                await this.wait(1000)
                 while (true) {
                     for (let nn = 0; nn<3; nn++) {
                         getPrize = await this.curl({
                                 'url': `https://${host}/wxCollectCard/getPrize`,
                                 form: `activityId=${activityId}&pin=${secretPin}`,
-                                cookie: getPin.cookie
+                                cookie: co || getPin.cookie
                             }
                         )
                         if (getPrize.errorMessage && (getPrize.errorMessage.includes("擦肩") || getPrize.errorMessage.includes("未达到领奖条件"))) {
@@ -996,6 +1000,7 @@ class Main extends Template {
                             break
                         }
                     }
+                    console.log(getPrize)
                     if (this.haskey(getPrize, 'data.drawOk')) {
                         console.log(`获得: ${getPrize.data.name}`)
                         g.push(getPrize.data.name)
@@ -1504,6 +1509,7 @@ class Main extends Template {
                 while (true) {
                     let getPrize = await this.curl(this.dicts[i].repeat
                     )
+                    await this.wait(1000)
                     if (this.haskey(getPrize, 'data.drawOk')) {
                         console.log(`获得: ${getPrize.data.name}`)
                         this.notices(getPrize.data.name, i)
