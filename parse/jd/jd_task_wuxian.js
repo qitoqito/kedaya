@@ -633,7 +633,8 @@ class Main extends Template {
                     let draw = await this.curl({
                             'url': `https://${host}/${type}/start`,
                             'form': `pin=${secretPin}&activityId=${activityId}`,
-                            cookie: `${getPin.cookie}`
+                            cookie: `${getPin.cookie}`,
+                            referer: `https://${host}/`
                         }
                     )
                     // console.log(draw)
@@ -1553,6 +1554,7 @@ class Main extends Template {
             return
         }
         else {
+            getPin.token = isvObfuscator.token
             return getPin
         }
     }
