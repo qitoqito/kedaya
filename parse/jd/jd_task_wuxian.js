@@ -236,6 +236,11 @@ class Main extends Template {
                                     data.title = "积分换豆"
                                     data.type = 'wxPointShop'
                                     break
+                                case 42:
+                                    data.pageUrl = `https://lzkjdz-isv.isvjcloud.com/wxCollectCard/activity?activityId=${i.activityId}`
+                                    data.title = "集卡有礼"
+                                    data.type = 'wxCollectCard'
+                                    break
                             }
                             if (!data.pageUrl) {
                                 data.pageUrl = i.activityId
@@ -255,6 +260,9 @@ class Main extends Template {
                             }
                             else if (['WxHbShareActivity'].includes(data.type)) {
                                 await this.WxHbShareActivity(data)
+                            }
+                            else if (['wxCollectCard'].includes(data.type)) {
+                                await this.wxCollectCard(data)
                             }
                             else {
                                 this.shareCode.push(data)
@@ -401,18 +409,7 @@ class Main extends Template {
         let sp = getPin.content.data.secretPin
         // 判断开卡
         if (this.dict.openCard && !['pool'].includes(type)) {
-            for (let kk of Array(3)) {
-                var o = await this.algo.curl({
-                        'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${venderId}","shopId":"${shopId}","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":"","channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
-                        // 'form':``,
-                        cookie: p.cookie
-                    }
-                )
-                if (o.success) {
-                    break
-                }
-            }
-            console.log(`开卡中`, o.message)
+            await this.bindWithVender(venderId, p.cookie)
         }
         // 不同域名下的secretPin形式不一样
         switch (host) {
@@ -540,7 +537,7 @@ class Main extends Template {
                 }
             )
             skuList = this.column(skus.skus, 'skuId').map(d => d.toString())
-            if (!['wxTeam', 'pool'].includes(type)) {
+            if (!['wxTeam', 'pool', 'wxCollectCard'].includes(type)) {
                 if (skuList.length) {
                     console.log(`加购列表: ${this.dumps(skuList)}`)
                 }
@@ -811,20 +808,7 @@ class Main extends Template {
                         if (this.haskey(join, 'result')) {
                             console.log("参团成功")
                             p.inviter.aid.push(sp)
-                            if (this.dict.openCard) {
-                                for (let kk of Array(3)) {
-                                    var o = await this.algo.curl({
-                                            'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${venderId}","shopId":"${shopId}","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":"","channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
-                                            // 'form':``,
-                                            cookie: p.cookie
-                                        }
-                                    )
-                                    if (o.success) {
-                                        break
-                                    }
-                                }
-                                console.log(`开卡中`, o.message)
-                            }
+                            await this.bindWithVender(venderId, p.cookie)
                         }
                         if (this.dumps(join).includes("满员")) {
                             this.finish.push(p.number)
@@ -904,20 +888,8 @@ class Main extends Template {
                 }
             }
             else if (['microDz'].includes(type)) {
-                if (this.dict.openCard) {
-                    for (let kkk of this.venderIds || []) {
-                        for (let kk of Array(3)) {
-                            var o = await this.algo.curl({
-                                    'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${kkk}","shopId":"","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":"","channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
-                                    cookie: p.cookie
-                                }
-                            )
-                            if (o.success) {
-                                break
-                            }
-                        }
-                        console.log(kkk, `开卡中`, o.message)
-                    }
+                for (let kkk of this.venderIds || []) {
+                    await this.bindWithVender(kkk, p.cookie)
                 }
                 if (p.inviter.aid.includes(pin)) {
                     p.finish = 1
@@ -970,6 +942,73 @@ class Main extends Template {
                         'form': `isInvited=1&activityId=${activityId}&pin=${secretPin}`,
                         cookie: getPin.cookie
                     }
+                }
+            }
+            else if (['wxCollectCard'].includes(type)) {
+                console.log('当前助力:', p.inviter.inviter)
+                let g = []
+                let n = this.match(/(\d+)次/, this.dumps(activityContent)) || 6
+                var form = `sourceId=${p.inviter.signUuid}&activityId=${activityId}&type=1&pinImg=${encodeURIComponent(
+                    'https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}&pin=${secretPin}&jdNick=${encodeURIComponent(
+                    pin)}`
+                for (let z = 0; z<parseInt(n); z++) {
+                    if (z == 1) {
+                        let source = await this.curl({
+                                'url': `https://${host}/wxCollectCard/saveSource`,
+                                'form': `activityId=${activityId}&pinImg=${encodeURIComponent('https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}&pin=${secretPin}&jdNick=${encodeURIComponent(pin)}`,
+                                cookie: getPin.cookie
+                            }
+                        )
+                        let uuid = source.data || p.inviter.signUuid
+                        form = `sourceId=${uuid}&activityId=${activityId}&type=0`
+                    }
+                    let draw = await this.curl({
+                            'url': `https://${host}/wxCollectCard/drawCard`,
+                            form,
+                            cookie: getPin.cookie
+                        }
+                    )
+                    if (this.haskey(draw, 'errorMessage').includes("上限")) {
+                        console.log(draw.errorMessage)
+                        break
+                    }
+                    if (this.haskey(draw, 'data.reward')) {
+                        console.log(`获得: ${draw.data.reward.cardName}`)
+                        g.push(`获得: ${draw.data.reward.cardName}`)
+                    }
+                    else {
+                        console.log(draw.errorMessage || "什么也没有抽到")
+                    }
+                }
+                while (true) {
+                    for (let nn = 0; nn<3; nn++) {
+                        getPrize = await this.curl({
+                                'url': `https://${host}/wxCollectCard/getPrize`,
+                                form: `activityId=${activityId}&pin=${secretPin}`,
+                                cookie: getPin.cookie
+                            }
+                        )
+                        if (getPrize.errorMessage && (getPrize.errorMessage.includes("擦肩") || getPrize.errorMessage.includes("未达到领奖条件"))) {
+                            console.log('奖品与您擦肩而过了哟,重新获取')
+                            await this.wait(1000)
+                        }
+                        else {
+                            break
+                        }
+                    }
+                    if (this.haskey(getPrize, 'data.drawOk')) {
+                        console.log(`获得: ${getPrize.data.name}`)
+                        g.push(getPrize.data.name)
+                    }
+                    else {
+                        console.log(getPrize.errorMessage || getPrize.msg || "什么也没有")
+                    }
+                    if (!this.haskey(getPrize, 'data.canDrawTimes')) {
+                        break
+                    }
+                }
+                if (g.length) {
+                    this.notices(g.join("\n"), p.user)
                 }
             }
         }
@@ -1140,21 +1179,8 @@ class Main extends Template {
                     if (this.haskey(acc, 'data.venderIds')) {
                         venderIds = acc.data.venderIds.split(",")
                         this.venderIds = venderIds
-                        if (this.dict.openCard) {
-                            for (let kkk of venderIds) {
-                                for (let kk of Array(3)) {
-                                    var o = await this.algo.curl({
-                                            'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${kkk}","shopId":"","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":"","channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
-                                            // 'form':``,
-                                            cookie: p.cookie
-                                        }
-                                    )
-                                    if (o.success) {
-                                        break
-                                    }
-                                }
-                                console.log(user, `开卡: ${kkk}`, o.success)
-                            }
+                        for (let kkk of venderIds) {
+                            await this.bindWithVender(kkk, p.cookie)
                         }
                     }
                     let inviter = await this.curl({
@@ -1220,19 +1246,7 @@ class Main extends Template {
                     var secretPin = getPin.content.data.secretPin
                     let activityId = p.inviter.activityId
                     let host = p.inviter.host
-                    if (this.dict.openCard) {
-                        for (let kk of Array(3)) {
-                            var o = await this.algo.curl({
-                                    'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${venderId}","shopId":"${shopId}","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":"","channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
-                                    cookie: p.cookie
-                                }
-                            )
-                            if (o.success) {
-                                break
-                            }
-                        }
-                        console.log(user, `开卡中`, o.message)
-                    }
+                    await this.bindWithVender(venderId, p.cookie)
                     switch (host) {
                         case "cjhy-isv.isvjcloud.com":
                             secretPin = escape(encodeURIComponent(secretPin))
@@ -1306,6 +1320,73 @@ class Main extends Template {
                         else {
                             console.log(user, '没有获取到队伍Id')
                         }
+                    }
+                }
+            } catch (e) {
+                console.log(e)
+            }
+        }
+    }
+
+    async wxCollectCard(data) {
+        this.model = 'shuffle'
+        this.filter = ''
+        for (let cookie of this.cookies['help']) {
+            let p = {
+                cookie, inviter: data
+            }
+            let user = this.userPin(cookie)
+            try {
+                for (let nnn = 0; nnn<2; nnn++) {
+                    var getPin = await this.getMyPing(p)
+                    if (getPin) {
+                        break
+                    }
+                }
+                if (getPin) {
+                    let venderId = p.inviter.venderId
+                    let shopId = p.inviter.shopId
+                    var secretPin = getPin.content.data.secretPin
+                    let activityId = p.inviter.activityId
+                    let host = p.inviter.host
+                    await this.bindWithVender(venderId, p.cookie)
+                    switch (host) {
+                        case "cjhy-isv.isvjcloud.com":
+                            secretPin = escape(encodeURIComponent(secretPin))
+                            break
+                        default:
+                            secretPin = encodeURIComponent(secretPin)
+                            break
+                    }
+                    let wxFollow = await this.response({
+                            'url': `https://${p.inviter.host}/wxActionCommon/followShop`,
+                            'form': `userId=${venderId}&buyerNick=${secretPin}&activityId=${p.inviter.activityId}&activityType=${p.inviter.activityType}`,
+                            cookie: `${getPin.cookie}`
+                        }
+                    )
+                    let source = await this.curl({
+                            'url': `https://${host}/wxCollectCard/saveSource`,
+                            'form': `activityId=${activityId}&pinImg=${encodeURIComponent('https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}&pin=${secretPin}&jdNick=${encodeURIComponent(user)}`,
+                            cookie: getPin.cookie
+                        }
+                    )
+                    let insert = await this.curl({
+                            'url': `https://${host}/crm/pageVisit/insertCrmPageVisit`,
+                            'form': `venderId=${venderId}&elementId=%E9%82%80%E8%AF%B7&pageId=${activityId}&pin=${secretPin}`,
+                            cookie: getPin.cookie
+                        }
+                    )
+                    if (this.haskey(source, 'data')) {
+                        this.dicts[user] = {
+                            repeat: {
+                                'url': `https://${host}/wxCollectCard/getPrize`,
+                                form: `activityId=${activityId}&pin=${secretPin}`,
+                                cookie: getPin.cookie
+                            }
+                        }
+                        data.signUuid = source.data
+                        data.inviter = user
+                        this.shareCode.push(data)
                     }
                 }
             } catch (e) {
@@ -1392,6 +1473,22 @@ class Main extends Template {
         }
     }
 
+    async bindWithVender(venderId, cookie) {
+        if (this.dict.openCard) {
+            for (let kk of Array(3)) {
+                var o = await this.algo.curl({
+                        'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${venderId}","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":"","channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
+                        cookie
+                    }
+                )
+                if (o.success) {
+                    break
+                }
+            }
+            console.log(`开卡中${venderId}`, o.message)
+        }
+    }
+
     async extra() {
         // 此处用来跑组队开卡
         for (let i in this.dicts) {
@@ -1399,29 +1496,24 @@ class Main extends Template {
             if (this.dict.openCard && this.shareCode.length) {
                 if (this.venderIds && this.venderIds.length) {
                     for (let kkk of this.venderIds) {
-                        for (let kk of Array(3)) {
-                            var o = await this.algo.curl({
-                                    'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${kkk}","shopId":"","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":"","channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
-                                    cookie: this.dicts[i].cookie
-                                }
-                            )
-                            if (o.success) {
-                                break
-                            }
-                        }
-                        console.log(i, `开卡中${kkk}`, o.message)
+                        await this.bindWithVender(kkk, this.dicts[i].cookie)
                     }
                 }
             }
             if (this.dicts[i].repeat) {
-                let get = await this.curl(this.dicts[i].repeat
-                )
-                if (this.haskey(get, 'data.reward')) {
-                    console.log(`获得奖励: ${get.data.reward}`)
-                    this.notices(`获得奖励: ${get.data.reward}`, i)
-                }
-                else {
-                    console.log('可能已经领取过奖励')
+                while (true) {
+                    let getPrize = await this.curl(this.dicts[i].repeat
+                    )
+                    if (this.haskey(getPrize, 'data.drawOk')) {
+                        console.log(`获得: ${getPrize.data.name}`)
+                        this.notices(getPrize.data.name, i)
+                    }
+                    else {
+                        console.log(getPrize.errorMessage || getPrize.msg || "什么也没有")
+                    }
+                    if (!this.haskey(getPrize, 'data.canDrawTimes')) {
+                        break
+                    }
                 }
             }
             if (this.dicts[i].pool) {
