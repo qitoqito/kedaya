@@ -9,7 +9,7 @@ class Main extends Template {
         this.manual = 1
         this.readme = `filename_custom="url|id"\n如果显示The ShareCode is empty...\n就是你IP黑了,暂时无法访问活动\n更换ip或者等服务器解除限制方可运行\n如需开卡,filename_expand="openCard=1"\n组团这类请配合分身使用\nfilename_help=pin1|pin2\nfilename_expand="count=50"(有效参团人数)`
         this.import = ['fs', 'jdAlgo']
-        this.model = 'user'
+        this.model = 'share'
         this.filter = "activityId"
     }
 
