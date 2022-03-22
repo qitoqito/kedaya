@@ -75,10 +75,14 @@ class Main extends Template {
                 this.shareCode.push(query)
             }
             else {
+                let host = ''
+                if (i.match(/:\/\/([^\/]+)/)) {
+                    host = this.match(/:\/\/([^\/]+)/, i)
+                }
                 let acid = this.match([/(\w{32})/, /(\w{24,27})/, /(\d{12,17})/], i)
                 if (acid) {
                     this.code.push({
-                        activityId: acid,
+                        activityId: acid, host
                     })
                 }
                 else {
@@ -93,231 +97,231 @@ class Main extends Template {
                             activityId: this.match(/(\d+)/, i),
                             title: '幸运大抽奖',
                             pageUrl: `https://fjzy-isv.isvjcloud.com/index.php?mod=games&c=redpape&venderId=${vid}&yxId=5510`,
-                            type: "lucky",
+                            type: "lucky", host
                         })
                     }
                 }
             }
-            let array = [
-                "lzkj-isv.isvjcloud.com",
-                "cjhy-isv.isvjcloud.com",
-            ]
-            let shopArray = [
-                'txzj-isv.isvjcloud.com'
-            ]
-            for (let i of this.code) {
-                if (i.activityId.length == 32) {
-                    for (let host of array) {
-                        // let p = await this.response({
-                        //         'url': `https://${host}/wxCommonInfo/token`,
-                        //     }
-                        // )
-                        // var s = await this.curl({
-                        //         'url': `https://${host}/customer/getSimpleActInfoVo`,
-                        //         'form': `activityId=${i.activityId}`,
-                        //         cookie: p.cookie
-                        //     }
-                        // )
-                        // if (!this.haskey(s, 'data')) {
-                        switch (host) {
-                            case "cjhy-isv.isvjcloud.com":
-                                var h = await this.response({
-                                        'url': `https://${host}/wxCollectionActivity/activity?activityId=${i.activityId}`,
-                                    }
-                                )
-                                break
-                            default:
-                                var h = await this.response({
-                                        'url': `https://${host}/wxCollectionActivity/activity2/${i.activityId}?activityId=${i.activityId}`,
-                                    }
-                                )
-                                break
-                        }
-                        let s = await this.curl({
-                                'url': `https://${host}/customer/getSimpleActInfoVo`,
-                                form: `activityId=${i.activityId}`,
-                                cookie: h.cookie
-                            }
-                        )
-                        // }
-                        if (this.haskey(s, 'data')) {
-                            let data = s.data
-                            data.host = host
-                            switch (data.activityType) {
-                                case 5:
-                                case 6:
-                                    data.type = 'wxCollectionActivity'
-                                    data.title = "加购有礼"
-                                    data.pageUrl = `https://${host}/wxCollectionActivity/activity2/${i.activityId}?activityId=${i.activityId}`
-                                    break
-                                case 11:
-                                case 12:
-                                case 13:
-                                    data.type = 'wxDrawActivity'
-                                    data.title = "幸运大转盘"
-                                    data.pageUrl = `https://${host}/${data.type}/activity?activityId=${i.activityId}`
-                                    break
-                                case 24:
-                                case 73:
-                                    data.type = 'wxShopGift'
-                                    data.title = "店铺礼包"
-                                    data.pageUrl = `https://${host}/wxShopGift/activity?activityId=${i.activityId}`
-                                    break
-                                case 46:
-                                case 102:
-                                case 100:
-                                    data.type = 'wxTeam'
-                                    data.title = "组队瓜分"
-                                    data.pageUrl = `https://${host}/wxTeam/activity2?activityId=${i.activityId}`
-                                    break
-                                case 26:
-                                    data.type = 'wxPointDrawActivity'
-                                    data.title = "积分兑换"
-                                    data.pageUrl = `https://${host}/wxPointDrawActivity/activity?activityId=${i.activityId}`
-                                    break
-                                case 17:
-                                    data.type = 'wxShopFollowActivity'
-                                    data.title = "关注店铺"
-                                    data.pageUrl = `https://${host}/wxShopFollowActivity/activity?activityId=${i.activityId}`
-                                    break
-                                case 2001:
-                                case 2003:
-                                    data.type = 'drawCenter'
-                                    data.title = '幸运抽奖'
-                                    data.pageUrl = `https://${host}/drawCenter/activity?activityId=${i.activityId}`
-                                    break
-                                case 7:
-                                    data.type = 'wxGameActivity'
-                                    data.title = "无线游戏"
-                                    data.pageUrl = `https://${host}/wxGameActivity/activity?activityId=${i.activityId}`
-                                    break
-                                case 65:
-                                    data.type = 'wxBuildActivity'
-                                    data.tittle = "盖楼有礼"
-                                    data.pageUrl = `https://${host}/wxBuildActivity/activity?activityId=${i.activityId}`
-                                    break
-                                case 15:
-                                    data.type = 'sign'
-                                    data.title = "签到有礼"
-                                    data.pageUrl = `https://${host}/sign/signActivity2?activityId=${i.activityId}`
-                                    break
-                                case 18:
-                                    data.type = 'sevenDay'
-                                    data.title = "七天签到"
-                                    data.pageUrl = `https://${host}/sign/sevenDay/signActivity?activityId=${i.activityId}`
-                                    break
-                                case 400:
-                                    data.type = 'microDz'
-                                    data.title = "微定制"
-                                    data.pageUrl = `https://${host}/microDz/invite/activity/wx/view/index?activityId=${i.activityId}`
-                                    break
-                                case 104:
-                                    data.type = "wxMcLevelAndBirthGifts"
-                                    data.title = "等级礼包"
-                                    data.pageUrl = `https://${host}/mc/wxMcLevelAndBirthGifts/activity?activityId=${i.activityId}`
-                                    break
-                                // case 40:
-                                //     data.type = 'wxInviteActivity'
-                                //     data.title = "邀请关注有礼"
-                                //     data.pageUrl = `https://${host}/wxInviteActivity/invitee?activityId=${i.activityId}`
-                                //     break
-                                case 16:
-                                    data.type = "daily"
-                                    data.title = "每日抢"
-                                    data.pageUrl = `https://${host}/activity/daily/wx/indexPage1/${i.activityId}?activityId=${i.activityId}`
-                                    break
-                                // case 66:
-                                //     data.type = "WxHbShareActivity"
-                                //     data.title = "拼手气赢红包"
-                                //     data.pageUrl = `https://${host}/WxHbShareActivity/view/activity/${i.activityId}?activityId=${i.activityId}`
-                                //     break
-                                case 204:
-                                    data.pageUrl = `https://${host}/mc/wxPointShopView/pointExgBeans?giftId=${i.activityId}`
-                                    data.title = "积分换豆"
-                                    data.type = 'wxPointShop'
-                                    break
-                                case 42:
-                                    data.pageUrl = `https://${host}/wxCollectCard/activity?activityId=${i.activityId}`
-                                    data.title = "集卡有礼"
-                                    data.type = 'wxCollectCard'
-                                    break
-                                // case 3:
-                                //     data.pageUrl = `https://${host}/wxUnPackingActivity/activity/${i.activityId}?activityId=${i.activityId}`
-                                //     data.title = "让福袋飞"
-                                //     data.type = 'wxUnPackingActivity'
-                                //     break
-                            }
-                            if (!data.pageUrl) {
-                                data.pageUrl = i.activityId
-                            }
-                            let shopInfo = await this.curl({
-                                    'url': `https://api.m.jd.com/?functionId=lite_getShopHomeBaseInfo&body={"shopId":"${data.shopId}","venderId":"${data.venderId}","source":"appshop"}&t=1646398923902&appid=jdlite-shop-app&client=H5`,
+        }
+        let array = [
+            "lzkj-isv.isvjcloud.com",
+            "cjhy-isv.isvjcloud.com",
+        ]
+        for (let i of this.code) {
+            if (i.activityId.length == 32) {
+                if (i.host) {
+                    array = [i.host]
+                }
+                for (let host of array) {
+                    // let p = await this.response({
+                    //         'url': `https://${host}/wxCommonInfo/token`,
+                    //     }
+                    // )
+                    // var s = await this.curl({
+                    //         'url': `https://${host}/customer/getSimpleActInfoVo`,
+                    //         'form': `activityId=${i.activityId}`,
+                    //         cookie: p.cookie
+                    //     }
+                    // )
+                    // if (!this.haskey(s, 'data')) {
+                    switch (host) {
+                        case "cjhy-isv.isvjcloud.com":
+                            var h = await this.response({
+                                    'url': `https://${host}/wxCollectionActivity/activity?activityId=${i.activityId}`,
                                 }
                             )
-                            if (this.haskey(shopInfo, 'result.shopInfo.shopName')) {
-                                data.shopName = shopInfo.result.shopInfo.shopName
+                            break
+                        default:
+                            var h = await this.response({
+                                    'url': `https://${host}/wxCollectionActivity/activity2/${i.activityId}?activityId=${i.activityId}`,
+                                }
+                            )
+                            break
+                    }
+                    let s = await this.curl({
+                            'url': `https://${host}/customer/getSimpleActInfoVo`,
+                            form: `activityId=${i.activityId}`,
+                            cookie: h.cookie
+                        }
+                    )
+                    // }
+                    if (this.haskey(s, 'data')) {
+                        let data = s.data
+                        data.host = host
+                        switch (data.activityType) {
+                            case 5:
+                            case 6:
+                                data.type = 'wxCollectionActivity'
+                                data.title = "加购有礼"
+                                data.pageUrl = `https://${host}/wxCollectionActivity/activity2/${i.activityId}?activityId=${i.activityId}`
+                                break
+                            case 11:
+                            case 12:
+                            case 13:
+                                data.type = 'wxDrawActivity'
+                                data.title = "幸运大转盘"
+                                data.pageUrl = `https://${host}/${data.type}/activity?activityId=${i.activityId}`
+                                break
+                            case 24:
+                            case 73:
+                                data.type = 'wxShopGift'
+                                data.title = "店铺礼包"
+                                data.pageUrl = `https://${host}/wxShopGift/activity?activityId=${i.activityId}`
+                                break
+                            case 46:
+                            case 102:
+                            case 100:
+                                data.type = 'wxTeam'
+                                data.title = "组队瓜分"
+                                data.pageUrl = `https://${host}/wxTeam/activity2?activityId=${i.activityId}`
+                                break
+                            case 26:
+                                data.type = 'wxPointDrawActivity'
+                                data.title = "积分兑换"
+                                data.pageUrl = `https://${host}/wxPointDrawActivity/activity?activityId=${i.activityId}`
+                                break
+                            case 17:
+                                data.type = 'wxShopFollowActivity'
+                                data.title = "关注店铺"
+                                data.pageUrl = `https://${host}/wxShopFollowActivity/activity?activityId=${i.activityId}`
+                                break
+                            case 2001:
+                            case 2003:
+                                data.type = 'drawCenter'
+                                data.title = '幸运抽奖'
+                                data.pageUrl = `https://${host}/drawCenter/activity?activityId=${i.activityId}`
+                                break
+                            case 7:
+                                data.type = 'wxGameActivity'
+                                data.title = "无线游戏"
+                                data.pageUrl = `https://${host}/wxGameActivity/activity?activityId=${i.activityId}`
+                                break
+                            case 65:
+                                data.type = 'wxBuildActivity'
+                                data.tittle = "盖楼有礼"
+                                data.pageUrl = `https://${host}/wxBuildActivity/activity?activityId=${i.activityId}`
+                                break
+                            case 15:
+                                data.type = 'sign'
+                                data.title = "签到有礼"
+                                data.pageUrl = `https://${host}/sign/signActivity2?activityId=${i.activityId}`
+                                break
+                            case 18:
+                                data.type = 'sevenDay'
+                                data.title = "七天签到"
+                                data.pageUrl = `https://${host}/sign/sevenDay/signActivity?activityId=${i.activityId}`
+                                break
+                            case 400:
+                                data.type = 'microDz'
+                                data.title = "微定制"
+                                data.pageUrl = `https://${host}/microDz/invite/activity/wx/view/index?activityId=${i.activityId}`
+                                break
+                            case 104:
+                                data.type = "wxMcLevelAndBirthGifts"
+                                data.title = "等级礼包"
+                                data.pageUrl = `https://${host}/mc/wxMcLevelAndBirthGifts/activity?activityId=${i.activityId}`
+                                break
+                            // case 40:
+                            //     data.type = 'wxInviteActivity'
+                            //     data.title = "邀请关注有礼"
+                            //     data.pageUrl = `https://${host}/wxInviteActivity/invitee?activityId=${i.activityId}`
+                            //     break
+                            case 16:
+                                data.type = "daily"
+                                data.title = "每日抢"
+                                data.pageUrl = `https://${host}/activity/daily/wx/indexPage1/${i.activityId}?activityId=${i.activityId}`
+                                break
+                            // case 66:
+                            //     data.type = "WxHbShareActivity"
+                            //     data.title = "拼手气赢红包"
+                            //     data.pageUrl = `https://${host}/WxHbShareActivity/view/activity/${i.activityId}?activityId=${i.activityId}`
+                            //     break
+                            case 204:
+                                data.pageUrl = `https://${host}/mc/wxPointShopView/pointExgBeans?giftId=${i.activityId}`
+                                data.title = "积分换豆"
+                                data.type = 'wxPointShop'
+                                break
+                            case 42:
+                                data.pageUrl = `https://${host}/wxCollectCard/activity?activityId=${i.activityId}`
+                                data.title = "集卡有礼"
+                                data.type = 'wxCollectCard'
+                                break
+                            // case 3:
+                            //     data.pageUrl = `https://${host}/wxUnPackingActivity/activity/${i.activityId}?activityId=${i.activityId}`
+                            //     data.title = "让福袋飞"
+                            //     data.type = 'wxUnPackingActivity'
+                            //     break
+                        }
+                        if (!data.pageUrl) {
+                            data.pageUrl = i.activityId
+                        }
+                        let shopInfo = await this.curl({
+                                'url': `https://api.m.jd.com/?functionId=lite_getShopHomeBaseInfo&body={"shopId":"${data.shopId}","venderId":"${data.venderId}","source":"appshop"}&t=1646398923902&appid=jdlite-shop-app&client=H5`,
                             }
-                            if (['wxTeam', 'microDz', 'WxHbShareActivity', 'wxCollectCard', 'wxUnPackingActivity'].includes(data.type)) {
-                                await this[data.type](data)
+                        )
+                        if (this.haskey(shopInfo, 'result.shopInfo.shopName')) {
+                            data.shopName = shopInfo.result.shopInfo.shopName
+                        }
+                        if (['wxTeam', 'microDz', 'WxHbShareActivity', 'wxCollectCard', 'wxUnPackingActivity'].includes(data.type)) {
+                            await this[data.type](data)
+                        }
+                        else {
+                            this.shareCode.push(data)
+                        }
+                        break
+                    }
+                    else {
+                        let html = await this.curl({
+                                'url': `https://${host}/pool/captain/${i.activityId}?activityId=${i.activityId}`,
                             }
-                            else {
-                                this.shareCode.push(data)
+                        )
+                        if (html.includes("瓜分")) {
+                            let venderId = this.match(/id="venderId"\s*value="(\d+)"/, html)
+                            if (venderId) {
+                                let shopInfo = await this.curl({
+                                        'url': `https://api.m.jd.com/?functionId=lite_getShopHomeBaseInfo&body={"venderId":"${venderId}","source":"appshop"}&t=1646398923902&appid=jdlite-shop-app&client=H5`,
+                                    }
+                                )
+                                await this.wxTeam({
+                                    activityId: i.activityId,
+                                    pageUrl: `https://${host}/pool/captain/${i.activityId}?activityId=${i.activityId}`,
+                                    title: "组队瓜分京豆",
+                                    type: 'pool',
+                                    host, venderId,
+                                    shopId: shopInfo.result.shopInfo.shopId,
+                                    shopName: shopInfo.result.shopInfo.shopName
+                                })
                             }
                             break
                         }
-                        else {
-                            let html = await this.curl({
-                                    'url': `https://${host}/pool/captain/${i.activityId}?activityId=${i.activityId}`,
-                                }
-                            )
-                            if (html.includes("瓜分")) {
-                                let venderId = this.match(/id="venderId"\s*value="(\d+)"/, html)
-                                if (venderId) {
-                                    let shopInfo = await this.curl({
-                                            'url': `https://api.m.jd.com/?functionId=lite_getShopHomeBaseInfo&body={"venderId":"${venderId}","source":"appshop"}&t=1646398923902&appid=jdlite-shop-app&client=H5`,
-                                        }
-                                    )
-                                    await this.wxTeam({
-                                        activityId: i.activityId,
-                                        pageUrl: `https://${host}/pool/captain/${i.activityId}?activityId=${i.activityId}`,
-                                        title: "组队瓜分京豆",
-                                        type: 'pool',
-                                        host, venderId,
-                                        shopId: shopInfo.result.shopInfo.shopId,
-                                        shopName: shopInfo.result.shopInfo.shopName
-                                    })
-                                }
-                                break
-                            }
-                        }
                     }
                 }
-                else if (!isNaN(i.activityId)) {
-                    if (this.haskey(i, 'type', 'lucky')) {
-                        this.shareCode.push(i)
-                    }
-                    else {
-                        let venderId = i.activityId.substr(4, i.activityId.length - 6)
-                        for (let host of array) {
-                            let token = await this.response({
-                                    'url': `https://${host}/wxCommonInfo/token`,
-                                }
-                            )
-                            let s = await this.curl({
-                                    'url': `https://${host}/pointExchange/activityContent`,
-                                    'form': `activityId=${i.activityId}&pin=werwr36235244`,
-                                    cookie: token.cookie
-                                }
-                            )
-                            if (this.haskey(s, 'data.activity')) {
-                                this.shareCode.push({
-                                    "venderId": venderId,
-                                    "activityId": i.activityId,
-                                    type: 'pointExchange',
-                                    host
-                                })
-                                break
+            }
+            else if (!isNaN(i.activityId)) {
+                if (this.haskey(i, 'type', 'lucky')) {
+                    this.shareCode.push(i)
+                }
+                else {
+                    let venderId = i.activityId.substr(4, i.activityId.length - 6)
+                    for (let host of array) {
+                        let token = await this.response({
+                                'url': `https://${host}/wxCommonInfo/token`,
                             }
+                        )
+                        let s = await this.curl({
+                                'url': `https://${host}/pointExchange/activityContent`,
+                                'form': `activityId=${i.activityId}&pin=werwr36235244`,
+                                cookie: token.cookie
+                            }
+                        )
+                        if (this.haskey(s, 'data.activity')) {
+                            this.shareCode.push({
+                                "venderId": venderId,
+                                "activityId": i.activityId,
+                                type: 'pointExchange',
+                                host
+                            })
+                            break
                         }
                     }
                 }
