@@ -11,24 +11,30 @@ class Main extends Template {
 
     async main(p) {
         let cookie = p.cookie
-        let timeout = 3000
+        let timeout = 5000
         try {
             let isvObfuscator = await this.curl({
                 url: 'https://api.m.jd.com/client.action',
                 form: 'functionId=isvObfuscator&body=%7B%22id%22%3A%22%22%2C%22url%22%3A%22https%3A%2F%2Fddsj-dz.isvjcloud.com%22%7D&uuid=5162ca82aed35fc52e8&client=apple&clientVersion=10.0.10&st=1631884203742&sv=112&sign=fd40dc1c65d20881d92afe96c4aec3d0',
                 cookie: p.cookie
             })
-            let getFansInfo = await this.curl({
-                    'url': `https://mpdz-car-dz.isvjcloud.com/ql/front/getFansInfo`,
-                    'body': {
-                        "data": isvObfuscator.token,
-                        "source": "01",
-                        "actId": "1760007"
-                    }, timeout
+            for (let i of Array(3)) {
+                var getFansInfo = await this.curl({
+                        'url': `https://mpdz-car-dz.isvjcloud.com/ql/front/getFansInfo`,
+                        'body': {
+                            "data": isvObfuscator.token,
+                            "source": "01",
+                            "actId": "1760007"
+                        }, timeout,
+                        referer: 'https://mpdz-car-dz.isvjcloud.com'
+                    }
+                )
+                if (this.haskey(getFansInfo, 'msg')) {
+                    break
                 }
-            )
+            }
+            this.assert(this.haskey(getFansInfo, 'msg'), "没有获取到用户信息")
             let buyerNick = getFansInfo.msg
-            this.assert(buyerNick, "没有获取到用户信息")
             console.log(buyerNick)
             this.dict[this.userPin(cookie)] = buyerNick
             let actId = this.haskey(getFansInfo, 'data.actId') || 1760007
@@ -39,16 +45,18 @@ class Main extends Template {
                         buyerNick,
                         "energyValue": 10,
                         "day": 1
-                    }, timeout
+                    }, timeout,
+                    referer: 'https://mpdz-car-dz.isvjcloud.com'
                 }
             )
-            console.log('signin', signin.msg || signin.errorMsg)
+            console.log('signin', this.haskey(signin, 'msg') || this.haskey(signin, 'errorMsg'))
             let t = await this.curl({
                     'url': `https://mpdz-car-dz.isvjcloud.com/ql/front/loadTaskTimes`,
                     body: {
                         actId,
                         buyerNick,
-                    }, timeout
+                    }, timeout,
+                    referer: 'https://mpdz-car-dz.isvjcloud.com'
                 }
             )
             let task = ['browseItem', 'browseShop', 'carSelection', 'refueling']
@@ -61,21 +69,22 @@ class Main extends Template {
                                 buyerNick,
                                 "behavior": i
                             },
-                            timeout
+                            timeout,
+                            referer: 'https://mpdz-car-dz.isvjcloud.com'
                         }
                     )
                     if (!d) {
-                        await this.wait(3000)
+                        await this.wait(5000)
                         continue
                     }
                     console.log(i, d.msg || d.errorMsg)
                     if (d.msg == '今日已完成该任务') {
                         break
                     }
-                    if (!d.succ) {
+                    if (!this.haskey(d, 'succ')) {
                         break
                     }
-                    await this.wait(3000)
+                    await this.wait(5000)
                 }
             }
             for (let n = 0; n<3 - (this.haskey(t, `data.favouriteShop`) || 0); n++) {
@@ -85,34 +94,36 @@ class Main extends Template {
                             actId,
                             buyerNick,
                             "shopGroupType": "favouriteShop"
-                        }, timeout
+                        }, timeout,
+                        referer: 'https://mpdz-car-dz.isvjcloud.com'
                     }
                 )
-                if (loadShopGroup.succ) {
+                if (this.haskey(loadShopGroup, 'succ')) {
                     let follow = await this.curl({
                             'url': `https://mpdz-car-dz.isvjcloud.com/ql/front/favouriteShopSingle`,
                             body: {
                                 actId,
                                 buyerNick,
                                 "shopId": loadShopGroup.data.shopId
-                            }, timeout
+                            }, timeout,
+                            referer: 'https://mpdz-car-dz.isvjcloud.com'
                         }
                     )
                     if (!follow) {
-                        await this.wait(3000)
+                        await this.wait(5000)
                         continue
                     }
-                    if (!follow.succ) {
+                    if (!this.haskey(follow, 'succ')) {
                         break
                     }
                     console.log('follow', follow.msg)
                     if (follow.msg == '今日已完成该任务') {
                         break
                     }
-                    await this.wait(3000)
+                    await this.wait(5000)
                 }
                 else {
-                    console.log('follow', loadShopGroup.errorMsg)
+                    console.log('follow', this.haskey(loadShopGroup, 'errorMsg'))
                     break
                 }
             }
@@ -123,11 +134,12 @@ class Main extends Template {
                             actId,
                             buyerNick,
                             "itemGroupType": "browseItem"
-                        }, timeout
+                        }, timeout,
+                        referer: 'https://mpdz-car-dz.isvjcloud.com'
                     }
                 )
                 if (!loadItemGroup) {
-                    await this.wait(3000)
+                    await this.wait(5000)
                     continue
                 }
                 if (loadItemGroup.succ) {
@@ -138,14 +150,15 @@ class Main extends Template {
                                 buyerNick,
                                 "shopId": loadItemGroup.data.shopId,
                                 "itemId": loadItemGroup.data.itemId,
-                            }, timeout
+                            }, timeout,
+                            referer: 'https://mpdz-car-dz.isvjcloud.com'
                         }
                     )
-                    if (!add.succ) {
+                    if (!this.haskey(add, 'succ')) {
                         break
                     }
                     console.log('add', add.msg)
-                    await this.wait(3000)
+                    await this.wait(5000)
                 }
                 else {
                     console.log('add', loadItemGroup.errorMsg)
@@ -157,16 +170,18 @@ class Main extends Template {
                     body: {
                         actId,
                         buyerNick,
-                    }, timeout
+                    }, timeout,
+                    referer: 'https://mpdz-car-dz.isvjcloud.com'
                 }
             )
-            console.log('order', order.msg || order.errorMsg)
+            console.log('order', this.haskey(order, 'msg') || this.haskey(order, 'errorMsg'))
             let times = await this.curl({
                     'url': `https://mpdz-car-dz.isvjcloud.com/ql/front/checkCarPlayTimes`,
                     body: {
                         actId,
                         buyerNick,
-                    }, timeout
+                    }, timeout,
+                    referer: 'https://mpdz-car-dz.isvjcloud.com'
                 }
             )
             if ((this.haskey(times, 'data.times') || 0)>0) {
@@ -176,14 +191,15 @@ class Main extends Template {
                             body: {
                                 actId,
                                 buyerNick,
-                            }, timeout
+                            }, timeout,
+                            referer: 'https://mpdz-car-dz.isvjcloud.com'
                         }
                     )
                     if (!start) {
-                        await this.wait(3000)
+                        await this.wait(5000)
                         continue
                     }
-                    if (start.succ) {
+                    if (this.haskey(start, 'succ')) {
                         await this.wait(5000)
                         let game = await this.curl({
                                 'url': `https://mpdz-car-dz.isvjcloud.com/ql/front/carPlayUpdate`,
@@ -191,12 +207,13 @@ class Main extends Template {
                                     actId,
                                     buyerNick,
                                     "behavior": "run",
-                                    "energyValue": this.rand(200000, 300000)
-                                }, timeout
+                                    "energyValue": this.rand(200000, 500000)
+                                }, timeout,
+                                referer: 'https://mpdz-car-dz.isvjcloud.com'
                             }
                         )
-                        console.log('game', game.data || game.errorMsg)
-                        if (!game.succ) {
+                        console.log('game', this.haskey(game, 'msg') || this.haskey(game, 'errorMsg'))
+                        if (!this.haskey(game, 'succ')) {
                             break
                         }
                         await this.wait(5000)
@@ -211,7 +228,8 @@ class Main extends Template {
                     'body': {
                         actId,
                         buyerNick
-                    }, timeout
+                    }, timeout,
+                    referer: 'https://mpdz-car-dz.isvjcloud.com'
                 }
             )
             if (this.haskey(f, 'data.energyValue')) {
@@ -219,7 +237,8 @@ class Main extends Template {
                 this.notices(`当前积分: ${f.data.energyValue}`, p.user)
             }
             //
-        } catch (e) {
+        } catch
+            (e) {
             console.log(e)
         }
     }
@@ -271,4 +290,5 @@ class Main extends Template {
     }
 }
 
-module.exports = Main;
+module
+    .exports = Main;
