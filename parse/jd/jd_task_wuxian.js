@@ -177,7 +177,7 @@ class Main extends Template {
                                 break
                             case 26:
                                 data.type = 'wxPointDrawActivity'
-                                data.title = "积分兑换"
+                                data.title = "抽奖赚积分"
                                 data.pageUrl = `https://${host}/wxPointDrawActivity/activity?activityId=${i.activityId}`
                                 break
                             case 17:

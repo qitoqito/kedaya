@@ -5,7 +5,7 @@ class Main extends Template {
         super()
         this.title = "京东东东农场"
         this.cron = "33 0,11,17,22 * * *"
-        this.thread = 2
+        // this.thread = 2
         this.task = 'local'
         this.import = ['fs']
         this.readme = `目前农场容易黑ip,现有模式是每次运行先获取invite/jd_task_farm.json里面的shareCode来逐一助力\n等运行完毕后,获取本次运行的所有账号shareCode,重新写入invite/jd_task_farm.json,由于ip问题,可能漏掉部分账号shareCode\n号多的话,建议缓存js_task_farm.json,此模式是每次运行后不再写入新的shareCode到invite/jd_task_farm.json里面,增减需要手动修改json文件\n缓存助力码文件: filename_custom='cache'\n水滴换豆: filename_custom='beanCard'\n水滴换豆+缓存json: filename_custom='beanCard|cache'\n上面的custom看需求选一个添加,请检查scripts目录有invite文件夹`
