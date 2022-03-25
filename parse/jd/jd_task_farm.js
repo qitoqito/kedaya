@@ -65,6 +65,8 @@ class Main extends Template {
                 }
             )
         }
+        let amount = this.haskey(init, 'farmUserPro.totalEnergy')
+        let treeTotalEnergy = this.haskey(init, 'farmUserPro.treeTotalEnergy')
         let fi = await this.curl({
                 'url': `https://api.m.jd.com/client.action?functionId=friendListInitForFarm&body={"lastId":null,"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                 // 'form':``,
@@ -82,7 +84,7 @@ class Main extends Template {
             for (let i of this.random(fcode, 7)) {
                 console.log("删除好友:", i)
                 let sc = await this.curl({
-                    'url': `https://api.m.jd.com/client.action?functionId=deleteFriendForFarm&body={"shareCode":"${i}","version":8,"channel":1}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                    'url': `https://api.m.jd.com/client.action?functionId=deleteFriendForFarm&body={"shareCode":"${i}","version":14,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.4.2`,
                     // 'form':``,
                     cookie
                 })
@@ -583,7 +585,7 @@ class Main extends Template {
                 cookie
             }
         )
-        let amount = init.farmUserPro.totalEnergy
+        amount = this.haskey(init, 'farmUserPro.totalEnergy') || amount
         let custom = this.getValue('custom')
         if (custom.includes('beanCard')) {
             for (let i = 0; i<Math.min(Math.floor(amount / 100), 3); i++) {
@@ -605,7 +607,7 @@ class Main extends Template {
             await this.wait(this.rand(3000, 4000))
             for (let j = 0; j<3; j++) {
                 var js = await this.curl({
-                        'url': `https://api.m.jd.com/client.action?functionId=waterGoodForFarm&body={"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                        'url': `https://api.m.jd.com/client.action?functionId=waterGoodForFarm&body={"type":"","version":15,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                         // 'form':``,
                         cookie
                     }
@@ -620,10 +622,10 @@ class Main extends Template {
             if (!js.totalEnergy) {
                 break
             }
-            if (js.treeEnergy == init.farmUserPro.treeTotalEnergy) {
+            if (js.treeEnergy == treeTotalEnergy) {
                 this.notices("可以兑换奖品了", p.user)
             }
-            console.log("正在浇水,剩余水滴:", js.totalEnergy, '总共浇水:', js.treeEnergy, '需要水滴', init.farmUserPro.treeTotalEnergy)
+            console.log("正在浇水,剩余水滴:", js.totalEnergy, '总共浇水:', js.treeEnergy, '需要水滴', treeTotalEnergy)
         }
     }
 
