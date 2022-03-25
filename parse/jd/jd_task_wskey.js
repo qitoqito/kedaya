@@ -131,12 +131,17 @@ class Main extends Template {
                 wskey: cookie,
                 verify: 1
             }
-            this.userDict[pin] = {
-                pin,
-                userName: pin,
-                index: this.rand(10000, 20000),
-                wskey: cookie,
-                verify: 1
+            if (this.userDict[pin]) {
+                this.userDict[pin].wskey = q.wskey
+            }
+            else {
+                this.userDict[pin] = {
+                    pin,
+                    userName: pin,
+                    index: this.rand(10000, 20000),
+                    wskey: cookie,
+                    verify: 1
+                }
             }
         }
         if (dict.wskey && dict.verify) {
@@ -156,9 +161,7 @@ class Main extends Template {
                 else {
                     wskey = `pin=${encodeURIComponent(pin)};wskey=${dict.wskey};`
                 }
-
                 let shopUrl = `https://shop.m.jd.com/?shopId=${this.rand(1000349325, 1000249325)}`
-
                 let x = await this.response({
                     url: `https://api.m.jd.com/client.action?functionId=genToken`,
                     form: this.random(this.code, 1)[0],
@@ -180,7 +183,6 @@ class Main extends Template {
                         url: `https://un.m.jd.com/cgi-bin/app/appjmp?tokenKey=${x.content.tokenKey}&lbs={"cityId":"","districtId":"","provinceId":"","districtName":"","lng":"0.000000","provinceName":"","lat":"0.000000","cityName":""}&to=${encodeURIComponent(shopUrl)}`,
                         'form': '',
                     })
-
                     openKey = y.cookie || ''
                 }
                 console.log(openKey)
@@ -347,19 +349,19 @@ class Main extends Template {
                                 }
                                 console.log("Cookie写入成功")
                             })
-                            let userData = `module.exports = ${JSON.stringify(this.userDict, null, 4)}`
-                            this.modules.fs.writeFile(this.dirname + "/config/jdUser.js", userData, function(err, data) {
-                                if (err) {
-                                    throw err;
-                                }
-                                console.log("user写入成功")
-                            })
                         }
                         else {
                             console.log("没有数据可以写入")
                         }
                         break
                 }
+                let userData = `module.exports = ${JSON.stringify(this.userDict, null, 4)}`
+                this.modules.fs.writeFile(this.dirname + "/config/jdUser.js", userData, function(err, data) {
+                    if (err) {
+                        throw err;
+                    }
+                    console.log("user写入成功")
+                })
             } catch (e) {
             }
         }
