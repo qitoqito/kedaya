@@ -5,7 +5,7 @@ class Main extends Template {
         super()
         this.title = "京东telegram监听"
         // this.cron = "12 0,13 * * *"
-        this.help = 2÷
+        // this.help = 2
         this.task = 'test'
         this.jump = 1
         this.import = ['node-telegram-bot-api', 'jdUrl']
