@@ -12,6 +12,8 @@ class Main extends Template {
     }
 
     async prepare() {
+        this.locationId = {}
+        this.ban = 0
         for (let i of this.getValue('custom')) {
             let k = this.match(/(\w+)\s*=\s*([^\s]+)/, i)
             if (k.length) {
@@ -25,9 +27,33 @@ class Main extends Template {
         }
         this.assert(this.dict.token, "请先添加机器人TOKEN")
         this.TelegramBot = this.modules['node-telegram-bot-api']
-        this.bot = new this.TelegramBot(this.dict.token, {polling: true});
-        this.locationId = {}
-        this.ban = 0
+        if (this['QITOQITO_MAP']) {
+            let change = {}
+            for (let k of this['QITOQITO_MAP'].replace(/\&/g, "\|").split("|")) {
+                let a = k.split("=")
+                for (let i of a[0].split(',')) {
+                    change[i] = {
+                        map: a[1],
+                        type: a[1].split("_")[0]
+                    }
+                }
+            }
+            this.dict.map = change
+        }
+        let request = {}
+        if (this.proxy) {
+            if (this.proxy.toLowerCase().includes("socks")) {
+                var SocksProxyAgent = require('socks-proxy-agent');
+                var agent = new SocksProxyAgent(this.proxy.toLowerCase());
+                request.agent = agent
+            }
+            else {
+                request.proxy = this.proxy
+            }
+        }
+        this.bot = new this.TelegramBot(this.dict.token, {
+            polling: true, request,
+        });
         await this.tg()
     }
 
@@ -79,6 +105,10 @@ class Main extends Template {
                 else if (this.match(new RegExp(`(^${this.dict.scripts.join("|")}$)`), text)) {
                     let command = this.match(new RegExp(`(^${this.dict.scripts.join("|")})`), text)
                     text = `task jd_task_${command}`
+                }
+                else if (this.dict.map && this.match(new RegExp(`(^${Object.keys(this.dict.map).join("|")})`), text)) {
+                    let command = this.match(new RegExp(`(^${Object.keys(this.dict.map).join("|")})`), text)
+                    text = `task ${this.dict.map[command].map} -custom ${reText || text.replace(command, '')}`
                 }
                 let filename = this.match(/task\s*(\w+)\s*/, text)
                 console.log(filename)
