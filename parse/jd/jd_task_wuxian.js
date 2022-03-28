@@ -1037,31 +1037,36 @@ class Main extends Template {
                         task: 'doMeetingTask',
                     },
                 }
+                let cookie = getPin.cookie
                 for (let task in dict) {
                     let d = data[task]
                     if (d && d.finishedCount != d.upLimit) {
                         if (dict[task].list) {
                             for (let v of d[dict[task].list]) {
                                 if (!v.finished) {
-                                    let dd = await this.curl({
+                                    let dd = await this.response({
                                             'url': `https://lzkjdz-isv.isvjcloud.com/wxFansInterActionActivity/${dict[task].task}`,
-                                            'form': `activityId=${activityId}&uuid=${uuid}&skuId=${vo.skuId}&${dict[task].key}=${v[dict[task].key]}`,
-                                            cookie: getPin.cookie
+                                            'form': `activityId=${activityId}&uuid=${uuid}&${dict[task].key}=${v[dict[task].key]}`,
+                                            cookie
                                         }
                                     )
-                                    console.log(task, dd)
+                                    console.log(task, dd.content)
+                                    await this.wait(500)
+                                    cookie = dd.cookie
                                 }
                             }
                         }
                         else {
                             for (let kk = d.finishedCount; kk<d.upLimit; kk++) {
-                                let dd = await this.curl({
+                                let dd = await this.response({
                                         'url': `https://lzkjdz-isv.isvjcloud.com/wxFansInterActionActivity/${dict[task].task}`,
                                         'form': `activityId=${activityId}&uuid=${uuid}`,
-                                        cookie: getPin.cookie
+                                        cookie: cookie
                                     }
                                 )
-                                console.log(task, dd)
+                                console.log(task, dd.content)
+                                await this.wait(500)
+                                cookie = dd.cookie
                             }
                         }
                     }
@@ -1069,18 +1074,19 @@ class Main extends Template {
                 let prize = ['prizeOneStatus', 'prizeTwoStatus', 'prizeThreeStatus']
                 for (let k = 0; k<3; k++) {
                     if (!data.actorInfo[prize[k]]) {
-                        let draw = await this.curl({
+                        let draw = await this.response({
                                 'url': `https://lzkjdz-isv.isvjcloud.com/wxFansInterActionActivity/startDraw`,
                                 'form': `activityId=${activityId}&uuid=${uuid}&drawType=0${k + 1}`,
-                                cookie: getPin.cookie
+                                cookie
                             }
                         )
-                        if (this.haskey(draw, 'data.drawOk')) {
-                            this.notices(draw.data.drawInfo.name, p.user)
-                            console.log(`获得奖品: ${draw.data.drawInfo.name} ${draw.data.drawInfo.priceInfo}`)
+                        cookie = draw.cookie 
+                        if (this.haskey(draw, 'content.data.drawOk')) {
+                            this.notices(draw.content.data.drawInfo.name, p.user)
+                            console.log(`获得奖品: ${draw.content.data.drawInfo.name} ${draw.content.data.drawInfo.priceInfo}`)
                         }
                         else {
-                            console.log(draw.errorMessage || draw.msg || "什么也没有")
+                            console.log(draw.content.errorMessage || draw.content.msg || "什么也没有")
                         }
                     }
                 }
@@ -1590,7 +1596,7 @@ class Main extends Template {
         // }
         let isvObfuscator = await this.curl({
             url: 'https://api.m.jd.com/client.action',
-            form: this.random(this.dict.ob,1)[0],
+            form: this.random(this.dict.ob, 1)[0],
             cookie: p.cookie
         })
         switch (host) {
