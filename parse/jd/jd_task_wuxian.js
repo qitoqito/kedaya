@@ -697,10 +697,10 @@ class Main extends Template {
                     let getPrize = await this.curl({
                             'url': `https://${host}/${type}/getPrize`,
                             form: `activityId=${activityId}&pin=${secretPin}`,
-                            cookie: getPin.cookie
+                            cookie: getPin.cookie,
+                            referer: p.inviter.pageUrl
                         }
                     )
-                    // console.log(getPrize)
                     if (this.haskey(getPrize, 'data.drawOk')) {
                         console.log(`获得: ${getPrize.data.name}`)
                         this.notices(getPrize.data.name, p.user)
@@ -1514,13 +1514,13 @@ class Main extends Template {
         let venderId = p.inviter.venderId
         let shopId = p.inviter.shopId
         let sid = p.inviter.sid || ''
-        if (venderId) {
-            let follow = await this.curl({
-                'url': 'https://api.m.jd.com/client.action?g_ty=ls&g_tk=518274330',
-                'form': `functionId=followShop&body={"follow":"true","shopId":"${shopId}","venderId":"${venderId}","award":"true","sourceRpc":"shop_app_home_follow"}&osVersion=13.7&appid=wh5&clientVersion=9.2.0&loginType=2&loginWQBiz=interact`,
-                cookie: p.cookie
-            })
-        }
+        // if (venderId) {
+        //     let follow = await this.curl({
+        //         'url': 'https://api.m.jd.com/client.action?g_ty=ls&g_tk=518274330',
+        //         'form': `functionId=followShop&body={"follow":"true","shopId":"${shopId}","venderId":"${venderId}","award":"true","sourceRpc":"shop_app_home_follow"}&osVersion=13.7&appid=wh5&clientVersion=9.2.0&loginType=2&loginWQBiz=interact`,
+        //         cookie: p.cookie
+        //     })
+        // }
         let isvObfuscator = await this.curl({
             url: 'https://api.m.jd.com/client.action',
             form: this.random(this.dict[host], 1)[0],
