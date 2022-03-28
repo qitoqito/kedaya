@@ -16,8 +16,7 @@ class Main extends Template {
     async prepare() {
         this.assert(this.custom, '请先添加环境变量')
         this.dict = {
-            'lzkj-isv.isvjcloud.com': [
-                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Flzkj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=1d9f7760c9ffaad4eb&client=apple&clientVersion=10.0.10&st=1646999134752&sv=112&sign=d14c9517190f8a8b0e253e3dbbdee87a',
+            ob: ['functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Flzkj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=1d9f7760c9ffaad4eb&client=apple&clientVersion=10.0.10&st=1646999134752&sv=112&sign=d14c9517190f8a8b0e253e3dbbdee87a',
                 'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Flzkj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=18a17aa99f7fcfff35&client=apple&clientVersion=10.0.10&st=1646999134761&sv=121&sign=e930b0308cbfaf4200b2b84b941c6788',
                 'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Flzkj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=db9c771d90d938b86b&client=apple&clientVersion=10.0.10&st=1646999134762&sv=112&sign=08221e9c89bbd9ae2c60f2051b7ce505',
                 'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Flzkj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=2da6b0bb5954112f4a&client=apple&clientVersion=10.0.10&st=1646999134763&sv=100&sign=32911674584d97be1a250b98533e12f1',
@@ -26,32 +25,7 @@ class Main extends Template {
                 'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Flzkj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=09007f4b53f42ea76a&client=apple&clientVersion=10.0.10&st=1646999134772&sv=112&sign=8b69bb949ac5098e8f0db4697e0ec84a',
                 'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Flzkj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=829d99df24e49cdacb&client=apple&clientVersion=10.0.10&st=1646999134773&sv=112&sign=87dbe2a552abef974cfd6d97a7f74b97',
                 'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Flzkj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=e8c798cb6d7b13c75b&client=apple&clientVersion=10.0.10&st=1646999134784&sv=112&sign=198854a1e8da61b030924ea640e61b74',
-                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Flzkj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=b024526b380d35c9e3&client=apple&clientVersion=10.0.10&st=1646999134786&sv=102&sign=7d796bf73559e6ef06ad746fdc5445c0'
-            ],
-            'cjhy-isv.isvjcloud.com': [
-                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Fcjhy-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=b024526b380d35c9e3&client=apple&clientVersion=10.0.10&st=1646999134786&sv=111&sign=fd9417f9d8e872da6c55102bd69da99f',
-                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Fcjhy-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=c13998164739530b4b&client=apple&clientVersion=10.0.10&st=1646999134787&sv=112&sign=6c8bea1dbcaec6e17841d5e66ed590ed',
-                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Fcjhy-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=1d70cd0a0c7096e86d&client=apple&clientVersion=10.0.10&st=1646999134788&sv=111&sign=026a782e2d60aa8e7fbb76f000bcbc7e',
-                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Fcjhy-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=293231f92a043e7bee&client=apple&clientVersion=10.0.10&st=1646999134791&sv=112&sign=e13574f1c25f5adf23d0a68bb0728e01',
-                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Fcjhy-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=147dc74e2f03ec5e23&client=apple&clientVersion=10.0.10&st=1646999134792&sv=112&sign=5b14dad0922821a65d7acb1da36c0d38',
-                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Fcjhy-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=cdea9eb9e5e369c041&client=apple&clientVersion=10.0.10&st=1646999134793&sv=100&sign=a9f78dae735cecf0e4447c6621d0b870',
-                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Fcjhy-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=615a2eeca9d867f5f8&client=apple&clientVersion=10.0.10&st=1646999134794&sv=121&sign=afaf2c7b1756cd2dbdc3a0bf2aa72f38',
-                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Fcjhy-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=baab1229681d350dd0&client=apple&clientVersion=10.0.10&st=1646999134803&sv=102&sign=91292e8c482052f55bf4a8d90f57d48c',
-                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Fcjhy-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=baab1229681d350dd0&client=apple&clientVersion=10.0.10&st=1646999134804&sv=120&sign=0fe8ba286231503a9c8c642995b444bd',
-                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Fcjhy-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=f7fc9bef85a8620cdf&client=apple&clientVersion=10.0.10&st=1646999134805&sv=121&sign=0339e05b0ee85e7a9346eb8c1ed7056d'
-            ],
-            'txzj-isv.isvjcloud.com': [
-                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Ftxzj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=f7fc9bef85a8620cdf&client=apple&clientVersion=10.0.10&st=1646999134805&sv=121&sign=bbe137e2f52dbf3a1f10fa2ffe749d05',
-                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Ftxzj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=2d055826a369eb2fc6&client=apple&clientVersion=10.0.10&st=1646999134807&sv=112&sign=fa00234b1f237624970aed51543c49e2',
-                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Ftxzj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=d5f0ab2b97d36ba178&client=apple&clientVersion=10.0.10&st=1646999134809&sv=112&sign=04895a606933f02321a35f9fca56e807',
-                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Ftxzj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=f491462298964da08f&client=apple&clientVersion=10.0.10&st=1646999134810&sv=111&sign=003c222fc32323957a3da441eb1d0a0d',
-                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Ftxzj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=f491462298964da08f&client=apple&clientVersion=10.0.10&st=1646999134810&sv=111&sign=003c222fc32323957a3da441eb1d0a0d',
-                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Ftxzj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=f491462298964da08f&client=apple&clientVersion=10.0.10&st=1646999134810&sv=112&sign=2fc24960c23983f65ef975d306b21615',
-                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Ftxzj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=d75765b6c47fc7eb46&client=apple&clientVersion=10.0.10&st=1646999134814&sv=102&sign=9753902a4c8467ab9dffcc44ffd82aad',
-                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Ftxzj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=118c532769d7022cc6&client=apple&clientVersion=10.0.10&st=1646999134817&sv=121&sign=44a1b5c6597802dcee364ba80079d668',
-                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Ftxzj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=3d709b9f33d7c423b9&client=apple&clientVersion=10.0.10&st=1646999134834&sv=120&sign=477724fcebcd7c8b54417694714406f1',
-                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Ftxzj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=3d709b9f33d7c423b9&client=apple&clientVersion=10.0.10&st=1646999134834&sv=102&sign=4d1031329bce14b47ae31bbdf03cd5f4'
-            ]
+                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Flzkj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=b024526b380d35c9e3&client=apple&clientVersion=10.0.10&st=1646999134786&sv=102&sign=7d796bf73559e6ef06ad746fdc5445c0']
         }
         let query = this.query((this.getValue('expand').join("|") || ''), '\\|', 1)
         this.dict = {...this.dict, ...query}
@@ -245,6 +219,11 @@ class Main extends Template {
                                 data.pageUrl = `https://${host}/wxCollectCard/activity?activityId=${i.activityId}`
                                 data.title = "集卡有礼"
                                 data.type = 'wxCollectCard'
+                                break
+                            case 69:
+                                data.pageUrl = `https://${host}/wxFansInterActionActivity/activity/${i.activityId}?activityId=${i.activityId}`
+                                data.title = "粉丝互动"
+                                data.type = 'wxFansInterActionActivity'
                                 break
                             // case 3:
                             //     data.pageUrl = `https://${host}/wxUnPackingActivity/activity/${i.activityId}?activityId=${i.activityId}`
@@ -525,25 +504,35 @@ class Main extends Template {
             }
             let need = this.haskey(activityContent, 'content.data.needCollectionSize')
             let has = this.haskey(activityContent, 'content.data.hasCollectionSize')
-            let skus = await this.curl({
-                    'url': `https://${host}/act/common/findSkus`,
-                    'form': `actId=${activityId}&userId=${venderId}&type=${p.inviter.activityType}`,
-                    cookie: `${getPin.cookie}`
-                }
-            )
-            let wxFollow = await this.response({
-                    'url': `https://${host}/wxActionCommon/followShop`,
-                    'form': `userId=${venderId}&buyerNick=${secretPin}&activityId=${activityId}&activityType=${p.inviter.activityType}`,
-                    cookie: `${getPin.cookie}`
-                }
-            )
-            skuList = this.column(skus.skus, 'skuId').map(d => d.toString())
-            if (!['wxTeam', 'pool', 'wxCollectCard'].includes(type)) {
-                if (skuList.length) {
-                    console.log(`加购列表: ${this.dumps(skuList)}`)
-                }
+            let data = activityContent.content.data
+            switch (type) {
+                case 'wxFansInterActionActivity':
+                    var uuid = data.actorInfo.uuid
+                    var wxFollow = await this.response({
+                            'url': `https://lzkjdz-isv.isvjcloud.com/wxFansInterActionActivity/followShop`,
+                            'form': `activityId=51ebdc27816941b29de646a60e54f24a&uuid=${uuid}`,
+                            cookie: getPin.cookie
+                        }
+                    )
+                    break
+                default:
+                    var wxFollow = await this.response({
+                            'url': `https://${host}/wxActionCommon/followShop`,
+                            'form': `userId=${venderId}&buyerNick=${secretPin}&activityId=${activityId}&activityType=${p.inviter.activityType}`,
+                            cookie: `${getPin.cookie}`
+                        }
+                    )
+                    break
             }
             if (['wxCollectionActivity'].includes(type)) {
+                let skus = await this.curl({
+                        'url': `https://${host}/act/common/findSkus`,
+                        'form': `actId=${activityId}&userId=${venderId}&type=${p.inviter.activityType}`,
+                        cookie: `${getPin.cookie}`
+                    }
+                )
+                skuList = this.column(skus.skus, 'skuId').map(d => d.toString())
+                console.log(`加购列表: ${this.dumps(skuList)}`)
                 // 判断数据中是否存在一键加购字段
                 if (this.haskey(activityContent, 'content.data.oneKeyAddCart')) {
                     for (let z = 0; z<3; z++) {
@@ -1016,6 +1005,84 @@ class Main extends Template {
                 }
                 if (g.length) {
                     this.notices(g.join("\n"), p.user)
+                }
+            }
+            else if (['wxFansInterActionActivity'].includes(type)) {
+                let dict = {
+                    'task1Sign': {
+                        task: 'doSign'
+                    },
+                    'task2BrowGoods': {
+                        task: 'doBrowGoodsTask',
+                        list: 'taskGoodList',
+                        key: 'skuId'
+                    },
+                    'task3AddCart': {
+                        task: 'doAddGoodsTask',
+                        list: 'taskGoodList',
+                        key: 'skuId'
+                    },
+                    'task4Share': {
+                        task: 'doShareTask',
+                    },
+                    'task5Remind': {
+                        task: 'doRemindTask',
+                    },
+                    'task6GetCoupon': {
+                        task: 'doGetCouponTask',
+                        list: 'taskCouponInfoList',
+                        key: 'couponId'
+                    },
+                    'task7MeetPlaceVo': {
+                        task: 'doMeetingTask',
+                    },
+                }
+                for (let task in dict) {
+                    let d = data[task]
+                    if (d && d.finishedCount != d.upLimit) {
+                        if (dict[task].list) {
+                            for (let v of d[dict[task].list]) {
+                                if (!v.finished) {
+                                    let dd = await this.curl({
+                                            'url': `https://lzkjdz-isv.isvjcloud.com/wxFansInterActionActivity/${dict[task].task}`,
+                                            'form': `activityId=${activityId}&uuid=${uuid}&skuId=${vo.skuId}&${dict[task].key}=${v[dict[task].key]}`,
+                                            cookie: getPin.cookie
+                                        }
+                                    )
+                                    console.log(task, dd)
+                                }
+                            }
+                        }
+                        else {
+                            for (let kk = d.finishedCount; kk<d.upLimit; kk++) {
+                                let dd = await this.curl({
+                                        'url': `https://lzkjdz-isv.isvjcloud.com/wxFansInterActionActivity/${dict[task].task}`,
+                                        'form': `activityId=${activityId}&uuid=${uuid}`,
+                                        cookie: getPin.cookie
+                                    }
+                                )
+                                console.log(task, dd)
+                            }
+                        }
+                    }
+                }
+                let prize = ['prizeOneStatus', 'prizeTwoStatus', 'prizeThreeStatus']
+                for (let k = 0; k<3; k++) {
+                    if (!data.actorInfo[prize[k]]) {
+                        let draw = await this.curl({
+                                'url': `https://lzkjdz-isv.isvjcloud.com/wxFansInterActionActivity/startDraw`,
+                                'form': `activityId=${activityId}&uuid=${uuid}&drawType=0${k + 1}`,
+                                cookie: getPin.cookie
+                            }
+                        )
+                        if (this.haskey(draw, 'data.drawOk')) {
+                            this.notices(draw.data.drawInfo.name, p.user)
+                            console.log(`获得奖品: ${draw.data.drawInfo.name} ${draw.data.drawInfo.priceInfo}`)
+                        }
+                        else {
+                            console.log(draw.errorMessage || draw.msg || "什么也没有")
+                        }
+                    }
                 }
             }
         }
@@ -1523,7 +1590,7 @@ class Main extends Template {
         // }
         let isvObfuscator = await this.curl({
             url: 'https://api.m.jd.com/client.action',
-            form: this.random(this.dict[host], 1)[0],
+            form: this.random(this.dict.ob,1)[0],
             cookie: p.cookie
         })
         switch (host) {
