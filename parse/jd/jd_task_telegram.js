@@ -69,7 +69,7 @@ class Main extends Template {
             let text = msg.text
             let group = this.haskey(msg, 'chat.type', 'group')
             let id = from.id
-            let admin = id.toString() == this.dict.root || false
+            let admin = this.dict.root.includes(id.toString())
             let ban = 0  // 禁言
             let groupTask = 0 // 是否允许群组成员运行
             var reText
@@ -98,15 +98,15 @@ class Main extends Template {
                 this.sendMessage(chat.id, st, '', 16666);
             }
             if (!ban) {
-                if (this.match(new RegExp(`(^${this.dict.custom.join("|")})`), text)) {
+                if (this.match(new RegExp(`(^${this.dict.custom.join("|")})`), text) && !this.match(/task\s*\w+/, text)) {
                     let command = this.match(new RegExp(`(^${this.dict.custom.join("|")})`), text)
                     text = `task jd_task_${command} -custom ${reText || text.replace(command, '')}`
                 }
-                else if (this.match(new RegExp(`(^${this.dict.scripts.join("|")}$)`), text)) {
+                else if (this.match(new RegExp(`(^${this.dict.scripts.join("|")}$)`), text) && !this.match(/task\s*\w+/, text)) {
                     let command = this.match(new RegExp(`(^${this.dict.scripts.join("|")})`), text)
                     text = `task jd_task_${command}`
                 }
-                else if (this.dict.map && this.match(new RegExp(`(^${Object.keys(this.dict.map).join("|")})`), text)) {
+                else if (this.dict.map && this.match(new RegExp(`(^${Object.keys(this.dict.map).join("|")})`), text) && !this.match(/task\s*\w+/, text)) {
                     let command = this.match(new RegExp(`(^${Object.keys(this.dict.map).join("|")})`), text)
                     text = `task ${this.dict.map[command].map} -custom ${reText || text.replace(command, '')}`
                 }
