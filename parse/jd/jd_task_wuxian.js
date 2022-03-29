@@ -372,6 +372,10 @@ class Main extends Template {
         let pin = this.userPin(p.cookie)
         let host = p.inviter.host
         let activityId = p.inviter.activityId
+        if (this.dict[activityId]) {
+            console.log("检测到活动已经结束")
+            return
+        }
         let jdActivityId = p.inviter.jdActivityId
         let at = p.inviter.activityType
         let type = p.inviter.type
@@ -769,13 +773,18 @@ class Main extends Template {
                 }
             }
             else if (['wxTeam'].includes(type)) {
-                if (p.inviter.aid.includes(sp)) {
+                if (this.haskey(activityContent, 'content.data.active.endTimeStr') && new Date(activityContent.content.data.active.endTimeStr.replace(/-/g, '/')).getTime()<new Date().getTime()) {
+                    this.dict[activityId] = true
+                    console.log("活动已经结束")
+                    return
+                }
+                else if (p.inviter.aid.includes(sp)) {
                     console.log("已经在队伍里面了哦")
                 }
                 else {
                     if (this.haskey(activityContent, 'content.data.canJoin')) {
-                        console.log("入会有延迟,等待3秒...")
-                        await this.wait(3000)
+                        // console.log("入会有延迟,等待3秒...")
+                        // await this.wait(3000)
                         let join = await this.curl({
                                 'url': `https://${host}/${type}/saveMember`,
                                 'form': `pin=${secretPin}&activityId=${activityId}&signUuid=${signUuid}&pinImg=${encodeURIComponent('https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}`,
@@ -798,8 +807,8 @@ class Main extends Template {
                 }
                 else {
                     if (this.haskey(activityContent, 'content.data.canJoin')) {
-                        console.log("入会有延迟,等待3秒...")
-                        await this.wait(3000)
+                        // console.log("入会有延迟,等待3秒...")
+                        // await this.wait(3000)
                         let join = await this.curl({
                                 'url': `https://${host}/${type}/saveCandidate`,
                                 'form': `pin=${secretPin}&activityId=${activityId}&signUuid=${signUuid}&pinImg=${encodeURIComponent('https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}&jdNick=${encodeURIComponent(pin)}`,
@@ -1276,7 +1285,7 @@ class Main extends Template {
                     )
                     let residualPercentage = this.haskey(acc, 'data.residualPercentage')
                     if (!residualPercentage) {
-                        console.log("没获取到进度条")
+                        console.log("没获取到进度条,可能活动已经结束了")
                         continue
                     }
                     else {
