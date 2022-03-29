@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东超级互动城"
-        this.task = 'active'
+        this.task = 'local'
         this.verify = 1
         this.manual = 1
         this.readme = `filename_custom="url|id"\n如果显示The ShareCode is empty...\n就是你IP黑了,暂时无法访问活动\n更换ip或者等服务器解除限制方可运行\n如需开卡,filename_expand="openCard=1"\n组团这类请配合分身使用\nfilename_help=pin1|pin2\nfilename_expand="count=50"(有效参团人数)`
@@ -225,6 +225,11 @@ class Main extends Template {
                                 data.title = "粉丝互动"
                                 data.type = 'wxFansInterActionActivity'
                                 break
+                            case 25:
+                                data.pageUrl = `https://${host}/wxShareActivity/activity/activity?activityId=${i.activityId}`
+                                data.title = "分享有礼"
+                                data.type = "wxShareActivity"
+                                break
                             // case 3:
                             //     data.pageUrl = `https://${host}/wxUnPackingActivity/activity/${i.activityId}?activityId=${i.activityId}`
                             //     data.title = "让福袋飞"
@@ -241,7 +246,7 @@ class Main extends Template {
                         if (this.haskey(shopInfo, 'result.shopInfo.shopName')) {
                             data.shopName = shopInfo.result.shopInfo.shopName
                         }
-                        if (['wxTeam', 'microDz', 'WxHbShareActivity', 'wxCollectCard', 'wxUnPackingActivity'].includes(data.type)) {
+                        if (['wxTeam', 'microDz', 'WxHbShareActivity', 'wxCollectCard', 'wxUnPackingActivity', 'wxShareActivity'].includes(data.type)) {
                             await this[data.type](data)
                         }
                         else {
@@ -492,7 +497,7 @@ class Main extends Template {
                 }
                 var activityContent = await this.response({
                         url,
-                        'form': `pin=${secretPin}&activityId=${activityId}&buyerPin=${secretPin}&signUuid=${signUuid}&nick=${pin}`,
+                        'form': `pin=${secretPin}&activityId=${activityId}&buyerPin=${secretPin}&signUuid=${signUuid}&nick=${pin}&friendUuid=${signUuid}`,
                         cookie: `${getPin.cookie};`
                     }
                 )
@@ -534,6 +539,12 @@ class Main extends Template {
                 skuList = this.column(skus.skus, 'skuId').map(d => d.toString())
                 console.log(`加购列表: ${this.dumps(skuList)}`)
                 // 判断数据中是否存在一键加购字段
+                let lc = await this.curl({
+                        'url': `https://${host}/crmCard/common/coupon/lightAddCart`,
+                        'form': `actId=${activityId}&venderId=${venderId}&type=${at}&pin=${secretPin}`,
+                        cookie: getPin.cookie
+                    }
+                )
                 if (this.haskey(activityContent, 'content.data.oneKeyAddCart')) {
                     for (let z = 0; z<3; z++) {
                         var add = await this.response({
@@ -1080,7 +1091,7 @@ class Main extends Template {
                                 cookie
                             }
                         )
-                        cookie = draw.cookie 
+                        cookie = draw.cookie
                         if (this.haskey(draw, 'content.data.drawOk')) {
                             this.notices(draw.content.data.drawInfo.name, p.user)
                             console.log(`获得奖品: ${draw.content.data.drawInfo.name} ${draw.content.data.drawInfo.priceInfo}`)
@@ -1089,6 +1100,20 @@ class Main extends Template {
                             console.log(draw.content.errorMessage || draw.content.msg || "什么也没有")
                         }
                     }
+                }
+            }
+            else if (['wxShareActivity'].includes(type)) {
+                console.log('uuid', activityContent.content.data.myUuid)
+                console.log(`正在助力: ${p.inviter.signUuid}`)
+                if (p.inviter.aid.includes(sp)) {
+                    console.log(`已经助力过了`)
+                }
+                else {
+                    p.inviter.aid.push(sp)
+                }
+                let count = this.dict.count || p.inviter.count
+                if (p.inviter.aid.length>=parseInt(count)) {
+                    this.finish.push(p.number)
                 }
             }
         }
@@ -1539,6 +1564,85 @@ class Main extends Template {
         }
     }
 
+    async wxShareActivity(data) {
+        this.model = 'share'
+        this.filter = ''
+        for (let cookie of this.cookies['help']) {
+            let p = {
+                cookie, inviter: data
+            }
+            let user = this.userPin(cookie)
+            try {
+                for (let nnn = 0; nnn<2; nnn++) {
+                    var getPin = await this.getMyPing(p)
+                    if (getPin) {
+                        break
+                    }
+                }
+                if (getPin) {
+                    let venderId = p.inviter.venderId
+                    let shopId = p.inviter.shopId
+                    var secretPin = getPin.content.data.secretPin
+                    let activityId = p.inviter.activityId
+                    let jdActivityId = p.inviter.jdActivityId
+                    let host = p.inviter.host
+                    await this.bindWithVender(venderId, jdActivityId, p.cookie)
+                    switch (host) {
+                        case "cjhy-isv.isvjcloud.com":
+                            secretPin = escape(encodeURIComponent(secretPin))
+                            break
+                        default:
+                            secretPin = encodeURIComponent(secretPin)
+                            break
+                    }
+                    let ac = await this.curl({
+                            'url': `https://${host}/wxShareActivity/activityContent`,
+                            'form': `activityId=${activityId}&pin=${secretPin}`,
+                            cookie: getPin.cookie,
+                            referer: p.inviter.pageUrl
+                        }
+                    )
+                    let share = await this.curl({
+                            'url': `https://${host}/wxShareActivity/share`,
+                            'form': `activityId=${activityId}&pin=${secretPin}`,
+                            cookie: getPin.cookie,
+                            referer: p.inviter.pageUrl
+                        }
+                    )
+                    data.inviter = user
+                    data.inviterPin = secretPin
+                    data.signUuid = ac.data.myUuid
+                    if (this.haskey(ac, 'data.drawContentVOs')) {
+                        data.gifts = this.column(ac.data.drawContentVOs, 'name', 'drawInfoId')
+                        data.count = this.sum(this.column(ac.data.drawContentVOs, 'shareTimes'))
+                    }
+                    let list = await this.curl({
+                            'url': `https://${host}/wxShareActivity/memberList`,
+                            'form': `uuid=${ac.data.myUuid}&pageNo=1&pageSize=100`,
+                            cookie: getPin.cookie,
+                            referer: p.inviter.pageUrl
+                        }
+                    )
+                    if (this.haskey(list, 'data.items')) {
+                        data.aid = this.column(list.data.items, 'pin')
+                    }
+                    this.shareCode.push(data)
+                    this.dicts[user] = {
+                        wxShareActivity: {
+                            'url': `https://${host}/wxCollectCard/getPrize`,
+                            form: `activityId=${activityId}&pin=${secretPin}&drawInfoId=`,
+                            cookie: getPin.cookie,
+                            referer: p.inviter.pageUrl,
+                            gifts: data.gifts
+                        },
+                    }
+                }
+            } catch (e) {
+                console.log(e)
+            }
+        }
+    }
+
     async WxHbShareActivity(data) {
         this.model = 'shuffle'
         this.filter = ''
@@ -1668,7 +1772,7 @@ class Main extends Template {
                 while (true) {
                     let getPrize = await this.curl(this.dicts[i].repeat
                     )
-                    await this.wait(5000)
+                    await this.wait(2000)
                     if (this.haskey(getPrize, 'data.drawOk')) {
                         console.log(`获得: ${getPrize.data.name}`)
                         this.notices(getPrize.data.name, i)
@@ -1706,6 +1810,23 @@ class Main extends Template {
                         }
                     }
                 } catch (e) {
+                }
+            }
+            if (this.dicts[i].wxShareActivity) {
+                let r = this.dicts[i].wxShareActivity
+                let form = r.form
+                for (let id in this.dicts[i].wxShareActivity.gifts) {
+                    console.log(`正在领取: ${this.dicts[i].wxShareActivity.gifts[id]}`)
+                    r.form = form.concat(id)
+                    let getPrize = await this.curl(r)
+                    await this.wait(2000)
+                    if (this.haskey(getPrize, 'data.drawOk')) {
+                        console.log(`获得: ${getPrize.data.name}`)
+                        this.notices(getPrize.data.name, i)
+                    }
+                    else {
+                        console.log(getPrize.errorMessage || getPrize.msg || "什么也没有")
+                    }
                 }
             }
         }
