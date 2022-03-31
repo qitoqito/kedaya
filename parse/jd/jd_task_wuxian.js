@@ -373,6 +373,7 @@ class Main extends Template {
         let host = p.inviter.host
         let activityId = p.inviter.activityId
         if (this.dict[activityId]) {
+            this.finish.push(p.number)
             console.log("检测到活动已经结束")
             return
         }
@@ -775,6 +776,7 @@ class Main extends Template {
             else if (['wxTeam'].includes(type)) {
                 if (this.haskey(activityContent, 'content.data.active.endTimeStr') && new Date(activityContent.content.data.active.endTimeStr.replace(/-/g, '/')).getTime()<new Date().getTime()) {
                     this.dict[activityId] = true
+                    this.jump = 1
                     console.log("活动已经结束")
                     return
                 }
