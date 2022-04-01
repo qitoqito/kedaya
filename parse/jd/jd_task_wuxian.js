@@ -1248,11 +1248,12 @@ class Main extends Template {
         }
     }
 
-    async microDz(data) {
+    async microDz(dicts) {
         // this.model = 'share'
         this.filter = ''
         data.sid = 599119
         for (let cookie of this.cookies['help']) {
+            var data = this.loads(this.dumps(dicts))
             let p = {
                 cookie, inviter: data
             }
@@ -1343,10 +1344,11 @@ class Main extends Template {
         }
     }
 
-    async wxTeam(data) {
+    async wxTeam(dicts) {
         // this.model = 'share'
         this.filter = ''
         for (let cookie of this.cookies['help']) {
+            var data = this.loads(this.dumps(dicts))
             let p = {
                 cookie, inviter: data
             }
@@ -1447,10 +1449,11 @@ class Main extends Template {
         }
     }
 
-    async wxCollectCard(data) {
+    async wxCollectCard(dicts) {
         this.model = 'shuffle'
         this.filter = ''
         for (let cookie of this.cookies['help']) {
+            var data = this.loads(this.dumps(dicts))
             let p = {
                 cookie, inviter: data
             }
@@ -1515,10 +1518,11 @@ class Main extends Template {
         }
     }
 
-    async wxUnPackingActivity(data) {
+    async wxUnPackingActivity(dicts) {
         this.model = 'team'
         this.filter = ''
         for (let cookie of this.cookies['help']) {
+            var data = this.loads(this.dumps(dicts))
             let p = {
                 cookie, inviter: data
             }
@@ -1575,10 +1579,11 @@ class Main extends Template {
         }
     }
 
-    async wxShareActivity(data) {
-        this.model = 'share'
+    async wxShareActivity(dicts) {
+        // this.model = 'share'
         this.filter = ''
         for (let cookie of this.cookies['help']) {
+            var data = this.loads(this.dumps(dicts))
             let p = {
                 cookie, inviter: data
             }
@@ -1654,10 +1659,11 @@ class Main extends Template {
         }
     }
 
-    async WxHbShareActivity(data) {
-        this.model = 'shuffle'
+    async WxHbShareActivity(dicts) {
+        // this.model = 'shuffle'
         this.filter = ''
         for (let cookie of this.cookies['help']) {
+            var data = this.loads(this.dumps(dicts))
             let p = {
                 cookie, inviter: data
             }
