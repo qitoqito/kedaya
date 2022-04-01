@@ -1249,7 +1249,7 @@ class Main extends Template {
     }
 
     async microDz(data) {
-        this.model = 'share'
+        // this.model = 'share'
         this.filter = ''
         data.sid = 599119
         for (let cookie of this.cookies['help']) {
@@ -1344,7 +1344,7 @@ class Main extends Template {
     }
 
     async wxTeam(data) {
-        this.model = 'share'
+        // this.model = 'share'
         this.filter = ''
         for (let cookie of this.cookies['help']) {
             let p = {
