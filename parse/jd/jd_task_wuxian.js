@@ -1645,7 +1645,7 @@ class Main extends Template {
                     this.shareCode.push(data)
                     this.dicts[user] = {
                         wxShareActivity: {
-                            'url': `https://${host}/wxCollectCard/getPrize`,
+                            'url': `https://${host}/wxShareActivity/getPrize`,
                             form: `activityId=${activityId}&pin=${secretPin}&drawInfoId=`,
                             cookie: getPin.cookie,
                             referer: p.inviter.pageUrl,
