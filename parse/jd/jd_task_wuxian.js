@@ -1326,6 +1326,7 @@ class Main extends Template {
                         data.aid = aid
                         data.inviter = secretPin
                         data.venderIds = venderIds
+                        data.user = this.userName(cookie)
                         this.shareCode.push({...data, ...inviter.data})
                     }
                     await this.wait(2000)
@@ -1437,6 +1438,7 @@ class Main extends Template {
                             console.log(`队伍Id: ${signUuid}`)
                             data.signUuid = signUuid
                             data.aid = aid
+                            data.user = this.userName(cookie)
                             this.shareCode.push(data)
                             this.dicts[user] = {
                                 'pool': {
@@ -1518,6 +1520,7 @@ class Main extends Template {
                         }
                         data.signUuid = source.data
                         data.inviter = user
+                        data.user = this.userName(cookie)
                         this.shareCode.push(data)
                     }
                 }
@@ -1575,6 +1578,7 @@ class Main extends Template {
                                 cookie: getPin.cookie
                             }
                         )
+                        data.user = this.userName(cookie)
                         this.shareCode.push({
                             ...data, ...{
                                 inviter, drawInfoId, signUuid
@@ -1651,6 +1655,7 @@ class Main extends Template {
                     if (this.haskey(list, 'data.items')) {
                         data.aid = this.column(list.data.items, 'pin')
                     }
+                    data.user = this.userName(cookie)
                     this.shareCode.push(data)
                     this.dicts[user] = {
                         wxShareActivity: {
