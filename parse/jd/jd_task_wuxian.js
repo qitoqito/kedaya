@@ -382,6 +382,7 @@ class Main extends Template {
         let type = p.inviter.type
         console.log(`活动ID: ${activityId}`)
         this.assert(type, "不支持的活动类型")
+        this.options.headers.referer = p.inviter.pageUrl || `https://${host}`
         let venderId = p.inviter.venderId
         let shopId = p.inviter.shopId
         if (p.inviter.pageUrl) {
@@ -525,6 +526,14 @@ class Main extends Template {
                         }
                     )
                     break
+                case 'wxShopGift':
+                    var wxFollow = await this.response({
+                            'url': `https://${host}/wxShopGift/followShop`,
+                            'form': `userId=${venderId}&buyerNick=${secretPin}&activityId=${activityId}&activityType=${p.inviter.activityType}`,
+                            cookie: `${getPin.cookie}`
+                        }
+                    )
+                    break
                 default:
                     var wxFollow = await this.response({
                             'url': `https://${host}/wxActionCommon/followShop`,
@@ -662,34 +671,34 @@ class Main extends Template {
             else if (['wxShopGift'].includes(type)) {
                 let ad = await this.response({
                         'url': `https://${host}/common/accessLogWithAD`,
-                        'form': `venderId=${venderId}&code=24&pin=${encodeURIComponent(getPin.content.data.secretPin)}&activityId=${activityId}&pageUrl=https%3A%2F%2Flzkj-isv.isvjcloud.com%2FwxShopGift%2Factivity%3FactivityId%3D${activityId}`,
+                        'form': `venderId=${venderId}&code=24&pin=${secretPin}&activityId=${activityId}&pageUrl=https%3A%2F%2Flzkj-isv.isvjcloud.com%2FwxShopGift%2Factivity%3FactivityId%3D${activityId}`,
                         cookie: getPin.cookie
                     }
                 )
-                let ac = await this.response({
-                        'url': `https://${host}/${type}/activityContent`,
-                        'form': `activityId=${activityId}&buyerPin=${encodeURIComponent(getPin.content.data.secretPin)}`,
-                        cookie: ad.cookie
-                    }
-                )
+                // let ac = await this.response({
+                //         'url': `https://${host}/${type}/activityContent`,
+                //         'form': `activityId=${activityId}&buyerPin=${secretPin}`,
+                //         cookie: ad.cookie
+                //     }
+                // )
                 let draw = await this.curl({
                         'url': `https://${host}/wxShopGift/draw`,
-                        'form': `activityId=${activityId}&buyerPin=${encodeURIComponent(getPin.content.data.secretPin)}&hasFollow=false&accessType=app`,
-                        cookie: ac.cookie
+                        'form': `activityId=${activityId}&buyerPin=${secretPin}&hasFollow=false&accessType=app`,
+                        cookie: ad.cookie
                     }
                 )
                 // console.log(draw)
                 if (draw.result) {
-                    console.log(this.haskey(ac.content, 'data.list') || ac.content)
+                    console.log(this.haskey(activityContent.content, 'data.list') || activityContent.content)
                     let g = {
                         'jd': '京豆',
                         'jf': '积分',
                         'dq': `东券`,
                     }
-                    for (let i of this.haskey(ac.content, 'data.list')) {
-                        console.log(`获得: ${i.takeNum}${g[i.type]}`)
+                    for (let i of this.haskey(activityContent.content, 'data.list')) {
+                        console.log(`获得: ${i.takeNum || i.discount}${g[i.type]}`)
                         this.notices(
-                            `${i.takeNum}${g[i.type]}`, p.user
+                            `${i.takeNum || i.discount}${g[i.type]}`, p.user
                         )
                     }
                 }
