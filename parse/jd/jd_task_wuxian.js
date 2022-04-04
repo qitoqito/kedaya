@@ -528,8 +528,16 @@ class Main extends Template {
                     break
                 case 'wxShopGift':
                     var wxFollow = await this.response({
-                            'url': `https://${host}/wxShopGift/followShop`,
+                            'url': `https://${host}/${type}/followShop`,
                             'form': `userId=${venderId}&buyerNick=${secretPin}&activityId=${activityId}&activityType=${p.inviter.activityType}`,
+                            cookie: `${getPin.cookie}`
+                        }
+                    )
+                    break
+                case 'wxShopFollowActivity':
+                    var wxFollow = await this.response({
+                            'url': `https://${host}/${type}/follow`,
+                            'form': `pin=${secretPin}&activityId=${activityId}`,
                             cookie: `${getPin.cookie}`
                         }
                     )
