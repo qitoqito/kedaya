@@ -67,7 +67,7 @@ class Main extends Template {
             let messageId = msg.message_id
             let chatId = chat.id
             let text = msg.text
-            let group = this.haskey(msg, 'chat.type', 'group')
+            let group = ['group', 'supergroup'].includes(msg.chat.type)
             let id = from.id
             let admin = this.dict.root.includes(id.toString())
             let ban = 0  // 禁言
@@ -111,8 +111,9 @@ class Main extends Template {
                     text = `task ${this.dict.map[command].map} -custom ${reText || text.replace(command, '')}`
                 }
                 let filename = this.match(/task\s*(\w+)\s*/, text)
-                console.log(filename)
+
                 if (filename && admin) {
+                    console.log(filename)
                     try {
                         let split = text.split(filename)
                         let params = {}
@@ -147,6 +148,10 @@ class Main extends Template {
     }
 
     async sendMessage(id, echo, params = {}, timeout = 0) {
+        if (this.dict.except && this.dict.except.includes(id.toString())) {
+            console.log("id在排除名单里面,不发送消息")
+            return
+        }
         this.bot.sendMessage(id, echo, params || {}).then(async (res) => {
             if (timeout) {
                 await this.wait(16666)
