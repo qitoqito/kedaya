@@ -19,7 +19,6 @@ class Main extends Template {
         else if (this.expand) {
             this.code = [...this.getValue('expand'), ...this.code]
         }
-        console.log(this.code)
     }
 
     async main(p) {
@@ -39,6 +38,7 @@ class Main extends Template {
             else {
                 console.log("什么也没有")
             }
+            await this.wait(500)
         }
         if (gifts.length) {
             this.notices(gifts.join("\n"), p.user)
