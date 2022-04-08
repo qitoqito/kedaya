@@ -512,9 +512,9 @@ class Main extends Template {
                     console.log(activityContent.content.errorMessage)
                     return
                 }
-                let need = this.haskey(activityContent, 'content.data.needCollectionSize')
-                let has = this.haskey(activityContent, 'content.data.hasCollectionSize')
-                let data = activityContent.content.data
+                var need = this.haskey(activityContent, 'content.data.needCollectionSize')
+                var has = this.haskey(activityContent, 'content.data.hasCollectionSize')
+                var data = activityContent.content.data
             }
             switch (type) {
                 case 'wxFansInterActionActivity':
@@ -1416,6 +1416,10 @@ class Main extends Template {
                             }
                         } catch (e2) {
                         }
+                    }
+                    if (this.haskey(ac, 'data.active.endTimeStr') && new Date(ac.data.active.endTimeStr.replace(/-/g, '/')).getTime()<new Date().getTime()) {
+                        console.log("活动已经结束")
+                        return
                     }
                     if (this.haskey(ac, 'data.successRetList') && this.haskey(ac, 'data.active.maxGroup') && ac.data.successRetList.length == ac.data.active.maxGroup) {
                         console.log(user, "人员已满")
