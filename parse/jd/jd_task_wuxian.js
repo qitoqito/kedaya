@@ -512,10 +512,10 @@ class Main extends Template {
                     console.log(activityContent.content.errorMessage)
                     return
                 }
+                let need = this.haskey(activityContent, 'content.data.needCollectionSize')
+                let has = this.haskey(activityContent, 'content.data.hasCollectionSize')
+                let data = activityContent.content.data
             }
-            let need = this.haskey(activityContent, 'content.data.needCollectionSize')
-            let has = this.haskey(activityContent, 'content.data.hasCollectionSize')
-            let data = activityContent.content.data
             switch (type) {
                 case 'wxFansInterActionActivity':
                     var uuid = data.actorInfo.uuid
@@ -1268,7 +1268,7 @@ class Main extends Template {
     async microDz(dicts) {
         // this.model = 'share'
         this.filter = ''
-        data.sid = 599119
+        dicts.sid = 599119
         for (let cookie of this.cookies['help']) {
             var data = this.loads(this.dumps(dicts))
             let p = {
