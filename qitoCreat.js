@@ -57,7 +57,9 @@ if (!command) {
     let common
     try {
         common = require(`${dirname}/util/common`)
-    } catch (e) {}
+    } catch (e) {
+        console.log(e.message)
+    }
     let msg = []
     let dir = fs.readdirSync(`${dirname}/parse`);
     dir.forEach(function(item, index) {
@@ -189,7 +191,9 @@ if (!command) {
                                                         break
                                                     }
                                                 }
-                                            } catch (eee) {}
+                                            } catch (eee) {
+                                                console.log(eee.message)
+                                            }
                                         }
                                     } else {
                                         console.log(`🐹 跳过操作: ${filename} 操作脚本失败,请手动运行该脚本`)
@@ -219,7 +223,7 @@ if (!command) {
                                                 break
                                             }
                                         } catch (eee) {
-                                            console.log(eee)
+                                            console.log(eee.message)
                                         }
                                     }
                                     console.log(`🐶 导入失败: ${filename} 已经添加过了`)
@@ -249,7 +253,7 @@ if (!command) {
                                 }
                             }
                         } catch (ee) {
-                            console.log(ee)
+                            console.log(ee.message)
                         }
                     }
                 }
@@ -280,7 +284,7 @@ if (!command) {
                         manual: kedaya.manual
                     }
                 } catch (e) {
-                    console.log(e)
+                    console.log(e.message)
                 }
             }
         }
@@ -356,7 +360,7 @@ if (!command) {
         await c.notify()
     }
 })().catch((e) => {
-    console.log(e)
+    console.log(e.message)
 })
 
 function match(pattern, string) {
