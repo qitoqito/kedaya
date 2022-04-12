@@ -8,7 +8,7 @@ class Main extends Template {
         this.verify = 1
         this.manual = 1
         this.readme = `filename_custom="url|id"\n如果显示The ShareCode is empty...\n就是你IP黑了,暂时无法访问活动\n更换ip或者等服务器解除限制方可运行\n如需开卡,filename_expand="openCard=1"\n组团这类请配合分身使用\nfilename_help=pin1|pin2\nfilename_expand="count=50"(有效参团人数)`
-        this.import = ['fs', 'jdAlgo']
+        this.import = ['fs', 'jdAlgo', 'jdUrl']
         this.model = 'share'
         this.filter = "activityId"
     }
@@ -36,7 +36,7 @@ class Main extends Template {
         this.isSend = []
         let custom = this.getValue('custom')
         this.algo = new this.modules.jdAlgo({
-            appId: "8adfb",
+            appId: "169f1",
             type: 'app',
             fp: "8389547038003203",
         })
@@ -345,6 +345,7 @@ class Main extends Template {
     }
 
     async main(p) {
+        let cookie = p.cookie
         let type = p.inviter.type
         let text = ''
         if (!this.isSend.includes(this.md5(`${p.inviter.activityId},${p.inviter.signUuid}`))) {
@@ -380,6 +381,7 @@ class Main extends Template {
         let jdActivityId = p.inviter.jdActivityId
         let at = p.inviter.activityType
         let type = p.inviter.type
+        let signUuid = p.inviter.signUuid
         console.log(`活动ID: ${activityId}`)
         this.assert(type, "不支持的活动类型")
         this.options.headers.referer = p.inviter.pageUrl || `https://${host}`
@@ -402,7 +404,6 @@ class Main extends Template {
         if (this.dict.openCard && !['pool'].includes(type)) {
             await this.bindWithVender(venderId, jdActivityId, p.cookie)
         }
-        // 不同域名下的secretPin形式不一样
         switch (host) {
             case "cjhy-isv.isvjcloud.com":
                 secretPin = escape(encodeURIComponent(secretPin))
@@ -491,31 +492,82 @@ class Main extends Template {
                 console.log(`没获取到用户积分信息`)
             }
         }
-        else {
-            let signUuid = p.inviter.signUuid
-            if (['microDz'].includes(type)) {
-                // 这边不做限制
+        else if (['microDz'].includes(type)) {
+            for (let kkk of this.venderIds || []) {
+                await this.bindWithVender(kkk, jdActivityId, p.cookie)
+            }
+            if (p.inviter.aid.includes(pin)) {
+                p.finish = 1
+                console.log('已经组队过了')
             }
             else {
-                var url = `https://${host}/${type}/activityContent`
-                if (type == 'wxMcLevelAndBirthGifts') {
-                    url = `https://${host}/mc/wxMcLevelAndBirthGifts/activityContent`
-                }
-                var activityContent = await this.response({
-                        url,
-                        'form': `pin=${secretPin}&activityId=${activityId}&buyerPin=${secretPin}&signUuid=${signUuid}&nick=${pin}&friendUuid=${signUuid}`,
-                        cookie: `${getPin.cookie};`
+                let f = await this.curl({
+                        'url': `https://${host}/microDz/invite/activity/wx/acceptInvite`,
+                        'form': `activityId=${activityId}&invitee=${secretPin}&inviteeNick=${pin}&inviteeImg=${encodeURIComponent('https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}&inviter=${p.inviter.inviter}&inviterNick=${p.inviter.inviterNick}&inviterImg=${p.inviter.imgUrl}`,
+                        cookie: getPin.cookie
                     }
                 )
-                // console.log(activityContent.content.data)
-                if (!this.haskey(activityContent, 'content.result')) {
-                    console.log(activityContent.content.errorMessage)
-                    return
+                if (f.result) {
+                    p.finish = 1
+                    p.inviter.aid.push(pin)
+                    console.log("加团成功")
                 }
-                var need = this.haskey(activityContent, 'content.data.needCollectionSize')
-                var has = this.haskey(activityContent, 'content.data.hasCollectionSize')
-                var data = activityContent.content.data
+                else {
+                    let error = f.errorMessage || ''
+                    console.log(error)
+                    if (error.includes('队伍已经满员')) {
+                        this.finish(p.n)
+                    }
+                }
             }
+            await this.wait(1000)
+            let get = await this.curl({
+                    'url': `https://${host}/microDz/invite/activity/wx/getOpenCardAllStatuesNew`,
+                    'form': `isInvited=1&activityId=${activityId}&pin=${secretPin}`,
+                    cookie: getPin.cookie
+                }
+            )
+            if (this.haskey(get, 'data.reward')) {
+                console.log(`获得奖励: ${get.data.reward}`)
+                this.notices(`获得奖励: ${get.data.reward}`, p.user)
+            }
+            else {
+                console.log("可能已经领取奖励了")
+            }
+            if (this.dict.count) {
+                if (this.unique(p.inviter.aid).length>=parseInt(this.dict.count)) {
+                    console.log(`组队满足: ${this.dict.count}`)
+                    this.finish.push(p.number)
+                }
+            }
+            this.dicts[pin] = {
+                cookie: p.cookie,
+                repeat: {
+                    'url': `https://${host}/microDz/invite/activity/wx/getOpenCardAllStatuesNew`,
+                    'form': `isInvited=1&activityId=${activityId}&pin=${secretPin}`,
+                    cookie: getPin.cookie
+                }
+            }
+        }
+        else {
+            var url = `https://${host}/${type}/activityContent`
+            if (type == 'wxMcLevelAndBirthGifts') {
+                url = `https://${host}/mc/wxMcLevelAndBirthGifts/activityContent`
+            }
+            var activityContent = await this.response({
+                    url,
+                    'form': `pin=${secretPin}&activityId=${activityId}&buyerPin=${secretPin}&signUuid=${signUuid}&nick=${pin}&friendUuid=${signUuid}`,
+                    cookie: `${getPin.cookie};`
+                }
+            )
+            // console.log(activityContent.content.data)
+            if (!this.haskey(activityContent, 'content.result')) {
+                console.log(activityContent.content.errorMessage)
+                return
+            }
+            var need = this.haskey(activityContent, 'content.data.needCollectionSize')
+            var has = this.haskey(activityContent, 'content.data.hasCollectionSize')
+            var data = activityContent.content.data
             switch (type) {
                 case 'wxFansInterActionActivity':
                     var uuid = data.actorInfo.uuid
@@ -596,7 +648,7 @@ class Main extends Template {
                         }
                         if (this.haskey(addOne, 'content.errorMessage').includes('异常')) {
                             console.log(addOne.content.errorMessage)
-                            return
+                            break
                         }
                         var cookie = `${addOne.cookie};AUTH_C_USER=${secretPin};`
                     }
@@ -864,6 +916,7 @@ class Main extends Template {
                 if (this.haskey(getMemberLevel, 'data.level')) {
                     if (!this.haskey(activityContent, 'content.data.isReceived')) {
                         let level = parseInt(getMemberLevel.data.level)
+                        console.log("当前等级:", level)
                         for (let ll = 1; ll<=level; ll++) {
                             let s = await this.curl({
                                     'url': `https://${host}/mc/wxMcLevelAndBirthGifts/sendLevelGifts`,
@@ -915,63 +968,6 @@ class Main extends Template {
                 }
                 else {
                     console.log("没有积分可以兑换")
-                }
-            }
-            else if (['microDz'].includes(type)) {
-                for (let kkk of this.venderIds || []) {
-                    await this.bindWithVender(kkk, jdActivityId, p.cookie)
-                }
-                if (p.inviter.aid.includes(pin)) {
-                    p.finish = 1
-                    console.log('已经组队过了')
-                }
-                else {
-                    let f = await this.curl({
-                            'url': `https://${host}/microDz/invite/activity/wx/acceptInvite`,
-                            'form': `activityId=${activityId}&invitee=${secretPin}&inviteeNick=${pin}&inviteeImg=${encodeURIComponent('https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}&inviter=${p.inviter.inviter}&inviterNick=${p.inviter.inviterNick}&inviterImg=${p.inviter.imgUrl}`,
-                            cookie: getPin.cookie
-                        }
-                    )
-                    if (f.result) {
-                        p.finish = 1
-                        p.inviter.aid.push(pin)
-                        console.log("加团成功")
-                    }
-                    else {
-                        let error = f.errorMessage || ''
-                        console.log(error)
-                        if (error.includes('队伍已经满员')) {
-                            this.finish(p.n)
-                        }
-                    }
-                }
-                await this.wait(1000)
-                let get = await this.curl({
-                        'url': `https://${host}/microDz/invite/activity/wx/getOpenCardAllStatuesNew`,
-                        'form': `isInvited=1&activityId=${activityId}&pin=${secretPin}`,
-                        cookie: getPin.cookie
-                    }
-                )
-                if (this.haskey(get, 'data.reward')) {
-                    console.log(`获得奖励: ${get.data.reward}`)
-                    this.notices(`获得奖励: ${get.data.reward}`, p.user)
-                }
-                else {
-                    console.log("可能已经领取奖励了")
-                }
-                if (this.dict.count) {
-                    if (this.unique(p.inviter.aid).length>=parseInt(this.dict.count)) {
-                        console.log(`组队满足: ${this.dict.count}`)
-                        this.finish.push(p.number)
-                    }
-                }
-                this.dicts[pin] = {
-                    cookie: p.cookie,
-                    repeat: {
-                        'url': `https://${host}/microDz/invite/activity/wx/getOpenCardAllStatuesNew`,
-                        'form': `isInvited=1&activityId=${activityId}&pin=${secretPin}`,
-                        cookie: getPin.cookie
-                    }
                 }
             }
             else if (['wxCollectCard'].includes(type)) {
@@ -1077,11 +1073,14 @@ class Main extends Template {
                     },
                 }
                 let cookie = getPin.cookie
+                if (this.haskey(data, 'task3AddCart.taskGoodList')) {
+                    skuList = this.column(data.task3AddCart.taskGoodList, 'skuId')
+                }
                 for (let task in dict) {
                     let d = data[task]
                     if (d && d.finishedCount != d.upLimit) {
                         if (dict[task].list) {
-                            for (let v of d[dict[task].list]) {
+                            for (let v of d[dict[task].list].slice(0, d.upLimit - d.finishedCount)) {
                                 if (!v.finished) {
                                     let dd = await this.response({
                                             'url': `https://lzkjdz-isv.isvjcloud.com/wxFansInterActionActivity/${dict[task].task}`,
@@ -1089,7 +1088,7 @@ class Main extends Template {
                                             cookie
                                         }
                                     )
-                                    console.log(task, dd.content)
+                                    console.log(task, typeof dd.content == 'object' ? dd.content : '可能出错了')
                                     await this.wait(500)
                                     cookie = dd.cookie
                                 }
@@ -1103,7 +1102,7 @@ class Main extends Template {
                                         cookie: cookie
                                     }
                                 )
-                                console.log(task, dd.content)
+                                console.log(task, typeof dd.content == 'object' ? dd.content : '可能出错了')
                                 await this.wait(500)
                                 cookie = dd.cookie
                             }
@@ -1152,48 +1151,73 @@ class Main extends Template {
             cookie: p.cookie
         })
         // 删除加购
-        if (skuList.length) {
-            let s = await this.curl({
-                    'url': `https://wq.jd.com/deal/mshopcart/rmvCmdy?sceneval=2&g_login_type=1&g_ty=ajax`,
-                    'form': `pingouchannel=0&commlist=123,,1,123,11,123,0,skuUuid:aaa@@useUuid:0&type=0&checked=0&locationid=&templete=1&reg=1&scene=0&version=20190418&traceid=1394319544881167891&tabMenuType=1&sceneval=2`,
-                    cookie: p.cookie
+        if (skuList.length>0) {
+            skuList = skuList.map(d => d.toString())
+            let cart = await this.curl({
+                    'url': `https://api.m.jd.com/api?functionId=pcCart_jc_getCurrentCart&appid=JDC_mall_cart&body={}`,
+                    // 'form':``,
+                    cookie: p.cookie,
+                    headers: {
+                        "referer": "https://cart.jd.com/cart_index/",
+                        "user-agent": "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:98.0) Gecko/20100101 Firefox/98.0",
+                    }
                 }
             )
-            let list = []
-            let name = []
-            let n = 0
-            try {
-                let cart = s.cart.venderCart
-                for (let i of cart) {
-                    for (let items of i.sortedItems) {
-                        for (let products of items.polyItem.products) {
-                            if (skuList.includes(products.mainSku.id.toString())) {
-                                if (this.haskey(items, 'polyItem.promotion.pid')) {
-                                    list.push(`${products.mainSku.id},,1,${products.mainSku.id},11,${items.polyItem.promotion.pid},0,skuUuid:${products.skuUuid}@@useUuid:0`)
+            let skus = []
+            let packs = []
+            if (this.haskey(cart, 'resultData.cartInfo.vendors')) {
+                for (let i of cart.resultData.cartInfo.vendors) {
+                    for (let j of this.haskey(i, 'sorted')) {
+                        if (this.haskey(j, 'item.items')) {
+                            if (j.item.items.length>0) {
+                                for (let k of j.item.items) {
+                                    if (skuList.includes(k.item.Id)) {
+                                        packs.push(
+                                            {
+                                                "num": k.item.Num.toString(),
+                                                "ybPackId": j.item.promotionId,
+                                                "sType": "11",
+                                                "TheSkus": [{"num": k.item.Num.toString(), "Id": k.item.Id.toString()}],
+                                                "Id": j.item.promotionId
+                                            }
+                                        )
+                                    }
                                 }
-                                else {
-                                    list.push(
-                                        `${products.mainSku.id},,1,${products.mainSku.id},1,,0,skuUuid:${products.skuUuid}@@useUuid:0`
+                            }
+                            else {
+                                if (skuList.includes(j.item.Id)) {
+                                    skus.push(
+                                        {
+                                            "num": j.item.Num.toString(),
+                                            "Id": j.item.Id.toString(),
+                                            "skuUuid": j.item.skuUuid,
+                                            "useUuid": j.item.useUuid
+                                        }
                                     )
                                 }
-                                name.push(
-                                    `${products.mainSku.id} -- ${products.mainSku.name}`
-                                )
-                                n++
                             }
                         }
                     }
                 }
-            } catch (e) {
             }
-            if (list.length) {
-                s = await this.curl({
-                        'url': `https://wq.jd.com/deal/mshopcart/rmvCmdy?sceneval=2&g_login_type=1&g_ty=ajax`,
-                        'form': `pingouchannel=0&commlist=${list.join("$")}&checked=0&locationid=&templete=1&reg=1&scene=0&version=20190418&traceid=&tabMenuType=1&sceneval=2`,
-                        cookie: p.cookie
+            console.log('即将删除购物车数目:', skus.length + packs.length)
+            if (skus.length>0 || packs.length>0) {
+                let cartRemove = await this.curl({
+                        'url': `https://api.m.jd.com/api`,
+                        'form': `functionId=pcCart_jc_cartRemove&appid=JDC_mall_cart&body=${this.dumps({
+                            "operations": [{
+                                "carttype": "4",
+                                "TheSkus": skus,
+                                "ThePacks": packs
+                            }], "serInfo": {}
+                        })}`,
+                        cookie: p.cookie,
+                        headers: {
+                            "referer": "https://cart.jd.com/cart_index/",
+                            "user-agent": "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:98.0) Gecko/20100101 Firefox/98.0",
+                        }
                     }
                 )
-                console.log(`删除购物车商品数: ${list.length}`)
             }
         }
     }
@@ -1406,6 +1430,10 @@ class Main extends Template {
                             cookie: getPin.cookie
                         }
                     )
+                    if (this.haskey(ac, 'data.active.endTimeStr') && new Date(ac.data.active.endTimeStr.replace(/-/g, '/')).getTime()<new Date().getTime()) {
+                        console.log("活动已经结束")
+                        return
+                    }
                     let aid = []
                     let captainId = []
                     if (this.haskey(ac, 'data.successRetList')) {
@@ -1416,10 +1444,6 @@ class Main extends Template {
                             }
                         } catch (e2) {
                         }
-                    }
-                    if (this.haskey(ac, 'data.active.endTimeStr') && new Date(ac.data.active.endTimeStr.replace(/-/g, '/')).getTime()<new Date().getTime()) {
-                        console.log("活动已经结束")
-                        return
                     }
                     if (this.haskey(ac, 'data.successRetList') && this.haskey(ac, 'data.active.maxGroup') && ac.data.successRetList.length == ac.data.active.maxGroup) {
                         console.log(user, "人员已满")
