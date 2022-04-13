@@ -8,19 +8,15 @@ class Main extends Template {
         // this.help = 2
         this.task = 'local'
         this.verify = 1
+        this.thread = 3
     }
 
     async prepare() {
         this.code = [
+            "https://prodev.m.jd.com/mall/active/31GFSKyRbD3ehsHih2rQKArxfb8c/index.html",
             "https://prodev.m.jd.com/mall/active/2T8MxyGmn4CQtGJ1asZybjMvakmR/index.html"
         ]
         let custom = this.getValue('custom')
-        // let expand = this.getValue('expand')
-        // if (expand.length) {
-        //     for (let i of expand) {
-        //         this.code.unshift(i)
-        //     }
-        // }
         if (custom.length) {
             this.code = []
             for (let i of custom) {
@@ -48,11 +44,46 @@ class Main extends Template {
                         this.shareCode.push({encryptProjectId, appid})
                     }
                 }
+                else if (this.match(/businessh5\/([^\/]+)/, html)) {
+                    let js = this.matchAll(/src="(.*?\.js)"/g, html).filter(d => d.includes('app.'))
+                    if (js) {
+                        let jsContent = await this.curl({
+                                'url': `https:${js[0]}`,
+                            }
+                        )
+                        let source = this.match(/ActivitySource\s*:\s*"(\w+)"/, jsContent)
+                        let functionId = this.match(/functionId\s*:\s*"(\w+)"/, jsContent)
+                        if (source && functionId) {
+                            let s = await this.curl({
+                                    'url': `https://api.m.jd.com/?appid=ProductZ4Brand&functionId=${functionId}&t=${this.timestamp}&body={"source":"${source}"}`,
+                                }
+                            )
+                            if (this.haskey(s, 'data.result.activityBaseInfo')) {
+                                this.shareCode.push({
+                                    encryptProjectId: s.data.result.activityBaseInfo.encryptProjectId,
+                                    appid: 'ProductZ4Brand',
+                                    activityId: s.data.result.activityBaseInfo.activityId
+                                })
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 
     async main(p) {
+        switch (p.inviter.appid) {
+            case "ProductZ4Brand":
+                await this.tewuz(p)
+                break
+            default:
+                await this.hudongz(p)
+                break
+        }
+    }
+
+    async hudongz(p) {
         let cookie = p.cookie;
         let encryptProjectId = p.inviter.encryptProjectId
         let appid = p.inviter.appid
@@ -100,7 +131,7 @@ class Main extends Template {
                 if (!r) {
                     break
                 }
-                if (r.msg && r.msg.includes("积分不足")) {
+                else if (['风险等级未通过', "未登录", '兑换积分不足'].includes(r.msg)) {
                     console.log(r.msg)
                     break
                 }
@@ -120,6 +151,75 @@ class Main extends Template {
             if (gifts.length) {
                 this.notices(gifts.join("\n"), p.user)
             }
+        }
+    }
+
+    async tewuz(p) {
+        let cookie = p.cookie;
+        let list = await this.curl({
+                'url': `https://api.m.jd.com/?uuid=&client=wh5&appid=ProductZ4Brand&functionId=superBrandTaskList&t=1649852207375&body={"source":"star_gift","activityId":1010001}`,
+                cookie
+            }
+        )
+        let lotteryId
+        let gifts = []
+        let encryptProjectId = p.inviter.encryptProjectId
+        let appid = p.inviter.appid
+        for (let i of this.haskey(list, 'data.result.taskList')) {
+            if (i.completionFlag) {
+                console.log(`任务已经完成: ${i.assignmentName}`)
+            }
+            else {
+                let extraType = i.ext.extraType
+                if (this.haskey(i, `ext.${i.ext.extraType}`)) {
+                    let extra = i.ext[extraType]
+                    for (let j of extra) {
+                        let s = await this.curl({
+                                url: `https://api.m.jd.com/?uuid=&client=wh5&appid=ProductZ4Brand&functionId=superBrandDoTask&t=${this.timestamp}&body={"source":"star_gift","activityId":${p.inviter.activityId},"encryptProjectId":"${p.inviter.encryptProjectId}","encryptAssignmentId":"${i.encryptAssignmentId}","assignmentType":1,"itemId":"${j.advId || j.itemId}","actionType":1}`,
+                                cookie
+                            }
+                        )
+                        if (i.ext.waitDuration) {
+                            console.log(`等待: ${i.ext.waitDuration}s`)
+                            await this.wait(i.ext.waitDuration * 1000)
+                            s = await this.curl({
+                                    url: `https://api.m.jd.com/?uuid=&client=wh5&appid=ProductZ4Brand&functionId=superBrandDoTask&t=${this.timestamp}&body={"source":"star_gift","activityId":${p.inviter.activityId},"encryptProjectId":"${p.inviter.encryptProjectId}","encryptAssignmentId":"${i.encryptAssignmentId}","assignmentType":1,"itemId":"${j.advId || j.itemId}","actionType":0}`,
+                                    cookie
+                                }
+                            )
+                            console.log(s)
+                        }
+                        else {
+                            console.log(i.assignmentName, this.haskey(s, 'data.bizMsg'))
+                        }
+                    }
+                }
+                else {
+                    if (i.assignmentName.includes("抽奖")) {
+                        lotteryId = i.encryptAssignmentId
+                    }
+                }
+            }
+        }
+        if (lotteryId) {
+            let r = await this.curl({
+                    'url': `https://api.m.jd.com/?uuid=&client=wh5&appid=ProductZ4Brand&functionId=superBrandTaskLottery&t=${this.timestamp}&body={"source":"star_gift","activityId":${p.inviter.activityId},"encryptProjectId":"${p.inviter.encryptProjectId}"}`,
+                    cookie
+                }
+            )
+            if (this.haskey(r, 'data.result.rewards')) {
+                for (let g in r.data.result.rewards) {
+                    let data = r.data.result.rewards[g]
+                    console.log(data)
+                    gifts.push(data.beanNum)
+                }
+            }
+            else {
+                console.log(`什么也没有抽到`)
+            }
+        }
+        if (gifts.length) {
+            this.notices(gifts.join("\n"), p.user)
         }
     }
 }
