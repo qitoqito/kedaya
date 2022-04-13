@@ -810,8 +810,9 @@ class Main extends Template {
             }
             else if (['wxBuildActivity'].includes(type)) {
                 while (true) {
-                    let content = "很好!"
-                    if (this.haskey(activityContent, 'content.data.words')) {
+                    let contents = ["很好很不错!", '2333333', '6666666', this.uuid(12), "红红火火恍恍惚惚", "哈哈哈哈哈哈哈哈哈"]
+                    let content = this.random(contents, 1)[0]
+                    if (this.haskey(activityContent, 'content.data.words') && this.random(activityContent.content.data.words, 1).length>0) {
                         content = this.random(activityContent.content.data.words, 1)[0].content
                     }
                     let c = await this.response({
@@ -824,12 +825,11 @@ class Main extends Template {
                         console.log(`盖楼楼层: ${c.content.data.currentFloors}`)
                     }
                     let getPrize = await this.curl({
-                            'url': `https://${host}/${type}/publish`,
+                            'url': `https://${host}/wxBuildActivity/publish`,
                             'form': `pin=${secretPin}&activityId=${activityId}&content=${encodeURIComponent(content)}`,
                             cookie: c.cookie
                         }
                     )
-                    // console.log(getPrize)
                     if (this.haskey(getPrize, 'data.drawResult.drawOk')) {
                         console.log(`获得: ${getPrize.data.drawResult.name}`)
                         this.notices(getPrize.data.drawResult.name, p.user)
