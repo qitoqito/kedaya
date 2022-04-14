@@ -459,9 +459,10 @@ class Main extends Template {
                     cookie: getPin.cookie
                 }
             )
-            if (draw.isOk) {
-                console.log(this.haskey(draw, 'gift.gift.name'))
-                this.notices(this.haskey(draw, 'gift.gift.name'), p.user)
+            if (this.haskey(draw, 'isOk')) {
+                let name = this.haskey(draw, 'gift.gift.name') || this.haskey(draw, 'gift.gift.giftName')
+                console.log(name)
+                this.notices(name, p.user)
             }
             else {
                 console.log(draw.msg || "什么也没有抢到")
