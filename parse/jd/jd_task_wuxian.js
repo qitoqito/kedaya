@@ -145,9 +145,19 @@ class Main extends Template {
                             case 46:
                             case 102:
                             case 100:
+                            case 99:
                                 data.type = 'wxTeam'
                                 data.title = "组队瓜分"
                                 data.pageUrl = `https://${host}/wxTeam/activity2?activityId=${i.activityId}`
+                                let html = await this.curl({
+                                        'url': `https://${host}/pool/captain/${i.activityId}?activityId=${i.activityId}`,
+                                    }
+                                )
+                                if (html.includes("瓜分")) {
+                                    data.title = "组队瓜分京豆"
+                                    data.type = 'pool'
+                                    data.pageUrl = `https://${host}/pool/captain/${i.activityId}?activityId=${i.activityId}`
+                                }
                                 break
                             case 26:
                                 data.type = 'wxPointDrawActivity'
@@ -248,6 +258,9 @@ class Main extends Template {
                         }
                         if (['wxTeam', 'microDz', 'WxHbShareActivity', 'wxCollectCard', 'wxUnPackingActivity', 'wxShareActivity'].includes(data.type)) {
                             await this[data.type](data)
+                        }
+                        else if (data.type == 'pool') {
+                            await this.wxTeam(data)
                         }
                         else {
                             this.shareCode.push(data)
@@ -666,7 +679,7 @@ class Main extends Template {
                                 cookie
                             }
                         )
-                        if (getPrize.errorMessage && (getPrize.errorMessage.includes("擦肩") || getPrize.errorMessage.includes("未达到领奖条件"))) {
+                        if (this.haskey(getPrize, 'errorMessage') && (getPrize.errorMessage.includes("擦肩") || getPrize.errorMessage.includes("未达到领奖条件"))) {
                             console.log('奖品与您擦肩而过了哟,重新获取')
                             await this.wait(1000)
                         }
