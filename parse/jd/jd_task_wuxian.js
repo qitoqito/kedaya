@@ -1871,16 +1871,28 @@ class Main extends Template {
                     let data = this.dicts[i].pool
                     let ac = await this.curl(data)
                     if (this.haskey(ac, 'data.successRetList')) {
+                        var url = `https://${data.host}/pool/updateCaptain`
                         try {
                             for (let kk of ac.data.successRetList) {
                                 let member = (this.column(kk.memberList, 'jdNick')).join("  ")
                                 let c = kk.memberList[0].captainId
                                 let s = await this.curl({
-                                        'url': `https://${data.host}/pool/updateCaptain`,
+                                        url,
                                         'form': `uuid=${c}`,
-                                        cookie: data.cookie
+                                        cookie: data.cookie,
+                                        referer: `https://${data.host}/pool/updateCaptain`
                                     }
                                 )
+                                if (this.haskey(s, 'errorMessage', '更新信息出错')) {
+                                    url = `https://${data.host}/common/pool/updateCaptain`
+                                    s = await this.curl({
+                                            url,
+                                            'form': `uuid=${c}`,
+                                            cookie: data.cookie,
+                                            referer: `https://${data.host}/pool/updateCaptain`
+                                        }
+                                    )
+                                }
                                 this.notices(`${c} ${s.errorMessage}\n组队成员: ${member}`, i)
                                 console.log(c, s.errorMessage)
                                 console.log(`组队成员: ${member}`)
