@@ -4,9 +4,9 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东盲盒"
-        this.cron = "52 5,18 * * *"
+        this.cron = "50 6,17 * * *"
         this.task = 'local'
-        this.thread = 3
+        // this.thread = 1
         this.verify = 1
         this.readme = `自定义盲盒: filename_custom='id1|id2'\n追加盲盒: filename_expand='id1|id2'`
     }
@@ -47,7 +47,7 @@ class Main extends Template {
     async main(p) {
         let cookie = p.cookie
         let gifts = []
-        for (let url of this.inviter.url) {
+        for (let url of p.inviter.url) {
             let h = await this.curl({
                     url,
                     cookie
