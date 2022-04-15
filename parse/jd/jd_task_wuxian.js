@@ -489,12 +489,32 @@ class Main extends Template {
                 }
             )
             if (this.haskey(c, 'data.usedNum')) {
-                let r = await this.curl({
-                        'url': `https://${host}/mc/wxPointShop/exgBeans`,
-                        'form': `buyerPin=${secretPin}&buyerNick=${getPin.content.data.pin}&giftId=${activityId}&venderId=${venderId}&beansLevel=${c.data.beansLevel}&exgBeanNum=${c.data.beansLevelCount}`,
-                        cookie: getPin.cookie
+                var r = {}
+                if (c.data.beansLevelCount) {
+                    r = await this.curl({
+                            'url': `https://${host}/mc/wxPointShop/exgBeans`,
+                            'form': `buyerPin=${secretPin}&buyerNick=${getPin.content.data.pin}&giftId=${activityId}&venderId=${venderId}&beansLevel=${c.data.beansLevel}&exgBeanNum=${c.data.beansLevelCount}`,
+                            cookie: getPin.cookie
+                        }
+                    )
+                }
+                else {
+                    let point = await this.curl({
+                            'url': `https://${host}/mc/wxPointShop/getBuyerPoints`,
+                            'form': `buyerPin=${secretPin}&venderId=${venderId}`,
+                            cookie: getPin.cookie
+                        }
+                    )
+                    console.log(`当前积分:`, this.haskey(point, 'data.buyerPoints'))
+                    if (this.haskey(point, 'data.buyerPoints')) {
+                        r = await this.curl({
+                                'url': `https://${host}/mc/wxPointShop/exgBeans`,
+                                'form': `buyerPin=${secretPin}&buyerNick=${getPin.content.data.pin}&giftId=${activityId}&venderId=${venderId}&beansLevel=&exgBeanNum=${this.haskey(point, 'data.buyerPoints') / 10}`,
+                                cookie: getPin.cookie
+                            }
+                        )
                     }
-                )
+                }
                 if (r.result) {
                     console.log(r)
                 }
