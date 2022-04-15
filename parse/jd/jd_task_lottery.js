@@ -7,7 +7,7 @@ class Main extends Template {
         this.cron = "26 0,18 * * *"
         this.help = 'main'
         this.task = 'local'
-        this.thread = 6
+        this.thread = 3
         this.filter = 'appId'
     }
 
@@ -22,6 +22,7 @@ class Main extends Template {
         }
         else {
             this.shareCode = [
+                {appId: '1EFBTxa6H'},
                 {
                     appId: '1EFRWxKuG',
                 },
@@ -50,7 +51,7 @@ class Main extends Template {
                         if (j.assistTaskDetailVo) {
                             i.taskId = j.taskId
                             i.inviter = i.inviter || []
-                            i.inviter.push({taskToken: j.assistTaskDetailVo.taskToken})
+                            i.inviter.push({taskToken: j.assistTaskDetailVo.taskToken, user: this.userName(cookie)})
                             break
                         }
                     }
@@ -74,6 +75,16 @@ class Main extends Template {
         if (p.inviter.title) {
             console.log(`正在运行 ${p.inviter.title}`)
         }
+        if (p.inviter.inviter) {
+            let inviter = this.column(p.inviter.inviter, 'user')
+            if (inviter.includes(p.user)) {
+                this.dict[p.user]['report'] = {
+                    'url': `https://api.m.jd.com/client.action`,
+                    'form': `functionId=${lottery}_getLotteryResult&body={"appId":"${appId}"}&client=wh5&clientVersion=1.0.0`,
+                    cookie
+                }
+            }
+        }
         let l = await this.curl({
                 'url': `https://api.m.jd.com/`,
                 'form': `appid=wh5&clientVersion=1.0.0&functionId=${home}_getHomeData&body={"taskToken":"","appId":"${appId}","channelId":${channelId}`,
@@ -84,7 +95,23 @@ class Main extends Template {
         let text = ''
         this.assert(this.haskey(l, 'data.result.taskVos'), '活动已经执行过或者无权访问')
         for (let i of l.data.result.taskVos) {
-            if (i.status == 1 || i.status == 3) {
+            if (i.assistTaskDetailVo && i.status != 2) {
+                for (let zz of p.inviter.inviter || []) {
+                    console.log(`正在给 ${zz.taskToken} 助力`)
+                    let body = {
+                        'taskId': i.taskId,
+                        'taskToken': zz.taskToken,
+                        'actionType': 0,
+                        "appId": appId
+                    }
+                    let collectScore = await this.curl({
+                        url: `https://api.m.jd.com/client.action?advId=${collect}_collectScore`,
+                        form: `functionId=${collect}_collectScore&body=${JSON.stringify(body)}&client=wh5&clientVersion=1.0.0`,
+                        cookie
+                    })
+                }
+            }
+            else if (i.status == 1 || i.status == 3) {
                 let vos = i.browseShopVo || i.shoppingActivityVos || i.productInfoVos || i.followShopVo || i.brandMemberVos || []
                 if (vos.length>0) {
                     console.log(p.index, `正在做${i.subTitleName}=========`)
@@ -160,22 +187,6 @@ class Main extends Template {
                     }
                 }
             }
-            else if (i.assistTaskDetailVo) {
-                for (let zz of p.inviter.inviter || []) {
-                    console.log(`正在给 ${zz.taskToken} 助力`)
-                    let body = {
-                        'taskId': i.taskId,
-                        'taskToken': zz.taskToken,
-                        'actionType': 0,
-                        "appId": appId
-                    }
-                    let collectScore = await this.curl({
-                        url: `https://api.m.jd.com/client.action?advId=${collect}_collectScore`,
-                        form: `functionId=${collect}_collectScore&body=${JSON.stringify(body)}&client=wh5&clientVersion=1.0.0`,
-                        cookie
-                    })
-                }
-            }
             else {
                 console.log(p.index, `${i.taskName}任务已完成...`)
             }
@@ -246,6 +257,11 @@ class Main extends Template {
     async extra() {
         for (let cookie of this.cookies[this.task]) {
             let user = this.userName(cookie)
+            if (this.dict[user].report) {
+                for (let i of Array(3)) {
+                    let s = await this.curl(this.dict[user].report)
+                }
+            }
             if (this.dict[user].gifts.length) {
                 console.log(user, `本次运行奖励:\n${this.dict[user].gifts.join("\n")}`)
                 this.notices(this.dict[user].gifts.join("\n"), user)
