@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东极速版超级摇一摇"
-        // this.cron = "5 0,13 * * *"
+        // this.cron = "0 20-23 * * *"
         this.help = 2
         this.task = 'local'
         this.thread = 6
@@ -17,15 +17,25 @@ class Main extends Template {
         this.algo = new this.modules.jdAlgo({
             type: 'lite', 'appId': '6e8d7',
         })
-        console.log(this.match(/(\w+)\.js/,'/ql/scripts/js_task_super.js'))
     }
 
     async main(p) {
         let cookie = p.cookie;
+        let linkId = this.cuustom || "OER5a5ybAQYDrCUKrN2WhQ"
+        let home = await this.curl({
+                'url': `https://api.m.jd.com/?functionId=superRedBagHome&body={"linkId":"${linkId}"}&t=1650025237128&appid=activities_platform`,
+                // 'form':``,
+                cookie
+            }
+        )
+        if (!this.haskey(home, 'data.isLogin')) {
+            console.log("未登录或者黑名单")
+            return
+        }
         for (let i = 0; i<60; i++) {
             let s = await this.algo.curl({
-                    'url': `https://api.m.jd.com/?functionId=superRedBagDraw&body={"linkId":"DUE8grc3lu-A932miriTFg"}&t=1643040859389&appid=activities_platform`,
-                    // 'form':``,
+                    'url': `https://api.m.jd.com/?functionId=superRedBagDraw&body={"linkId":"${linkId}"}&t=1643040859389&appid=activities_platform`,
+                    // 'form':``,`
                     cookie
                 }
             )
@@ -35,10 +45,11 @@ class Main extends Template {
             else {
                 console.log(p.user, '什么也没有')
             }
+            await this.wait(500)
         }
         for (let n = 1; n<6; n++) {
             let l = await this.curl({
-                    'url': `https://api.m.jd.com/?functionId=superRedBagList&body={"pageNum":${n},"pageSize":10,"associateLinkId":"DUE8grc3lu-A932miriTFg","business":"SpringFestival","linkId":"Eu7-E0CUzqYyhZJo9d3YkQ","inviter":""}&t=1643042027781&appid=activities_platform`,
+                    'url': `https://api.m.jd.com/?functionId=superRedBagList&body={"pageNum":${n},"pageSize":10,"associateLinkId":"${linkId}","business":"SpringFestival","linkId":"Eu7-E0CUzqYyhZJo9d3YkQ","inviter":""}&t=1643042027781&appid=activities_platform`,
                     // 'form':``,
                     cookie
                 }
