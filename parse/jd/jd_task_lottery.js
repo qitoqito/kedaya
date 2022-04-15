@@ -62,7 +62,7 @@ class Main extends Template {
     }
 
     async middle(p) {
-        this.dict[p.user] = {gifts: []}
+        this.dict[p.user] = {gifts: [], report: []}
     }
 
     async main(p) {
@@ -78,11 +78,11 @@ class Main extends Template {
         if (p.inviter.inviter) {
             let inviter = this.column(p.inviter.inviter, 'user')
             if (inviter.includes(p.user)) {
-                this.dict[p.user]['report'] = {
+                this.dict[p.user]['report'].push({
                     'url': `https://api.m.jd.com/client.action`,
                     'form': `functionId=${lottery}_getLotteryResult&body={"appId":"${appId}"}&client=wh5&clientVersion=1.0.0`,
                     cookie
-                }
+                })
             }
         }
         let l = await this.curl({
@@ -258,8 +258,10 @@ class Main extends Template {
         for (let cookie of this.cookies[this.task]) {
             let user = this.userName(cookie)
             if (this.dict[user].report) {
-                for (let i of Array(3)) {
-                    let s = await this.curl(this.dict[user].report)
+                for (let report of this.dict[user].report) {
+                    for (let i of Array(3)) {
+                        let s = await this.curl(report)
+                    }
                 }
             }
             if (this.dict[user].gifts.length) {
