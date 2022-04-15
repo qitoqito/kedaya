@@ -149,11 +149,12 @@ class Main extends Template {
                                 data.type = 'wxTeam'
                                 data.title = "组队瓜分"
                                 data.pageUrl = `https://${host}/wxTeam/activity2?activityId=${i.activityId}`
-                                let html = await this.curl({
-                                        'url': `https://${host}/pool/captain/${i.activityId}?activityId=${i.activityId}`,
-                                    }
-                                )
-                                if (html.includes("瓜分")) {
+                                // let html = await this.curl({
+                                //         'url': `https://${host}/pool/captain/${i.activityId}?activityId=${i.activityId}`,
+                                //     }
+                                // )
+                                // if (html.includes("瓜分")) {
+                                if (this.dict.type == 'pool') {
                                     data.title = "组队瓜分京豆"
                                     data.type = 'pool'
                                     data.pageUrl = `https://${host}/pool/captain/${i.activityId}?activityId=${i.activityId}`
@@ -489,7 +490,8 @@ class Main extends Template {
                 }
             )
             if (this.haskey(c, 'data.usedNum')) {
-                var r = {}
+                let r = {}
+                let count
                 if (c.data.beansLevelCount) {
                     r = await this.curl({
                             'url': `https://${host}/mc/wxPointShop/exgBeans`,
@@ -497,6 +499,7 @@ class Main extends Template {
                             cookie: getPin.cookie
                         }
                     )
+                    count = c.data.beansLevelCount
                 }
                 else {
                     let point = await this.curl({
@@ -513,13 +516,16 @@ class Main extends Template {
                                 cookie: getPin.cookie
                             }
                         )
+                        count = this.haskey(point, 'data.buyerPoints') / 10
                     }
                 }
                 if (r.result) {
                     console.log(r)
+                    console.log(`积分换豆:`, count)
+                    this.notices(`积分换豆: ${count}`, p.user)
                 }
                 else {
-                    console.log(r.errorMessage)
+                    console.log(r.errorMessage || "可能没有积分")
                 }
             }
             else {
