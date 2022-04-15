@@ -102,12 +102,14 @@ class Main extends Template {
                         case "cjhy-isv.isvjcloud.com":
                             var h = await this.response({
                                     'url': `https://${host}/wxCollectionActivity/activity?activityId=${i.activityId}`,
+                                    referer: `https://${host}/customer/getSimpleActInfoVo`,
                                 }
                             )
                             break
                         default:
                             var h = await this.response({
                                     'url': `https://${host}/wxCollectionActivity/activity2/${i.activityId}?activityId=${i.activityId}`,
+                                    referer: `https://${host}/customer/getSimpleActInfoVo`,
                                 }
                             )
                             break
@@ -115,13 +117,17 @@ class Main extends Template {
                     let s = await this.curl({
                             'url': `https://${host}/customer/getSimpleActInfoVo`,
                             form: `activityId=${i.activityId}`,
-                            cookie: h.cookie
+                            cookie: h.cookie,
+                            referer: `https://${host}/customer/getSimpleActInfoVo`,
                         }
                     )
                     // }
                     if (this.haskey(s, 'data')) {
                         let data = s.data
                         data.host = host
+                        if (this.dict.activityType) {
+                            data.activityType = parseInt(this.dict.activityType)
+                        }
                         switch (data.activityType) {
                             case 5:
                             case 6:
@@ -145,20 +151,15 @@ class Main extends Template {
                             case 46:
                             case 102:
                             case 100:
-                            case 99:
                                 data.type = 'wxTeam'
                                 data.title = "组队瓜分"
                                 data.pageUrl = `https://${host}/wxTeam/activity2?activityId=${i.activityId}`
-                                // let html = await this.curl({
-                                //         'url': `https://${host}/pool/captain/${i.activityId}?activityId=${i.activityId}`,
-                                //     }
-                                // )
-                                // if (html.includes("瓜分")) {
-                                if (this.dict.type == 'pool') {
-                                    data.title = "组队瓜分京豆"
-                                    data.type = 'pool'
-                                    data.pageUrl = `https://${host}/pool/captain/${i.activityId}?activityId=${i.activityId}`
-                                }
+                                break
+                            case 99:
+                            case 99999:
+                                data.title = "组队瓜分京豆"
+                                data.type = 'pool'
+                                data.pageUrl = `https://${host}/pool/captain/${i.activityId}?activityId=${i.activityId}`
                                 break
                             case 26:
                                 data.type = 'wxPointDrawActivity'
@@ -273,7 +274,7 @@ class Main extends Template {
                                 'url': `https://${host}/pool/captain/${i.activityId}?activityId=${i.activityId}`,
                             }
                         )
-                        if (html.includes("瓜分")) {
+                        if (html.includes("瓜分") || this.dict.activityType == '99999') {
                             let venderId = this.match(/id="venderId"\s*value="(\d+)"/, html)
                             if (venderId) {
                                 let shopInfo = await this.curl({
