@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东集魔方赢大奖"
-        // this.cron = "22 0,22 * * *"
+        this.cron = "22 0,22 * * *"
         this.task = 'local'
         this.thread = 3
         this.verify = 1
@@ -12,7 +12,7 @@ class Main extends Template {
 
     async prepare() {
         this.code = [
-            `https://prodev.m.jd.com/mall/active/2GaAnLLb7NcHkEjPXphja7SSQ7Z4/index.html`
+            `https://prodev.m.jd.com/mall/active/2fmVhvgmpWrmjC4rFmoU2ZfKgDKf/index.html`
         ]
         let custom = this.getValue('custom')
         let expand = this.getValue('expand')
@@ -43,16 +43,34 @@ class Main extends Template {
                     )
                     let pageId = this.match(/"pageId"\s*:\s*"(\d+)"/, h)
                     let activityId = this.match(/"activityId"\s*:\s*"(\d+)"/, h)
-                    let s = await this.curl({
-                            'url': `https://api.m.jd.com/client.action?client=wh5&clientVersion=10.3.0&osVersion=15.1.1&networkType=wifi&ext=%7B%22prstate%22:%220%22%7D&functionId=qryCompositeMaterials&t=1640923295510&body={"geo":null,"mcChannel":0,"activityId":"${activityId}","pageId":"${pageId}","qryParam":"[{\\"type\\":\\"advertGroup\\",\\"id\\":\\"06167705\\",\\"mapTo\\":\\"advData\\",\\"next\\":[{\\"type\\":\\"productGroup\\",\\"mapKey\\":\\"comment[0]\\",\\"mapTo\\":\\"productGroup\\",\\"attributes\\":13},{\\"type\\":\\"productGroup\\",\\"mapKey\\":\\"comment[1]\\",\\"mapTo\\":\\"productGroup2\\",\\"attributes\\":13}]}]","applyKey":"21new_products_h"}`,
-                        }
-                    )
-                    let data = this.dumps(s)
-                    let advertId = this.matchAll(/(\d+)/g, this.matchAll(/"comments"\s*:\s*\[([^\]]+)\]/g, data).join(","))
-                    let skuId = this.matchAll(/"skuId"\s*:\s*"(\d+)"/g, data)
-                    this.shareCode.push({
-                        pageId, activityId, advertId, skuId
-                    })
+                    let modules = this.matchAll(/module_(\d+)/g, h)
+                    if (modules) {
+                        let aa = await this.curl({
+                                'url': `https://api.m.jd.com/client.action?functionId=queryPanamaFloor`,
+                                'form': `screen=1170*2259&version=1.0.0&client=wh5&appid=babelh5&body={"activityId":"${activityId}","pageId":"${pageId}","floorList":[${modules.map(d => `{"alias":"${d}"}`).join(",")}],"imgDomain":"m11.360buyimg.com","siteClientVersion":"10.5.0"}&ext=%7B%22prstate%22%3A%220%22%7D`,
+                            }
+                        )
+                        let data = this.dumps(aa)
+                        let advertId = this.unique(this.matchAll(/"advertId":"(\d+)"/g, data))
+                        let skuId = this.unique(this.matchAll(/"skuId":"(\d+)"/g, data))
+                        advertId = [...advertId, ...skuId]
+                        this.shareCode.push({
+                            pageId, activityId, advertId, skuId
+                        })
+                    }
+                    else {
+                        let s = await this.curl({
+                                'url': `https://api.m.jd.com/client.action?client=wh5&clientVersion=10.3.0&osVersion=15.1.1&networkType=wifi&ext=%7B%22prstate%22:%220%22%7D&functionId=qryCompositeMaterials&t=1640923295510&body={"geo":null,"mcChannel":0,"activityId":"${activityId}","pageId":"${pageId}","qryParam":"[{\\"type\\":\\"advertGroup\\",\\"id\\":\\"06167705\\",\\"mapTo\\":\\"advData\\",\\"next\\":[{\\"type\\":\\"productGroup\\",\\"mapKey\\":\\"comment[0]\\",\\"mapTo\\":\\"productGroup\\",\\"attributes\\":13},{\\"type\\":\\"productGroup\\",\\"mapKey\\":\\"comment[1]\\",\\"mapTo\\":\\"productGroup2\\",\\"attributes\\":13}]}]","applyKey":""}`,
+                            }
+                        )
+                        let data = this.dumps(s)
+                        let advertId = this.unique(this.matchAll(/(\d+)/g, this.matchAll(/"comments"\s*:\s*\[([^\]]+)\]/g, data).join(",")))
+                        let skuId = this.unique(this.matchAll(/"skuId"\s*:\s*"(\d+)"/g, data))
+                        advertId = [...advertId, ...skuId]
+                        this.shareCode.push({
+                            pageId, activityId, advertId, skuId
+                        })
+                    }
                 } catch (e) {
                 }
             }
@@ -72,23 +90,8 @@ class Main extends Template {
         for (let i of l.result.taskPoolInfo.taskList) {
             if (!i.taskStatus) {
                 for (let j of Array(i.toastTime + 5)) {
-                    let sku = this.random(p.inviter.skuId || [
-                        '10025690385788',
-                        '100029081460',
-                        '100027604000',
-                        '100008764851',
-                        '100023781630',
-                        '100018818732',
-                        '10025690385788',
-                        '100029081460',
-                        '100027604000',
-                        '100008764851',
-                        '100023781630',
-                        '100018818732',
-                    ], 1)
-                    let advertId = this.random(p.inviter.activeId || [
-                        "18395215", "18468845", "18395285", "18470991", "18395381", "18468452", "18396456", "18472112", "18451573", "18468940", "18460143", "18471960"
-                    ], 1)
+                    let sku = this.random(p.inviter.skuId, 1)
+                    let advertId = this.random(p.inviter.advertId, 1)
                     let s = await this.curl({
                             'url': `https://api.m.jd.com/client.action?uuid=&client=wh5&clientVersion=10.3.0&osVersion=15.1.1&networkType=wifi&&appid=content_ecology&functionId=executeNewInteractionTask&t=1640607957804&body={"geo":{"lng":"","lat":""},"mcChannel":0,"sign":3,"interactionId":${interactionId},"taskPoolId":${taskPoolId},"taskType":${i.taskId},"sku":"${sku}","advertId":"${advertId}"}`,
                             cookie
@@ -107,7 +110,7 @@ class Main extends Template {
                 }
             }
             else {
-                console.log(p.user,`${i.taskName}任务已经完成了` )
+                console.log(p.user, `${i.taskName}任务已经完成了`)
             }
         }
         let lo = await this.curl({
