@@ -1180,7 +1180,7 @@ class Main extends Template {
                     p.inviter.aid.push(sp)
                 }
                 let count = this.dict.count || p.inviter.count
-                if (p.inviter.aid.length>=parseInt(count)) {
+                if (p.inviter.aid.length>parseInt(count)) {
                     this.finish.push(p.number)
                 }
             }
