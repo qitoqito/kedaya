@@ -7,6 +7,76 @@ class Main extends Template {
         // this.cron = "23 23 * * *"
         this.task = 'local'
         this.readme = `请谨慎使用该脚本\n建议配合filename_work字段,删除指定账户\n如需删除指定个数商品,请使用filename_count字段`
+        this.import = ['jdUrl']
+    }
+
+    async main(p) {
+        let cookie = p.cookie
+        let cart = await this.curl({
+                'url': `https://api.m.jd.com/api?functionId=pcCart_jc_getCurrentCart&appid=JDC_mall_cart&body={}`,
+                // 'form':``,
+                cookie,
+                headers: {
+                    "referer": "https://cart.jd.com/cart_index/",
+                    "user-agent": "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:98.0) Gecko/20100101 Firefox/98.0",
+                }
+            }
+        )
+        let skus = []
+        let packs = []
+        if (this.haskey(cart, 'resultData.cartInfo.vendors')) {
+            for (let i of cart.resultData.cartInfo.vendors) {
+                for (let j of this.haskey(i, 'sorted')) {
+                    if (this.haskey(j, 'item.items')) {
+                        if (j.item.items.length>0) {
+                            for (let k of j.item.items) {
+                                // if (k.item.stockState != "无货" && k.item.checkBoxText != "预售") {
+                                packs.push(
+                                    {
+                                        "num": k.item.Num.toString(),
+                                        "ybPackId": j.item.promotionId,
+                                        "sType": "11",
+                                        "TheSkus": [{"num": k.item.Num.toString(), "Id": k.item.Id.toString()}],
+                                        "Id": j.item.promotionId
+                                    }
+                                )
+                                // }
+                            }
+                        }
+                        else {
+                            skus.push(
+                                {
+                                    "num": j.item.Num.toString(),
+                                    "Id": j.item.Id.toString(),
+                                    "skuUuid": j.item.skuUuid,
+                                    "useUuid": j.item.useUuid
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        console.log('即将删除购物车数目:', skus.length + packs.length)
+        if (skus.length>0 || packs.length>0) {
+            let cartRemove = await this.curl({
+                    'url': `https://api.m.jd.com/api`,
+                    'form': `functionId=pcCart_jc_cartRemove&appid=JDC_mall_cart&body=${this.dumps({
+                        "operations": [{
+                            "carttype": "4",
+                            "TheSkus": skus,
+                            "ThePacks": packs
+                        }], "serInfo": {}
+                    })}`,
+                    cookie,
+                    headers: {
+                        "referer": "https://cart.jd.com/cart_index/",
+                        "user-agent": "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:98.0) Gecko/20100101 Firefox/98.0",
+                    }
+                }
+            )
+            this.notices(`删除购物车: ${skus.length + packs.length}`, p.user)
+        }
     }
 
     async backup(p) {
