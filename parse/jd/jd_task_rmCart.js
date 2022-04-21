@@ -81,6 +81,58 @@ class Main extends Template {
 
     async backup(p) {
         let cookie = p.cookie
+        let uuid = this.uuid(40)
+        let u = this.modules.jdUrl.lite("lite_cart", {
+            "syntype": "1",
+            "noResponse": false,
+            "userType": "1",
+            "openudid": uuid,
+            "cartuuid": uuid,
+            "carttype": "1",
+            "adid": ""
+        }, 'post', cookie)
+        let s = await this.curl(u)
+        let skus = []
+        if (this.haskey(s, 'cartInfo.vendors')) {
+            for (let i of s.cartInfo.vendors) {
+                for (let j of this.haskey(i, 'sorted')) {
+                    for (let k of j.item.items) {
+                        if (k.item.stockState != "无货" && k.item.checkBoxText != "预售") {
+                            skus.push(
+                                {
+                                    "num": k.item.Num.toString(),
+                                    "ybPackId": j.item.promotionId,
+                                    "sType": "11",
+                                    "TheSkus": [{"num": k.item.Num.toString(), "Id": k.item.Id.toString()}],
+                                    "Id": j.item.promotionId
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        console.log('即将删除购物车数目:', skus.length)
+        if (skus.length>0) {
+            let uu = this.modules.jdUrl.lite("lite_cartRemove", {
+                "syntype": "1",
+                "noResponse": false,
+                "userType": "1",
+                "openudid": uuid,
+                "hitNewUIStatus": "1",
+                "cartuuid": uuid,
+                "carttype": "4",
+                "operations": [{
+                    "ThePacks": skus
+                }],
+                "adid": ""
+            }, 'post', cookie)
+            let remove = await this.curl(uu)
+        }
+    }
+
+    async backup1(p) {
+        let cookie = p.cookie
         let list = []
         let name = []
         let n = 0
@@ -135,7 +187,7 @@ class Main extends Template {
         }
     }
 
-    async main(p) {
+    async backup2(p) {
         let cookie = p.cookie
         let s = await this.curl({
                 'url': `https://wq.jd.com/deal/mshopcart/rmvCmdy?sceneval=2&g_login_type=1&g_ty=ajax`,
