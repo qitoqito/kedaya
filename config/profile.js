@@ -5,4 +5,5 @@ module.exports = {
         'kejiwanjia': [/pin=([^;]+)/, /username=([^;]+)/],
         'baidu': /pin=([^;]+)/,
     },
+    complete: []
 }
