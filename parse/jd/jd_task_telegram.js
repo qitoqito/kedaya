@@ -110,6 +110,9 @@ class Main extends Template {
                     let command = this.match(new RegExp(`(^${Object.keys(this.dict.map).join("|")})`), text)
                     text = `task ${this.dict.map[command].map} -custom ${reText || text.replace(command, '')}`
                 }
+                else if (this.match(/^ini\s*-\w+/, text)) {
+                    text = text.replace("ini", 'task jd_task_ini')
+                }
                 let filename = this.match(/task\s*(\w+)\s*/, text)
 
                 if (filename && admin) {
