@@ -40,11 +40,13 @@ class Main extends Template {
                     if (data.length>0) {
                         console.log(`正在删除:`, this.column(data, 'commTitle').join("|"))
                         let rm = await this.curl({
-                                'url': `https://api.m.jd.com/api?functionId=batchCancelFavorite&body={"skus":"${this.column(s.data, 'commId').join(",")}"}&appid=follow_for_concert&client=pc`,
+                                'url': `https://api.m.jd.com/api?functionId=batchCancelFavorite&body={"skus":"${this.column(data, 'commId').join(",")}"}&appid=follow_for_concert&client=pc`,
                                 cookie
                             }
                         )
                         console.log(rm.resultMsg)
+                    }else{
+                        break
                     }
                 }
                 else {
