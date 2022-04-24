@@ -15,7 +15,7 @@ class Main extends Template {
 
     async main(p) {
         let cookie = p.cookie;
-        let count = parseInt(this.dict.counnt || 20)
+        let count = parseInt(this.dict.count || 20)
         for (let i = 0; i<count / 20; i++) {
             let s = await this.curl({
                     'url': `https://m.jingxi.com/fav/comm/FavCommQueryFilter?cp=1&pageSize=20&category=0&promote=0&cutPrice=0&coupon=0&stock=0&_=1650625973463&&sceneval=2&g_login_type=1&callback=aaa`,
