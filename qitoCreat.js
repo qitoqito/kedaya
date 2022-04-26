@@ -10,11 +10,11 @@ let cover = process.env.QITOQITO_COVER || ''
 console.log(`
 请先设置环境变量
 
-QITOQITO_PLATFORM=按照所使用面板正确填写 qinglong|jtask|jd 其中一个 [青龙面板:qinglong, v3系列:jtask, 衍生面板:jd]
+QITOQITO_PLATFORM=按照所使用面板正确填写 qinglong|jtask|jd 其中一个
 
-QITOQITO_SYNC=1 当有此变量时,面板脚本定时与仓库有效脚本定时同步
+QITOQITO_SYNC=1 当有此变量时,本地脚本的定时任务跟随仓库同步启用
 
-QITOQITO_DISABLE=1 当有此变量时,部分活动失效时,面板脚本定时随仓库同步禁用
+QITOQITO_DISABLE=1 当有此变量时,本地脚本的定时任务跟随仓库同步禁用
 
 QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的入口文件
         `)
@@ -23,7 +23,7 @@ if (!command) {
 }!(async () => {
     let change = {}
     if (map) {
-        for (let k of map.replace(/\&/g,"\|").split("|")) {
+        for (let k of map.replace(/\&/g, "\|").split("|")) {
             let a = k.split("=")
             for (let i of a[0].split(',')) {
                 change[i] = {
@@ -57,9 +57,7 @@ if (!command) {
     let common
     try {
         common = require(`${dirname}/util/common`)
-    } catch (e) {
-        console.log(e.message)
-    }
+    } catch (e) {}
     let msg = []
     let dir = fs.readdirSync(`${dirname}/parse`);
     dir.forEach(function(item, index) {
@@ -70,11 +68,13 @@ if (!command) {
     })
     dicts['extra'] = Object.keys(change)
     console.log(`🦊 如需强制覆盖,请设置QITOQITO_COVER\n`)
+    let message = []
     for (let i in dicts) {
+        console.log("🐹  正在生成入口文件")
         for (let j of dicts[i]) {
             let filename = `${prefix}${j}`
             if (pathFile.includes(filename) && !cover) {
-                console.log(`🐹 跳过写入: ${filename} 已经在目录了`)
+                // console.log(`🐹 跳过写入: ${filename} 已经在目录了`)
             } else {
                 if (i == 'extra') {
                     let exc = `
@@ -170,7 +170,7 @@ if (!command) {
                                             try {
                                                 if (z.name.includes(label) && z.command.includes(`task ${filename}`)) {
                                                     if (z.isDisabled) {
-                                                        console.log(`🦊 禁用失败: ${filename} 已经是禁用的`)
+                                                        message.push(`🦊 禁用失败: ${filename} 已经是禁用的`)
                                                     } else {
                                                         if (disable) {
                                                             let disable = await curl({
@@ -184,19 +184,17 @@ if (!command) {
                                                                 method: 'put'
                                                             })
                                                             msg.push(`🐼 禁用成功: ${filename}`)
-                                                            console.log(`🐼 禁用成功: ${filename} 已经成功禁用`)
+                                                            message.push(`🐼 禁用成功: ${filename} 已经成功禁用`)
                                                         } else {
-                                                            console.log(`🦊 禁用失败: ${filename} 禁用脚本失败`)
+                                                            message.push(`🦊 禁用失败: ${filename} 禁用脚本失败`)
                                                         }
                                                         break
                                                     }
                                                 }
-                                            } catch (eee) {
-                                                console.log(eee.message)
-                                            }
+                                            } catch (eee) {}
                                         }
                                     } else {
-                                        console.log(`🐹 跳过操作: ${filename} 操作脚本失败,请手动运行该脚本`)
+                                        message.push(`🐹 跳过操作: ${filename} 操作脚本失败,请手动运行该脚本`)
                                     }
                                 } else {
                                     for (let z of cron.data) {
@@ -215,25 +213,25 @@ if (!command) {
                                                             method: 'put'
                                                         })
                                                         msg.push(`🐽 开启成功: ${filename}`)
-                                                        console.log(`🐽 开启成功: ${filename} 启用脚本成功`)
+                                                        message.push(`🐽 开启成功: ${filename} 启用脚本成功`)
                                                     } else {
-                                                        console.log(`🐽 开启失败: ${filename} 启用脚本失败`)
+                                                        message.push(`🐽 开启失败: ${filename} 启用脚本失败`)
                                                     }
                                                 }
                                                 break
                                             }
                                         } catch (eee) {
-                                            console.log(eee.message)
+                                            console.log(eee)
                                         }
                                     }
-                                    console.log(`🐶 导入失败: ${filename} 已经添加过了`)
+                                    message.push(`🐶 导入失败: ${filename} 已经添加过了`)
                                 }
                             } else {
                                 if (kedaya.cron) {
                                     let crons = typeof(kedaya.cron) == 'object' ? kedaya.cron : [kedaya.cron]
                                     for (let c of crons) {
                                         msg.push(`🦁 导入成功: ${filename}`)
-                                        console.log(`🦁 导入成功: ${filename} 加入定时成功`)
+                                        message.push(`🦁 导入成功: ${filename} 加入定时成功`)
                                         let add = await curl({
                                             'url': `${url}/api/crons?t=1638983187740`,
                                             json: {
@@ -249,11 +247,11 @@ if (!command) {
                                         })
                                     }
                                 } else {
-                                    console.log(`🐯 导入跳过: ${filename} 如需运行请手动添加定时`)
+                                    message.push(`🐯 导入跳过: ${filename} 如需运行请手动添加定时`)
                                 }
                             }
                         } catch (ee) {
-                            console.log(ee.message)
+                            console.log(ee)
                         }
                     }
                 }
@@ -284,7 +282,7 @@ if (!command) {
                         manual: kedaya.manual
                     }
                 } catch (e) {
-                    console.log(e.message)
+                    console.log(e)
                 }
             }
         }
@@ -298,15 +296,15 @@ if (!command) {
                                 if (sync) {
                                     spl[j] = spl[j].replace('#', '')
                                     msg.push(`🐽 开启成功: ${i}`)
-                                    console.log(`🐽 开启成功: ${i} 启用脚本成功`)
+                                   message.push(`🐽 开启成功: ${i} 启用脚本成功`)
                                 } else {
                                     spl[j] = spl[j]
-                                    console.log(`🐽 开启失败: ${i} 启用脚本失败`)
+                                    message.push(`🐽 开启失败: ${i} 启用脚本失败`)
                                 }
                             }
                         }
                     }
-                    console.log(`🐶 导入失败: ${i} 已经添加过了`)
+                    message.push(`🐶 导入失败: ${i} 已经添加过了`)
                 } else {
                     let crons = typeof(yaya.cron) == 'object' ? yaya.cron : [yaya.cron]
                     for (let j of crons) {
@@ -315,7 +313,7 @@ if (!command) {
                         let a = (`${c}${new Array(64-c.length).join(' ')}#${label}${yaya.title}`)
                         spl.push(a)
                         msg.push(`🦁 导入成功: ${i}`)
-                        console.log(`🦁 导入成功: ${i} 加入定时成功`)
+                        message.push(`🦁 导入成功: ${i} 加入定时成功`)
                     }
                 }
             } else {
@@ -324,29 +322,30 @@ if (!command) {
                         if (match(new RegExp(`(${command}\\s*${i})\\s*#${label}`), spl[j])) {
                             // spl[j] = ''
                             if (spl[j][0] == '#') {
-                                console.log(`🦊 禁用失败: ${i} 已经是禁用的`)
+                                message.push(`🦊 禁用失败: ${i} 已经是禁用的`)
                             } else {
                                 if (disable) {
                                     spl[j] = `#${spl[j]}`
                                     msg.push(`🐼 禁用成功: ${i}`)
-                                    console.log(`🐼 禁用成功: ${i} 已经成功禁用`)
+                                    message.push(`🐼 禁用成功: ${i} 已经成功禁用`)
                                 } else {
-                                    console.log(`🦊 禁用失败: ${i} 禁用脚本失败`)
+                                    message.push(`🦊 禁用失败: ${i} 禁用脚本失败`)
                                 }
                             }
                         }
                     }
                     if (!crontab.includes(i)) {
-                        console.log(`🐯 导入跳过: ${i} 如需运行请手动添加定时`)
+                        message.push(`🐯 导入跳过: ${i} 如需运行请手动添加定时`)
                     }
                 } else {
-                    console.log(`🐹 跳过操作: ${i} 操作脚本失败,请手动运行该脚本`)
+                    message.push(`🐹 跳过操作: ${i} 操作脚本失败,请手动运行该脚本`)
                 }
             }
         }
         spl = spl.filter(d => d)
         fs.writeFileSync('../config/crontab.list', spl.filter(d => d).join("\n"))
     }
+    console.log(message.sort().join("\n"))
     if (command && msg.length) {
         console.log(msg)
         let c = new common()
@@ -360,7 +359,7 @@ if (!command) {
         await c.notify()
     }
 })().catch((e) => {
-    console.log(e.message)
+    console.log(e)
 })
 
 function match(pattern, string) {
