@@ -7,11 +7,16 @@ class Main extends Template {
         this.cron = "33 0,11,17,22 * * *"
         // this.thread = 2
         this.task = 'local'
-        this.import = ['fs']
+        this.import = ['fs', 'jdAlgo']
         this.readme = `目前农场容易黑ip,现有模式是每次运行先获取invite/jd_task_farm.json里面的shareCode来逐一助力\n等运行完毕后,获取本次运行的所有账号shareCode,重新写入invite/jd_task_farm.json,由于ip问题,可能漏掉部分账号shareCode\n号多的话,建议缓存js_task_farm.json,此模式是每次运行后不再写入新的shareCode到invite/jd_task_farm.json里面,增减需要手动修改json文件\n缓存助力码文件: filename_custom='cache'\n水滴换豆: filename_custom='beanCard'\n水滴换豆+缓存json: filename_custom='beanCard|cache'\n上面的custom看需求选一个添加,请检查scripts目录有invite文件夹`
     }
 
     async prepare() {
+        this.algo = new this.modules.jdAlgo({
+            appId: "0c010",
+            type: 'app',
+            fp: "8389547038003203",
+        })
         console.log("正在获取助力码")
         try {
             let txt = this.modules.fs.readFileSync(`${this.dirname}/invite/jd_task_farm.json`).toString()
@@ -25,7 +30,7 @@ class Main extends Template {
 
     async main(p) {
         let cookie = p.cookie;
-        // let a = await this.curl({
+        // let a = await this.algo.curl({
         //         'url': `https://api.m.jd.com/client.action`,
         //         'form': `functionId=collect_exchangeAward&body={"type":3}&appid=wh5&client=apple&clientVersion=10.2.4`,
         //         cookie
@@ -33,7 +38,7 @@ class Main extends Template {
         // )
         // console.log(a.result||a)
         // return
-        let init = await this.curl({
+        let init = await this.algo.curl({
                 'url': 'https://api.m.jd.com/client.action?functionId=initForFarm',
                 'form': `body={"version":11,"channel":3}&client=apple&clientVersion=10.0.4&osVersion=13.7&appid=wh5&loginType=2&loginWQBiz=interact`,
                 cookie
@@ -46,7 +51,7 @@ class Main extends Template {
         }
         if (!init.farmUserPro) {
             console.log("正在播种")
-            await this.curl({
+            await this.algo.curl({
                     'url': `https://api.m.jd.com/client.action?functionId=choiceGoodsForFarm&body={"imageUrl":"","nickName":"","shareCode":"","goodsType":"mihoutao22","type":"0","babelChannel":"120","sid":"b1482460605540226922b0088199941w","un_area":"16_1341_1347_44750","version":14,"channel":1}&appid=wh5&client=apple&clientVersion=10.2.4`,
                     cookie
                 }
@@ -58,7 +63,7 @@ class Main extends Template {
         }
         else if (init.farmUserPro.treeState == 0) {
             console.log("正在播种")
-            await this.curl({
+            await this.algo.curl({
                     'url': `https://api.m.jd.com/client.action?functionId=choiceGoodsForFarm&body={"imageUrl":"","nickName":"","shareCode":"","goodsType":"mihoutao22","type":"0","babelChannel":"120","sid":"b1482460605540226922b0088199941w","un_area":"16_1341_1347_44750","version":14,"channel":1}&appid=wh5&client=apple&clientVersion=10.2.4`,
                     // 'form':``,
                     cookie
@@ -67,7 +72,7 @@ class Main extends Template {
         }
         let amount = this.haskey(init, 'farmUserPro.totalEnergy')
         let treeTotalEnergy = this.haskey(init, 'farmUserPro.treeTotalEnergy')
-        let fi = await this.curl({
+        let fi = await this.algo.curl({
                 'url': `https://api.m.jd.com/client.action?functionId=friendListInitForFarm&body={"lastId":null,"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                 // 'form':``,
                 cookie
@@ -83,33 +88,33 @@ class Main extends Template {
             let fcode = this.column([...this.code], 'shareCode')
             for (let i of this.random(fcode, 7)) {
                 console.log("删除好友:", i)
-                let sc = await this.curl({
+                let sc = await this.algo.curl({
                     'url': `https://api.m.jd.com/client.action?functionId=deleteFriendForFarm&body={"shareCode":"${i}","version":14,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.4.2`,
                     // 'form':``,
                     cookie
                 })
                 console.log("添加好友:", i)
-                let tj = await this.curl({
+                let tj = await this.algo.curl({
                         'url': `https://api.m.jd.com/client.action?functionId=initForFarm&body={"mpin":"","utm_campaign":"","utm_medium":"appshare","shareCode":"${i}-inviteFriend","utm_term":"Wxfriends","utm_source":"iosapp","imageUrl":"","nickName":"","version":14,"channel":2,"babelChannel":0}&appid=wh5&client=apple&clientVersion=10.2.4`,
                         // 'form':``,
                         cookie
                     }
                 )
             }
-            await this.curl({
+            await this.algo.curl({
                     'url': `https://api.m.jd.com/client.action?functionId=awardInviteFriendForFarm&body={}&appid=wh5&client=apple&clientVersion=10.2.4`,
                     // 'form':``,
                     cookie
                 }
             )
         }
-        let qdd = await this.curl({
+        let qdd = await this.algo.curl({
                 'url': `https://api.m.jd.com/client.action?functionId=clockInForFarm&body={"type":1,"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                 // 'form':``,
                 cookie
             }
         )
-        // let qdd = await this.curl({
+        // let qdd = await this.algo.curl({
         //         'url': `https://api.m.jd.com/client.action?functionId=clockInInitForFarm&body={"timestamp":${this.timestamp},"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
         //         // 'form':``,
         //         cookie
@@ -122,13 +127,13 @@ class Main extends Template {
             console.log("已经签到过了")
         }
         // 7天奖励
-        qdd = await this.curl({
+        qdd = await this.algo.curl({
                 'url': `https://api.m.jd.com/client.action?functionId=clockInInitForFarm&body={"timestamp":${this.timestamp},"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                 // 'form':``,
                 cookie
             }
         )
-        let jl = await this.curl({
+        let jl = await this.algo.curl({
                 'url': `https://api.m.jd.com/client.action?functionId=clockInForFarm&body={"type":2,"version":14,"channel":2,"babelChannel":0}&appid=wh5&client=apple&clientVersion=10.2.4`,
                 // 'form':``,
                 cookie
@@ -139,14 +144,14 @@ class Main extends Template {
         }
         for (let i of qdd.themes || []) {
             if (!i.hadGot) {
-                let fo = await this.curl({
+                let fo = await this.algo.curl({
                         'url': `https://api.m.jd.com/client.action?functionId=clockInFollowForFarm&body={"id":"${i.id}","type":"theme","step":1,"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                         // 'form':``,
                         cookie
                     }
                 )
                 await this.wait(5000)
-                let foo = await this.curl({
+                let foo = await this.algo.curl({
                         'url': `https://api.m.jd.com/client.action?functionId=clockInFollowForFarm&body={"id":"${i.id}","type":"theme","step":2,"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                         // 'form':``,
                         cookie
@@ -156,7 +161,7 @@ class Main extends Template {
             }
         }
         // 领取弹窗水滴
-        let tcs = await this.curl({
+        let tcs = await this.algo.curl({
                 'url': `https://api.m.jd.com/client.action?functionId=gotWaterGoalTaskForFarm&body={"type":3,"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                 // 'form':``,
                 cookie
@@ -166,7 +171,7 @@ class Main extends Template {
             console.log("弹窗获得水滴", qdd.amount)
         }
         // 东东乐园
-        let ly = await this.curl({
+        let ly = await this.algo.curl({
                 'url': `https://api.m.jd.com/client.action`,
                 'form': `functionId=ddnc_farmpark_Init&body={"version":"1","channel":1}&client=wh5&clientVersion=1.0.0&uuid=`,
                 cookie
@@ -176,14 +181,14 @@ class Main extends Template {
             if (i.name.includes('泡泡龙') || i.name.includes("天天红包")) {
                 if (this.haskey(i, 'topResource.task.status', 1)) {
                     console.log(`正在浏览:${i.name}`)
-                    let pp = await this.curl({
+                    let pp = await this.algo.curl({
                             'url': `https://api.m.jd.com/client.action`,
                             'form': `functionId=ddnc_farmpark_markBrowser&body={"version":"1","channel":1,"advertId":"${i.topResource.task.advertId}"}&client=wh5&clientVersion=1.0.0&uuid=`,
                             cookie
                         }
                     )
                     await this.wait(i.topResource.task.browseSeconds * 1000)
-                    let ppp = await this.curl({
+                    let ppp = await this.algo.curl({
                             'url': `https://api.m.jd.com/client.action`,
                             'form': `functionId=ddnc_farmpark_browseAward&body={"version":"1","channel":1,"advertId":"${i.topResource.task.advertId}","index":8,"type":1}&client=wh5&clientVersion=1.0.0&uuid=`,
                             cookie
@@ -192,7 +197,7 @@ class Main extends Template {
                 }
             }
         }
-        let taskList = await this.curl({
+        let taskList = await this.algo.curl({
                 'url': `https://api.m.jd.com/client.action?functionId=taskInitForFarm&body={"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                 // 'form':``,
                 cookie
@@ -207,7 +212,7 @@ class Main extends Template {
                             console.log(`今天已签到,已经连续签到${dotask.totalSigned}天,下次签到可得${dotask.signEnergyEachAmount}g`);
                         }
                         else {
-                            let qd = await this.curl({
+                            let qd = await this.algo.curl({
                                     'url': `https://api.m.jd.com/client.action?functionId=signForFarm&body={"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                                     cookie
                                 }
@@ -224,13 +229,13 @@ class Main extends Template {
                         if (!dotask.f) {
                             for (let j of dotask.userBrowseTaskAds) {
                                 console.log("正在浏览任务")
-                                let s = await this.curl({
+                                let s = await this.algo.curl({
                                         'url': `https://api.m.jd.com/client.action?functionId=browseAdTaskForFarm&body={"advertId":"${j.advertId}","type":0,"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                                         cookie
                                     }
                                 )
                                 await this.wait(j.time * 1000)
-                                await this.curl({
+                                await this.algo.curl({
                                         'url': `https://api.m.jd.com/client.action?functionId=browseAdTaskForFarm&body={"advertId":"${j.advertId}","type":1,"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                                         cookie
                                     }
@@ -244,7 +249,7 @@ class Main extends Template {
                     case'waterRainInit':
                         if (!dotask.f) {
                             if (dotask.lastTime + 3 * 60 * 60 * 1000<this.timestamp) {
-                                let s = await this.curl({
+                                let s = await this.algo.curl({
                                         'url': `https://api.m.jd.com/client.action`,
                                         'form': `functionId=waterRainForFarm&body={"type": 1, "hongBaoTimes": 100, "version": 3}&appid=wh5`,
                                         cookie
@@ -265,13 +270,13 @@ class Main extends Template {
                         break
                     case 'firstWaterInit':
                         if (!dotask.f) {
-                            let js = await this.curl({
+                            let js = await this.algo.curl({
                                     'url': `https://api.m.jd.com/client.action?functionId=waterGoodForFarm&body={"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                                     // 'form':``,
                                     cookie
                                 }
                             )
-                            let s = await this.curl({
+                            let s = await this.algo.curl({
                                     'url': `https://api.m.jd.com/client.action?functionId=firstWaterTaskForFarm&body={"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                                     // 'form':``,
                                     cookie
@@ -291,7 +296,7 @@ class Main extends Template {
                     case 'waterFriendTaskInit':
                         if (!dotask.f) {
                             if (dotask.waterFriendCountKey<dotask.waterFriendMax) {
-                                let f = await this.curl({
+                                let f = await this.algo.curl({
                                         'url': `https://api.m.jd.com/client.action?functionId=friendListInitForFarm&body={"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                                         // 'form':``,
                                         cookie
@@ -302,7 +307,7 @@ class Main extends Template {
                                     for (let ff of f.friends) {
                                         if (ff.friendState) {
                                             console.log(`正在给: ${ff.shareCode} 浇水`)
-                                            let s = await this.curl({
+                                            let s = await this.algo.curl({
                                                     'url': `https://api.m.jd.com/client.action?functionId=waterFriendForFarm&body={"shareCode":"${ff.shareCode}","version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                                                     // 'form':``,
                                                     cookie
@@ -319,7 +324,7 @@ class Main extends Template {
                                     console.log("请添加好友再来吧")
                                 }
                             }
-                            let ss = await this.curl({
+                            let ss = await this.algo.curl({
                                     'url': `https://api.m.jd.com/client.action?functionId=waterFriendGotAwardForFarm&body={"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                                     // 'form':``,
                                     cookie
@@ -332,7 +337,7 @@ class Main extends Template {
                         break
                     case 'gotThreeMealInit':
                         if (!dotask.f) {
-                            let s = await this.curl({
+                            let s = await this.algo.curl({
                                     'url': `https://api.m.jd.com/client.action?functionId=gotThreeMealForFarm&body={"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                                     // 'form':``,
                                     cookie
@@ -351,12 +356,12 @@ class Main extends Template {
                         break
                     case 'treasureBoxInit':
                         if (!dotask.f) {
-                            let s = await this.curl({
+                            let s = await this.algo.curl({
                                     'url': `https://api.m.jd.com/client.action?functionId=ddnc_getTreasureBoxAward&body={"babelChannel":"11","line":"","channel":3,"type":1,"version":14}&appid=wh5&client=apple&clientVersion=10.2.4`,
                                     cookie
                                 }
                             )
-                            await this.curl({
+                            await this.algo.curl({
                                     'url': `https://api.m.jd.com/client.action?functionId=ddnc_getTreasureBoxAward&body={"babelChannel":"11","line":"","channel":3,"type":2,"version":14}&appid=wh5&client=apple&clientVersion=10.2.4`,
                                     cookie
                                 }
@@ -367,7 +372,7 @@ class Main extends Template {
                         if (!dotask.f) {
                             if (dotask.totalWaterTaskTimes<dotask.totalWaterTaskLimit) {
                                 for (let kk = 0; kk<dotask.totalWaterTaskLimit - dotask.totalWaterTaskTimes; kk++) {
-                                    await this.curl({
+                                    await this.algo.curl({
                                             'url': `https://api.m.jd.com/client.action?functionId=waterGoodForFarm&body={"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                                             // 'form':``,
                                             cookie
@@ -375,7 +380,7 @@ class Main extends Template {
                                     )
                                 }
                             }
-                            let s = await this.curl({
+                            let s = await this.algo.curl({
                                     'url': `https://api.m.jd.com/client.action?functionId=totalWaterTaskForFarm&body={"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                                     // 'form':``,
                                     cookie
@@ -394,31 +399,31 @@ class Main extends Template {
                         break
                     case 'treasureBoxInit-getBean':
                         if (!dotask.f) {
-                            await this.curl({
+                            await this.algo.curl({
                                     'url': `https://api.m.jd.com/client.action?functionId=ddnc_getTreasureBoxAward&body={"babelChannel":"11","line":"getBean","channel":3,"type":1,"version":14}&appid=wh5&client=apple&clientVersion=10.2.4`,
                                     // 'form':``,
                                     cookie
                                 }
                             )
-                            // await this.curl({
+                            // await this.algo.curl({
                             //         'url': `https://api.m.jd.com/client.action?functionId=findBeanScene`,
                             //         'form': 'functionId=findBeanScene&body=%7B%22rnClient%22%3A%222%22%2C%22viewChannel%22%3A%22AppHome%22%2C%22source%22%3A%22AppHome%22%2C%22rnVersion%22%3A%224.7%22%7D&uuid=b39756aeea55b9cebae9f&client=apple&clientVersion=10.0.10&st=1638541231790&sv=100&sign=f7c5657c19354b17600ed5d59a6c0047',
                             //         cookie
                             //     }
                             // )
-                            // await this.curl({
+                            // await this.algo.curl({
                             //         'url': `https://api.m.jd.com/client.action?functionId=beanTaskList`,
                             //         'form': 'functionId=beanTaskList&body=%7B%22viewChannel%22%3A%22AppHome%22%7D&uuid=a2874756f39b780840&client=apple&clientVersion=10.0.10&st=1638541338389&sv=100&sign=f1aff99ef35e77739fef2967328475d1',
                             //         cookie
                             //     }
                             // )
-                            // await this.curl({
+                            // await this.algo.curl({
                             //         'url': `https://api.m.jd.com/client.action?functionId=farmMarkStatus&body={"version":14,"channel":1,"babelChannel":"98"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                             //         // 'form':``,
                             //         cookie
                             //     }
                             // )
-                            await this.curl({
+                            await this.algo.curl({
                                     'url': `https://api.m.jd.com/client.action?functionId=ddnc_getTreasureBoxAward&body={"babelChannel":"11","line":"getBean","channel":3,"type":2,"version":14}&appid=wh5&client=apple&clientVersion=10.2.4`,
                                     // 'form':``,
                                     cookie
@@ -434,7 +439,7 @@ class Main extends Template {
             }
         }
         for (let i = 0; i<10; i++) {
-            let s = await this.curl({
+            let s = await this.algo.curl({
                     'url': `https://api.m.jd.com/client.action?functionId=getFullCollectionReward&body={"type":2,"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                     // 'form':``,
                     cookie
@@ -461,7 +466,7 @@ class Main extends Template {
             if (code.finish) {
                 continue
             }
-            let s = await this.curl({
+            let s = await this.algo.curl({
                     'url': `https://api.m.jd.com/client.action?functionId=initForFarm&body={"mpin":"","utm_campaign":"t_335139774","utm_medium":"appshare","shareCode":"${code.shareCode}","utm_term":"Wxfriends","utm_source":"iosapp","imageUrl":"","nickName":"","version":14,"channel":2,"babelChannel":0}&appid=wh5&loginType=2&loginWQBiz=ddnc`,
                     'cookie': p.cookie
                 }
@@ -496,7 +501,7 @@ class Main extends Template {
             }
         }
         // 天天红包
-        let red = await this.curl({
+        let red = await this.algo.curl({
                 'url': `https://api.m.jd.com/client.action?functionId=initForTurntableFarm&body={"version":4,"channel":1}&appid=wh5`,
                 // 'form':``,
                 cookie
@@ -505,14 +510,14 @@ class Main extends Template {
         for (let i of red.turntableBrowserAds) {
             if (!i.status) {
                 console.log(`正在浏览:${i.main}`)
-                let bt = await this.curl({
+                let bt = await this.algo.curl({
                         'url': `https://api.m.jd.com/client.action?functionId=browserForTurntableFarm&body={"type":1,"adId":"${i.adId}","version":4,"channel":1}&appid=wh5`,
                         // 'form':``,
                         cookie
                     }
                 )
                 await this.wait(i.browserTimes * 1000)
-                let btt = await this.curl({
+                let btt = await this.algo.curl({
                         'url': `https://api.m.jd.com/client.action?functionId=browserForTurntableFarm&body={"type":2,"adId":"${i.adId}","version":4,"channel":1}&appid=wh5`,
                         // 'form':``,
                         cookie
@@ -528,27 +533,27 @@ class Main extends Template {
                 codd = codess[this.rand(0, 3)].shareCode
             }
             console.log("天天红包助力", codd)
-            let he = await this.curl({
+            let he = await this.algo.curl({
                     'url': `https://api.m.jd.com/client.action?functionId=initForFarm&body={"shareCode":"${codd}-3","lng":"0.000000","lat":"0.000000","sid":"2871ac0252645ef0e2731aa7d03c1d3w","un_area":"16_1341_1347_44750","version":14,"channel":1,"babelChannel":0}&appid=wh5`,
                     'cookie': p.cookie
                 }
             )
         }
         // 天天红包定时奖励
-        await this.curl({
+        await this.algo.curl({
                 'url': `https://api.m.jd.com/client.action?functionId=timingAwardForTurntableFarm&body={"version":4,"channel":1}&appid=wh5`,
                 // 'form':``,
                 cookie
             }
         )
-        let cj = await this.curl({
+        let cj = await this.algo.curl({
                 'url': `https://api.m.jd.com/client.action?functionId=initForTurntableFarm&body={"version":4,"channel":1}&appid=wh5`,
                 // 'form':``,
                 cookie
             }
         )
         for (let i = 0; i<cj.remainLotteryTimes; i++) {
-            let s = await this.curl({
+            let s = await this.algo.curl({
                     'url': `https://api.m.jd.com/client.action?functionId=lotteryForTurntableFarm&body={"type":1,"version":4,"channel":1}&appid=wh5`,
                     // 'form':``,
                     cookie
@@ -558,7 +563,7 @@ class Main extends Template {
             console.log("抽奖:", this.dumps(s))
         }
         for (let i of Array(4)) {
-            let exc = await this.curl({
+            let exc = await this.algo.curl({
                     'url': `https://api.m.jd.com/client.action?functionId=farmAssistInit&body={"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                     cookie
                 }
@@ -566,7 +571,7 @@ class Main extends Template {
             if (!exc.f) {
                 for (let i of exc.assistStageList || []) {
                     if (i.percentage == '100%') {
-                        let excc = await this.curl({
+                        let excc = await this.algo.curl({
                                 'url': `https://api.m.jd.com/client.action?functionId=receiveStageEnergy&body={"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                                 cookie
                             }
@@ -579,7 +584,7 @@ class Main extends Template {
                 }
             }
         }
-        init = await this.curl({
+        init = await this.algo.curl({
                 'url': 'https://api.m.jd.com/client.action?functionId=initForFarm',
                 'form': `body={"version":11,"channel":3}&client=apple&clientVersion=10.0.4&osVersion=13.7&appid=wh5&loginType=2&loginWQBiz=interact`,
                 cookie
@@ -589,7 +594,7 @@ class Main extends Template {
         let custom = this.getValue('custom')
         if (custom.includes('beanCard')) {
             for (let i = 0; i<Math.min(Math.floor(amount / 100), 3); i++) {
-                let d = await this.curl({
+                let d = await this.algo.curl({
                         'url': `https://api.m.jd.com/client.action?functionId=userMyCardForFarm&body={"cardType":"beanCard","type":"","version":14,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.4.0`,
                         cookie
                     }
@@ -606,7 +611,7 @@ class Main extends Template {
         for (let i = 0; i<(amount - 110) / 10; i++) {
             await this.wait(this.rand(3000, 4000))
             for (let j = 0; j<3; j++) {
-                var js = await this.curl({
+                var js = await this.algo.curl({
                         'url': `https://api.m.jd.com/client.action?functionId=waterGoodForFarm&body={"type":"","version":15,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                         // 'form':``,
                         cookie
