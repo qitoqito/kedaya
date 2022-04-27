@@ -38,7 +38,7 @@ class Main extends Template {
         let cookie = p.cookie
         let array = [111000, 100000, 11000, 10000, 1000, 500, 200, 100, 50]
         if (this.custom) {
-            array = this.getValue('custom').map(d => parseInt(d) * 1000)
+            array = this.getValue('custom').map(d => d * 1000)
         }
         for (let i of array) {
             if (this.dict[i]) {
