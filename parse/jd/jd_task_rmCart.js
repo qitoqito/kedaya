@@ -6,8 +6,12 @@ class Main extends Template {
         this.title = "京东删除购物车"
         // this.cron = "23 23 * * *"
         this.task = 'local'
-        this.readme = `请谨慎使用该脚本\n建议配合filename_work字段,删除指定账户\n如需删除指定个数商品,请使用filename_count字段`
+        this.readme = "购物车删除,慎用脚本"
         this.import = ['jdUrl']
+    }
+
+    async prepare() {
+        this.dict = this.getData('custom')
     }
 
     async main(p) {
@@ -24,34 +28,95 @@ class Main extends Template {
         )
         let skus = []
         let packs = []
+        let whiteList, blackList
+        if (this.dict.whiteList) {
+            whiteList = this.dict.whiteList.split(",").join('|')
+        }
+        else if (this.dict.blackList) {
+            blackList = this.dict.blackList.split(",").join('|')
+        }
         if (this.haskey(cart, 'resultData.cartInfo.vendors')) {
             for (let i of cart.resultData.cartInfo.vendors) {
                 for (let j of this.haskey(i, 'sorted')) {
                     if (this.haskey(j, 'item.items')) {
                         if (j.item.items.length>0) {
                             for (let k of j.item.items) {
-                                // if (k.item.stockState != "无货" && k.item.checkBoxText != "预售") {
-                                packs.push(
-                                    {
-                                        "num": k.item.Num.toString(),
-                                        "ybPackId": j.item.promotionId,
-                                        "sType": "11",
-                                        "TheSkus": [{"num": k.item.Num.toString(), "Id": k.item.Id.toString()}],
-                                        "Id": j.item.promotionId
+                                if (whiteList) {
+                                    if (!k.item.Name.match(whiteList)) {
+                                        packs.push(
+                                            {
+                                                "num": k.item.Num.toString(),
+                                                "ybPackId": j.item.promotionId,
+                                                "sType": "11",
+                                                "TheSkus": [{"num": k.item.Num.toString(), "Id": k.item.Id.toString()}],
+                                                "Id": j.item.promotionId
+                                            }
+                                        )
                                     }
-                                )
+                                }
+                                else if (blackList) {
+                                    if (k.item.Name.match(blackList)) {
+                                        packs.push(
+                                            {
+                                                "num": k.item.Num.toString(),
+                                                "ybPackId": j.item.promotionId,
+                                                "sType": "11",
+                                                "TheSkus": [{"num": k.item.Num.toString(), "Id": k.item.Id.toString()}],
+                                                "Id": j.item.promotionId
+                                            }
+                                        )
+                                    }
+                                }
+                                else {
+                                    packs.push(
+                                        {
+                                            "num": k.item.Num.toString(),
+                                            "ybPackId": j.item.promotionId,
+                                            "sType": "11",
+                                            "TheSkus": [{"num": k.item.Num.toString(), "Id": k.item.Id.toString()}],
+                                            "Id": j.item.promotionId
+                                        }
+                                    )
+                                }
+                                // if (k.item.stockState != "无货" && k.item.checkBoxText != "预售") {
                                 // }
                             }
                         }
                         else {
-                            skus.push(
-                                {
-                                    "num": j.item.Num.toString(),
-                                    "Id": j.item.Id.toString(),
-                                    "skuUuid": j.item.skuUuid,
-                                    "useUuid": j.item.useUuid
+                            if (whiteList) {
+                                if (!j.item.Name.match(whiteList)) {
+                                    skus.push(
+                                        {
+                                            "num": j.item.Num.toString(),
+                                            "Id": j.item.Id.toString(),
+                                            "skuUuid": j.item.skuUuid,
+                                            "useUuid": j.item.useUuid
+                                        }
+                                    )
                                 }
-                            )
+                            }
+                            else if (blackList) {
+                                if (j.item.Name.match(blackList)) {
+                                    skus.push(
+                                        {
+                                            "num": j.item.Num.toString(),
+                                            "Id": j.item.Id.toString(),
+                                            "skuUuid": j.item.skuUuid,
+                                            "useUuid": j.item.useUuid
+                                        }
+                                    )
+                                }
+                            }
+                            else {
+                                skus.push(
+                                    {
+                                        "num": j.item.Num.toString(),
+                                        "Id": j.item.Id.toString(),
+                                        "skuUuid": j.item.skuUuid,
+                                        "useUuid": j.item.useUuid
+                                    }
+                                )
+                            }
                         }
                     }
                 }
