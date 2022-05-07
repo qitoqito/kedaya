@@ -141,6 +141,79 @@ class Main extends Template {
             if (state.invite.length == 5) {
                 this.dict[p.user].complete = 1
             }
+            let skuList = this.column(task.products, 'jd_product_id') || []
+            if (skuList.length>0) {
+                skuList = skuList.map(d => d.toString())
+                let cart = await this.curl({
+                        'url': `https://api.m.jd.com/api?functionId=pcCart_jc_getCurrentCart&appid=JDC_mall_cart&body={}`,
+                        // 'form':``,
+                        cookie: p.cookie,
+                        headers: {
+                            "referer": "https://cart.jd.com/cart_index/",
+                            "user-agent": "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:98.0) Gecko/20100101 Firefox/98.0",
+                        }
+                    }
+                )
+                let skus = []
+                let packs = []
+                if (this.haskey(cart, 'resultData.cartInfo.vendors')) {
+                    for (let i of cart.resultData.cartInfo.vendors) {
+                        for (let j of this.haskey(i, 'sorted')) {
+                            if (this.haskey(j, 'item.items')) {
+                                if (j.item.items.length>0) {
+                                    for (let k of j.item.items) {
+                                        if (skuList.includes(k.item.Id)) {
+                                            packs.push(
+                                                {
+                                                    "num": k.item.Num.toString(),
+                                                    "ybPackId": j.item.promotionId,
+                                                    "sType": "11",
+                                                    "TheSkus": [{
+                                                        "num": k.item.Num.toString(),
+                                                        "Id": k.item.Id.toString()
+                                                    }],
+                                                    "Id": j.item.promotionId
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+                                else {
+                                    if (skuList.includes(j.item.Id)) {
+                                        skus.push(
+                                            {
+                                                "num": j.item.Num.toString(),
+                                                "Id": j.item.Id.toString(),
+                                                "skuUuid": j.item.skuUuid,
+                                                "useUuid": j.item.useUuid
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                console.log('即将删除购物车数目:', skus.length + packs.length)
+                if (skus.length>0 || packs.length>0) {
+                    let cartRemove = await this.curl({
+                            'url': `https://api.m.jd.com/api`,
+                            'form': `functionId=pcCart_jc_cartRemove&appid=JDC_mall_cart&body=${this.dumps({
+                                "operations": [{
+                                    "carttype": "4",
+                                    "TheSkus": skus,
+                                    "ThePacks": packs
+                                }], "serInfo": {}
+                            })}`,
+                            cookie: p.cookie,
+                            headers: {
+                                "referer": "https://cart.jd.com/cart_index/",
+                                "user-agent": "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:98.0) Gecko/20100101 Firefox/98.0",
+                            }
+                        }
+                    )
+                }
+            }
         }
         else if (this.turnCount == 1) {
             let authorization = this.dict[p.user].authorization
