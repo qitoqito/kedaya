@@ -293,6 +293,22 @@ class Main extends Template {
                             }
                             break
                         }
+                        else {
+                            html = await this.curl({
+                                    'url': `https://${host}/microDz/invite/activity/wx/view/index/${i.activityId}?activityId=${i.activityId}`,
+                                }
+                            )
+                            if (html.includes("组队") || this.dict.activityType == '66666') {
+                                await this.microDz({
+                                    activityId: i.activityId,
+                                    pageUrl: `https://${host}/microDz/invite/activity/wx/view/index/${i.activityId}?activityId=${i.activityId}`,
+                                    title: "微定制",
+                                    type: 'microDz',
+                                    host,
+                                })
+                                break
+                            }
+                        }
                     }
                 }
             }
@@ -449,6 +465,9 @@ class Main extends Template {
             else {
                 console.log(signUp)
                 console.log(signUp.errorMessage || signUp.msg || "什么也没有")
+                if (this.haskey(signUp, 'msg', '该活动已经结束')) {
+                    this.finish.push(p.number)
+                }
             }
         }
         else if (['sevenDay'].includes(type)) {
