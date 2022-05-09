@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东母亲节活动"
-        this.cron = "33 2,21 * * *"
+        // this.cron = "33 2,21 * * *"
         this.task = 'local'
         this.header = {
             'App-Key': 'JVy4efS8',
