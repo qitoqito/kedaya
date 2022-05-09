@@ -73,6 +73,7 @@ class Main extends Template {
                                     else {
                                         console.log(`任务领奖失败`)
                                     }
+                                    await this.wait(2000)
                                 }
                             }
                             else if (j.type == 'shareTask') {
@@ -97,6 +98,7 @@ class Main extends Template {
                                     else {
                                         console.log(`任务领奖失败`)
                                     }
+                                    await this.wait(2000)
                                 }
                             }
                         }
