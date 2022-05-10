@@ -19,41 +19,28 @@ class Main extends Template {
         })
         console.log(s.data)
         let pin = this.userPin(cookie)
-        let nickName = ''
-        let phone = ''
         let custom = this.getValue('custom')
-        let keys = [...custom, ...['nickName', 'phone', 'msgWhite', 'msgBlack', 'send', 'wskey', 'verify']]
+        let keys = [...custom, ...['id', 'msgWhite', 'msgBlack', 'send', 'wskey', 'verify', 'nickName', 'phone']]
         let query = this.expand ? this.query(this['expand'], '\\|', 1) : {}
         let dict = {}
         for (let i of keys) {
-            if (this.haskey(this.userDict, `${pin}.${i}`)) {
+            if (this.haskey(this.userDict, `${pin}.${i}`) && this.userDict[pin][i]) {
                 dict[i] = this.haskey(this.userDict, `${pin}.${i}`)
             }
             else {
                 dict[i] = ''
             }
         }
-        if (query.verify) {
-            dict.verify = query.verify
-        }
-        // if (this.userDict[pin] && this.userDict[pin].nickName) {
-        //     nickName = this.userDict[pin].nickName
-        // }
-        // if (this.userDict[pin] && this.userDict[pin].phone) {
-        //     phone = this.userDict[pin].phone
-        // }
         try {
             this.dict[s.data.data.pin] = {
+                ...dict,
                 ...{
                     pin: s.data.data.pin,
                     userName: s.data.data.userName || s.data.data.pin,
-                    nickName,
-                    phone: s.data.data.intactMobile,
-                    score: s.data.data.score,
                     index: p.index.toString(),
-                    // display: (parseInt(p.index) + 1).toString(),
+                    phone: s.data.data.mobile,
+                    score: s.data.data.score,
                 },
-                ...dict
             }
         } catch {
             let pin = this.userPin(cookie)
@@ -61,10 +48,9 @@ class Main extends Template {
                 ...{
                     pin,
                     userName: pin,
-                    nickName,
                     index: p.index.toString(),
                     // display: (parseInt(p.index) + 1).toString(),
-                    phone
+                    // phone
                 },
                 ...dict
             }
