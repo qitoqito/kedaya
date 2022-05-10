@@ -254,7 +254,7 @@ class Main extends Template {
         if (gifts.length>0) {
             let sum = this.sum(gifts)
             console.log(`共获得京豆:`, sum)
-            this.notice(`获得京豆: ${sum}`, p.user)
+            this.notices(`获得京豆: ${sum}`, p.user)
         }
     }
 }
