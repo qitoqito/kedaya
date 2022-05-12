@@ -157,7 +157,7 @@ class Main extends Template {
     async tewuz(p) {
         let cookie = p.cookie;
         let list = await this.curl({
-                'url': `https://api.m.jd.com/?uuid=&client=wh5&appid=ProductZ4Brand&functionId=superBrandTaskList&t=1649852207375&body={"source":"star_gift","activityId":1010001}`,
+                'url': `https://api.m.jd.com/?uuid=&client=wh5&appid=ProductZ4Brand&functionId=superBrandTaskList&t=1649852207375&body={"source":"star_gift","activityId":${p.inviter.activityId}}`,
                 cookie
             }
         )
