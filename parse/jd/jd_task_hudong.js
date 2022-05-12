@@ -14,7 +14,7 @@ class Main extends Template {
     async prepare() {
         this.code = [
             "https://prodev.m.jd.com/mall/active/31GFSKyRbD3ehsHih2rQKArxfb8c/index.html",
-            "https://prodev.m.jd.com/mall/active/2T8MxyGmn4CQtGJ1asZybjMvakmR/index.html"
+            // "https://prodev.m.jd.com/mall/active/2T8MxyGmn4CQtGJ1asZybjMvakmR/index.html"
         ]
         let custom = this.getValue('custom')
         if (custom.length) {
@@ -165,6 +165,10 @@ class Main extends Template {
         let gifts = []
         let encryptProjectId = p.inviter.encryptProjectId
         let appid = p.inviter.appid
+        if (this.haskey(list, 'data.bizMsg', '风控')) {
+            console.log(p.user, '风控')
+            return
+        }
         for (let i of this.haskey(list, 'data.result.taskList')) {
             if (i.completionFlag) {
                 console.log(`任务已经完成: ${i.assignmentName}`)
