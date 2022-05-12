@@ -25,7 +25,7 @@ class Main extends Template {
         await this.getEarn(p)
         await this.getCoin(p)
         await this.getEgg(p)
-        await this.getCattle(p)
+        // await this.getCattle(p)
         await this.getPet(p)
         await this.getFarm(p)
         let t = []
@@ -223,6 +223,86 @@ class Main extends Template {
     }
 
     async getRedpacket(p) {
+        let s = await this.curl({
+                'url': `https://api.m.jd.com/client.action?functionId=myhongbao_getUsableHongBaoList`,
+                'form': 'functionId=myhongbao_getUsableHongBaoList&body=%7B%22fp%22%3A%22-1%22%2C%22appToken%22%3A%22apphongbao_token%22%2C%22childActivityUrl%22%3A%22-1%22%2C%22country%22%3A%22cn%22%2C%22openId%22%3A%22-1%22%2C%22childActivityId%22%3A%22-1%22%2C%22applicantErp%22%3A%22-1%22%2C%22platformId%22%3A%22appHongBao%22%2C%22isRvc%22%3A%22-1%22%2C%22orgType%22%3A%222%22%2C%22activityType%22%3A%221%22%2C%22shshshfpb%22%3A%22-1%22%2C%22platformToken%22%3A%22apphongbao_token%22%2C%22organization%22%3A%22JD%22%2C%22pageClickKey%22%3A%22-1%22%2C%22platform%22%3A%221%22%2C%22eid%22%3A%22-1%22%2C%22appId%22%3A%22appHongBao%22%2C%22childActiveName%22%3A%22-1%22%2C%22shshshfp%22%3A%22-1%22%2C%22jda%22%3A%22-1%22%2C%22extend%22%3A%22-1%22%2C%22shshshfpa%22%3A%22-1%22%2C%22activityArea%22%3A%22-1%22%2C%22childActivityTime%22%3A%22-1%22%7D&uuid=487f7b22f68312d2c1bbc93b1aea44&client=apple&clientVersion=10.0.10&st=1652335589917&sv=111&sign=e47eb0c72c2a8107c714daf91cb89a65',
+                cookie: p.cookie
+            }
+        )
+        let end = Math.round(new Date(new Date().setHours(23, 59, 59)).getTime() / 1000) + 1
+        let r = {
+            current: [],
+            app: [],
+            lite: [],
+            pingou: [],
+            healthy: [],
+        }
+        let dict = {
+            current: [0],
+            currentExpire: [0],
+            app: [0],
+            pingou: [0],
+            lite: [0],
+            healthy: [0],
+            appExpire: [0],
+            pingouExpire: [0],
+            liteExpire: [0],
+            healthyExpire: [0],
+            all: [0],
+            expire: [0],
+        }
+        try {
+            for (let i of this.haskey(s, 'hongBaoList')) {
+                dict.all.push(i.balance)
+                let expire = end>i.endTime / 1000
+                let orgLimitStr = i.orgLimitStr
+                if (orgLimitStr.includes("商城")) {
+                    dict.app.push(i.balance)
+                    if (expire) {
+                        dict.appExpire.push(i.balance)
+                        dict.expire.push(i.balance)
+                    }
+                }
+                else if (orgLimitStr.includes("京喜")) {
+                    dict.pingou.push(i.balance)
+                    if (expire) {
+                        dict.pingouExpire.push(i.balance)
+                        dict.expire.push(i.balance)
+                    }
+                }
+                else if (orgLimitStr.includes("健康")) {
+                    dict.healthy.push(i.balance)
+                    if (expire) {
+                        dict.healthyExpire.push(i.balance)
+                        dict.expire.push(i.balance)
+                    }
+                }
+                else if (orgLimitStr.includes("极速")) {
+                    dict.lite.push(i.balance)
+                    if (expire) {
+                        dict.liteExpire.push(i.balance)
+                        dict.expire.push(i.balance)
+                    }
+                }
+                else {
+                    dict.current.push(i.balance)
+                    if (expire) {
+                        dict.currentExpire.push(i.balance)
+                        dict.expire.push(i.balance)
+                    }
+                }
+            }
+        } catch (e) {
+        }
+        for (let i in r) {
+            r[i] = [this.sum(dict[i], 2), this.sum(dict[`${i}Expire`], 2)].map(d => d == '0.00' ? 0 : d)
+        }
+        r.all = this.sum(dict.all, 2)
+        r.expire = this.sum(dict.expire, 2)
+        this.dict[p.user].redpacket = r
+    }
+
+    async getRedpacket2(p) {
         let end = Math.round(new Date(new Date().setHours(23, 59, 59)).getTime() / 1000) + 1
         let s = await this.curl({
                 'url': `https://m.jingxi.com/user/info/QueryUserRedEnvelopesV2?type=1&orgFlag=JD_PinGou_New&page=1&cashRedType=1&redBalanceFlag=1&channel=1&_=1640866930803&sceneval=2&g_login_type=1&callback=jsonpCBKA&g_ty=ls`,
@@ -234,49 +314,50 @@ class Main extends Template {
         try {
             r.all = this.haskey(s, 'data.balance')
             r.expire = this.haskey(s, 'data.expiredBalance')
-            let current = [], app = [], pingou = [], lite = [], healthy = [], currentExcept = [], appExcept = [],
-                pingouExcept = [], liteExcept = [], healthyExcept = []
+            let current = [], app = [], pingou = [], lite = [], healthy = [], currentExpire = [], appExpire = [],
+                pingouExpire = [], liteExpire = [], healthyExpire = []
             for (let i of this.haskey(s, 'data.useRedInfo.redList') || []) {
                 // console.log(i)
                 if (i.limitStr.includes('京喜')) {
                     pingou.push(i.balance)
                     if (end>i.endTime) {
-                        pingouExcept.push(i.balance)
+                        pingouExpire.push(i.balance)
                     }
                 }
                 else if (i.limitStr.includes('商城')) {
                     app.push(i.balance)
                     if (end>i.endTime) {
-                        appExcept.push(i.balance)
+                        appExpire.push(i.balance)
                     }
                 }
                 else if (i.limitStr.includes('极速')) {
                     lite.push(i.balance)
                     if (end>i.endTime) {
-                        liteExcept.push(i.balance)
+                        liteExpire.push(i.balance)
                     }
                 }
                 else if (i.limitStr.includes('健康')) {
                     healthy.push(i.balance)
                     if (end>i.endTime) {
-                        healthyExcept.push(i.balance)
+                        healthyExpire.push(i.balance)
                     }
                 }
                 else {
                     current.push(i.balance)
                     if (end>i.endTime) {
-                        currentExcept.push(i.balance)
+                        currentExpire.push(i.balance)
                     }
                 }
             }
-            r.current = [current.length ? this.sum(current).toFixed(2) : 0, currentExcept.length ? this.sum(currentExcept).toFixed(2) : 0]
-            r.app = [app.length ? this.sum(app).toFixed(2) : 0, appExcept.length ? this.sum(appExcept).toFixed(2) : 0]
-            r.lite = [lite.length ? this.sum(lite).toFixed(2) : 0, liteExcept.length ? this.sum(liteExcept).toFixed(2) : 0]
-            r.pingou = [pingou.length ? this.sum(pingou).toFixed(2) : 0, pingouExcept.length ? this.sum(pingouExcept).toFixed(2) : 0]
-            r.healthy = [healthy.length ? this.sum(healthy).toFixed(2) : 0, healthyExcept.length ? this.sum(healthyExcept).toFixed(2) : 0]
+            r.current = [current.length ? this.sum(current).toFixed(2) : 0, currentExpire.length ? this.sum(currentExpire).toFixed(2) : 0]
+            r.app = [app.length ? this.sum(app).toFixed(2) : 0, appExpire.length ? this.sum(appExpire).toFixed(2) : 0]
+            r.lite = [lite.length ? this.sum(lite).toFixed(2) : 0, liteExpire.length ? this.sum(liteExpire).toFixed(2) : 0]
+            r.pingou = [pingou.length ? this.sum(pingou).toFixed(2) : 0, pingouExpire.length ? this.sum(pingouExpire).toFixed(2) : 0]
+            r.healthy = [healthy.length ? this.sum(healthy).toFixed(2) : 0, healthyExpire.length ? this.sum(healthyExpire).toFixed(2) : 0]
         } catch (e) {
             console.log(e)
         }
+        console.log(r)
         this.dict[p.user].redpacket = r
     }
 
