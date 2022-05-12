@@ -695,22 +695,27 @@ class Main extends Template {
                 }
                 else {
                     cookie = `${getPin.cookie}`
-                    for (let k of skuList) {
-                        let addOne = await this.response({
-                                'url': `https://${host}/wxCollectionActivity/addCart`,
-                                'form': `activityId=${activityId}&pin=${secretPin}&productId=${k}`,
-                                cookie
+                    if (has>=need) {
+                        console.log(`加购已经完成`)
+                    }
+                    else {
+                        for (let k of skuList) {
+                            let addOne = await this.response({
+                                    'url': `https://${host}/wxCollectionActivity/addCart`,
+                                    'form': `activityId=${activityId}&pin=${secretPin}&productId=${k}`,
+                                    cookie
+                                }
+                            )
+                            console.log(`加购: ${k}`)
+                            if (this.haskey(addOne, 'content.data.hasAddCartSize') == need) {
+                                break
                             }
-                        )
-                        console.log(`加购: ${k}`)
-                        if (this.haskey(addOne, 'content.data.hasAddCartSize') == need) {
-                            break
+                            if (this.haskey(addOne, 'content.errorMessage').includes('异常')) {
+                                console.log(addOne.content.errorMessage)
+                                break
+                            }
+                            var cookie = `${addOne.cookie};AUTH_C_USER=${secretPin};`
                         }
-                        if (this.haskey(addOne, 'content.errorMessage').includes('异常')) {
-                            console.log(addOne.content.errorMessage)
-                            break
-                        }
-                        var cookie = `${addOne.cookie};AUTH_C_USER=${secretPin};`
                     }
                 }
                 if (skuList.length) {
@@ -719,12 +724,17 @@ class Main extends Template {
                 }
                 while (true) {
                     for (let nn = 0; nn<3; nn++) {
-                        var getPrize = await this.curl({
-                                'url': `https://${host}/wxCollectionActivity/getPrize`,
-                                form: `activityId=${activityId}&pin=${secretPin}`,
-                                cookie
+                        for (let xx of Array(3)) {
+                            var getPrize = await this.curl({
+                                    'url': `https://${host}/wxCollectionActivity/getPrize`,
+                                    form: `activityId=${activityId}&pin=${secretPin}`,
+                                    cookie
+                                }
+                            )
+                            if (typeof getPrize == 'object') {
+                                break
                             }
-                        )
+                        }
                         if (this.haskey(getPrize, 'errorMessage') && (getPrize.errorMessage.includes("擦肩") || getPrize.errorMessage.includes("未达到领奖条件"))) {
                             console.log('奖品与您擦肩而过了哟,重新获取')
                             await this.wait(1000)
@@ -747,12 +757,17 @@ class Main extends Template {
             }
             else if (['drawCenter'].includes(type)) {
                 while (true) {
-                    let getPrize = await this.curl({
-                            'url': `https://${host}/drawCenter/draw/luckyDraw`,
-                            form: `activityId=${activityId}&pin=${secretPin}`,
-                            cookie: getPin.cookie
+                    for (let xx of Array(3)) {
+                        var getPrize = await this.curl({
+                                'url': `https://${host}/drawCenter/draw/luckyDraw`,
+                                form: `activityId=${activityId}&pin=${secretPin}`,
+                                cookie: getPin.cookie
+                            }
+                        )
+                        if (typeof getPrize == 'object') {
+                            break
                         }
-                    )
+                    }
                     // console.log(getPrize)
                     if (this.haskey(getPrize, 'data.drawOk')) {
                         console.log(`获得: ${getPrize.data.name}`)
@@ -768,13 +783,18 @@ class Main extends Template {
             }
             else if (['wxDrawActivity', 'wxPointDrawActivity'].includes(type)) {
                 while (true) {
-                    let draw = await this.curl({
-                            'url': `https://${host}/${type}/start`,
-                            'form': `pin=${secretPin}&activityId=${activityId}`,
-                            cookie: `${getPin.cookie}`,
-                            referer: `https://${host}/`
+                    for (let xx of Array(3)) {
+                        var draw = await this.curl({
+                                'url': `https://${host}/${type}/start`,
+                                'form': `pin=${secretPin}&activityId=${activityId}`,
+                                cookie: `${getPin.cookie}`,
+                                referer: `https://${host}/`
+                            }
+                        )
+                        if (typeof draw == 'object') {
+                            break
                         }
-                    )
+                    }
                     // console.log(draw)
                     if (this.haskey(draw, 'data.drawOk')) {
                         this.notices(draw.data.drawInfo.name, p.user)
@@ -801,12 +821,17 @@ class Main extends Template {
                 //         cookie: ad.cookie
                 //     }
                 // )
-                let draw = await this.curl({
-                        'url': `https://${host}/wxShopGift/draw`,
-                        'form': `activityId=${activityId}&buyerPin=${secretPin}&hasFollow=false&accessType=app`,
-                        cookie: ad.cookie
+                for (let xx of Array(3)) {
+                    var draw = await this.curl({
+                            'url': `https://${host}/wxShopGift/draw`,
+                            'form': `activityId=${activityId}&buyerPin=${secretPin}&hasFollow=false&accessType=app`,
+                            cookie: ad.cookie
+                        }
+                    )
+                    if (typeof draw == 'object') {
+                        break
                     }
-                )
+                }
                 // console.log(draw)
                 if (draw.result) {
                     console.log(this.haskey(activityContent.content, 'data.list') || activityContent.content)
@@ -828,13 +853,18 @@ class Main extends Template {
             }
             else if (['wxShopFollowActivity'].includes(type)) {
                 while (true) {
-                    let getPrize = await this.curl({
-                            'url': `https://${host}/${type}/getPrize`,
-                            form: `activityId=${activityId}&pin=${secretPin}`,
-                            cookie: getPin.cookie,
-                            referer: p.inviter.pageUrl
+                    for (let xx of Array(3)) {
+                        var getPrize = await this.curl({
+                                'url': `https://${host}/${type}/getPrize`,
+                                form: `activityId=${activityId}&pin=${secretPin}`,
+                                cookie: getPin.cookie,
+                                referer: p.inviter.pageUrl
+                            }
+                        )
+                        if (typeof getPrize == 'object') {
+                            break
                         }
-                    )
+                    }
                     if (this.haskey(getPrize, 'data.drawOk')) {
                         console.log(`获得: ${getPrize.data.name}`)
                         this.notices(getPrize.data.name, p.user)
@@ -849,12 +879,17 @@ class Main extends Template {
             }
             else if (['wxGameActivity'].includes(type)) {
                 while (true) {
-                    let getPrize = await this.curl({
-                            'url': `https://${host}/${type}/gameOverRecord`,
-                            form: `activityId=${activityId}&pin=${secretPin}&score=${this.rand(1000, 100000)}`,
-                            cookie: getPin.cookie
+                    for (let xx of Array(3)) {
+                        var getPrize = await this.curl({
+                                'url': `https://${host}/${type}/gameOverRecord`,
+                                form: `activityId=${activityId}&pin=${secretPin}&score=${this.rand(1000, 100000)}`,
+                                cookie: getPin.cookie
+                            }
+                        )
+                        if (typeof getPrize == 'object') {
+                            break
                         }
-                    )
+                    }
                     // console.log(getPrize)
                     if (this.haskey(getPrize, 'data.drawOk')) {
                         console.log(`获得: ${getPrize.data.name}`)
@@ -884,12 +919,17 @@ class Main extends Template {
                     if (this.haskey(c, 'content.data.currentFloors')) {
                         console.log(`盖楼楼层: ${c.content.data.currentFloors}`)
                     }
-                    let getPrize = await this.curl({
-                            'url': `https://${host}/wxBuildActivity/publish`,
-                            'form': `pin=${secretPin}&activityId=${activityId}&content=${encodeURIComponent(content)}`,
-                            cookie: c.cookie
+                    for (let xx of Array(3)) {
+                        var getPrize = await this.curl({
+                                'url': `https://${host}/wxBuildActivity/publish`,
+                                'form': `pin=${secretPin}&activityId=${activityId}&content=${encodeURIComponent(content)}`,
+                                cookie: c.cookie
+                            }
+                        )
+                        if (typeof getPrize == 'object') {
+                            break
                         }
-                    )
+                    }
                     if (this.haskey(getPrize, 'data.drawResult.drawOk')) {
                         console.log(`获得: ${getPrize.data.drawResult.name}`)
                         this.notices(getPrize.data.drawResult.name, p.user)
