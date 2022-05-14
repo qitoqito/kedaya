@@ -5,6 +5,7 @@ class Bot extends Template {
         super()
         this.type = 'bot'
         this.import = ['fs', 'node-telegram-bot-api']
+        this.params = {}
     }
 
     async telegram() {
@@ -28,7 +29,6 @@ class Bot extends Template {
             }
             this.dict.map = change
         }
-
         this.TelegramBot = this.modules['node-telegram-bot-api']
         let request = {}
         if (this.BOT_PROXY) {
