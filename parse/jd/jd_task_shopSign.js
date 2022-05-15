@@ -13,11 +13,7 @@ class Main extends Template {
     }
 
     async prepare() {
-        let array = [
-            '0FA06CDDB52AE05A98F572BC102C051F',
-            '97C1CE5FD22CC02A52DD6583B3E29F46',
-            // '7D7881FDDBBAAFB999F6A794E2036A56'
-        ]
+        let array = []
         if (this.custom) {
             array = this.getValue('custom')
         }
@@ -25,6 +21,8 @@ class Main extends Template {
             let expand = this.getValue('expand')
             array = [...expand, ...array]
         }
+        let expire = ["可能失效Token"]
+        let valid = ['有效Token']
         for (let i of this.unique(array)) {
             if (i.length == 32) {
                 let url = `https://api.m.jd.com/api?appid=interCenter_shopSign&t=${this.timestamp}&loginType=2&functionId=interact_center_shopSign_getActivityInfo&body={"token":"${i}","venderId":""}`
@@ -44,10 +42,14 @@ class Main extends Template {
                         info.shopName = shopInfo.result.shopInfo.shopName
                     }
                     this.shareCode.push(info)
-                } catch
-                    (e) {
+                    valid.push(i)
+                } catch (e) {
+                    expire.push(i)
                 }
             }
+        }
+        if (expire.length>1) {
+            this.notices([...expire, ...valid].join("\n"), "message")
         }
     }
 
@@ -67,26 +69,36 @@ class Main extends Template {
                 }
             }
         }
-        let signIn = await this.curl({
-                'url': `https://api.m.jd.com/api?appid=interCenter_shopSign&loginType=2&functionId=interact_center_shopSign_signCollectGift&body={"token":"${p.inviter.token}","venderId":${p.inviter.venderId},"activityId":${p.inviter.activityId},"type":56,"actionType":7}`,
-                cookie
-            }
-        )
-        signIn.success ? console.log(p.user, `签到成功`) : console.log(p.user, signIn.msg || `签到失败或者已经签到`)
+        let maxDay = this.sum(this.column(p.inviter.continuePrizeRuleList, 'days'))
         let s = await this.curl({
                 'url': `https://api.m.jd.com/api?appid=interCenter_shopSign&loginType=2&functionId=interact_center_shopSign_getSignRecord&body={"token":"${p.inviter.token}","venderId":${p.inviter.venderId},"activityId":${p.inviter.activityId},"type":56,"actionType":7}&jsonp=jsonp1004`,
-                // 'form':``,
                 cookie
             }
         )
         let days = this.haskey(s, 'data.days')
-        for (let day of Object.keys(dayDict)) {
-            if (days<=day) {
-                console.log(p.user, `店铺: ${p.inviter.shopName} Token: ${p.inviter.token},${dayDict[day]}, 已经签到: ${days}天`)
-                if (signIn.success) {
-                    this.dict[p.user].push(`Token: ${p.inviter.token}, ${dayDict[day]}, 已经签到: ${days}天`)
+        if (days>=maxDay) {
+            console.log(`签到已满${maxDay}天,跳出签到`, p.inviter.token, `https://shop.m.jd.com/?venderId=${p.inviter.venderId}`)
+        }
+        else {
+            let signIn = await this.curl({
+                    'url': `https://api.m.jd.com/api?appid=interCenter_shopSign&loginType=2&functionId=interact_center_shopSign_signCollectGift&body={"token":"${p.inviter.token}","venderId":${p.inviter.venderId},"activityId":${p.inviter.activityId},"type":56,"actionType":7}`,
+                    cookie
                 }
-                break
+            )
+            if (!signIn.success && this.haskey(signIn, 'msg').includes('未登录')) {
+                console.log(signIn.msg)
+                this.complete.push(p.index)
+                return
+            }
+            signIn.success ? console.log(p.user, `签到成功`) : console.log(p.user, signIn.msg || `签到失败或者已经签到`)
+            for (let day of Object.keys(dayDict)) {
+                if (days<=day) {
+                    console.log(p.user, `店铺: ${p.inviter.shopName} Token: ${p.inviter.token},${dayDict[day]}, 已经签到: ${days + 1}天`)
+                    if (signIn.success) {
+                        this.dict[p.user].push(`Token: ${p.inviter.token}, ${dayDict[day]}, 已经签到: ${days + 1}天`)
+                    }
+                    break
+                }
             }
         }
     }
@@ -94,7 +106,7 @@ class Main extends Template {
     async extra() {
         for (let i in this.dict) {
             if (this.dict[i].length) {
-                this.notices(this.dict[i].join("\n"))
+                this.notices(this.dict[i].join("\n"), 'message')
                 break
             }
         }
