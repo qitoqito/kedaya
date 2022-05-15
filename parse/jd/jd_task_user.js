@@ -55,6 +55,11 @@ class Main extends Template {
                 ...dict
             }
         }
+        this.dict['message'] = {
+            "userName": "message",
+            "nickName": "框架通知",
+            "index": "999998",
+        }
     }
 
     async extra() {
