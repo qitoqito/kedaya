@@ -23,6 +23,12 @@ class Main extends Template {
         }
         let expire = ["可能失效Token"]
         let valid = ['有效Token']
+        this.plan = {
+            expire: [],
+            valid: [],
+            except: [],
+            remain: []
+        }
         for (let i of this.unique(array)) {
             if (i.length == 32) {
                 let url = `https://api.m.jd.com/api?appid=interCenter_shopSign&t=${this.timestamp}&loginType=2&functionId=interact_center_shopSign_getActivityInfo&body={"token":"${i}","venderId":""}`
@@ -42,14 +48,11 @@ class Main extends Template {
                         info.shopName = shopInfo.result.shopInfo.shopName
                     }
                     this.shareCode.push(info)
-                    valid.push(i)
+                    this.plan.valid.push(i)
                 } catch (e) {
-                    expire.push(i)
+                    this.plan.expire.push(i)
                 }
             }
-        }
-        if (expire.length>1) {
-            this.notices([...expire, ...valid].join("\n"), "message")
         }
     }
 
@@ -78,6 +81,7 @@ class Main extends Template {
         let days = this.haskey(s, 'data.days')
         if (days>=maxDay) {
             console.log(`签到已满${maxDay}天,跳出签到`, p.inviter.token, `https://shop.m.jd.com/?venderId=${p.inviter.venderId}`)
+            this.plan.except.push(p.inviter.token)
         }
         else {
             let signIn = await this.curl({
@@ -104,6 +108,25 @@ class Main extends Template {
     }
 
     async extra() {
+        if (this.plan.expire.length) {
+            console.log([...['可能过期Token'], ...this.plan.expire, ...['']].join('\n'))
+            this.notices([...['可能过期Token'], ...this.plan.expire, ...['']].join('\n'), 'message')
+        }
+        if (this.plan.valid.length) {
+            console.log([...['有效Token'], ...this.plan.valid, ...['']].join('\n'))
+            this.notices([...['有效Token'], ...this.plan.valid, ...['']].join('\n'), 'message')
+        }
+        if (this.plan.except.length) {
+            console.log([...['满签Token'], ...this.plan.except, ...['']].join('\n'))
+            this.notices([...['满签Token'], ...this.plan.except, ...['']].join('\n'), 'message')
+            if (this.plan.valid.length) {
+                let c = this.plan.valid.concat(this.plan.except).filter(v => !this.plan.valid.includes(v) || !this.plan.except.includes(v))
+                if (c.length>0) {
+                    console.log([...['剩余Token'], ...c].join('\n'))
+                    this.notices([...['剩余Token'], ...c].join('\n'), 'message')
+                }
+            }
+        }
         for (let i in this.dict) {
             if (this.dict[i].length) {
                 this.notices(this.dict[i].join("\n"), 'message')
