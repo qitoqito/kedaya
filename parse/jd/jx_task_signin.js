@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京喜签到领红包"
-        this.cron = "22 3,22 * * *"
+        this.cron = "10 0,22 * * *"
         this.task = 'local'
         this.import = ['jdAlgo']
         this.overtime = 9
