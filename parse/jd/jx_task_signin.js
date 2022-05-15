@@ -4,13 +4,48 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京喜签到领红包"
-        this.cron = "22 3,21 * * *"
+        this.cron = "22 3,22 * * *"
         this.task = 'local'
         this.import = ['jdAlgo']
+        this.overtime = 9
+        this.model = "shuffle"
+        this.turn = 2
     }
 
     async prepare() {
         this.algo = new this.modules.jdAlgo({'appId': 10038, 'type': 'pingou'})
+        let smp = ''
+        for (let i of this.cookies['help']) {
+            let signhb = await this.algo.curl({
+                url: `https://m.jingxi.com/fanxiantask/signhb/query?signhb_source=5&smp=${smp}&type=0&_stk=signhb_source%2Csmp%2Ctype&_ste=1&g_ty=ls&g_tk=181187500&sceneval=2&g_login_type=1`,
+                cookie: i
+            })
+            if (signhb.smp) {
+                smp = signhb.smp
+                let report = await this.algo.curl({
+                        'url': `https://m.jingxi.com/activetmp/helpdraw/sharereport?call=reportshare&active=copy_qiandaolinghongbao1&hj=jx_app&sharetype=2&shareid=${smp}&idowner=&idctime=1652027061747&reportrefer=https%3A%2F%2Fwq.jd.com%2Fcube%2Ffront%2FactivePublish%2Fqdlhb%2F520923.html&activityid=&gpin=&gp_adr_id=&_=1652027061751&sceneval=2&g_login_type=1&callback=jsonpCBKF&g_ty=ls&appCode=msd1188198`,
+                        // 'form':``,
+                        cookie: i
+                    }
+                )
+                this.shareCode.push({'smp': smp})
+            }
+        }
+    }
+
+    async assist(p) {
+        let cookie = p.cookie
+        let s = await this.algo.curl({
+            url: `https://wq.jd.com/fanxiantask/signhb/query?signhb_source=5&smp=${p.inviter.smp}&type=0&_stk=signhb_source%2Csmp%2Ctype&_ste=2`,
+            cookie
+        })
+        console.log(p.user, s.todaysign);
+        await this.wait(1000)
+        let ss = await this.algo.curl({
+            url: `https://wq.jd.com/fanxiantask/signhb/query?signhb_source=5&smp=${p.inviter.smp}&type=1&_stk=signhb_source%2Csmp%2Ctype&_ste=2`,
+            cookie
+        })
+        console.log(p.user, ss.todaysign);
     }
 
     async main(p) {
@@ -18,10 +53,10 @@ class Main extends Template {
         for (let kk of ['hb', 'xd']) {
             switch (kk) {
                 case 'xd':
-                    var queryUrl = `https://m.jingxi.com/fanxiantask/signhb/query_jxpp?type=1&signhb_source=5&smp=&ispp=1&tk=&encrypt=&_stk=encrypt%2Cispp%2Csignhb_source%2Csmp%2Ctk%2Ctype&_ste=1`
+                    var queryUrl = `https://m.jingxi.com/fanxiantask/signhb/query_jxpp?type=1&signhb_source=5&smp=bd67efc3be1c59bcab4f8b90e3a0f708&ispp=1&tk=&encrypt=&_stk=encrypt%2Cispp%2Csignhb_source%2Csmp%2Ctk%2Ctype&_ste=1`
                     break
                 default:
-                    var queryUrl = `https://m.jingxi.com/fanxiantask/signhb/query?type=1&signhb_source=5&smp=&ispp=0&tk=&_stk=ispp%2Csignhb_source%2Csmp%2Ctk%2Ctype&_ste=1`
+                    var queryUrl = `https://m.jingxi.com/fanxiantask/signhb/query?type=1&signhb_source=5&smp=bd67efc3be1c59bcab4f8b90e3a0f708&ispp=0&tk=&_stk=ispp%2Csignhb_source%2Csmp%2Ctk%2Ctype&_ste=1`
                     break
             }
             let s = await this.algo.curl({
@@ -100,7 +135,23 @@ class Main extends Template {
                 }
             }
         }
+        if (new Date().getDay() == 5) {
+            await this.wait(3000)
+            let draw = await this.curl({
+                    'url': `https://jxa.jd.com/wq.jd.com/fanxiantask/signhb/fridaydraw?g_ty=mp&g_tk=621647716&appCode=msc9ed9e31&sceneval=2&g_login_type=1&site=2`,
+                    // 'form':``,
+                    cookie
+                }
+            )
+            if (this.haskey(draw, 'prize.0.discount')) {
+                console.log(`获得京喜红包: ${draw.prize[0].discount}`)
+                this.notices(`获得京喜红包: ${draw.prize[0].discount}`, p.user)
+            }
+            else {
+            }
+        }
     }
 }
 
-module.exports = Main;
+module
+    .exports = Main;
