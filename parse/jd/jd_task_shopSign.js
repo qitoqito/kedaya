@@ -21,8 +21,6 @@ class Main extends Template {
             let expand = this.getValue('expand')
             array = [...expand, ...array]
         }
-        let expire = ["可能失效Token"]
-        let valid = ['有效Token']
         this.plan = {
             expire: [],
             valid: [],
@@ -117,8 +115,8 @@ class Main extends Template {
             this.notices([...['有效Token'], ...this.plan.valid, ...['']].join('\n'), 'message')
         }
         if (this.plan.except.length) {
-            console.log([...['满签Token'], ...this.plan.except, ...['']].join('\n'))
-            this.notices([...['满签Token'], ...this.plan.except, ...['']].join('\n'), 'message')
+            console.log(this.unique([...['满签Token'], ...this.plan.except, ...['']]).join('\n'))
+            this.notices(this.unique([...['满签Token'], ...this.plan.except, ...['']]).join('\n'), 'message')
             if (this.plan.valid.length) {
                 let c = this.plan.valid.concat(this.plan.except).filter(v => !this.plan.valid.includes(v) || !this.plan.except.includes(v))
                 if (c.length>0) {
