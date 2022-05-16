@@ -29,11 +29,11 @@ class Main extends Template {
         let skus = []
         let packs = []
         let whiteList, blackList
-        if (this.dict.whiteList) {
-            whiteList = this.dict.whiteList.split(",").join('|')
+        if (this.profile.whiteList || this.dict.whiteList) {
+            whiteList = (this.profile.whiteList || this.dict.whiteList).split(",").join('|')
         }
-        else if (this.dict.blackList) {
-            blackList = this.dict.blackList.split(",").join('|')
+        else if (this.profile.blackList || this.dict.blackList) {
+            blackList = (this.profile.blackList || this.dict.blackList).blackList.split(",").join('|')
         }
         if (this.haskey(cart, 'resultData.cartInfo.vendors')) {
             for (let i of cart.resultData.cartInfo.vendors) {
