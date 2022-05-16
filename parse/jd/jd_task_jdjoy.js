@@ -236,7 +236,7 @@ class Main extends Template {
                                 'url': `https://jdjoy.jd.com/module/task/v2/getReward`,
                                 'body': {
                                     "groupType": i.groupType || 5,
-                                    "configCode": this.inviter.activityId,
+                                    "configCode": p.inviter.activityId,
                                     "itemId": this.haskey(i, 'data.item.itemId') || 1,
                                     "eid": eid,
                                     "fp": fp
@@ -290,7 +290,7 @@ class Main extends Template {
                             'url': `https://jdjoy.jd.com/module/task/v2/getReward`,
                             'body': {
                                 "groupType": 5,
-                                "configCode": this.inviter.activityId,
+                                "configCode": p.inviter.activityId,
                                 "itemId": 1,
                                 "eid": eid,
                                 "fp": fp
