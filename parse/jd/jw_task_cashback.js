@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东小程序下单领现金"
-        // this.cron = "12 0,13 * * *"
+        this.cron = "12 0,13 * * *"
         this.task = 'local'
         // this.import = ['jdLog', 'jsRisk']
     }
@@ -1247,7 +1247,7 @@ class Main extends Template {
                 }
             }
         }
-        if (gifts.length>1) {
+        if (gifts.length>0) {
             this.notices(gifts.join("\n"), p.user)
         }
     }
