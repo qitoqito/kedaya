@@ -4,40 +4,61 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东头文字J"
-        this.cron = "36 6,21 * * *"
+        this.cron = "36 0,9,21 * * *"
         this.help = 'main'
         this.task = 'local'
+        this.import = ['fs']
+    }
+
+    async prepare() {
+        try {
+            let txt = this.modules.fs.readFileSync(`${this.dirname}/invite/jd_task_carplay.json`).toString()
+            this.inviteDict = this.loads(txt)
+        } catch (e) {
+            console.log(e)
+        }
+        this.inviteDict = {}
     }
 
     async main(p) {
         let cookie = p.cookie
-        let timeout = 5000
+        let timeout = 500
         try {
-            let isvObfuscator = await this.curl({
-                url: 'https://api.m.jd.com/client.action',
-                form: 'functionId=isvObfuscator&body=%7B%22id%22%3A%22%22%2C%22url%22%3A%22https%3A%2F%2Fddsj-dz.isvjcloud.com%22%7D&uuid=5162ca82aed35fc52e8&client=apple&clientVersion=10.0.10&st=1631884203742&sv=112&sign=fd40dc1c65d20881d92afe96c4aec3d0',
-                cookie: p.cookie
-            })
-            for (let i of Array(3)) {
-                var getFansInfo = await this.curl({
-                        'url': `https://mpdz-car-dz.isvjcloud.com/ql/front/getFansInfo`,
-                        'body': {
-                            "data": isvObfuscator.token,
-                            "source": "01",
-                            "actId": "1760007"
-                        }, timeout,
-                        referer: 'https://mpdz-car-dz.isvjcloud.com'
+            let data = this.dict[p.user] || {}
+            if (data.buyerNick) {
+                var buyerNick = data.buyerNick
+            }
+            else {
+                let isvObfuscator = await this.curl({
+                    url: 'https://api.m.jd.com/client.action',
+                    form: 'functionId=isvObfuscator&body=%7B%22id%22%3A%22%22%2C%22url%22%3A%22https%3A%2F%2Fddsj-dz.isvjcloud.com%22%7D&uuid=5162ca82aed35fc52e8&client=apple&clientVersion=10.0.10&st=1631884203742&sv=112&sign=fd40dc1c65d20881d92afe96c4aec3d0',
+                    cookie: p.cookie
+                })
+                for (let i of Array(3)) {
+                    var getFansInfo = await this.curl({
+                            'url': `https://mpdz-car-dz.isvjcloud.com/ql/front/getFansInfo`,
+                            'body': {
+                                "data": isvObfuscator.token,
+                                "source": "01",
+                                "actId": "1760007"
+                            }, timeout,
+                            referer: 'https://mpdz-car-dz.isvjcloud.com'
+                        }
+                    )
+                    if (this.haskey(getFansInfo, 'msg')) {
+                        break
                     }
-                )
-                if (this.haskey(getFansInfo, 'msg')) {
-                    break
+                }
+                // console.log(getFansInfo)
+                this.assert(this.haskey(getFansInfo, 'msg'), "没有获取到用户信息")
+                var buyerNick = getFansInfo.msg
+                this.dict[p.user] = {
+                    buyerNick
                 }
             }
-            this.assert(this.haskey(getFansInfo, 'msg'), "没有获取到用户信息")
-            let buyerNick = getFansInfo.msg
+            let actId = 1760007
             console.log(buyerNick)
-            this.dict[this.userPin(cookie)] = buyerNick
-            let actId = this.haskey(getFansInfo, 'data.actId') || 1760007
+            this.inviteDict[this.userPin(cookie)] = buyerNick
             let signin = await this.curl({
                     'url': `https://mpdz-car-dz.isvjcloud.com/ql/front/signGetEnergy`,
                     'body': {
@@ -74,7 +95,7 @@ class Main extends Template {
                         }
                     )
                     if (!d) {
-                        await this.wait(5000)
+                        await this.wait(500)
                         continue
                     }
                     console.log(i, d.msg || d.errorMsg)
@@ -84,7 +105,7 @@ class Main extends Template {
                     if (!this.haskey(d, 'succ')) {
                         break
                     }
-                    await this.wait(5000)
+                    await this.wait(500)
                 }
             }
             for (let n = 0; n<3 - (this.haskey(t, `data.favouriteShop`) || 0); n++) {
@@ -110,7 +131,7 @@ class Main extends Template {
                         }
                     )
                     if (!follow) {
-                        await this.wait(5000)
+                        await this.wait(500)
                         continue
                     }
                     if (!this.haskey(follow, 'succ')) {
@@ -120,7 +141,7 @@ class Main extends Template {
                     if (follow.msg == '今日已完成该任务') {
                         break
                     }
-                    await this.wait(5000)
+                    await this.wait(500)
                 }
                 else {
                     console.log('follow', this.haskey(loadShopGroup, 'errorMsg'))
@@ -139,7 +160,7 @@ class Main extends Template {
                     }
                 )
                 if (!loadItemGroup) {
-                    await this.wait(5000)
+                    await this.wait(500)
                     continue
                 }
                 if (loadItemGroup.succ) {
@@ -158,7 +179,7 @@ class Main extends Template {
                         break
                     }
                     console.log('add', add.msg)
-                    await this.wait(5000)
+                    await this.wait(500)
                 }
                 else {
                     console.log('add', loadItemGroup.errorMsg)
@@ -186,6 +207,7 @@ class Main extends Template {
             )
             if ((this.haskey(times, 'data.times') || 0)>0) {
                 for (let n of Array(times.data.times)) {
+                    await this.wait(500)
                     let start = await this.curl({
                             'url': `https://mpdz-car-dz.isvjcloud.com/ql/front/carPlayTimesReduce`,
                             body: {
@@ -196,27 +218,26 @@ class Main extends Template {
                         }
                     )
                     if (!start) {
-                        await this.wait(5000)
+                        await this.wait(500)
                         continue
                     }
                     if (this.haskey(start, 'succ')) {
-                        await this.wait(5000)
+                        await this.wait(5500)
                         let game = await this.curl({
                                 'url': `https://mpdz-car-dz.isvjcloud.com/ql/front/carPlayUpdate`,
                                 body: {
                                     actId,
                                     buyerNick,
                                     "behavior": "run",
-                                    "energyValue": this.rand(200000, 500000)
+                                    "energyValue": this.rand(200000, 50000)
                                 }, timeout,
                                 referer: 'https://mpdz-car-dz.isvjcloud.com'
                             }
                         )
-                        console.log('game', this.haskey(game, 'msg') || this.haskey(game, 'errorMsg'))
+                        console.log('game', this.haskey(game, 'data') || this.haskey(game, 'errorMsg'))
                         if (!this.haskey(game, 'succ')) {
                             break
                         }
-                        await this.wait(5000)
                     }
                     else {
                         break
@@ -234,6 +255,7 @@ class Main extends Template {
             )
             if (this.haskey(f, 'data.energyValue')) {
                 console.log(`当前积分: ${f.data.energyValue}`)
+                this.dict[p.user].energyValue = f.data.energyValue
                 this.notices(`当前积分: ${f.data.energyValue}`, p.user)
             }
             //
@@ -244,22 +266,26 @@ class Main extends Template {
     }
 
     async extra() {
-        if (this.dumps(this.dict) != '{}') {
+        await this.modules.fs.writeFile(`${this.dirname}/invite/jd_task_carplay.json`, this.dumps(this.dict), (error) => {
+            if (error) return console.log("写入化失败" + error.message);
+            console.log("carplay写入成功");
+        })
+        if (this.dumps(this.inviteDict) != '{}') {
             let help = {}
             for (let cookie of this.cookies['help']) {
                 let pin = this.userPin(cookie)
-                if (this.dict[pin]) {
-                    help[this.dict[pin]] = pin
+                if (this.inviteDict[pin]) {
+                    help[this.inviteDict[pin]] = pin
                 }
             }
             let s = Object.keys(help)
-            let n = 1
+            let n = this.rand(1, 23)
             let count = s.length
-            for (let i in this.dict) {
+            for (let i in this.inviteDict) {
                 try {
                     let inviter = s[n % count]
                     n++
-                    if (inviter == this.dict[i]) {
+                    if (inviter == this.inviteDict[i]) {
                         inviter = s[n % count]
                         n++
                     }
@@ -276,7 +302,7 @@ class Main extends Template {
                             'url': `https://mpdz-car-dz.isvjcloud.com/ql/front/participantBehavior`,
                             body: {
                                 "actId": "1760007",
-                                "buyerNick": this.dict[i],
+                                "buyerNick": this.inviteDict[i],
                                 "inviterNick": inviter,
                                 "behavior": "inviteHelp"
                             }
@@ -290,5 +316,4 @@ class Main extends Template {
     }
 }
 
-module
-    .exports = Main;
+module.exports = Main;
