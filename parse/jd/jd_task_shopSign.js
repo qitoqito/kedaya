@@ -95,9 +95,9 @@ class Main extends Template {
             signIn.success ? console.log(p.user, `签到成功`) : console.log(p.user, signIn.msg || `签到失败或者已经签到`)
             for (let day of Object.keys(dayDict)) {
                 if (days<=day) {
-                    console.log(p.user, `店铺: ${p.inviter.shopName} Token: ${p.inviter.token},${dayDict[day]}, 已经签到: ${days + 1}天`)
+                    console.log(p.user, `店铺: ${p.inviter.shopName} Token: ${p.inviter.token},${dayDict[day]}, 已经签到: ${signIn.success ? days + 1 : days}天`)
                     if (signIn.success) {
-                        this.dict[p.user].push(`Token: ${p.inviter.token}, ${dayDict[day]}, 已经签到: ${days + 1}天`)
+                        this.dict[p.user].push(`Token: ${p.inviter.token}, ${dayDict[day]}, 已经签到: ${signIn.success ? days + 1 : days}天`)
                     }
                     break
                 }
