@@ -1237,11 +1237,11 @@ class Main extends Template {
         let gifts = []
         if (this.haskey(s, 'data.rewardInfo')) {
             for (let i of s.data.rewardInfo) {
-                if (i.type = 3) {
+                if (i.type == 3) {
                     console.log(`京东红包: ${i.discount}`)
                     gifts.push(`京东红包: ${i.discount}`)
                 }
-                else if (i.type = 1) {
+                else if (i.type == 1) {
                     console.log(`微信红包: ${i.discount}`)
                     gifts.push(`微信红包: ${i.discount}`)
                 }
