@@ -114,7 +114,7 @@ class Main extends Template {
             }
             for (let pin of p.inviter.pin) {
                 var b = await this.curl({
-                        'url': `https://jdjoy.jd.com/module/freshgoods/getActivityPage?code=${id}&friendPin=${encodeURIComponent(pin)}`,
+                        'url': `https://jdjoy.jd.com/module/freshgoods/getActivityPage?code=${id}&friendPin=${escape(encodeURIComponent(pin))}`,
                         // 'form':``,
                         cookie
                     }
