@@ -122,7 +122,9 @@ class Main extends Template {
             }
         )
         if (this.haskey(userInfo, 'data.skuList')) {
-            let gifts = [...['积分换购'], ...this.column(userInfo.data.skuList, 'name')]
+            let coin = `当前购物金: ${this.haskey(userInfo, 'data.userProperty.shoppingGold')}`
+       
+            let gifts = [...[coin, '积分换购'], ...this.column(userInfo.data.skuList, 'name')]
             console.log(gifts.join("\n"))
             this.notices(gifts.join("\n"), p.user)
         }
