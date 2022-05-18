@@ -112,7 +112,7 @@ class Main extends Template {
                     await this.wait(1000)
                 }
             }
-            for (let pin of this.inviter.pin) {
+            for (let pin of p.inviter.pin) {
                 var b = await this.curl({
                         'url': `https://jdjoy.jd.com/module/freshgoods/getActivityPage?code=${id}&friendPin=${encodeURIComponent(pin)}`,
                         // 'form':``,
