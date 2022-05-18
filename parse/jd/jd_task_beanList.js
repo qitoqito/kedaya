@@ -6,6 +6,7 @@ class Main extends Template {
         this.title = "京东当天京豆汇总"
         this.cron = "22 22 * * *"
         this.task = 'local'
+        this.work = 2
     }
 
     async prepare() {
@@ -33,7 +34,14 @@ class Main extends Template {
             }
         }
         let z = [], f = []
-        let dict = xs.sort(function(a, b) {
+        let d = {}
+        for (let i of xs) {
+            d[i.eventMassage] = d[i.eventMassage] || {
+                eventMassage: i.eventMassage, amount: 0
+            }
+            d[i.eventMassage].amount += parseInt(i.amount)
+        }
+        let dict = Object.values(d).sort(function(a, b) {
             return b.amount - a.amount
         })
         let echo = [`🐹  今日总共收入: ${this.sum(this.column(dict, 'amount').filter(d => d>0)) || 0}  支出: ${this.sum(this.column(dict, 'amount').filter(d => d<0)) || 0}`]
@@ -46,7 +54,7 @@ class Main extends Template {
             }
         }
         console.log(echo.join("\n"))
-        this.notices(echo.join("\n"), p.user, 8)
+        this.notices(echo.join("\n"), p.user, 5)
     }
 }
 
