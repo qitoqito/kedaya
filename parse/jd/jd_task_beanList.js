@@ -3,7 +3,7 @@ const Template = require('../../template');
 class Main extends Template {
     constructor() {
         super()
-        this.title = "京东当天京东汇总"
+        this.title = "京东当天京豆汇总"
         // this.cron = "12 0,13 * * *"
         this.task = 'local'
     }
