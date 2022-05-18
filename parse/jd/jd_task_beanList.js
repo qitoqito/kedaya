@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东当天京豆汇总"
-        // this.cron = "12 0,13 * * *"
+        this.cron = "22 22 * * *"
         this.task = 'local'
     }
 
@@ -36,7 +36,7 @@ class Main extends Template {
         let dict = xs.sort(function(a, b) {
             return b.amount - a.amount
         })
-        let echo = [`🐹  今日总共收入: ${this.sum(this.column(dict, 'amount').filter(d => d>0))}  支出: ${this.sum(this.column(dict, 'amount').filter(d => d<0))}`]
+        let echo = [`🐹  今日总共收入: ${this.sum(this.column(dict, 'amount').filter(d => d>0)) || 0}  支出: ${this.sum(this.column(dict, 'amount').filter(d => d<0)) || 0}`]
         for (let i of dict) {
             if (parseInt(i.amount)<0) {
                 echo.push(`🐶  ${i.eventMassage}   支出     ${i.amount}`)
