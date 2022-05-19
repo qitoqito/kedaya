@@ -6,7 +6,6 @@ class Main extends Template {
         this.title = "京东当天京豆汇总"
         this.cron = "22 22 * * *"
         this.task = 'local'
-        this.work = 2
     }
 
     async prepare() {
