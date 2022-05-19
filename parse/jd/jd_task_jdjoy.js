@@ -122,13 +122,14 @@ class Main extends Template {
             }
             if (this.haskey(b, 'data.remainPoints')) {
                 let g = []
-                for (let i = 0; i<Math.floor(b.data.remainPoints / 100); i++) {
+                for (let i = 0; i<Math.floor(b.data.remainPoints / (this.haskey(b, 'data.lotteryThreshold') || 100)); i++) {
                     let c = await this.curl({
                             'url': `https://jdjoy.jd.com/module/freshgoods/draw?code=${id}&eid=${eid}&fp=${fp}`,
                             // 'form':``,
                             cookie
                         }
                     )
+                    console.log(c)
                     if (this.haskey(c, 'data.rewardName')) {
                         console.log(p.user, '抽中:', c.data.rewardName)
                         g.push(c.data.rewardName)
