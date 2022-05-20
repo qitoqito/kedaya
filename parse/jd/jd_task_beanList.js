@@ -5,7 +5,7 @@ class Main extends Template {
         super()
         this.title = "京东当天京豆汇总"
         this.cron = "22 22 * * *"
-        this.task = 'local'
+        this.task = 'local' 
     }
 
     async prepare() {
@@ -36,7 +36,8 @@ class Main extends Template {
         let d = {}
         for (let i of xs) {
             d[i.eventMassage] = d[i.eventMassage] || {
-                eventMassage: i.eventMassage, amount: 0
+                eventMassage: i.eventMassage.replace(/参加|店铺活动|-奖励|\[|\]/g,''),
+                amount: 0
             }
             d[i.eventMassage].amount += parseInt(i.amount)
         }
@@ -46,10 +47,10 @@ class Main extends Template {
         let echo = [`🐹  今日总共收入: ${this.sum(this.column(dict, 'amount').filter(d => d>0)) || 0}  支出: ${this.sum(this.column(dict, 'amount').filter(d => d<0)) || 0}`]
         for (let i of dict) {
             if (parseInt(i.amount)<0) {
-                echo.push(`🐶  ${i.eventMassage}   支出     ${i.amount}`)
+                echo.push(`🐶  ${i.eventMassage} : ${i.amount}`)
             }
             else {
-                echo.push(`🦁  ${i.eventMassage}   收入     ${i.amount}`)
+                echo.push(`🦁  ${i.eventMassage} : ${i.amount}`)
             }
         }
         console.log(echo.join("\n"))
