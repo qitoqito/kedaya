@@ -79,10 +79,10 @@ class Main extends Template {
         )
         if (!this.dumps(this.code).includes(init.farmUserPro.shareCode)) {
             this.code.push({
-                shareCode: init.farmUserPro.shareCode
+                shareCode: init.farmUserPro.shareCode, user: p.user
             })
         }
-        this.dict[this.userPin(cookie)] = {shareCode: init.farmUserPro.shareCode}
+        this.dict[this.userPin(cookie)] = {shareCode: init.farmUserPro.shareCode, user: p.user}
         if (!fi.newFriendMsg) {
             let fcode = this.column([...this.code], 'shareCode')
             for (let i of this.random(fcode, 3)) {
@@ -711,7 +711,9 @@ class Main extends Template {
     async extra() {
         let custom = this.getValue('custom')
         if (this.profile.cache) {
-            console.log("已经设置缓存JSON,跳过写入")
+            console.log("已经设置缓存:/invite/jd_task_farm.json,跳过写入")
+            console.log(`现有助力码:`)
+            console.log(this.dumps(Object.values(this.dict)))
         }
         else {
             console.log("农场有检测,号多容易黑ip,建议缓存JSON文件")
