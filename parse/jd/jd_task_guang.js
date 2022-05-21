@@ -3,7 +3,7 @@ const Template = require('../../template');
 class Main extends Template {
     constructor() {
         super()
-        this.title = "京东逛系列合集"
+        this.title = "京东逛系列整合"
         this.cron = "24 0,15 * * *"
         this.task = 'local'
         this.verify = 1
@@ -11,7 +11,7 @@ class Main extends Template {
     }
 
     async prepare() {
-        let custom = this.custom
+        let custom = this.custom 
         if (custom) {
             for (let i of custom.split('|')) {
                 this.shareCode.push({
@@ -74,6 +74,7 @@ class Main extends Template {
             }
         }
         if (gifts.length) {
+            console.log(`获得奖励列表:`)
             for (let i of gifts) {
                 this.print(`${i.rewardName} : ${i.quantity}`, p.user)
             }
