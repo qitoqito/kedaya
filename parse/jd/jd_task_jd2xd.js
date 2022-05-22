@@ -3,7 +3,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东7天内过期京豆兑换成喜豆"
-        this.cron = "12 23 */2 * *"
+        // this.cron = "12 23 */2 * *"
         this.task = 'local'
     }
     async prepare() {}
