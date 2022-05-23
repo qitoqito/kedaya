@@ -4,15 +4,15 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东集魔方赢大奖"
-        // this.cron = "22 0,22 * * *"
+        this.cron = "22 0,22 * * *"
         this.task = 'local'
-        this.thread = 3
+        // this.thread = 3
         this.verify = 1
     }
 
     async prepare() {
         this.code = [
-            `https://prodev.m.jd.com/mall/active/2fmVhvgmpWrmjC4rFmoU2ZfKgDKf/index.html`
+            `https://prodev.m.jd.com/mall/active/3kkecpnpY5do572TYS66bCy5uSWR/index.html`
         ]
         let custom = this.getValue('custom')
         let expand = this.getValue('expand')
@@ -44,7 +44,11 @@ class Main extends Template {
                     let pageId = this.match(/"pageId"\s*:\s*"(\d+)"/, h)
                     let activityId = this.match(/"activityId"\s*:\s*"(\d+)"/, h)
                     let modules = this.matchAll(/module_(\d+)/g, h)
+                    let asyncId = this.matchAll(/"async","(\d+)"/g, h)
                     if (modules) {
+                        if (asyncId.length) {
+                            modules = this.unique([...modules, ...asyncId])
+                        }
                         let aa = await this.curl({
                                 'url': `https://api.m.jd.com/client.action?functionId=queryPanamaFloor`,
                                 'form': `screen=1170*2259&version=1.0.0&client=wh5&appid=babelh5&body={"activityId":"${activityId}","pageId":"${pageId}","floorList":[${modules.map(d => `{"alias":"${d}"}`).join(",")}],"imgDomain":"m11.360buyimg.com","siteClientVersion":"10.5.0"}&ext=%7B%22prstate%22%3A%220%22%7D`,
@@ -66,7 +70,6 @@ class Main extends Template {
                         let data = this.dumps(s)
                         let advertId = this.unique(this.matchAll(/(\d+)/g, this.matchAll(/"comments"\s*:\s*\[([^\]]+)\]/g, data).join(",")))
                         let skuId = this.unique(this.matchAll(/"skuId"\s*:\s*"(\d+)"/g, data))
-                        advertId = [...advertId, ...skuId]
                         this.shareCode.push({
                             pageId, activityId, advertId, skuId
                         })
@@ -87,22 +90,28 @@ class Main extends Template {
         )
         let interactionId = l.result.interactionId
         let taskPoolId = l.result.taskPoolInfo.taskPoolId
+        let n = Math.max(p.inviter.advertId.length, p.inviter.skuId.length)
         for (let i of l.result.taskPoolInfo.taskList) {
             if (!i.taskStatus) {
-                for (let j of Array(i.toastTime + 5)) {
-                    let sku = this.random(p.inviter.skuId, 1)
-                    let advertId = this.random(p.inviter.advertId, 1)
+                for (let j = 0; j<n; j++) {
+                    let sku = p.inviter.skuId[j] ? [p.inviter.skuId[j]] : this.random(p.inviter.skuId, 1)
+                    let advertId = p.inviter.advertId[j] ? [p.inviter.advertId[j]] : this.random(p.inviter.advertId, 1)
                     let s = await this.curl({
                             'url': `https://api.m.jd.com/client.action?uuid=&client=wh5&clientVersion=10.3.0&osVersion=15.1.1&networkType=wifi&&appid=content_ecology&functionId=executeNewInteractionTask&t=1640607957804&body={"geo":{"lng":"","lat":""},"mcChannel":0,"sign":3,"interactionId":${interactionId},"taskPoolId":${taskPoolId},"taskType":${i.taskId},"sku":"${sku}","advertId":"${advertId}"}`,
                             cookie
                         }
                     )
+                    if (this.dumps(s).includes('还未登录')) {
+                        console.log("还未登录")
+                        return
+                    }
                     if (this.haskey(s, 'result.lotteryInfoList')) {
                         let gift = this.column(s.result.lotteryInfoList, 'quantity', 'name')
                         if (this.dumps(gift) != '{}') {
                             this.notices(`${this.dumps(gift)}`, p.user)
                             console.log(p.user, `获得奖励: ${this.dumps(gift)}`)
                         }
+                        break
                     }
                     else {
                         console.log(p.user, `浏览: ${i.taskName} 但什么也没有`)
