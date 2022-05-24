@@ -50,7 +50,7 @@ class Main extends Template {
         if (this.haskey(s, 'data.status', 4)) {
             this.finish.push(p.number)
         }
-        if (this.haskey(s, 'data', '未登录')) {
+        if (this.haskey(s, 'msg', '未登录')) {
             console.log("未登录")
             this.complete.push(p.index)
             return
@@ -80,7 +80,7 @@ class Main extends Template {
                             "apiMapping": "/api/index/vote"
                         }, cookie
                     })
-                    if (this.haskey(s, 'data', '未登录')) {
+                    if (this.haskey(s, 'msg', '未登录')) {
                         console.log("未登录")
                         return
                     }
