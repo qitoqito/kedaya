@@ -9,15 +9,16 @@ class Main extends Template {
         this.task = 'local'
         this.import = ['jdAlgo']
         this.turn = 2
-        this.model = 'user'
+        // this.model = 'user'
         this.thread = 3
+        this.verify = 1
     }
 
     async prepare() {
         this.algo = new this.modules.jdAlgo({
             appId: "f093b",
             type: 'app',
-            fp: "7063407705917609",
+            fp: "7759920154937645",
         })
         let indexInfo = await this.tasking({
                 body: {"apiMapping": "/api/index/indexInfo"},
@@ -30,7 +31,7 @@ class Main extends Template {
                 let share = await this.tasking({
                     body: {"type": i, "apiMapping": "/api/supportTask/getShareId"}, cookie
                 })
-                if (this.haskey(share, 'data')) {
+                if (this.haskey(share, 'data') && this.haskey(share, 'code', 200)) {
                     this.shareCode.push({shareId: share.data, type: i, user})
                 }
             }
@@ -46,7 +47,7 @@ class Main extends Template {
                 "apiMapping": "/api/supportTask/doSupport"
             }, cookie
         })
-        console.log(p.inviter.user, this.haskey(s, 'data.status'))
+        console.log(p.inviter.user, this.haskey(s, 'msg'))
         if (this.haskey(s, 'data.status', 4)) {
             this.finish.push(p.number)
         }
