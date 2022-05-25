@@ -7,21 +7,34 @@ class Main extends Template {
         this.cron = "2 0,22 * * *"
         this.task = 'local'
         this.import = ['jdUrl']
-        this.readme = `正确填写环境变量 filename_expand=id1|id2`
+        this.readme = `正确填写环境变量 filename_expand=id1|id2或者filename_custom=id1|id2\nexpand是追加id,优先读取custom`
     }
 
     async prepare() {
+        let code = []
         if (this.custom) {
-            this.code = this.getValue('custom')
+            code = this.getValue('custom')
         }
         else if (this.expand) {
-            this.code = [...this.getValue('expand'), ...this.code]
+            code = [...this.getValue('expand'), ...code]
         }
-        if (this.code.length<1) {
+        if (code.length<1) {
             console.log("请先填写左侧店铺签到ID")
             this.jump = 1
         }
+        for (let i of code) {
+            if (isNaN(i)) {
+                let n = this.match(/vendorId%22%3A%22(\d+)/, i)
+                if (n) {
+                    this.code.push(n)
+                }
+            }
+            else {
+                this.code.push(i)
+            }
+        }
         this.code = this.unique(this.code)
+        console.log(`当前ID:`, this.code.join("|"))
     }
 
     async main(p) {
