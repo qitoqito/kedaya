@@ -138,7 +138,7 @@ class Main extends Template {
                                     pp[i] = params[i]
                                 }
                             }
-                            await kedaya.init(params)
+                            await kedaya.init(pp)
                         } catch (e) {
                         }
                     } catch (e) {
