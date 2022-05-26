@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东电器巨超值"
-        this.cron = "1 20 * * *"
+        this.cron = "0 20 * * *"
         this.help = 'main'
         this.task = 'local'
         this.import = ['jdAlgo']
@@ -17,8 +17,8 @@ class Main extends Template {
     async prepare() {
         this.algo = new this.modules.jdAlgo({
             appId: "f093b",
-            type: 'app',
-            fp: "7759920154937645",
+            type: 'lite',
+            fp: "7063407705917609",
         })
         this.types = []
         // let indexInfo = await this.tasking({
@@ -74,16 +74,19 @@ class Main extends Template {
                     console.log("已经完成", i.type)
                 }
                 else {
+                    let n = 1
                     for (let j of this.haskey(i, 'skuList')) {
                         let s = await this.tasking({
                             body: {
                                 "type": i.type,
                                 "like": 1,
                                 "skuId": j.skuId,
-                                "index": 1,
+                                "index": n,
                                 "apiMapping": "/api/index/vote"
                             }, cookie
                         })
+                        console.log(s)
+                        n++
                         if (this.haskey(s, 'msg', '未登录')) {
                             console.log("未登录")
                             return
@@ -156,7 +159,7 @@ class Main extends Template {
         let s = await this.algo.curl({
                 'url': `https://api.m.jd.com/api`,
                 'form': `appid=reinforceints&functionId=strategy_vote_prod&body=${this.dumps(params.body)}&t=${this.timestamp}`,
-                cookie: params.cookie
+                cookie: params.cookie,
             }
         )
         return s
