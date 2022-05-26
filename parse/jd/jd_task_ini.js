@@ -269,6 +269,9 @@ class Main extends Template {
                             if (!dicts[i][k]) {
                                 content.push(`${k}=""`)
                             }
+                            else if (typeof dicts[i][k] == "boolean") {
+                                content.push(k)
+                            }
                             else {
                                 content.push(`${k}=${dicts[i][k]}`)
                             }
