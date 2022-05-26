@@ -75,7 +75,7 @@ class Main extends Template {
                 }
                 else {
                     let n = 1
-                    for (let j of this.haskey(i, 'skuList')) {
+                    for (let j of (this.haskey(i, 'skuList') || this.haskey(i, 'topList'))) {
                         let s = await this.tasking({
                             body: {
                                 "type": i.type,
@@ -87,9 +87,13 @@ class Main extends Template {
                         })
                         console.log(s)
                         n++
-                        if (this.haskey(s, 'msg', '未登录')) {
+                        let msg = this.haskey(s, 'msg')
+                        if (msg == '未登录') {
                             console.log("未登录")
                             return
+                        }
+                        else if (msg == '您已完成本赛道投票') {
+                            break
                         }
                         if (this.haskey(s, 'data') && !isNaN(s.data)) {
                             gifts += s.data
