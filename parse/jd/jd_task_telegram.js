@@ -94,7 +94,6 @@ class Main extends Template {
                         }
                     }
                 }
-                console.log(text)
                 if (this.match(new RegExp(`(^${custom})`), text) && !this.match(/task\s*\w+/, text)) {
                     let command = this.match(new RegExp(`(^${custom})`), text)
                     text = `task jd_task_${command} -custom ${reText || text.replace(command, '')}`
