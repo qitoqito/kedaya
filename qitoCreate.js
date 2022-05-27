@@ -28,7 +28,7 @@ QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的�
         } catch (e2) {
             try {
                 let rootPath = path.resolve(__dirname, '../..');
-                var file = `${rootPath}/dirs/jd.ini`
+                var file = `${rootPath}/config/jd.ini`
                 env = parseIni.parse(file)
             } catch (e3) {
             }
@@ -61,7 +61,15 @@ QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的�
     }
     let change = {}
     if (map) {
-        for (let k of map.replace(/\&/g, "\|").split("|")) {
+        if (typeof map=='object') {
+            for (let i in map){
+                change[i]={
+                    map:map[i],
+                    type:map[i].split("_")[0]
+                }
+            }
+        }else{
+            for (let k of map.replace(/\&/g, "\|").split("|")) {
             let a = k.split("=")
             for (let i of a[0].split(',')) {
                 change[i] = {
@@ -70,6 +78,8 @@ QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的�
                 }
             }
         }
+        }
+
         console.log(change)
     }
     let content = `
