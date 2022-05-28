@@ -1,4 +1,5 @@
 let fs = require("fs")
+const path = require("path")
 let dirname = process.mainModule.path
 let dir = fs.readdirSync(`${dirname}/parse`);
 let dicts = {}
@@ -116,7 +117,7 @@ for (let i in dicts) {
                 if (err) {
                     throw err;
                 }
-                console.log(`🐯‍❄️ 写入成功: ${filename}.js 写入目录成功`)
+                console.log(`🐯‍❄️ 写入成功: ${filename} 写入目录成功`)
             })
         }
     }
