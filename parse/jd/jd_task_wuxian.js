@@ -177,6 +177,7 @@ class Main extends Template {
                                 data.pageUrl = `https://${host}/sign/sevenDay/signActivity?activityId=${i.activityId}`
                                 break
                             case 400:
+                            case 66666:
                                 data.type = 'microDz'
                                 data.title = "微定制"
                                 data.pageUrl = `https://${host}/microDz/invite/activity/wx/view/index?activityId=${i.activityId}`
@@ -1519,6 +1520,13 @@ class Main extends Template {
                     )
                     if (this.haskey(ac, 'data.active.endTimeStr') && new Date(ac.data.active.endTimeStr.replace(/-/g, '/')).getTime()<new Date().getTime()) {
                         console.log("活动已经结束")
+                        this.shareCode = []
+                        return
+                    }
+                    else if (this.haskey(ac, 'data.active.startTimeStr') && new Date(ac.data.active.startTimeStr.replace(/-/g, '/')).getTime()>new Date().getTime()) {
+                        this.shareCode = []
+                        this.notices(`还未开始ID: ${p.inviter.activityId}\n活动时间: ${ac.data.active.startTimeStr}`, 'message')
+                        console.log("活动还未开始", ac.data.active.startTimeStr)
                         return
                     }
                     let aid = []
@@ -1845,18 +1853,15 @@ class Main extends Template {
         let venderId = p.inviter.venderId
         let shopId = p.inviter.shopId
         let sid = p.inviter.sid || ''
-        // if (venderId) {
-        //     let follow = await this.curl({
-        //         'url': 'https://api.m.jd.com/client.action?g_ty=ls&g_tk=518274330',
-        //         'form': `functionId=followShop&body={"follow":"true","shopId":"${shopId}","venderId":"${venderId}","award":"true","sourceRpc":"shop_app_home_follow"}&osVersion=13.7&appid=wh5&clientVersion=9.2.0&loginType=2&loginWQBiz=interact`,
-        //         cookie: p.cookie
-        //     })
-        // }
-        let isvObfuscator = await this.curl({
-            url: 'https://api.m.jd.com/client.action',
-            form: this.random(this.dict.ob, 1)[0],
-            cookie: p.cookie
-        })
+        // let isvObfuscator = await this.curl({
+        //     url: 'https://api.m.jd.com/client.action',
+        //     form: this.random(this.dict.ob, 1)[0],
+        //     cookie: p.cookie
+        // })
+        let isvObfuscator = await this.curl(this.modules.jdUrl.app('isvObfuscator', {
+            "url": `https://${host}`,
+            "id": ""
+        }, 'post', p.cookie))
         switch (host) {
             case "cjhy-isv.isvjcloud.com":
                 var h = await this.response({
