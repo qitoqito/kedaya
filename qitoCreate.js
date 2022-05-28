@@ -168,7 +168,11 @@ QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的�
         command = 'http://127.0.0.1:5700'
     }
     if (command.includes('http')) {
-        let json = fs.readFileSync('../config/auth.json', "utf-8");
+        try{
+            var json = fs.readFileSync('../config/auth.json', "utf-8");
+        }catch(ea){
+            var json = fs.readFileSync('../../config/auth.json', "utf-8");
+        }
         let auth = JSON.parse(json)
         let authorization = `Bearer ${auth.token}`
         let url = command;
@@ -321,7 +325,14 @@ QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的�
         }
     }
     else {
-        let crontab = fs.readFileSync('../config/crontab.list', "utf-8");
+        try{
+            var crontab = fs.readFileSync('../config/crontab.list', "utf-8");
+            var file='../config/crontab.list'
+        }catch(eb){
+            var crontab = fs.readFileSync('../../config/crontab.list', "utf-8");
+            var file='../../config/crontab.list'
+        }
+
         let add = []
         let del = []
         var spl = crontab.split("\n");
@@ -411,7 +422,7 @@ QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的�
             }
         }
         spl = spl.filter(d => d)
-        fs.writeFileSync('../config/crontab.list', spl.filter(d => d).join("\n"))
+        fs.writeFileSync(file, spl.filter(d => d).join("\n"))
     }
     console.log(message.sort().join("\n"))
     if (command && msg.length) {
