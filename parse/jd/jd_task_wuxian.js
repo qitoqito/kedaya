@@ -1544,8 +1544,9 @@ class Main extends Template {
                         console.log(user, "人员已满")
                     }
                     else {
+                        let signUuid
                         if (this.haskey(ac, 'data.signUuid')) {
-                            var signUuid = ac.data.signUuid
+                            signUuid = ac.data.signUuid
                         }
                         else {
                             let pageUrl = encodeURIComponent(`https://${host}/sign/signActivity?activityId=${p.inviter.activityId}&venderId=${venderId}`)
@@ -1562,7 +1563,7 @@ class Main extends Template {
                                 }
                             )
                             if (this.haskey(catpain, 'data.signUuid')) {
-                                var signUuid = catpain.data.signUuid
+                                signUuid = catpain.data.signUuid
                             }
                         }
                         if (signUuid) {
