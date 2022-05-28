@@ -24,7 +24,9 @@ class Main extends Template {
         this.dict = query
         this.dicts = {}
         this.isSend = []
-        this.custom = this.custom.replace("wuxian ")
+        if (this.custom && typeof this.custom != 'object') {
+            this.custom = this.custom.replace(/wuxian\s*/, "")
+        }
         let custom = this.getValue('custom')
         this.algo = new this.modules.jdAlgo({
             appId: "169f1",
