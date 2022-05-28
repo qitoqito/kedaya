@@ -15,25 +15,16 @@ class Main extends Template {
 
     async prepare() {
         this.assert(this.custom, '请先添加环境变量')
-        this.dict = {
-            ob: ['functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Flzkj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=1d9f7760c9ffaad4eb&client=apple&clientVersion=10.0.10&st=1646999134752&sv=112&sign=d14c9517190f8a8b0e253e3dbbdee87a',
-                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Flzkj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=18a17aa99f7fcfff35&client=apple&clientVersion=10.0.10&st=1646999134761&sv=121&sign=e930b0308cbfaf4200b2b84b941c6788',
-                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Flzkj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=db9c771d90d938b86b&client=apple&clientVersion=10.0.10&st=1646999134762&sv=112&sign=08221e9c89bbd9ae2c60f2051b7ce505',
-                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Flzkj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=2da6b0bb5954112f4a&client=apple&clientVersion=10.0.10&st=1646999134763&sv=100&sign=32911674584d97be1a250b98533e12f1',
-                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Flzkj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=5353d1987de933bbed&client=apple&clientVersion=10.0.10&st=1646999134765&sv=111&sign=02fabfeb6991fd0942113b8b91daa064',
-                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Flzkj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=5d0ff914dc2f99d1ed&client=apple&clientVersion=10.0.10&st=1646999134767&sv=100&sign=4d926e0ced742ced8a4374811713af51',
-                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Flzkj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=09007f4b53f42ea76a&client=apple&clientVersion=10.0.10&st=1646999134772&sv=112&sign=8b69bb949ac5098e8f0db4697e0ec84a',
-                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Flzkj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=829d99df24e49cdacb&client=apple&clientVersion=10.0.10&st=1646999134773&sv=112&sign=87dbe2a552abef974cfd6d97a7f74b97',
-                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Flzkj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=e8c798cb6d7b13c75b&client=apple&clientVersion=10.0.10&st=1646999134784&sv=112&sign=198854a1e8da61b030924ea640e61b74',
-                'functionId=isvObfuscator&body=%7B%22url%22%3A%22https%3A%2F%2Flzkj-isv.isvjcloud.com%22%2C%22id%22%3A%22%22%7D&uuid=b024526b380d35c9e3&client=apple&clientVersion=10.0.10&st=1646999134786&sv=102&sign=7d796bf73559e6ef06ad746fdc5445c0']
+        if (this.expand) {
+            var query = this.query((this.getValue('expand').join("|") || ''), '\\|', 1)
         }
-        let query = this.query((this.getValue('expand').join("|") || ''), '\\|', 1)
-        this.dict = {...this.dict, ...query}
-        if (this.dict.hasOwnProperty("openCard")) {
-            this.dict.openCard = 1
+        else {
+            var query = this.profile
         }
+        this.dict = query
         this.dicts = {}
         this.isSend = []
+        this.custom = this.custom.replace("wuxian ")
         let custom = this.getValue('custom')
         this.algo = new this.modules.jdAlgo({
             appId: "169f1",
@@ -87,17 +78,6 @@ class Main extends Template {
                     array = [i.host]
                 }
                 for (let host of array) {
-                    // let p = await this.response({
-                    //         'url': `https://${host}/wxCommonInfo/token`,
-                    //     }
-                    // )
-                    // var s = await this.curl({
-                    //         'url': `https://${host}/customer/getSimpleActInfoVo`,
-                    //         'form': `activityId=${i.activityId}`,
-                    //         cookie: p.cookie
-                    //     }
-                    // )
-                    // if (!this.haskey(s, 'data')) {
                     switch (host) {
                         case "cjhy-isv.isvjcloud.com":
                             var h = await this.response({
@@ -121,7 +101,6 @@ class Main extends Template {
                             referer: `https://${host}/customer/getSimpleActInfoVo`,
                         }
                     )
-                    // }
                     if (this.haskey(s, 'data')) {
                         let data = s.data
                         data.host = host
@@ -748,7 +727,11 @@ class Main extends Template {
                         this.notices(getPrize.data.name, p.user)
                     }
                     else {
-                        console.log(getPrize.errorMessage || getPrize.msg || "什么也没有")
+                        let err = this.haskey(getPrize, 'errorMessage') || this.haskey(getPrize, 'msg') || "什么也没有"
+                        console.log(err)
+                        if (this.match(/奖品已发完|来晚了/, err)) {
+                            this.finish.push(p.number)
+                        }
                     }
                     if (!this.haskey(getPrize, 'data.canDrawTimes')) {
                         break
@@ -774,7 +757,11 @@ class Main extends Template {
                         this.notices(getPrize.data.name, p.user)
                     }
                     else {
-                        console.log(getPrize.errorMessage || getPrize.msg || "什么也没有")
+                        let err = this.haskey(getPrize, 'errorMessage') || this.haskey(getPrize, 'msg') || "什么也没有"
+                        console.log(err)
+                        if (this.match(/奖品已发完|来晚了/, err)) {
+                            this.finish.push(p.number)
+                        }
                     }
                     if (!this.haskey(getPrize, 'data.canDrawTimes')) {
                         break
