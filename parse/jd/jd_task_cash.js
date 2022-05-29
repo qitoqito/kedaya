@@ -14,6 +14,17 @@ class Main extends Template {
 
     async main(p) {
         let cookie = p.cookie;
+        let sign = await this.curl(this.modules.jdUrl.app('cash_sign', {
+            "remind": 0,
+            "inviteCode": "",
+            "type": 0,
+            "breakReward": 0
+        }, 'post', cookie))
+        console.log('签到:', this.haskey(sign, 'data.bizMsg'))
+        if (this.haskey(sign, 'data.bizMsg').includes('您已退出登录')) {
+            console.log("cookie失效")
+            return
+        }
         let s = await this.curl(this.modules.jdUrl.app('cash_homePage', {}, 'post', cookie))
         for (let i of this.haskey(s, 'data.result.taskInfos')) {
             if (i.times != i.doTimes) {
@@ -36,6 +47,9 @@ class Main extends Template {
             else {
                 console.log(`任务已完成: ${i.name}`)
             }
+        }
+        if (!this.haskey(s, 'data.result.taskInfos')) {
+            console.log(`没有获取到任务列表,可能脸黑`)
         }
     }
 }
