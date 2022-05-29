@@ -762,7 +762,7 @@ class Main extends Template {
                     else {
                         let err = this.haskey(getPrize, 'errorMessage') || this.haskey(getPrize, 'msg') || "什么也没有"
                         console.log(err)
-                        if (this.match(/奖品已发完|来晚了/, err)) {
+                        if (this.match(/奖品已发完|来晚了|全部被领取|明日再来/, err)) {
                             this.finish.push(p.number)
                         }
                     }
