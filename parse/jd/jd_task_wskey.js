@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东WSKEY转换"
-        // this.cron = "20,50 * * * *"
+        // this.cron = "50 */2 * * *"
         this.task = 'local'
         this.import = ['jdUrl', 'fs']
         this.readme = "使用前需先在config/jdUser配置用户wskey,以及将verify字段设置为1或2,脚本才能正常转换cookie,当verify设置为2时,即使当前cookie没有过期,也会强制转换更新\n慎重使用wskey相关脚本,此脚本没有用到外部服务器计算genToken"
@@ -39,7 +39,7 @@ class Main extends Template {
                 }
             }
         }
-        if (dict.wskey && dict.verify) {
+        if (dict.wskey && (dict.verify || this.profile.pass)) {
             let s = await this.curl({
                     'url': `https://plogin.m.jd.com/cgi-bin/ml/islogin`,
                     cookie
@@ -56,9 +56,9 @@ class Main extends Template {
                 else {
                     wskey = `pin=${encodeURIComponent(pin)};wskey=${dict.wskey};`
                 }
-                let shopUrl = `https://shop.m.jd.com/?shopId=${this.rand(1000349325, 1000249325)}`
                 var openKey
                 for (let i of Array(2)) {
+                    let toUrl = "https:\/\/bean.m.jd.com\/beanDetail\/index.action"
                     console.log("使用App算法生成")
                     // let x = await this.response({
                     //     url: `https://api.m.jd.com/client.action?functionId=genToken`,
@@ -66,24 +66,27 @@ class Main extends Template {
                     //     cookie: wskey
                     // })
                     let x = await this.response(this.modules.jdUrl.app('genToken', {
-                            "to": shopUrl,
+                            "to": toUrl,
                             "action": "to"
                         }, 'post', wskey)
                     )
+                    x.ua = 'JD4iPhone/168095%20(iPhone;%20iOS;%20Scale/3.00)'
                     let y = await this.response({
-                        url: `https://un.m.jd.com/cgi-bin/app/appjmp?tokenKey=${x.content.tokenKey}&lbs={"cityId":"","districtId":"","provinceId":"","districtName":"","lng":"0.000000","provinceName":"","lat":"0.000000","cityName":""}&to=${encodeURIComponent(shopUrl)}`,
+                        url: `https://un.m.jd.com/cgi-bin/app/appjmp?tokenKey=${x.content.tokenKey}&lbs={"cityId":"","districtId":"","provinceId":"","districtName":"","lng":"0.000000","provinceName":"","lat":"0.000000","cityName":""}&to=${encodeURIComponent(toUrl)}`,
                         'form': '',
                     })
                     openKey = y.cookie || ''
                     if (!openKey.includes('app_open')) {
                         console.log("使用Lite算法生成")
+                        toUrl = "https:\/\/tuihuan.jd.com\/afs\/orders?sourceType=160"
                         x = await this.response(this.modules.jdUrl.lite('lite_genToken', {
-                                "to": shopUrl,
+                                "to": toUrl,
                                 "action": "to"
                             }, 'post', wskey)
                         )
+                        x.ua = 'JDMobileLite/3.8.20 (iPhone; iOS 15.1.1; Scale/3.00)'
                         y = await this.response({
-                            url: `https://un.m.jd.com/cgi-bin/app/appjmp?tokenKey=${x.content.tokenKey}&lbs={"cityId":"","districtId":"","provinceId":"","districtName":"","lng":"0.000000","provinceName":"","lat":"0.000000","cityName":""}&to=${encodeURIComponent(shopUrl)}`,
+                            url: `https://un.m.jd.com/cgi-bin/app/appjmp?tokenKey=${x.content.tokenKey}&lbs={"cityId":"","districtId":"","provinceId":"","districtName":"","lng":"0.000000","provinceName":"","lat":"0.000000","cityName":""}&to=${encodeURIComponent(toUrl)}`,
                             'form': '',
                         })
                         openKey = y.cookie || ''
@@ -112,7 +115,7 @@ class Main extends Template {
             }
         }
         else {
-            console.log(p.user, '没有wskey')
+            console.log(p.user, '没有wskey或者没设置verify字段')
         }
     }
 
@@ -227,6 +230,29 @@ class Main extends Template {
                                     throw err;
                                 }
                                 console.log("config.sh写入成功")
+                            })
+                        }
+                        else {
+                            console.log("没有数据可以写入")
+                        }
+                        break
+                    case 'list':
+                        let lf = this.modules.fs.readFileSync(`${this.dirname}/logs/cookies.list`, "utf-8");
+                        let isChange2 = 0
+                        for (let cookie of lf.split("\n").map(d => d)) {
+                            let pin = this.userName(cookie)
+                            if (this.dict[pin]) {
+                                lf = lf.replace(cookie, this.dict[pin])
+                                console.log(`更新: ${pin} 成功`)
+                                isChange2 = 1
+                            }
+                        }
+                        if (isChange2) {
+                            this.modules.fs.writeFile(`${this.dirname}/logs/cookies.list`, lf, function(err, data) {
+                                if (err) {
+                                    throw err;
+                                }
+                                console.log("cookies.list写入成功")
                             })
                         }
                         else {
