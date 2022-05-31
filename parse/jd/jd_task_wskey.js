@@ -65,12 +65,12 @@ class Main extends Template {
                     //     form: this.random(this.code, 1)[0],
                     //     cookie: wskey
                     // })
-                    let x = await this.response(this.modules.jdUrl.app('genToken', {
-                            "to": toUrl,
-                            "action": "to"
-                        }, 'post', wskey)
-                    )
-                    x.ua = 'JD4iPhone/168095%20(iPhone;%20iOS;%20Scale/3.00)'
+                    let params = this.modules.jdUrl.app('genToken', {
+                        "to": toUrl,
+                        "action": "to"
+                    }, 'post', wskey)
+                    params.ua = 'JD4iPhone/168095%20(iPhone;%20iOS;%20Scale/3.00)'
+                    let x = await this.response(params)
                     let y = await this.response({
                         url: `https://un.m.jd.com/cgi-bin/app/appjmp?tokenKey=${x.content.tokenKey}&lbs={"cityId":"","districtId":"","provinceId":"","districtName":"","lng":"0.000000","provinceName":"","lat":"0.000000","cityName":""}&to=${encodeURIComponent(toUrl)}`,
                         'form': '',
@@ -79,12 +79,12 @@ class Main extends Template {
                     if (!openKey.includes('app_open')) {
                         console.log("使用Lite算法生成")
                         toUrl = "https:\/\/tuihuan.jd.com\/afs\/orders?sourceType=160"
-                        x = await this.response(this.modules.jdUrl.lite('lite_genToken', {
-                                "to": toUrl,
-                                "action": "to"
-                            }, 'post', wskey)
-                        )
-                        x.ua = 'JDMobileLite/3.8.20 (iPhone; iOS 15.1.1; Scale/3.00)'
+                        params = this.modules.jdUrl.lite('lite_genToken', {
+                            "to": toUrl,
+                            "action": "to"
+                        }, 'post', wskey)
+                        params.ua = 'JDMobileLite/3.8.20 (iPhone; iOS 15.1.1; Scale/3.00)'
+                        x = await this.response(params)
                         y = await this.response({
                             url: `https://un.m.jd.com/cgi-bin/app/appjmp?tokenKey=${x.content.tokenKey}&lbs={"cityId":"","districtId":"","provinceId":"","districtName":"","lng":"0.000000","provinceName":"","lat":"0.000000","cityName":""}&to=${encodeURIComponent(toUrl)}`,
                             'form': '',
