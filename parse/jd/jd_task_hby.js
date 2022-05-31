@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东红包雨"
-        // this.cron = "1 0,10,14,16,18,20 * * *"
+        this.cron = "1 20-23 * * *"
         this.task = 'local'
         this.thread = 3
     }
@@ -39,7 +39,7 @@ class Main extends Template {
             }
         }
         if (this.dumps(body) == '{}') {
-            body = {"babelProjectId": "01210019", "babelPageId": "3484113"}
+            body = {"babelProjectId": "01226321", "babelPageId": "3644410"}
         }
         this.dict = body
         console.log('当前红包雨:', this.dumps(this.dict))
