@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东红包雨"
-        this.cron = "1 20-23 * * *"
+        this.cron = "10 20-23 * * *"
         this.task = 'local'
         this.thread = 3
     }
@@ -35,11 +35,25 @@ class Main extends Template {
                 }
             }
             else {
-                body = {"babelProjectId": this.custom.toString(), "babelPageId": "3351872"}
+                body = {
+                    "babelProjectId": this.custom.toString(),
+                    "babelPageId": "3644410",
+                    "latitude": "0.000000",
+                    "longitude": "0.000000",
+                    "activityNo": "TF8Y1nRzvG--tYyTJr-al",
+                    "click": "1"
+                }
             }
         }
         if (this.dumps(body) == '{}') {
-            body = {"babelProjectId": "01226321", "babelPageId": "3644410"}
+            body = {
+                "babelProjectId": "01226321",
+                "babelPageId": "3644410",
+                "latitude": "0.000000",
+                "longitude": "0.000000",
+                "activityNo": "TF8Y1nRzvG--tYyTJr-al",
+                "click": "1"
+            }
         }
         this.dict = body
         console.log('当前红包雨:', this.dumps(this.dict))
@@ -53,6 +67,7 @@ class Main extends Template {
                 cookie
             }
         )
+        console.log(s)
         try {
             console.log(p.user, s.data.result.hbInfo.discount)
             this.notices(`获得红包: ${s.data.result.hbInfo.discount}元`, p.user)
