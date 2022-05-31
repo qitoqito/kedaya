@@ -132,7 +132,11 @@ class Main extends Template {
                         if (command == 'qinglong') {
                             command = 'http://127.0.0.1:5700'
                         }
-                        let json = this.modules.fs.readFileSync('../config/auth.json', "utf-8");
+                        try {
+                            var json = this.modules.fs.readFileSync('../config/auth.json', "utf-8");
+                        } catch (ea) {
+                            var json = this.modules.fs.readFileSync('../../config/auth.json', "utf-8");
+                        }
                         let auth = JSON.parse(json)
                         let authorization = `Bearer ${auth.token}`
                         let url = command;
