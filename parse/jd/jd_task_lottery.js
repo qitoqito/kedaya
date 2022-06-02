@@ -13,7 +13,7 @@ class Main extends Template {
 
     async prepare() {
         let custom = this.getValue('custom')
-        let add = this.getValue('expand')
+        let expand = this.getValue('expand')
         if (custom.length) {
             for (let c of custom) {
                 let dict = c.includes("=") ? this.query(c, '&', 'split') : {'appId': c}
@@ -21,18 +21,8 @@ class Main extends Template {
             }
         }
         else {
-            this.shareCode = [
-                {appId: '1EFBTxa6H'},
-                {
-                    appId: '1EFRWxKuG',
-                },
-                {
-                    appId: '1FFVQyqw',
-                },
-                {appId: '1E1xZy6s'},
-            ]
-            if (add.length) {
-                for (let c of add) {
+            if (expand.length) {
+                for (let c of expand) {
                     let dict = c.includes("=") ? this.query(c, '&', 'split') : {'appId': c}
                     this.shareCode.push(dict)
                 }
