@@ -13,9 +13,8 @@ class Main extends Template {
     async prepare() {
         try {
             let txt = this.modules.fs.readFileSync(`${this.dirname}/invite/jd_task_carplay.json`).toString()
-            this.inviteDict = this.loads(txt)
+            this.dict = this.loads(txt)
         } catch (e) {
-            console.log(e)
         }
         this.inviteDict = {}
     }
