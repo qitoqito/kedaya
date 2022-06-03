@@ -61,18 +61,31 @@ class Main extends Template {
 
     async main(p) {
         let cookie = p.cookie
-        let s = await this.curl({
-                'url': `https://api.m.jd.com/client.action`,
-                'form': `functionId=hby_lottery&appid=publicUseApi&body=${this.dumps(this.dict)}&t=${this.timestamp}&client=wh5&clientVersion=1.0.0&networkType=&ext={"prstate":"0"}`,
-                cookie
+        for (let i of Array(2)) {
+            let s = await this.curl({
+                    'url': `https://api.m.jd.com/client.action`,
+                    'form': `functionId=hby_lottery&appid=publicUseApi&body=${this.dumps(this.dict)}&t=${this.timestamp}&client=wh5&clientVersion=1.0.0&networkType=&ext={"prstate":"0"}`,
+                    cookie
+                }
+            )
+            console.log(this.haskey(s, 'data'))
+            try {
+                console.log(p.user, s.data.result.hbInfo.discount)
+                this.notices(`获得红包: ${s.data.result.hbInfo.discount}元`, p.user)
+            } catch (e) {
+                console.log("没有获得红包")
             }
-        )
-        console.log(s)
-        try {
-            console.log(p.user, s.data.result.hbInfo.discount)
-            this.notices(`获得红包: ${s.data.result.hbInfo.discount}元`, p.user)
-        } catch (e) {
-            console.log("没有获得红包")
+            if (this.haskey(s, 'data.result.sceneId') && this.haskey(s, 'data.result.share')) {
+                let share = await this.curl({
+                        'url': `https://api.m.jd.com/client.action`,
+                        'form': `functionId=hby_share&appid=publicUseApi&body={"sceneId":"${this.haskey(s, 'data.result.sceneId')}","activityNo":"TF8Y1nRzvG--tYyTJr-al"}&t=${this.timestamp}&client=wh5&clientVersion=1.0.0&&networkType=&ext={"prstate":"0"}`,
+                        cookie
+                    }
+                )
+            }
+            else {
+                break
+            }
         }
     }
 }
