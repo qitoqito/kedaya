@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东超市红包雨"
-        this.cron = "2 0,20-23 * * *"
+        this.cron = "2 0,20 * * *"
         this.help = 'main'
         this.task = 'local'
         this.verify = 1
@@ -44,8 +44,12 @@ class Main extends Template {
                 console.log(s.msg)
                 return
             }
+            else if (this.haskey(s, 'code', 201)) {
+                console.log(s.msg)
+                return
+            }
             else {
-                await this.wait(5000)
+                await this.wait(this.rand(5000, 10000))
             }
         }
     }
