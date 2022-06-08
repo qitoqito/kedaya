@@ -7,7 +7,6 @@ class Main extends Template {
         this.task = 'local'
         this.verify = 1
         this.manual = 1
-        this.readme = `filename_custom="url|id"\n如果显示The ShareCode is empty...\n就是你IP黑了,暂时无法访问活动\n更换ip或者等服务器解除限制方可运行\n如需开卡,filename_expand="openCard=1"\n组团这类请配合分身使用\nfilename_help=pin1|pin2\nfilename_expand="count=50"(有效参团人数)`
         this.import = ['fs', 'jdAlgo', 'jdUrl']
         this.model = 'share'
         this.filter = "activityId"
@@ -15,14 +14,14 @@ class Main extends Template {
 
     async prepare() {
         this.assert(this.custom, '请先添加环境变量')
-        if (this.expand) {
-            var query = this.query((this.getValue('expand').join("|") || ''), '\\|', 1)
-        }
-        else {
-            var query = this.profile
-        }
         this.errMsg = new RegExp(`/奖品已发完|来晚了|全部被领取|明日再来|结束|${this.profile.errMsg}/`)
-        this.dict = query
+        // if (this.expand) {
+        //     var query = this.query((this.getValue('expand').join("|") || ''), '\\|', 1)
+        // }
+        // else {
+        //     var query = this.profile
+        // }
+        this.dict = this.profile
         this.dicts = {}
         this.isSend = []
         if (this.custom && typeof this.custom != 'object') {
@@ -225,6 +224,11 @@ class Main extends Template {
                                 data.title = "分享有礼"
                                 data.type = "wxShareActivity"
                                 break
+                            case 71:
+                                data.pageUrl = `https://${host}/wxSecond/activity?activityId=${i.activityId}`
+                                data.title = "拼手速"
+                                data.type = "wxSecond"
+                                break
                             // case 3:
                             //     data.pageUrl = `https://${host}/wxUnPackingActivity/activity/${i.activityId}?activityId=${i.activityId}`
                             //     data.title = "让福袋飞"
@@ -329,7 +333,7 @@ class Main extends Template {
             console.log("没获取到数据,可能IP黑了或者类型不支持")
         }
         else {
-            if (query.noCache) {
+            if (this.profile.noCache) {
                 let shareCode = this.shareCode
                 this.shareCode = []
                 this.cacheId = []
@@ -340,7 +344,7 @@ class Main extends Template {
                 }
                 for (let i of shareCode) {
                     // 检测到不缓存类型,直接push
-                    if (query.noCache.includes(i.type)) {
+                    if (this.profile.noCache.includes(i.type)) {
                         this.cacheId.push(i.activityId)
                         this.shareCode.push(i)
                     }
@@ -451,6 +455,40 @@ class Main extends Template {
                 if (this.haskey(signUp, 'msg', '该活动已经结束')) {
                     this.finish.push(p.number)
                 }
+            }
+        }
+        else if (['wxSecond'].includes(type)) {
+            let getData = await this.curl({
+                    'url': `https://${host}/wxSecond/getData`,
+                    'form': `pin=${secretPin}&activityId=${activityId}`,
+                    cookie: getPin.cookie
+                }
+            )
+            let uuid = this.haskey(getData, 'data.uuid')
+            let targetTime = this.haskey(getData, 'data.secondActive.targetTime')
+            console.log(`当前手速:`, targetTime)
+            while (true) {
+                let getPrize = await this.curl({
+                        'url': `https://${host}/wxSecond/start`,
+                        'form': `pin=${secretPin}&activityId=${activityId}&uuid=${uuid}&seconds=${targetTime}`,
+                        cookie: getPin.cookie
+                    }
+                )
+                if (this.haskey(getPrize, 'data.draw.drawOk')) {
+                    console.log(`获得: ${getPrize.data.draw.name}`)
+                    this.notices(getPrize.data.draw.name, p.user)
+                }
+                else {
+                    let err = this.haskey(getPrize, 'errorMessage') || this.haskey(getPrize, 'msg') || "什么也没有"
+                    console.log(err)
+                    if (this.match(this.errMsg, err)) {
+                        this.finish.push(p.number)
+                    }
+                }
+                if (!this.haskey(getPrize, 'data.draw.canDrawTimes')) {
+                    break
+                }
+                await this.wait(500)
             }
         }
         else if (['sevenDay'].includes(type)) {
@@ -1907,10 +1945,16 @@ class Main extends Template {
         jdActivityId = jdActivityId || ''
         if (this.dict.openCard) {
             for (let kk of Array(3)) {
-                var o = await this.algo.curl({
-                        'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${venderId}","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":"","channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
-                        cookie
-                    }
+                // var o = await this.algo.curl({
+                //         'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${venderId}","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":"","channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
+                //         cookie
+                //     }
+                // )
+                var o = await this.curl(this.modules.jdUrl.app('bindWithVender', {
+                        "venderId": venderId.toString(),
+                        // "shopId": venderId.toString(),
+                        "bindByVerifyCodeFlag": 1
+                    }, 'post', cookie)
                 )
                 if (o.success) {
                     break
