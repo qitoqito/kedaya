@@ -27,6 +27,10 @@ class Main extends Template {
                 "id": ""
             }, 'post', cookie))
             let gifts = 0
+            if (this.haskey(isvObfuscator, 'message', '参数异常，请退出重试')) {
+                console.log(`用户过期或者异常`)
+                return
+            }
             let load = await this.curl({
                     'url': `https://jinggengjcq-isv.isvjcloud.com/dm/front/openCardNew/activity_load?mix_nick=`,
                     'json': {
@@ -50,6 +54,10 @@ class Main extends Template {
                     },
                 }
             )
+            if (this.haskey(load, 'errorMessage', '获取京东用户信息失败~')) {
+                console.log('获取京东用户信息失败~')
+                return
+            }
             let buyerNick = load.data.data.buyerNick
             let userId = load.data.data.missionCustomer.userId
             let state = await this.curl({
