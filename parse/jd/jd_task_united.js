@@ -122,6 +122,7 @@ class Main extends Template {
                 console.log(`什么也没有`)
             }
         } catch (e) {
+            console.log(e)
         }
     }
 }
