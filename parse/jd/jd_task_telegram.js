@@ -20,12 +20,22 @@ class Main extends Template {
     async tgMsg() {
         if (this['QITOQITO_MAP']) {
             let change = {}
-            for (let k of this['QITOQITO_MAP'].replace(/\&/g, "\|").split("|")) {
-                let a = k.split("=")
-                for (let i of a[0].split(',')) {
+            if (typeof this['QITOQITO_MAP'] == 'object') {
+                for (let i in this['QITOQITO_MAP']) {
                     change[i] = {
-                        map: a[1],
-                        type: a[1].split("_")[0]
+                        map: this['QITOQITO_MAP'][i],
+                        type: this['QITOQITO_MAP'][i].split("_")[0]
+                    }
+                }
+            }
+            else {
+                for (let k of this['QITOQITO_MAP'].replace(/\&/g, "\|").split("|")) {
+                    let a = k.split("=")
+                    for (let i of a[0].split(',')) {
+                        change[i] = {
+                            map: a[1],
+                            type: a[1].split("_")[0]
+                        }
                     }
                 }
             }
