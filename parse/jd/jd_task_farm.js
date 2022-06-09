@@ -679,7 +679,7 @@ class Main extends Template {
         if (!this.profile.tenWater) {
             if (myCard.fastCard && amount - 100>stock) {
                 await this.wait(2000)
-                for (let i = 0; i<3; i++) {
+                for (let i = 0; i<(amount / 100); i++) {
                     if (amount - 100<stock) {
                         break
                     }
@@ -727,11 +727,11 @@ class Main extends Template {
     }
 
     async extra() {
+        console.log(`此次运行助力码:`)
+        console.log(this.dumps(Object.values(this.dict)))
         let custom = this.getValue('custom')
         if (this.profile.cache) {
             console.log("已经设置缓存:/invite/jd_task_farm.json,跳过写入")
-            console.log(`现有助力码:`)
-            console.log(this.dumps(Object.values(this.dict)))
         }
         else {
             console.log("农场有检测,号多容易黑ip,建议缓存JSON文件")
