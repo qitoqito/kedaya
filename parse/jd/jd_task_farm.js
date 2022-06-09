@@ -39,7 +39,7 @@ class Main extends Template {
         // return
         let init = await this.algo.curl({
                 'url': 'https://api.m.jd.com/client.action?functionId=initForFarm',
-                'form': `body={"version":11,"channel":3}&client=apple&clientVersion=10.0.4&osVersion=13.7&appid=wh5&loginType=2&loginWQBiz=interact`,
+                'form': `body={"version":16,"channel":3}&appid=wh5&client=apple&clientVersion=10.2.4`,
                 cookie
             }
         )
@@ -51,7 +51,7 @@ class Main extends Template {
         if (!init.farmUserPro) {
             console.log("正在播种")
             await this.algo.curl({
-                    'url': `https://api.m.jd.com/client.action?functionId=choiceGoodsForFarm&body={"imageUrl":"","nickName":"","shareCode":"","goodsType":"mihoutao22","type":"0","babelChannel":"120","sid":"b1482460605540226922b0088199941w","un_area":"16_1341_1347_44750","version":14,"channel":1}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                    'url': `https://api.m.jd.com/client.action?functionId=choiceGoodsForFarm&body={"imageUrl":"","nickName":"","shareCode":"","goodsType":"mihoutao22","type":"0","babelChannel":"121","version":16,"channel":1}&appid=wh5&client=apple&clientVersion=10.2.4`,
                     cookie
                 }
             )
@@ -62,17 +62,33 @@ class Main extends Template {
         }
         else if (init.farmUserPro.treeState == 0) {
             console.log("正在播种")
-            await this.algo.curl({
-                    'url': `https://api.m.jd.com/client.action?functionId=choiceGoodsForFarm&body={"imageUrl":"","nickName":"","shareCode":"","goodsType":"mihoutao22","type":"0","babelChannel":"120","sid":"b1482460605540226922b0088199941w","un_area":"16_1341_1347_44750","version":14,"channel":1}&appid=wh5&client=apple&clientVersion=10.2.4`,
-                    // 'form':``,
+            let exc = await this.curl({
+                    'url': `https://api.m.jd.com/client.action?functionId=getExchangeLevelList&body={"version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                     cookie
                 }
             )
+            if (this.haskey(init, 'farmLevelWinGoods')) {
+                let goods
+                for (let i of Object.values(init.farmLevelWinGoods)) {
+                    if (this.dumps(i) != "[]") {
+                        goods = i[0]
+                    }
+                }
+                if (goods) {
+                    console.log(`正在种植:`, goods.name)
+                    let choic = await this.algo.curl({
+                            'url': `https://api.m.jd.com/client.action?functionId=choiceGoodsForFarm&body={"goodsType":"${goods.type}","type":"0","babelChannel":"121","version":16,"channel":1}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                            // 'form':``,
+                            cookie
+                        }
+                    )
+                }
+            }
         }
         let amount = this.haskey(init, 'farmUserPro.totalEnergy')
         let treeTotalEnergy = this.haskey(init, 'farmUserPro.treeTotalEnergy')
         let fi = await this.algo.curl({
-                'url': `https://api.m.jd.com/client.action?functionId=friendListInitForFarm&body={"lastId":null,"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                'url': `https://api.m.jd.com/client.action?functionId=friendListInitForFarm&body={"lastId":null,"version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                 // 'form':``,
                 cookie
             }
@@ -88,13 +104,13 @@ class Main extends Template {
             for (let i of this.random(fcode, 3)) {
                 console.log("删除好友:", i)
                 let sc = await this.algo.curl({
-                    'url': `https://api.m.jd.com/client.action?functionId=deleteFriendForFarm&body={"shareCode":"${i}","version":14,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.4.2`,
+                    'url': `https://api.m.jd.com/client.action?functionId=deleteFriendForFarm&body={"shareCode":"${i}","version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.4.2`,
                     // 'form':``,
                     cookie
                 })
                 console.log("添加好友:", i)
                 let tj = await this.algo.curl({
-                        'url': `https://api.m.jd.com/client.action?functionId=initForFarm&body={"mpin":"","utm_campaign":"","utm_medium":"appshare","shareCode":"${i}-inviteFriend","utm_term":"Wxfriends","utm_source":"iosapp","imageUrl":"","nickName":"","version":14,"channel":2,"babelChannel":0}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                        'url': `https://api.m.jd.com/client.action?functionId=initForFarm&body={"mpin":"","utm_campaign":"","utm_medium":"appshare","shareCode":"${i}-inviteFriend","utm_term":"Wxfriends","utm_source":"iosapp","imageUrl":"","nickName":"","version":16,"channel":2,"babelChannel":0}&appid=wh5&client=apple&clientVersion=10.2.4`,
                         // 'form':``,
                         cookie
                     }
@@ -108,13 +124,13 @@ class Main extends Template {
             )
         }
         let qdd = await this.algo.curl({
-                'url': `https://api.m.jd.com/client.action?functionId=clockInForFarm&body={"type":1,"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                'url': `https://api.m.jd.com/client.action?functionId=clockInForFarm&body={"type":1,"version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                 // 'form':``,
                 cookie
             }
         )
         // let qdd = await this.algo.curl({
-        //         'url': `https://api.m.jd.com/client.action?functionId=clockInInitForFarm&body={"timestamp":${this.timestamp},"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+        //         'url': `https://api.m.jd.com/client.action?functionId=clockInInitForFarm&body={"timestamp":${this.timestamp},"version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
         //         // 'form':``,
         //         cookie
         //     }
@@ -127,7 +143,7 @@ class Main extends Template {
         }
         // 7天奖励
         qdd = await this.algo.curl({
-                'url': `https://api.m.jd.com/client.action?functionId=clockInInitForFarm&body={"timestamp":${this.timestamp},"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                'url': `https://api.m.jd.com/client.action?functionId=clockInInitForFarm&body={"timestamp":${this.timestamp},"version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                 // 'form':``,
                 cookie
             }
@@ -135,14 +151,14 @@ class Main extends Template {
         for (let i of qdd.themes || []) {
             if (!i.hadGot) {
                 let fo = await this.algo.curl({
-                        'url': `https://api.m.jd.com/client.action?functionId=clockInFollowForFarm&body={"id":"${i.id}","type":"theme","step":1,"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                        'url': `https://api.m.jd.com/client.action?functionId=clockInFollowForFarm&body={"id":"${i.id}","type":"theme","step":1,"version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                         // 'form':``,
                         cookie
                     }
                 )
                 await this.wait(5000)
                 let foo = await this.algo.curl({
-                        'url': `https://api.m.jd.com/client.action?functionId=clockInFollowForFarm&body={"id":"${i.id}","type":"theme","step":2,"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                        'url': `https://api.m.jd.com/client.action?functionId=clockInFollowForFarm&body={"id":"${i.id}","type":"theme","step":2,"version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                         // 'form':``,
                         cookie
                     }
@@ -152,7 +168,7 @@ class Main extends Template {
         }
         // 领取弹窗水滴
         let tcs = await this.algo.curl({
-                'url': `https://api.m.jd.com/client.action?functionId=gotWaterGoalTaskForFarm&body={"type":3,"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                'url': `https://api.m.jd.com/client.action?functionId=gotWaterGoalTaskForFarm&body={"type":3,"version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                 // 'form':``,
                 cookie
             }
@@ -163,7 +179,7 @@ class Main extends Template {
         // 东东乐园
         let ly = await this.algo.curl({
                 'url': `https://api.m.jd.com/client.action`,
-                'form': `functionId=ddnc_farmpark_Init&body={"version":"1","channel":1}&client=wh5&clientVersion=1.0.0&uuid=`,
+                'form': `functionId=ddnc_farmpark_Init&body={"version":16,"channel":1}&appid=wh5&client=apple&clientVersion=10.2.4`,
                 cookie
             }
         )
@@ -173,264 +189,266 @@ class Main extends Template {
                     console.log(`正在浏览:${i.name}`)
                     let pp = await this.algo.curl({
                             'url': `https://api.m.jd.com/client.action`,
-                            'form': `functionId=ddnc_farmpark_markBrowser&body={"version":"1","channel":1,"advertId":"${i.topResource.task.advertId}"}&client=wh5&clientVersion=1.0.0&uuid=`,
+                            'form': `functionId=ddnc_farmpark_markBrowser&body={"version":16,"channel":1,"advertId":"${i.topResource.task.advertId}"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                             cookie
                         }
                     )
                     await this.wait(i.topResource.task.browseSeconds * 1000)
                     let ppp = await this.algo.curl({
                             'url': `https://api.m.jd.com/client.action`,
-                            'form': `functionId=ddnc_farmpark_browseAward&body={"version":"1","channel":1,"advertId":"${i.topResource.task.advertId}","index":8,"type":1}&client=wh5&clientVersion=1.0.0&uuid=`,
+                            'form': `functionId=ddnc_farmpark_browseAward&body={"version":16,"channel":1,"advertId":"${i.topResource.task.advertId}","index":8,"type":1}&appid=wh5&client=apple&clientVersion=10.2.4`,
                             cookie
                         }
                     )
                 }
             }
         }
-        let taskList = await this.algo.curl({
-                'url': `https://api.m.jd.com/client.action?functionId=taskInitForFarm&body={"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
-                // 'form':``,
-                cookie
-            }
-        )
-        for (let i in taskList) {
-            if (typeof (taskList[i]) == 'object') {
-                let dotask = taskList[i]
-                switch (i) {
-                    case 'signInit':
-                        if (dotask.todaySigned) {
-                            console.log(`今天已签到,已经连续签到${dotask.totalSigned}天,下次签到可得${dotask.signEnergyEachAmount}g`);
-                        }
-                        else {
-                            let qd = await this.algo.curl({
-                                    'url': `https://api.m.jd.com/client.action?functionId=signForFarm&body={"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
-                                    cookie
-                                }
-                            )
-                            if (qd.code === "0") {
-                                console.log(`签到成功获得${qd.amount}g💧`)
+        for (let n = 1; n<=2; n++) {
+            let taskList = await this.algo.curl({
+                    'url': `https://api.m.jd.com/client.action?functionId=taskInitForFarm&body={"version":16,"channel":${n},"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                    // 'form':``,
+                    cookie
+                }
+            )
+            for (let i in taskList) {
+                if (typeof (taskList[i]) == 'object') {
+                    let dotask = taskList[i]
+                    switch (i) {
+                        case 'signInit':
+                            if (dotask.todaySigned) {
+                                console.log(`今天已签到,已经连续签到${dotask.totalSigned}天,下次签到可得${dotask.signEnergyEachAmount}g`);
                             }
                             else {
-                                console.log(`签到结果:  ${JSON.stringify(qd)}`);
-                            }
-                        }
-                        break
-                    case 'gotBrowseTaskAdInit':
-                        if (!dotask.f) {
-                            for (let j of dotask.userBrowseTaskAds) {
-                                console.log("正在浏览任务")
-                                let s = await this.algo.curl({
-                                        'url': `https://api.m.jd.com/client.action?functionId=browseAdTaskForFarm&body={"advertId":"${j.advertId}","type":0,"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                                let qd = await this.algo.curl({
+                                        'url': `https://api.m.jd.com/client.action?functionId=signForFarm&body={"version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                                         cookie
                                     }
                                 )
-                                await this.wait(j.time * 1000)
-                                await this.algo.curl({
-                                        'url': `https://api.m.jd.com/client.action?functionId=browseAdTaskForFarm&body={"advertId":"${j.advertId}","type":1,"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
-                                        cookie
-                                    }
-                                )
-                            }
-                        }
-                        else {
-                            console.log("浏览任务已完成")
-                        }
-                        break
-                    case'waterRainInit':
-                        if (!dotask.f) {
-                            if (dotask.lastTime + 3 * 60 * 60 * 1000<this.timestamp) {
-                                let s = await this.algo.curl({
-                                        'url': `https://api.m.jd.com/client.action`,
-                                        'form': `functionId=waterRainForFarm&body={"type": 1, "hongBaoTimes": 100, "version": 3}&appid=wh5`,
-                                        cookie
-                                    }
-                                )
-                                if (s.code === '0') {
-                                    console.log('水滴雨任务执行成功，获得水滴：' + s.addEnergy + 'g');
-                                    console.log(`第${dotask.winTimes + 1}次水滴雨获得${s.addEnergy}g水滴`);
-                                }
-                            }
-                            else {
-                                console.log("还未到时间可收取水滴雨")
-                            }
-                        }
-                        else {
-                            console.log("水滴雨已经完成")
-                        }
-                        break
-                    case 'firstWaterInit':
-                        if (!dotask.f) {
-                            let js = await this.algo.curl({
-                                    'url': `https://api.m.jd.com/client.action?functionId=waterGoodForFarm&body={"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
-                                    // 'form':``,
-                                    cookie
-                                }
-                            )
-                            let s = await this.algo.curl({
-                                    'url': `https://api.m.jd.com/client.action?functionId=firstWaterTaskForFarm&body={"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
-                                    // 'form':``,
-                                    cookie
-                                }
-                            )
-                            if (s.code === '0') {
-                                console.log(`首次浇水奖励获得${s.amount}g💧`);
-                            }
-                            else {
-                                console.log(`领取首次浇水奖励结果:  ${JSON.stringify(s)}`);
-                            }
-                        }
-                        else {
-                            console.log("首次浇水任务已完成")
-                        }
-                        break
-                    case 'waterFriendTaskInit':
-                        if (!dotask.f) {
-                            if (dotask.waterFriendCountKey<dotask.waterFriendMax) {
-                                let f = await this.algo.curl({
-                                        'url': `https://api.m.jd.com/client.action?functionId=friendListInitForFarm&body={"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
-                                        // 'form':``,
-                                        cookie
-                                    }
-                                )
-                                let nnn = 0
-                                if (f.friends.length) {
-                                    for (let ff of f.friends) {
-                                        if (ff.friendState) {
-                                            console.log(`正在给: ${ff.shareCode} 浇水`)
-                                            let s = await this.algo.curl({
-                                                    'url': `https://api.m.jd.com/client.action?functionId=waterFriendForFarm&body={"shareCode":"${ff.shareCode}","version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
-                                                    // 'form':``,
-                                                    cookie
-                                                }
-                                            )
-                                            nnn++
-                                        }
-                                        if (nnn == 2) {
-                                            break
-                                        }
-                                    }
+                                if (qd.code === "0") {
+                                    console.log(`签到成功获得${qd.amount}g💧`)
                                 }
                                 else {
-                                    console.log("请添加好友再来吧")
+                                    console.log(`签到结果:  ${JSON.stringify(qd)}`);
                                 }
                             }
-                            let ss = await this.algo.curl({
-                                    'url': `https://api.m.jd.com/client.action?functionId=waterFriendGotAwardForFarm&body={"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
-                                    // 'form':``,
-                                    cookie
-                                }
-                            )
-                        }
-                        else {
-                            console.log(`给${dotask.waterFriendMax}个好友浇水任务已完成`)
-                        }
-                        break
-                    case 'gotThreeMealInit':
-                        if (!dotask.f) {
-                            let s = await this.algo.curl({
-                                    'url': `https://api.m.jd.com/client.action?functionId=gotThreeMealForFarm&body={"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
-                                    // 'form':``,
-                                    cookie
-                                }
-                            )
-                            if (s.code === "0") {
-                                console.log(`定时领水获得${s.amount}g💧`);
-                            }
-                            else {
-                                console.log(`定时领水成功结果:  ${JSON.stringify(s)}`);
-                            }
-                        }
-                        else {
-                            console.log('当前不在定时领水时间或者已经领过')
-                        }
-                        break
-                    case 'treasureBoxInit':
-                        if (!dotask.f) {
-                            let s = await this.algo.curl({
-                                    'url': `https://api.m.jd.com/client.action?functionId=ddnc_getTreasureBoxAward&body={"babelChannel":"11","line":"","channel":3,"type":1,"version":14}&appid=wh5&client=apple&clientVersion=10.2.4`,
-                                    cookie
-                                }
-                            )
-                            await this.algo.curl({
-                                    'url': `https://api.m.jd.com/client.action?functionId=ddnc_getTreasureBoxAward&body={"babelChannel":"11","line":"","channel":3,"type":2,"version":14}&appid=wh5&client=apple&clientVersion=10.2.4`,
-                                    cookie
-                                }
-                            )
-                        }
-                        break
-                    case 'totalWaterTaskInit':
-                        if (!dotask.f) {
-                            if (dotask.totalWaterTaskTimes<dotask.totalWaterTaskLimit) {
-                                for (let kk = 0; kk<dotask.totalWaterTaskLimit - dotask.totalWaterTaskTimes + 1; kk++) {
+                            break
+                        case 'gotBrowseTaskAdInit':
+                            if (!dotask.f) {
+                                for (let j of dotask.userBrowseTaskAds) {
+                                    console.log("正在浏览任务")
+                                    let s = await this.algo.curl({
+                                            'url': `https://api.m.jd.com/client.action?functionId=browseAdTaskForFarm&body={"advertId":"${j.advertId}","type":0,"version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                                            cookie
+                                        }
+                                    )
+                                    await this.wait(j.time * 1000)
                                     await this.algo.curl({
-                                            'url': `https://api.m.jd.com/client.action?functionId=waterGoodForFarm&body={"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
-                                            // 'form':``,
+                                            'url': `https://api.m.jd.com/client.action?functionId=browseAdTaskForFarm&body={"advertId":"${j.advertId}","type":1,"version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                                             cookie
                                         }
                                     )
                                 }
                             }
-                            let s = await this.algo.curl({
-                                    'url': `https://api.m.jd.com/client.action?functionId=totalWaterTaskForFarm&body={"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
-                                    // 'form':``,
-                                    cookie
+                            else {
+                                console.log("浏览任务已完成")
+                            }
+                            break
+                        case'waterRainInit':
+                            if (!dotask.f) {
+                                if (dotask.lastTime + 3 * 60 * 60 * 1000<this.timestamp) {
+                                    let s = await this.algo.curl({
+                                            'url': `https://api.m.jd.com/client.action`,
+                                            'form': `functionId=waterRainForFarm&body={"type":1,"hongBaoTimes":100,"version":16}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                                            cookie
+                                        }
+                                    )
+                                    if (s.code === '0') {
+                                        console.log('水滴雨任务执行成功，获得水滴：' + s.addEnergy + 'g');
+                                        console.log(`第${dotask.winTimes + 1}次水滴雨获得${s.addEnergy}g水滴`);
+                                    }
                                 }
-                            )
-                            if (s.code === '0') {
-                                console.log(`十次浇水奖励获得${s.totalWaterTaskEnergy}g💧`);
+                                else {
+                                    console.log("还未到时间可收取水滴雨")
+                                }
                             }
                             else {
-                                console.log(`领取10次浇水奖励结果:  ${JSON.stringify(s)}`);
+                                console.log("水滴雨已经完成")
                             }
-                        }
-                        else {
-                            console.log("累计浇水已经完成")
-                        }
-                        break
-                    case 'treasureBoxInit-getBean':
-                        if (!dotask.f) {
-                            await this.algo.curl({
-                                    'url': `https://api.m.jd.com/client.action?functionId=ddnc_getTreasureBoxAward&body={"babelChannel":"11","line":"getBean","channel":3,"type":1,"version":14}&appid=wh5&client=apple&clientVersion=10.2.4`,
-                                    // 'form':``,
-                                    cookie
+                            break
+                        case 'firstWaterInit':
+                            if (!dotask.f) {
+                                let js = await this.algo.curl({
+                                        'url': `https://api.m.jd.com/client.action?functionId=waterGoodForFarm&body={"version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                                        // 'form':``,
+                                        cookie
+                                    }
+                                )
+                                let s = await this.algo.curl({
+                                        'url': `https://api.m.jd.com/client.action?functionId=firstWaterTaskForFarm&body={"version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                                        // 'form':``,
+                                        cookie
+                                    }
+                                )
+                                if (s.code === '0') {
+                                    console.log(`首次浇水奖励获得${s.amount}g💧`);
                                 }
-                            )
-                            // await this.algo.curl({
-                            //         'url': `https://api.m.jd.com/client.action?functionId=findBeanScene`,
-                            //         'form': 'functionId=findBeanScene&body=%7B%22rnClient%22%3A%222%22%2C%22viewChannel%22%3A%22AppHome%22%2C%22source%22%3A%22AppHome%22%2C%22rnVersion%22%3A%224.7%22%7D&uuid=b39756aeea55b9cebae9f&client=apple&clientVersion=10.0.10&st=1638541231790&sv=100&sign=f7c5657c19354b17600ed5d59a6c0047',
-                            //         cookie
-                            //     }
-                            // )
-                            // await this.algo.curl({
-                            //         'url': `https://api.m.jd.com/client.action?functionId=beanTaskList`,
-                            //         'form': 'functionId=beanTaskList&body=%7B%22viewChannel%22%3A%22AppHome%22%7D&uuid=a2874756f39b780840&client=apple&clientVersion=10.0.10&st=1638541338389&sv=100&sign=f1aff99ef35e77739fef2967328475d1',
-                            //         cookie
-                            //     }
-                            // )
-                            // await this.algo.curl({
-                            //         'url': `https://api.m.jd.com/client.action?functionId=farmMarkStatus&body={"version":14,"channel":1,"babelChannel":"98"}&appid=wh5&client=apple&clientVersion=10.2.4`,
-                            //         // 'form':``,
-                            //         cookie
-                            //     }
-                            // )
-                            await this.algo.curl({
-                                    'url': `https://api.m.jd.com/client.action?functionId=ddnc_getTreasureBoxAward&body={"babelChannel":"11","line":"getBean","channel":3,"type":2,"version":14}&appid=wh5&client=apple&clientVersion=10.2.4`,
-                                    // 'form':``,
-                                    cookie
+                                else {
+                                    console.log(`领取首次浇水奖励结果:  ${JSON.stringify(s)}`);
                                 }
-                            )
-                        }
-                        break
-                    default:
-                        // console.log(i)
-                        // console.log(dotask)
-                        break
+                            }
+                            else {
+                                console.log("首次浇水任务已完成")
+                            }
+                            break
+                        case 'waterFriendTaskInit':
+                            if (!dotask.f) {
+                                if (dotask.waterFriendCountKey<dotask.waterFriendMax) {
+                                    let f = await this.algo.curl({
+                                            'url': `https://api.m.jd.com/client.action?functionId=friendListInitForFarm&body={"version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                                            // 'form':``,
+                                            cookie
+                                        }
+                                    )
+                                    let nnn = 0
+                                    if (f.friends.length) {
+                                        for (let ff of f.friends) {
+                                            if (ff.friendState) {
+                                                console.log(`正在给: ${ff.shareCode} 浇水`)
+                                                let s = await this.algo.curl({
+                                                        'url': `https://api.m.jd.com/client.action?functionId=waterFriendForFarm&body={"shareCode":"${ff.shareCode}","version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                                                        // 'form':``,
+                                                        cookie
+                                                    }
+                                                )
+                                                nnn++
+                                            }
+                                            if (nnn == 2) {
+                                                break
+                                            }
+                                        }
+                                    }
+                                    else {
+                                        console.log("请添加好友再来吧")
+                                    }
+                                }
+                                let ss = await this.algo.curl({
+                                        'url': `https://api.m.jd.com/client.action?functionId=waterFriendGotAwardForFarm&body={"version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                                        // 'form':``,
+                                        cookie
+                                    }
+                                )
+                            }
+                            else {
+                                console.log(`给${dotask.waterFriendMax}个好友浇水任务已完成`)
+                            }
+                            break
+                        case 'gotThreeMealInit':
+                            if (!dotask.f) {
+                                let s = await this.algo.curl({
+                                        'url': `https://api.m.jd.com/client.action?functionId=gotThreeMealForFarm&body={"version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                                        // 'form':``,
+                                        cookie
+                                    }
+                                )
+                                if (s.code === "0") {
+                                    console.log(`定时领水获得${s.amount}g💧`);
+                                }
+                                else {
+                                    console.log(`定时领水成功结果:  ${JSON.stringify(s)}`);
+                                }
+                            }
+                            else {
+                                console.log('当前不在定时领水时间或者已经领过')
+                            }
+                            break
+                        case 'treasureBoxInit':
+                            if (!dotask.f) {
+                                let s = await this.algo.curl({
+                                        'url': `https://api.m.jd.com/client.action?functionId=ddnc_getTreasureBoxAward&body={"babelChannel":"121","line":"","channel":3,"type":1,"version":16}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                                        cookie
+                                    }
+                                )
+                                await this.algo.curl({
+                                        'url': `https://api.m.jd.com/client.action?functionId=ddnc_getTreasureBoxAward&body={"babelChannel":"121","line":"","channel":3,"type":2,"version":16}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                                        cookie
+                                    }
+                                )
+                            }
+                            break
+                        case 'totalWaterTaskInit':
+                            if (!dotask.f) {
+                                if (dotask.totalWaterTaskTimes<dotask.totalWaterTaskLimit) {
+                                    for (let kk = 0; kk<dotask.totalWaterTaskLimit - dotask.totalWaterTaskTimes + 1; kk++) {
+                                        await this.algo.curl({
+                                                'url': `https://api.m.jd.com/client.action?functionId=waterGoodForFarm&body={"version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                                                // 'form':``,
+                                                cookie
+                                            }
+                                        )
+                                    }
+                                }
+                                let s = await this.algo.curl({
+                                        'url': `https://api.m.jd.com/client.action?functionId=totalWaterTaskForFarm&body={"version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                                        // 'form':``,
+                                        cookie
+                                    }
+                                )
+                                if (s.code === '0') {
+                                    console.log(`十次浇水奖励获得${s.totalWaterTaskEnergy}g💧`);
+                                }
+                                else {
+                                    console.log(`领取10次浇水奖励结果:  ${JSON.stringify(s)}`);
+                                }
+                            }
+                            else {
+                                console.log("累计浇水已经完成")
+                            }
+                            break
+                        case 'treasureBoxInit-getBean':
+                            if (!dotask.f) {
+                                await this.algo.curl({
+                                        'url': `https://api.m.jd.com/client.action?functionId=ddnc_getTreasureBoxAward&body={"babelChannel":"121","line":"getBean","channel":3,"type":1,"version":16}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                                        // 'form':``,
+                                        cookie
+                                    }
+                                )
+                                // await this.algo.curl({
+                                //         'url': `https://api.m.jd.com/client.action?functionId=findBeanScene`,
+                                //         'form': 'functionId=findBeanScene&body=%7B%22rnClient%22%3A%222%22%2C%22viewChannel%22%3A%22AppHome%22%2C%22source%22%3A%22AppHome%22%2C%22rnVersion%22%3A%224.7%22%7D&uuid=b39756aeea55b9cebae9f&client=apple&clientVersion=10.0.10&st=1638541231790&sv=100&sign=f7c5657c19354b17600ed5d59a6c0047',
+                                //         cookie
+                                //     }
+                                // )
+                                // await this.algo.curl({
+                                //         'url': `https://api.m.jd.com/client.action?functionId=beanTaskList`,
+                                //         'form': 'functionId=beanTaskList&body=%7B%22viewChannel%22%3A%22AppHome%22%7D&uuid=a2874756f39b780840&client=apple&clientVersion=10.0.10&st=1638541338389&sv=100&sign=f1aff99ef35e77739fef2967328475d1',
+                                //         cookie
+                                //     }
+                                // )
+                                // await this.algo.curl({
+                                //         'url': `https://api.m.jd.com/client.action?functionId=farmMarkStatus&body={"version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                                //         // 'form':``,
+                                //         cookie
+                                //     }
+                                // )
+                                await this.algo.curl({
+                                        'url': `https://api.m.jd.com/client.action?functionId=ddnc_getTreasureBoxAward&body={"babelChannel":"121","line":"getBean","channel":3,"type":2,"version":16}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                                        // 'form':``,
+                                        cookie
+                                    }
+                                )
+                            }
+                            break
+                        default:
+                            // console.log(i)
+                            // console.log(dotask)
+                            break
+                    }
                 }
             }
         }
         for (let i = 0; i<10; i++) {
             let s = await this.algo.curl({
-                    'url': `https://api.m.jd.com/client.action?functionId=getFullCollectionReward&body={"type":2,"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                    'url': `https://api.m.jd.com/client.action?functionId=getFullCollectionReward&body={"type":2,"version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                     // 'form':``,
                     cookie
                 }
@@ -457,7 +475,7 @@ class Main extends Template {
                 continue
             }
             let s = await this.algo.curl({
-                    'url': `https://api.m.jd.com/client.action?functionId=initForFarm&body={"mpin":"","utm_campaign":"t_335139774","utm_medium":"appshare","shareCode":"${code.shareCode}","utm_term":"Wxfriends","utm_source":"iosapp","imageUrl":"","nickName":"","version":14,"channel":2,"babelChannel":0}&appid=wh5&loginType=2&loginWQBiz=ddnc`,
+                    'url': `https://api.m.jd.com/client.action?functionId=initForFarm&body={"mpin":"","utm_medium":"appshare","shareCode":"${code.shareCode}","utm_term":"Wxfriends","utm_source":"iosapp","imageUrl":"","nickName":"","version":16,"channel":2,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                     'cookie': p.cookie
                 }
             )
@@ -492,7 +510,7 @@ class Main extends Template {
         }
         // 天天红包
         let red = await this.algo.curl({
-                'url': `https://api.m.jd.com/client.action?functionId=initForTurntableFarm&body={"version":4,"channel":1}&appid=wh5`,
+                'url': `https://api.m.jd.com/client.action?functionId=initForTurntableFarm&body={"version":16,"channel":1}&appid=wh5&client=apple&clientVersion=10.2.4`,
                 // 'form':``,
                 cookie
             }
@@ -501,14 +519,14 @@ class Main extends Template {
             if (!i.status) {
                 console.log(`正在浏览:${i.main}`)
                 let bt = await this.algo.curl({
-                        'url': `https://api.m.jd.com/client.action?functionId=browserForTurntableFarm&body={"type":1,"adId":"${i.adId}","version":4,"channel":1}&appid=wh5`,
+                        'url': `https://api.m.jd.com/client.action?functionId=browserForTurntableFarm&body={"type":1,"adId":"${i.adId}","version":16,"channel":1}&appid=wh5&client=apple&clientVersion=10.2.4`,
                         // 'form':``,
                         cookie
                     }
                 )
                 await this.wait(i.browserTimes * 1000)
                 let btt = await this.algo.curl({
-                        'url': `https://api.m.jd.com/client.action?functionId=browserForTurntableFarm&body={"type":2,"adId":"${i.adId}","version":4,"channel":1}&appid=wh5`,
+                        'url': `https://api.m.jd.com/client.action?functionId=browserForTurntableFarm&body={"type":2,"adId":"${i.adId}","version":16,"channel":1}&appid=wh5&client=apple&clientVersion=10.2.4`,
                         // 'form':``,
                         cookie
                     }
@@ -523,7 +541,7 @@ class Main extends Template {
                 codd = codess[this.rand(0, 3)].shareCode
             }
             let he = await this.algo.curl({
-                    'url': `https://api.m.jd.com/client.action?functionId=initForFarm&body={"shareCode":"${codd}-3","lng":"0.000000","lat":"0.000000","sid":"2871ac0252645ef0e2731aa7d03c1d3w","un_area":"16_1341_1347_44750","version":14,"channel":1,"babelChannel":0}&appid=wh5`,
+                    'url': `https://api.m.jd.com/client.action?functionId=initForFarm&body={"shareCode":"${codd}-3","lng":"0.000000","lat":"0.000000","version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                     'cookie': p.cookie
                 }
             )
@@ -533,20 +551,20 @@ class Main extends Template {
         }
         // 天天红包定时奖励
         await this.algo.curl({
-                'url': `https://api.m.jd.com/client.action?functionId=timingAwardForTurntableFarm&body={"version":4,"channel":1}&appid=wh5`,
+                'url': `https://api.m.jd.com/client.action?functionId=timingAwardForTurntableFarm&body={"version":16,"channel":1}&appid=wh5&client=apple&clientVersion=10.2.4`,
                 // 'form':``,
                 cookie
             }
         )
         let cj = await this.algo.curl({
-                'url': `https://api.m.jd.com/client.action?functionId=initForTurntableFarm&body={"version":4,"channel":1}&appid=wh5`,
+                'url': `https://api.m.jd.com/client.action?functionId=initForTurntableFarm&body={"version":16,"channel":1}&appid=wh5&client=apple&clientVersion=10.2.4`,
                 // 'form':``,
                 cookie
             }
         )
         for (let i = 0; i<cj.remainLotteryTimes; i++) {
             let s = await this.algo.curl({
-                    'url': `https://api.m.jd.com/client.action?functionId=lotteryForTurntableFarm&body={"type":1,"version":4,"channel":1}&appid=wh5`,
+                    'url': `https://api.m.jd.com/client.action?functionId=lotteryForTurntableFarm&body={"type":1,"version":16,"channel":1}&appid=wh5&client=apple&clientVersion=10.2.4`,
                     // 'form':``,
                     cookie
                 }
@@ -556,7 +574,7 @@ class Main extends Template {
         }
         for (let i of Array(4)) {
             let exc = await this.algo.curl({
-                    'url': `https://api.m.jd.com/client.action?functionId=farmAssistInit&body={"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                    'url': `https://api.m.jd.com/client.action?functionId=farmAssistInit&body={"version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                     cookie
                 }
             )
@@ -564,7 +582,7 @@ class Main extends Template {
                 for (let i of exc.assistStageList || []) {
                     if (i.percentage == '100%') {
                         let excc = await this.algo.curl({
-                                'url': `https://api.m.jd.com/client.action?functionId=receiveStageEnergy&body={"version":14,"channel":1,"babelChannel":"120"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                                'url': `https://api.m.jd.com/client.action?functionId=receiveStageEnergy&body={"version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                                 cookie
                             }
                         )
@@ -578,7 +596,7 @@ class Main extends Template {
         }
         init = await this.algo.curl({
                 'url': 'https://api.m.jd.com/client.action?functionId=initForFarm',
-                'form': `body={"version":11,"channel":3}&client=apple&clientVersion=10.0.4&osVersion=13.7&appid=wh5&loginType=2&loginWQBiz=interact`,
+                'form': `body={"version":16,"channel":3}&appid=wh5&client=apple&clientVersion=10.2.4`,
                 cookie
             }
         )
@@ -596,7 +614,7 @@ class Main extends Template {
             if (this.profile.doubleCard && amount>99 && myCard.doubleCard) {
                 for (let i of Array(3)) {
                     let doubleCard = await this.algo.curl({
-                            'url': `https://api.m.jd.com/client.action?functionId=userMyCardForFarm&body={"cardType":"doubleCard","type":"","version":16,"channel":1,"babelChannel":"121"}&appid=signed_wh5&osVersion=15.1.1&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&wqDefault=false&client=iOS&clientVersion=11.0.0&partner=&build=168086`,
+                            'url': `https://api.m.jd.com/client.action?functionId=userMyCardForFarm&body={"cardType":"doubleCard","type":"","version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                             cookie
                         }
                     )
@@ -614,7 +632,7 @@ class Main extends Template {
             if (this.profile.beanCard && myCard.beanCard) {
                 for (let i = 0; i<Math.min(Math.floor(amount / 110), 1); i++) {
                     let d = await this.algo.curl({
-                            'url': `https://api.m.jd.com/client.action?functionId=userMyCardForFarm&body={"cardType":"beanCard","type":"","version":14,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.4.0`,
+                            'url': `https://api.m.jd.com/client.action?functionId=userMyCardForFarm&body={"cardType":"beanCard","type":"","version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.4.0`,
                             cookie
                         }
                     )
@@ -666,7 +684,7 @@ class Main extends Template {
                         break
                     }
                     let fastCard = await this.algo.curl({
-                            'url': `https://api.m.jd.com/client.action?functionId=userMyCardForFarm&body={"cardType":"fastCard","type":"","version":16,"channel":1,"babelChannel":"121"}&appid=signed_wh5&osVersion=15.1.1&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&wqDefault=false&client=iOS&clientVersion=11.0.0&partner=&build=168086`,
+                            'url': `https://api.m.jd.com/client.action?functionId=userMyCardForFarm&body={"cardType":"fastCard","type":"","version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                             cookie
                         }
                     )
@@ -685,7 +703,7 @@ class Main extends Template {
             for (let i = 0; i<(amount - stock) / 10; i++) {
                 for (let j = 0; j<3; j++) {
                     var js = await this.algo.curl({
-                            'url': `https://api.m.jd.com/client.action?functionId=waterGoodForFarm&body={"type":"","version":15,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
+                            'url': `https://api.m.jd.com/client.action?functionId=waterGoodForFarm&body={"type":"","version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                             // 'form':``,
                             cookie
                         }
