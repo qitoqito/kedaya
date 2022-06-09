@@ -421,7 +421,7 @@ QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的�
             }
         }
         spl = spl.filter(d => d)
-        fs.writeFileSync(file, spl.filter(d => d).join("\n"))
+        fs.writeFileSync(file, spl.filter(d => d).push("").join("\n"))
     }
     console.log(message.sort().join("\n"))
     if (command && msg.length) {
