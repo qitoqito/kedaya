@@ -8,6 +8,7 @@ class Main extends Template {
         this.task = 'local'
         this.import = ['jdUrl']
         this.verify = 1
+        // this.thread=3
     }
 
     async prepare() {
@@ -58,8 +59,8 @@ class Main extends Template {
                 console.log('获取京东用户信息失败~')
                 return
             }
-            let buyerNick = load.data.data.buyerNick
-            let userId = load.data.data.missionCustomer.userId
+            let buyerNick = this.haskey(load, 'data.data.buyerNick')
+            let userId = this.haskey(load, 'data.data.missionCustomer.userId') || 10299171
             let state = await this.curl({
                     'url': `https://jinggengjcq-isv.isvjcloud.com/dm/front/openCardNew/mission/complete/state?mix_nick=${buyerNick}`,
                     'json': {
