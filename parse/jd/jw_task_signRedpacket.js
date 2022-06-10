@@ -26,7 +26,7 @@ class Main extends Template {
     async main(p) {
         let cookie = p.cookie;
         for (let activityId of ["10003", "10004"]) {
-            let q = await this.curl({
+            let q = await this.algo.curl({
                     'url': `https://api.m.jd.com/signTask/querySignStatus?client=apple&clientVersion=7.17.300&build=&uuid=oTGnpnJnfzHlnhyMFW_3v2IxIlAk&osVersion=iOS%2011.4&screen=320*568&networkType=wifi&partner=&forcebot=&d_brand=iPhone&d_model=iPhone%20SE%3CiPhone8%2C4%3E&lang=zh_CN&wifiBssid=&scope=&functionId=SignComponent_querySignStatus&appid=hot_channel&loginWQBiz=signcomponent&loginType=2&body={"activityId":"${activityId}","activeId":"","groupId":""}`,
                     cookie,
                     headers: {
@@ -50,7 +50,7 @@ class Main extends Template {
             else {
                 console.log(p.user, s.message)
             }
-            let task = await this.curl({
+            let task = await this.algo.curl({
                     'url': `https://api.m.jd.com/signTask/querySignList?client=apple&clientVersion=7.17.300&build=&uuid=&osVersion=iOS%2015.1.1&screen=390*844&networkType=wifi&partner=&forcebot=&d_brand=iPhone&lang=zh_CN&wifiBssid=&scope=&functionId=SignComponent_querySignList&appid=hot_channel&loginWQBiz=signcomponent&loginType=2&body={"activityId":"${activityId}"}`,
                     // 'form':``,
                     cookie,
@@ -60,41 +60,42 @@ class Main extends Template {
                     }
                 }
             )
-            this.assert(this.haskey(task, 'data.scanTaskInfo'), '没有获取到数据')
-            let info = task.data.scanTaskInfo
-            if (!info.completionFlag) {
-                let ss = await this.algo.curl({
-                        'url': `https://api.m.jd.com/scanTask/startScanTask?client=apple&clientVersion=7.17.300&functionId=SignComponent_doScanTask&appid=hot_channel&loginWQBiz=signcomponent&loginType=2&body={"itemId":"${info.itemId}","activityId":"${activityId}","scanAssignmentId":"${info.scanAssignmentId}","actionType":1}`,
-                        // 'form':``,
-                        cookie,
-                        headers: {
-                            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15F79 MicroMessenger/8.0.15(0x18000f2e) NetType/WIFI Language/zh_CN',
-                            referer: 'https://servicewechat.com/wx91d27dbf599dff74/616/page-frame.html'
+            if (this.haskey(task, 'data.scanTaskInfo')) {
+                let info = task.data.scanTaskInfo
+                if (!info.completionFlag) {
+                    let ss = await this.algo.curl({
+                            'url': `https://api.m.jd.com/scanTask/startScanTask?client=apple&clientVersion=7.17.300&functionId=SignComponent_doScanTask&appid=hot_channel&loginWQBiz=signcomponent&loginType=2&body={"itemId":"${info.itemId}","activityId":"${activityId}","scanAssignmentId":"${info.scanAssignmentId}","actionType":1}`,
+                            // 'form':``,
+                            cookie,
+                            headers: {
+                                'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15F79 MicroMessenger/8.0.15(0x18000f2e) NetType/WIFI Language/zh_CN',
+                                referer: 'https://servicewechat.com/wx91d27dbf599dff74/616/page-frame.html'
+                            }
                         }
-                    }
-                )
-                console.log(`等待任务中...`)
-                await this.wait(8000)
-                let r = await this.algo.curl({
-                        'url': `https://api.m.jd.com/scanTask/startScanTask?client=apple&clientVersion=7.17.300&functionId=SignComponent_doScanTask&appid=hot_channel&loginWQBiz=signcomponent&loginType=2&body={"itemId":"${info.itemId}","activityId":"${activityId}","scanAssignmentId":"${info.scanAssignmentId}","actionType":0}`,
-                        // 'form':``,
-                        cookie,
-                        headers: {
-                            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15F79 MicroMessenger/8.0.15(0x18000f2e) NetType/WIFI Language/zh_CN',
-                            referer: 'https://servicewechat.com/wx91d27dbf599dff74/616/page-frame.html'
+                    )
+                    console.log(`等待任务中...`)
+                    await this.wait(8000)
+                    let r = await this.algo.curl({
+                            'url': `https://api.m.jd.com/scanTask/startScanTask?client=apple&clientVersion=7.17.300&functionId=SignComponent_doScanTask&appid=hot_channel&loginWQBiz=signcomponent&loginType=2&body={"itemId":"${info.itemId}","activityId":"${activityId}","scanAssignmentId":"${info.scanAssignmentId}","actionType":0}`,
+                            // 'form':``,
+                            cookie,
+                            headers: {
+                                'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15F79 MicroMessenger/8.0.15(0x18000f2e) NetType/WIFI Language/zh_CN',
+                                referer: 'https://servicewechat.com/wx91d27dbf599dff74/616/page-frame.html'
+                            }
                         }
+                    )
+                    let amount = this.haskey(r, 'data.amount')
+                    if (amount) {
+                        this.print(`获得红包: ${amount}`, p.user)
                     }
-                )
-                let amount = this.haskey(r, 'data.amount')
-                if (amount) {
-                    this.print(`获得红包: ${amount}`, p.user)
+                    else {
+                        console.log(`什么也没有`)
+                    }
                 }
                 else {
-                    console.log(`什么也没有`)
+                    console.log(`任务已经完成`)
                 }
-            }
-            else {
-                console.log(`任务已经完成`)
             }
         }
     }
