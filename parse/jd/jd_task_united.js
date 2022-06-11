@@ -84,29 +84,35 @@ class Main extends Template {
                 return
             }
             let buyerNick = this.haskey(load, 'data.data.buyerNick')
-            let userId = this.haskey(load, 'data.data.missionCustomer.userId') || 10299171
-            let state = await this.curl({
-                    'url': `https://jinggengjcq-isv.isvjcloud.com/dm/front/openCardNew/mission/complete/state?mix_nick=${buyerNick}`,
-                    'json': {
-                        "jsonRpc": "2.0",
-                        "params": {
-                            "commonParameter": {
-                                "appkey": "51B59BB805903DA4CE513D29EC448375",
-                                "m": "POST",
-                                "timestamp": this.timestamp,
-                                userId
-                            },
-                            "admJson": {
-                                "actId": p.inviter.actId,
-                                userId,
-                                "method": "/openCardNew/mission/complete/state",
-                                buyerNick
+            let userId = (this.haskey(load, 'data.data.missionCustomer.userId') || 10299171).toString()
+            for (let nn of Array(3)) {
+                var state = await this.curl({
+                        'url': `https://jinggengjcq-isv.isvjcloud.com/dm/front/openCardNew/mission/complete/state?mix_nick=${buyerNick}`,
+                        'json': {
+                            "jsonRpc": "2.0",
+                            "params": {
+                                "commonParameter": {
+                                    "appkey": "51B59BB805903DA4CE513D29EC448375",
+                                    "m": "POST",
+                                    "timestamp": new Date().getTime(),
+                                    userId
+                                },
+                                "admJson": {
+                                    "actId": p.inviter.actId,
+                                    userId,
+                                    "method": "/openCardNew/mission/complete/state",
+                                    buyerNick
+                                }
                             }
                         }
                     }
+                )
+                if (this.haskey(state, 'data.data')) {
+                    break
                 }
-            )
-            for (let i of state.data.data) {
+            }
+            this.assert(this.haskey(state, 'data.data'), '没有获取到数据')
+            for (let i of this.haskey(state, 'data.data')) {
                 if (!i.isComplete) {
                     let k = 0
                     if (['viewShop', 'viewGoods', 'uniteAddCart', 'uniteCollectShop'].includes(i.type)) {
@@ -117,7 +123,7 @@ class Main extends Template {
                                 "commonParameter": {
                                     "appkey": "51B59BB805903DA4CE513D29EC448375",
                                     "m": "POST",
-                                    "timestamp": this.timestamp,
+                                    "timestamp": new Date().getTime(),
                                     userId
                                 },
                                 "admJson": {
