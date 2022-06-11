@@ -18,6 +18,14 @@ class Main extends Template {
     }
 
     async tgMsg() {
+        let dir = this.modules.fs.readdirSync(`${this.dirname}/parse/jd`);
+        let scripts = []
+        dir.forEach(function(v, k) {
+            let a = v.match(/jd_task_(\w+)/)
+            if (a) {
+                scripts.push(a[1])
+            }
+        })
         if (this['QITOQITO_MAP']) {
             let change = {}
             if (typeof this['QITOQITO_MAP'] == 'object') {
@@ -106,11 +114,21 @@ class Main extends Template {
                 }
                 if (this.match(new RegExp(`(^${custom})`), text) && !this.match(/task\s*\w+/, text)) {
                     let command = this.match(new RegExp(`(^${custom})`), text)
-                    text = `task jd_task_${command} -custom ${reText || text.replace(command, '')}`
+                    if (text.split(0, command.length) == command) {
+                        text = `task jd_task_${command} -custom ${reText || text.replace(command, '')}`
+                    }
                 }
                 else if (this.match(new RegExp(`(^${script}$)`), text) && !this.match(/task\s*\w+/, text)) {
                     let command = this.match(new RegExp(`(^${script})`), text)
-                    text = `task jd_task_${command}`
+                    if (text.split(0, command.length) == command) {
+                        text = `task jd_task_${command}`
+                    }
+                }
+                else if (this.match(new RegExp(`(^${scripts.join("|")}$)`), text) && !this.match(/task\s*\w+/, text)) {
+                    let command = this.match(new RegExp(`(^${scripts.join("|")})`), text)
+                    if (text.split(0, command.length) == command) {
+                        text = `task jd_task_${command} -custom ${reText || text.replace(command, '')}`
+                    }
                 }
                 else if (this.dict.map && this.match(new RegExp(`(^${Object.keys(this.dict.map).join("|")})`), text) && !this.match(/task\s*\w+/, text)) {
                     let command = this.match(new RegExp(`(^${Object.keys(this.dict.map).join("|")})`), text)
