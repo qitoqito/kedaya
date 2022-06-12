@@ -13,11 +13,11 @@ class Main extends Template {
     }
 
     async prepare() {
-        // try {
-        //     let txt = this.modules.fs.readFileSync(`${this.dirname}/invite/jd_task_carplay.json`).toString()
-        //     this.dict = this.loads(txt)
-        // } catch (e) {
-        // }
+        try {
+            let txt = this.modules.fs.readFileSync(`${this.dirname}/invite/jd_task_carplay.json`).toString()
+            this.dict = this.loads(txt)
+        } catch (e) {
+        }
         this.inviteDict = {}
     }
 
@@ -27,35 +27,46 @@ class Main extends Template {
             "url": `https://mpdz-car-dz.isvjcloud.com`,
             "id": ""
         }, 'post', cookie))
-        let load = await this.curl({
-                'url': `https://mpdz-car-dz.isvjcloud.com/dm/front/jdCardRunning/activity/load?open_id=&mix_nick=&push_way=2&user_id=`,
-                'json': {
-                    "jsonRpc": "2.0",
-                    "params": {
-                        "commonParameter": {
-                            "appkey": "33694314",
-                            "m": "POST",
-                            "sign": "8747140084354352e0cf1182bd8a50a1",
-                            "timestamp": this.timestamp,
-                            "userId": ""
+        if (!this.haskey(this.dict, `${p.user}.carId`)) {
+            for (let i = 0; i<3; i++) {
+                var load = await this.curl({
+                        'url': `https://mpdz-car-dz.isvjcloud.com/dm/front/jdCardRunning/activity/load?open_id=&mix_nick=&push_way=2&user_id=`,
+                        'json': {
+                            "jsonRpc": "2.0",
+                            "params": {
+                                "commonParameter": {
+                                    "appkey": "33694314",
+                                    "m": "POST",
+                                    "sign": "8747140084354352e0cf1182bd8a50a1",
+                                    "timestamp": this.timestamp,
+                                    "userId": ""
+                                },
+                                "admJson": {
+                                    "actId": 1760007,
+                                    "jdToken": isvObfuscator.token,
+                                    "shopId": null,
+                                    "method": "/jdCardRunning/activity/load",
+                                    "userId": "",
+                                    "buyerNick": ""
+                                }
+                            }
                         },
-                        "admJson": {
-                            "actId": 1760007,
-                            "jdToken": isvObfuscator.token,
-                            "shopId": null,
-                            "method": "/jdCardRunning/activity/load",
-                            "userId": "",
-                            "buyerNick": ""
-                        }
                     }
-                },
+                )
+                if (this.haskey(load, 'data')) {
+                    break
+                }
             }
-        )
-        if (this.haskey(load, 'errorMessage', '获取京东用户信息失败~')) {
-            console.log('获取京东用户信息失败~')
-            return
+            if (this.haskey(load, 'errorMessage', '获取京东用户信息失败~')) {
+                console.log('获取京东用户信息失败~')
+                return
+            }
+            var buyerNick = this.haskey(load, 'data.data.missionCustomer.buyerNick')
+            this.dict[p.user] = {buyerNick, actId: "1760007"}
         }
-        let buyerNick = this.haskey(load, 'data.data.missionCustomer.buyerNick')
+        else {
+            var buyerNick = this.dict[p.user].buyerNick
+        }
         // let userId = this.haskey(load, 'data.data.missionCustomer.userId') || 10299171
         for (let n = 0; n<2; n++) {
             let state = await this.curl({
@@ -88,23 +99,17 @@ class Main extends Template {
                         buyerNick
                     }
                 }
-                this.dict[user] = {
-                    buyerNick
-                }
             }
             for (let i of this.haskey(state, 'data.data')) {
                 if (!i.isComplete) {
-                    // console.log(i)
                     switch (i.type) {
-                        case "addCart":
-                        case "specialSign":
-                        case "collectShop":
-                        case "viewCarMeet":
-                        case "viewCarButler":
-                        case "viewPlus":
-                        case "viewCarLife":
-                        case "viewCarChannel":
-                        case "viewCommodity":
+                        case 'openCard':
+                        case 'shareAct':
+                        case  'payTrade':
+                        case 'bingCar':
+                            console.log("跳过运行:", i.missionName)
+                            break
+                        default:
                             console.log('正在运行:', i.missionName)
                             // let shopList=[1000088545,102074]
                             for (let j = 0; j<((i.dayTop - (i.hasGotNum || 0)) || 1); j++) {
@@ -150,7 +155,7 @@ class Main extends Template {
                                             }
                                         }
                                     )
-                                    json.params.admJson.shopId = this.haskey(shop, 'data.data.cusShop.shopId')
+                                    json.params.admJson.shopId = this.haskey(shop, 'data.data.cusShop.userId')
                                 }
                                 else if (i.type == "addCart") {
                                     let product = await this.curl({
@@ -194,6 +199,42 @@ class Main extends Template {
             }
             await this.wait(1000)
         }
+        let carInfo = await this.curl({
+                'url': `https://mpdz-car-dz.isvjcloud.com/dm/front/jdCardRunning/carInfo/getCarInfo?open_id=&mix_nick=${buyerNick}&user_id=10299171`,
+                json: {
+                    "jsonRpc": "2.0",
+                    "params": {
+                        "commonParameter": {
+                            "appkey": "33694314",
+                            "m": "POST",
+                            "sign": "251b47e7191893293e351703f5962055",
+                            "timestamp": this.timestamp,
+                            "userId": 10299171
+                        },
+                        "admJson": {
+                            "method": "/jdCardRunning/carInfo/getCarInfo",
+                            "userId": 10299171,
+                            "actId": 1760007,
+                            buyerNick
+                        }
+                    }
+                }
+            }
+        )
+        var carId
+        if (this.haskey(carInfo, 'data.data')) {
+            carInfo.data.data.forEach(function(v, k) {
+                if (v.isUnlock) {
+                    carId = v.id
+                }
+            })
+        }
+        if (!carId) {
+            carId = this.dict[p.user].carId || 1
+        }
+        else {
+            this.dict[p.user].carId = carId
+        }
         for (let i = 0; i<3; i++) {
             let game = await this.curl({
                     'url': `https://mpdz-car-dz.isvjcloud.com/dm/front/jdCardRunning/game/playGame?open_id=&mix_nick=${buyerNick}&user_id=10299171`,
@@ -208,7 +249,7 @@ class Main extends Template {
                                 "userId": 10299171
                             },
                             "admJson": {
-                                "carId": 1,
+                                carId,
                                 "carName": "电瓶车",
                                 "method": "/jdCardRunning/game/playGame",
                                 "userId": 10299171,
@@ -239,7 +280,7 @@ class Main extends Template {
                             },
                             "admJson": {
                                 gameLogId,
-                                "point": 100,
+                                "point": 1000,
                                 "method": "/jdCardRunning/game/sendGameAward",
                                 "userId": 10299171,
                                 "actId": 1760007,
@@ -252,13 +293,39 @@ class Main extends Template {
             console.log("获得积分100", this.haskey(r, 'success'))
             await this.wait(1000)
         }
+        let bing = await this.curl({
+                'url': `https://mpdz-car-dz.isvjcloud.com/dm/front/jdCardRunning/carInfo/checkBingCar?open_id=&mix_nick=${buyerNick}&user_id=10299171`,
+                json: {
+                    "jsonRpc": "2.0",
+                    "params": {
+                        "commonParameter": {
+                            "appkey": "33694314",
+                            "m": "POST",
+                            "sign": "9c5b41d5f8c038cc08e98c9f249ec90d",
+                            "timestamp": 1655023110154,
+                            "userId": 10299171
+                        },
+                        "admJson": {
+                            "method": "/jdCardRunning/carInfo/checkBingCar",
+                            "userId": 10299171,
+                            "actId": 1760007,
+                            buyerNick
+                        }
+                    }
+                }
+            }
+        )
+        if (this.haskey(bing, 'data.data.totalPoint')) {
+            this.print(`当前分数:`, bing.data.data.totalPoint, p.user)
+            this.dict[p.user].energyValue = bing.data.data.totalPoint
+        }
     }
 
     async extra() {
         if (this.dumps(this.inviteDict) != "{}") {
             for (let z in this.inviteDict) {
                 for (let i in this.dict) {
-                    if (!this.dict[i].complete) {
+                    if (!this.dict[i].complete && this.dict[i].actId == '1760007') {
                         console.log(`账号 ${i} 助力账号${z}`)
                         let s = await this.curl({
                                 'url': `https://mpdz-car-dz.isvjcloud.com/dm/front/jdCardRunning/mission/completeMission?open_id=&mix_nick=${this.dict[i].buyerNick}`,
@@ -293,11 +360,14 @@ class Main extends Template {
                     }
                 }
             }
+            for (let i in this.dict) {
+                this.dict[i].complete = 0
+            }
         }
-        // await this.modules.fs.writeFile(`${this.dirname}/invite/jd_task_carplay.json`, this.dumps(this.dict), (error) => {
-        //     if (error) return console.log("写入化失败" + error.message);
-        //     console.log("carplay写入成功");
-        // })
+        await this.modules.fs.writeFile(`${this.dirname}/invite/jd_task_carplay.json`, this.dumps(this.dict), (error) => {
+            if (error) return console.log("写入化失败" + error.message);
+            console.log("carplay写入成功");
+        })
         // if (this.dumps(this.inviteDict) != '{}') {
         //     let help = {}
         //     for (let cookie of this.cookies['help']) {
