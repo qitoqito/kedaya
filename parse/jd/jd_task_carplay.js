@@ -8,7 +8,7 @@ class Main extends Template {
         this.help = 'main'
         this.task = 'local'
         // this.work = 16
-        // this.thread = 3
+        // this.thread = 6
         this.import = ['fs', 'jdUrl']
     }
 
@@ -18,7 +18,7 @@ class Main extends Template {
             this.dict = this.loads(txt)
         } catch (e) {
         }
-        this.inviteDict = {}
+        // this.inviteDict = {}
     }
 
     async main(p) {
@@ -94,11 +94,11 @@ class Main extends Template {
             if (n == 0) {
                 this.assert(this.haskey(state, 'data.data'), '没有获取到数据')
                 let user = this.userName(cookie)
-                if (this.cookies.help.includes(cookie)) {
-                    this.inviteDict[user] = {
-                        buyerNick
-                    }
-                }
+                // if (this.cookies.help.includes(cookie)) {
+                //     this.inviteDict[user] = {
+                //         buyerNick
+                //     }
+                // }
             }
             for (let i of this.haskey(state, 'data.data')) {
                 if (!i.isComplete) {
@@ -324,11 +324,12 @@ class Main extends Template {
     }
 
     async extra() {
-        if (this.dumps(this.inviteDict) != "{}") {
-            for (let z in this.inviteDict) {
+        if (this.dumps(this.dict) != "{}") {
+            for (let k of this.cookies.help) {
+                let z = this.userName(k)
                 for (let i in this.dict) {
                     if (!this.dict[i].complete && this.dict[i].actId == '1760007') {
-                        console.log(`账号 ${i} 助力账号${z}`)
+                        console.log(`账号 ${i} 助力账号 ${z}`)
                         let s = await this.curl({
                                 'url': `https://mpdz-car-dz.isvjcloud.com/dm/front/jdCardRunning/mission/completeMission?open_id=&mix_nick=${this.dict[i].buyerNick}`,
                                 json: {
@@ -343,7 +344,7 @@ class Main extends Template {
                                         },
                                         "admJson": {
                                             "missionType": "shareAct",
-                                            "inviterNick": this.inviteDict[z].buyerNick,
+                                            "inviterNick": this.dict[z].buyerNick,
                                             "method": "/jdCardRunning/mission/completeMission",
                                             "userId": 10299171,
                                             "actId": 1760007,
