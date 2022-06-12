@@ -33,7 +33,7 @@ class Main extends Template {
             whiteList = (this.profile.whiteList || this.dict.whiteList).split(",").join('|')
         }
         else if (this.profile.blackList || this.dict.blackList) {
-            blackList = (this.profile.blackList || this.dict.blackList).blackList.split(",").join('|')
+            blackList = (this.profile.blackList || this.dict.blackList).split(",").join('|')
         }
         if (this.haskey(cart, 'resultData.cartInfo.vendors')) {
             for (let i of cart.resultData.cartInfo.vendors) {
