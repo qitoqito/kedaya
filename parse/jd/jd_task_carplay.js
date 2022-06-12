@@ -290,34 +290,36 @@ class Main extends Template {
                     }
                 }
             )
-            console.log("获得积分100", this.haskey(r, 'success'))
+            console.log("获得游戏积分", this.haskey(r, 'success'))
             await this.wait(1000)
         }
         let bing = await this.curl({
-                'url': `https://mpdz-car-dz.isvjcloud.com/dm/front/jdCardRunning/carInfo/checkBingCar?open_id=&mix_nick=${buyerNick}&user_id=10299171`,
+                'url': `https://mpdz-car-dz.isvjcloud.com/dm/front/jdCardRunning/activity/load?open_id=&mix_nick=${buyerNick}&push_way=2&user_id=10299171`,
                 json: {
                     "jsonRpc": "2.0",
                     "params": {
                         "commonParameter": {
                             "appkey": "33694314",
                             "m": "POST",
-                            "sign": "9c5b41d5f8c038cc08e98c9f249ec90d",
-                            "timestamp": 1655023110154,
+                            "sign": "de718d86d6f8a7a8780c9b73b8246fe2",
+                            "timestamp": this.timestamp,
                             "userId": 10299171
                         },
                         "admJson": {
-                            "method": "/jdCardRunning/carInfo/checkBingCar",
-                            "userId": 10299171,
                             "actId": 1760007,
+                            "jdToken": isvObfuscator.token,
+                            "shopId": null,
+                            "method": "/jdCardRunning/activity/load",
+                            "userId": 10299171,
                             buyerNick
                         }
                     }
                 }
             }
         )
-        if (this.haskey(bing, 'data.data.totalPoint')) {
-            this.print(`当前分数:`, bing.data.data.totalPoint, p.user)
-            this.dict[p.user].energyValue = bing.data.data.totalPoint
+        if (this.haskey(bing, 'data.data.missionCustomer.totalPoint')) {
+            this.print(`当前分数: ${bing.data.data.missionCustomer.totalPoint}`, p.user)
+            this.dict[p.user].energyValue = bing.data.data.missionCustomer.totalPoint
         }
     }
 
@@ -368,49 +370,6 @@ class Main extends Template {
             if (error) return console.log("写入化失败" + error.message);
             console.log("carplay写入成功");
         })
-        // if (this.dumps(this.inviteDict) != '{}') {
-        //     let help = {}
-        //     for (let cookie of this.cookies['help']) {
-        //         let pin = this.userPin(cookie)
-        //         if (this.inviteDict[pin]) {
-        //             help[this.inviteDict[pin]] = pin
-        //         }
-        //     }
-        //     let s = Object.keys(help)
-        //     let n = this.rand(1, 23)
-        //     let count = s.length
-        //     for (let i in this.inviteDict) {
-        //         try {
-        //             let inviter = s[n % count]
-        //             n++
-        //             if (inviter == this.inviteDict[i]) {
-        //                 inviter = s[n % count]
-        //                 n++
-        //             }
-        //             let share = await this.curl({
-        //                     'url': `https://mpdz-car-dz.isvjcloud.com/ql/front/participantBehavior`,
-        //                     body: {
-        //                         "actId": "1760007",
-        //                         "buyerNick": inviter,
-        //                         "behavior": "share"
-        //                     }
-        //                 }
-        //             )
-        //             let ss = await this.curl({
-        //                     'url': `https://mpdz-car-dz.isvjcloud.com/ql/front/participantBehavior`,
-        //                     body: {
-        //                         "actId": "1760007",
-        //                         "buyerNick": this.inviteDict[i],
-        //                         "inviterNick": inviter,
-        //                         "behavior": "inviteHelp"
-        //                     }
-        //                 }
-        //             )
-        //             console.log(`${i} 正在给 ${help[inviter]} 助力: ${ss.msg || ss.errorMsg}`)
-        //         } catch (e) {
-        //         }
-        //     }
-        // }
     }
 }
 
