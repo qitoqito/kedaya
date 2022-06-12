@@ -114,21 +114,21 @@ class Main extends Template {
                 }
                 if (this.match(new RegExp(`(^${custom})`), text) && !this.match(/task\s*\w+/, text)) {
                     let command = this.match(new RegExp(`(^${custom})`), text)
-                    if (text.split(0, command.length) == command) {
+                    // if (text.split(0, command.length) == command) {
                         text = `task jd_task_${command} -custom ${reText || text.replace(command, '')}`
-                    }
+                    // }
                 }
                 else if (this.match(new RegExp(`(^${script}$)`), text) && !this.match(/task\s*\w+/, text)) {
                     let command = this.match(new RegExp(`(^${script})`), text)
-                    if (text.split(0, command.length) == command) {
+                    // if (text.split(0, command.length) == command) {
                         text = `task jd_task_${command}`
-                    }
+                    // }
                 }
                 else if (this.match(new RegExp(`(^${scripts.join("|")}$)`), text) && !this.match(/task\s*\w+/, text)) {
                     let command = this.match(new RegExp(`(^${scripts.join("|")})`), text)
-                    if (text.split(0, command.length) == command) {
+                    // if (text.split(0, command.length) == command) {
                         text = `task jd_task_${command} -custom ${reText || text.replace(command, '')}`
-                    }
+                    // }
                 }
                 else if (this.dict.map && this.match(new RegExp(`(^${Object.keys(this.dict.map).join("|")})`), text) && !this.match(/task\s*\w+/, text)) {
                     let command = this.match(new RegExp(`(^${Object.keys(this.dict.map).join("|")})`), text)
