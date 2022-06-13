@@ -20,7 +20,7 @@ class Main extends Template {
     async main(p) {
         let cookie = p.cookie
         let s = await this.curl({
-                'url': `https://api.m.jd.com/api?appid=redrain-2021&functionId=doInteractiveAssignment&client=wh5&clientVersion=1.0.0&body={"completionFlag":true,"sourceCode":"acehby20210924","encryptProjectId":"3dp53zfoHGDTYCMqdNyXNUiEqD6X","encryptAssignmentId":"C6M11c51GTehfGsfoYuCNd7KLa7"}&_=1635683042434&callback=jsonp2`,
+                'url': `https://api.m.jd.com/api?appid=redrain-2021&functionId=doInteractiveAssignment&client=wh5&clientVersion=1.0.0&body={"completionFlag":true,"sourceCode":"acehby20210924","encryptProjectId":"3sXXaRM6gCUyJc4LwYU7EZpYhrcq","encryptAssignmentId":"8ppJjFktuVPrJKPVYZin9z6fgtv"}&_=1635683042434&callback=jsonp2`,
                 // 'form':``,
                 cookie
             }
