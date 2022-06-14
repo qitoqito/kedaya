@@ -419,7 +419,7 @@ class Main extends Template {
         var secretPin = getPin.content.data.secretPin
         let sp = getPin.content.data.secretPin
         // 判断开卡
-        if (this.dict.openCard && !['pool'].includes(type)) {
+        if (this.dict.openCard && venderId && !['pool'].includes(type)) {
             await this.bindWithVender(venderId, jdActivityId, p.cookie)
         }
         switch (host) {
