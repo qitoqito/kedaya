@@ -67,6 +67,12 @@ class Main extends Template {
                     if (j.type == 4) {
                         dayDict[i.level] = `签到: ${i.level}天, 可得: ${j.discount}京豆`
                     }
+                    else if (j.type == 10) {
+                        dayDict[i.level] = `签到: ${i.level}天, 可得: ${j.discount}E卡`
+                    }
+                    else if (j.type == 14) {
+                        dayDict[i.level] = `签到: ${i.level}天, 可得: ${j.discount / 100}红包`
+                    }
                 }
             }
         }
@@ -92,16 +98,16 @@ class Main extends Template {
                 this.complete.push(p.index)
                 return
             }
-            signIn.success ? console.log(p.user, `签到成功`) : console.log(p.user, signIn.msg || `签到失败或者已经签到`)
             for (let day of Object.keys(dayDict)) {
                 if (days<=day) {
-                    console.log(p.user, `店铺: ${p.inviter.shopName} Token: ${p.inviter.token},${dayDict[day]}, 已经签到: ${signIn.success ? days + 1 : days}天`)
+                    console.log(p.index, `店铺: ${p.inviter.shopName} Token: ${p.inviter.token},${dayDict[day]}, 已经签到: ${signIn.success ? days + 1 : days}天`)
                     if (signIn.success) {
                         this.dict[p.user].push(`Token: ${p.inviter.token}, ${dayDict[day]}, 已经签到: ${signIn.success ? days + 1 : days}天`)
                     }
                     break
                 }
             }
+            signIn.success ? console.log(p.index, `签到成功`) : console.log(p.index, signIn.msg || `签到失败或者已经签到`)
         }
     }
 
