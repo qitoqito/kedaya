@@ -378,7 +378,7 @@ class Main extends Template {
                         case 'totalWaterTaskInit':
                             if (!dotask.f) {
                                 if (dotask.totalWaterTaskTimes<dotask.totalWaterTaskLimit) {
-                                    for (let kk = 0; kk<dotask.totalWaterTaskLimit - dotask.totalWaterTaskTimes + 1; kk++) {
+                                    for (let kk = 0; kk<dotask.totalWaterTaskLimit - dotask.totalWaterTaskTimes + 6; kk++) {
                                         await this.algo.curl({
                                                 'url': `https://api.m.jd.com/client.action?functionId=waterGoodForFarm&body={"version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                                                 // 'form':``,
