@@ -582,10 +582,18 @@ class Main extends Template {
                 console.log('已经组队过了')
             }
             else {
+                let ad = await this.response({
+                        'url': `https://${host}/common/accessLogWithAD`,
+                        'form': `venderId=${venderId}&code=${p.inviter.activityType}&pin=${secretPin}&activityId=${activityId}&pageUrl=https%3A%2F%2Flzdz1-isv.isvjcloud.com&subType=app&adSource=`,
+                        cookie: getPin.cookie,
+                        referer: `https://${host}`
+                    }
+                )
                 let f = await this.curl({
                         'url': `https://${host}/microDz/invite/activity/wx/acceptInvite`,
                         'form': `activityId=${activityId}&invitee=${secretPin}&inviteeNick=${pin}&inviteeImg=${encodeURIComponent('https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}&inviter=${p.inviter.inviter}&inviterNick=${p.inviter.inviterNick}&inviterImg=${p.inviter.imgUrl}`,
-                        cookie: getPin.cookie
+                        cookie: ad.cookie,
+                        referer: `https://${host}/`
                     }
                 )
                 if (f.result) {
