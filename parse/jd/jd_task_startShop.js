@@ -35,6 +35,18 @@ class Main extends Template {
                 console.log('任务已经完成:', i.taskTitle)
             }
         }
+        let draw = await this.curl({
+                'url': `https://api.m.jd.com/?functionId=starShopDraw&body={"linkId":"Jim-Gu6R_lyd4LT6nz69ow"}&_t=1655468068076&appid=activities_platform&client=ios&clientVersion=11.0.6&cthr=1&networkType=wifi&d_brand=iPhone&d_model=iPhone13,3&lang=zh_CN&osVersion=15.1.1&partner=`,
+                // 'form':``,
+                cookie
+            }
+        )
+        if (this.haskey(draw, 'data')) {
+            console.log(`${draw.data.prizeConfigName} : ${draw.data.prizeValue}`)
+        }
+        else {
+            console.log(`什么也没有`)
+        }
     }
 }
 
