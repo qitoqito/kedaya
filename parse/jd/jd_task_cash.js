@@ -25,31 +25,38 @@ class Main extends Template {
             console.log("cookie失效")
             return
         }
-        let s = await this.curl(this.modules.jdUrl.app('cash_homePage', {}, 'post', cookie))
-        for (let i of this.haskey(s, 'data.result.taskInfos')) {
-            if (i.times != i.doTimes) {
-                if (i.jump) {
-                    let k = await this.curl(this.modules.jdUrl.app('cash_doTask', {
-                        "type": i.type,
-                        "taskInfo": i.jump.params.url || i.jump.params.skuId || i.jump.params.path
-                            || i.jump.params.shoId
-                    }, 'post', cookie))
-                    console.log(k.data.bizMsg)
+        for (let n = 0; n<6; n++) {
+            let z = 0
+            let s = await this.curl(this.modules.jdUrl.app('cash_homePage', {}, 'post', cookie))
+            for (let i of this.haskey(s, 'data.result.taskInfos')) {
+                if (i.times != i.doTimes) {
+                    if (i.jump) {
+                        z = 1
+                        let k = await this.curl(this.modules.jdUrl.app('cash_doTask', {
+                            "type": i.type,
+                            "taskInfo": i.jump.params.url || i.jump.params.skuId || i.jump.params.path
+                                || i.jump.params.shoId
+                        }, 'post', cookie))
+                        console.log(i.name, k.data.bizMsg)
+                    }
+                    else {
+                        let k = await this.curl(this.modules.jdUrl.app('cash_doTask', {
+                            "type": i.type,
+                            "taskInfo": "1"
+                        }, 'post', cookie))
+                        console.log(i.name, k.data)
+                    }
                 }
-                else {
-                    let k = await this.curl(this.modules.jdUrl.app('cash_doTask', {
-                        "type": i.type,
-                        "taskInfo": "1"
-                    }, 'post', cookie))
-                    console.log(k.data)
+                else if (n == 0) {
+                    console.log(`任务已完成: ${i.name}`)
                 }
             }
-            else {
-                console.log(`任务已完成: ${i.name}`)
+            if (!this.haskey(s, 'data.result.taskInfos')) {
+                console.log(`没有获取到任务列表,可能脸黑`)
             }
-        }
-        if (!this.haskey(s, 'data.result.taskInfos')) {
-            console.log(`没有获取到任务列表,可能脸黑`)
+            if (z == 0) {
+                break
+            }
         }
     }
 }
