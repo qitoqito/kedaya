@@ -42,7 +42,7 @@ class Main extends Template {
             }
         )
         if (this.haskey(draw, 'data')) {
-            console.log(`${draw.data.prizeConfigName} : ${draw.data.prizeValue}`)
+            this.print(`${draw.data.prizeConfigName} : ${draw.data.prizeValue}`)
         }
         else {
             console.log(`什么也没有`)
