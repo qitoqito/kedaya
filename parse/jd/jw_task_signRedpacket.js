@@ -19,7 +19,7 @@ class Main extends Template {
         this.algo.set({
             'appId': '9a38a',
             'type': 'wechat',
-            'fp': '5727941528525264'
+            'fp': this.random(['5572387091469959', '1798506217406362', '7842615739583152'], 1)[0]
         })
     }
 
