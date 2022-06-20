@@ -4,10 +4,10 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东赚赚"
-        this.cron = "51 6,22 * * *"
-        this.help = 2
-        this.task = 'active'
-        this.thread = 6
+        this.cron = "51 10,22 * * *"
+        // this.help = 2
+        this.task = 'local'
+        // this.thread = 6
     }
 
     async prepare() {
