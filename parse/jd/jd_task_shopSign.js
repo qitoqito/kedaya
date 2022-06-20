@@ -98,6 +98,11 @@ class Main extends Template {
                 this.complete.push(p.index)
                 return
             }
+            if (this.haskey(signIn, 'msg', '当前不存在有效的活动!')) {
+                this.plan.expire.push(p.inviter.token)
+                let index = this.plan.valid.indexOf(p.inviter.token)
+                delete this.plan.valid[index]
+            }
             for (let day of Object.keys(dayDict)) {
                 if (days<=day) {
                     console.log(p.index, `店铺: ${p.inviter.shopName} Token: ${p.inviter.token},${dayDict[day]}, 已经签到: ${signIn.success ? days + 1 : days}天`)
@@ -113,12 +118,12 @@ class Main extends Template {
 
     async extra() {
         if (this.plan.expire.length) {
-            console.log([...['可能过期Token'], ...this.plan.expire, ...['']].join('\n'))
-            this.notices([...['可能过期Token'], ...this.plan.expire, ...['']].join('\n'), 'message')
+            console.log([...['可能过期Token'], ...this.unique(this.plan.expire), ...['']].join('\n'))
+            this.notices([...['可能过期Token'], ...this.unique(this.plan.expire), ...['']].join('\n'), 'message')
         }
         if (this.plan.valid.length) {
-            console.log([...['有效Token'], ...this.plan.valid, ...['']].join('\n'))
-            this.notices([...['有效Token'], ...this.plan.valid, ...['']].join('\n'), 'message')
+            console.log([...['有效Token'], ...this.plan.valid.filter(d => d), ...['']].join('\n'))
+            this.notices([...['有效Token'], ...this.plan.valid.filter(d => d), ...['']].join('\n'), 'message')
         }
         if (this.plan.except.length) {
             console.log(this.unique([...['满签Token'], ...this.plan.except, ...['']]).join('\n'))
