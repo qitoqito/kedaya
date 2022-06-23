@@ -308,12 +308,14 @@ class Main extends Template {
                     for (let host of array) {
                         let token = await this.response({
                                 'url': `https://${host}/wxCommonInfo/token`,
+                                referer: `https://${host}/`
                             }
                         )
                         let s = await this.curl({
                                 'url': `https://${host}/pointExchange/activityContent`,
                                 'form': `activityId=${i.activityId}&pin=werwr36235244`,
-                                cookie: token.cookie
+                                cookie: token.cookie,
+                                referer: `https://${host}/`
                             }
                         )
                         if (this.haskey(s, 'data.activity')) {
@@ -443,7 +445,8 @@ class Main extends Template {
             let signUp = await this.curl({
                     'url': `https://${host}/sign/wx/signUp`,
                     'form': `venderId=${venderId}&pin=${secretPin}&actId=${activityId}`,
-                    cookie: getPin.cookie
+                    cookie: getPin.cookie,
+                    referer: `https://${host}/`
                 }
             )
             if (this.haskey(signUp, 'gift.giftName')) {
@@ -528,7 +531,7 @@ class Main extends Template {
             let c = await this.curl({
                     'url': `https://${host}/mc/beans/selectBeansForC`,
                     'form': `giftId=${activityId}&venderId=${venderId}&buyerPin=${secretPin}&beansLevel=1`,
-                    cookie: getPin.cookie
+                    cookie: getPin.cookie, referer: `https://${host}/`
                 }
             )
             if (this.haskey(c, 'data.usedNum')) {
@@ -538,7 +541,7 @@ class Main extends Template {
                     r = await this.curl({
                             'url': `https://${host}/mc/wxPointShop/exgBeans`,
                             'form': `buyerPin=${secretPin}&buyerNick=${getPin.content.data.pin}&giftId=${activityId}&venderId=${venderId}&beansLevel=${c.data.beansLevel}&exgBeanNum=${c.data.beansLevelCount}`,
-                            cookie: getPin.cookie
+                            cookie: getPin.cookie, referer: `https://${host}/`
                         }
                     )
                     count = c.data.beansLevelCount
@@ -555,7 +558,7 @@ class Main extends Template {
                         r = await this.curl({
                                 'url': `https://${host}/mc/wxPointShop/exgBeans`,
                                 'form': `buyerPin=${secretPin}&buyerNick=${getPin.content.data.pin}&giftId=${activityId}&venderId=${venderId}&beansLevel=&exgBeanNum=${this.haskey(point, 'data.buyerPoints') / 10}`,
-                                cookie: getPin.cookie
+                                cookie: getPin.cookie, referer: `https://${host}/`
                             }
                         )
                         count = this.haskey(point, 'data.buyerPoints') / 10
@@ -615,7 +618,7 @@ class Main extends Template {
             let get = await this.curl({
                     'url': `https://${host}/microDz/invite/activity/wx/getOpenCardAllStatuesNew`,
                     'form': `isInvited=1&activityId=${activityId}&pin=${secretPin}`,
-                    cookie: getPin.cookie
+                    cookie: getPin.cookie, referer: `https://${host}/`
                 }
             )
             if (this.haskey(get, 'data.reward')) {
@@ -636,7 +639,7 @@ class Main extends Template {
                 repeat: {
                     'url': `https://${host}/microDz/invite/activity/wx/getOpenCardAllStatuesNew`,
                     'form': `isInvited=1&activityId=${activityId}&pin=${secretPin}`,
-                    cookie: getPin.cookie
+                    cookie: getPin.cookie, referer: `https://${host}/`
                 }
             }
         }
@@ -648,7 +651,7 @@ class Main extends Template {
             var activityContent = await this.response({
                     url,
                     'form': `pin=${secretPin}&activityId=${activityId}&buyerPin=${secretPin}&signUuid=${signUuid}&nick=${pin}&friendUuid=${signUuid}`,
-                    cookie: `${getPin.cookie};`
+                    cookie: `${getPin.cookie};`, referer: `https://${host}/`
                 }
             )
             // console.log(activityContent.content.data)
@@ -663,9 +666,10 @@ class Main extends Template {
                 case 'wxFansInterActionActivity':
                     var uuid = data.actorInfo.uuid
                     var wxFollow = await this.response({
-                            'url': `https://lzkjdz-isv.isvjcloud.com/wxFansInterActionActivity/followShop`,
-                            'form': `activityId=51ebdc27816941b29de646a60e54f24a&uuid=${uuid}`,
-                            cookie: getPin.cookie
+                            'url': `https://${host}/wxFansInterActionActivity/followShop`,
+                            'form': `activityId=${activityId}&uuid=${uuid}`,
+                            cookie: getPin.cookie,
+                            referer: `https://${host}/`
                         }
                     )
                     break
@@ -681,7 +685,8 @@ class Main extends Template {
                     var wxFollow = await this.response({
                             'url': `https://${host}/${type}/follow`,
                             'form': `pin=${secretPin}&activityId=${activityId}`,
-                            cookie: `${getPin.cookie}`
+                            cookie: `${getPin.cookie}`,
+                            referer: `https://${host}/`
                         }
                     )
                     break
@@ -689,7 +694,8 @@ class Main extends Template {
                     var wxFollow = await this.response({
                             'url': `https://${host}/wxActionCommon/followShop`,
                             'form': `userId=${venderId}&buyerNick=${secretPin}&activityId=${activityId}&activityType=${p.inviter.activityType}`,
-                            cookie: `${getPin.cookie}`
+                            cookie: `${getPin.cookie}`,
+                            referer: `https://${host}/`
                         }
                     )
                     break
@@ -698,7 +704,8 @@ class Main extends Template {
                 let skus = await this.curl({
                         'url': `https://${host}/act/common/findSkus`,
                         'form': `actId=${activityId}&userId=${venderId}&type=${p.inviter.activityType}`,
-                        cookie: `${getPin.cookie}`
+                        cookie: `${getPin.cookie}`,
+                        referer: `https://${host}/`
                     }
                 )
                 skuList = this.column(skus.skus, 'skuId').map(d => d.toString())
@@ -707,7 +714,8 @@ class Main extends Template {
                 let lc = await this.curl({
                         'url': `https://${host}/crmCard/common/coupon/lightAddCart`,
                         'form': `actId=${activityId}&venderId=${venderId}&type=${at}&pin=${secretPin}`,
-                        cookie: getPin.cookie
+                        cookie: getPin.cookie,
+                        referer: `https://${host}/`
                     }
                 )
                 if (this.haskey(activityContent, 'content.data.oneKeyAddCart')) {
@@ -715,7 +723,8 @@ class Main extends Template {
                         var add = await this.response({
                                 'url': `https://${host}/wxCollectionActivity/oneKeyAddCart`,
                                 form: `activityId=${activityId}&pin=${secretPin}&productIds=${this.dumps(this.column(skus.skus, 'skuId'))}`,
-                                cookie: `${getPin.cookie}`
+                                cookie: `${getPin.cookie}`,
+                                referer: `https://${host}/`
                             }
                         )
                         await this.wait(1000)
@@ -734,7 +743,8 @@ class Main extends Template {
                             let addOne = await this.response({
                                     'url': `https://${host}/wxCollectionActivity/addCart`,
                                     'form': `activityId=${activityId}&pin=${secretPin}&productId=${k}`,
-                                    cookie
+                                    cookie,
+                                    referer: `https://${host}/`
                                 }
                             )
                             console.log(`加购: ${k}`)
@@ -759,7 +769,8 @@ class Main extends Template {
                             var getPrize = await this.curl({
                                     'url': `https://${host}/wxCollectionActivity/getPrize`,
                                     form: `activityId=${activityId}&pin=${secretPin}`,
-                                    cookie
+                                    cookie,
+                                    referer: `https://${host}/`
                                 }
                             )
                             if (typeof getPrize == 'object') {
@@ -796,7 +807,8 @@ class Main extends Template {
                         var getPrize = await this.curl({
                                 'url': `https://${host}/drawCenter/draw/luckyDraw`,
                                 form: `activityId=${activityId}&pin=${secretPin}`,
-                                cookie: getPin.cookie
+                                cookie: getPin.cookie,
+                                referer: `https://${host}/`
                             }
                         )
                         if (typeof getPrize == 'object') {
@@ -851,7 +863,8 @@ class Main extends Template {
                 let ad = await this.response({
                         'url': `https://${host}/common/accessLogWithAD`,
                         'form': `venderId=${venderId}&code=24&pin=${secretPin}&activityId=${activityId}&pageUrl=https%3A%2F%2Flzkj-isv.isvjcloud.com%2FwxShopGift%2Factivity%3FactivityId%3D${activityId}`,
-                        cookie: getPin.cookie
+                        cookie: getPin.cookie,
+                        referer: `https://${host}/`
                     }
                 )
                 // let ac = await this.response({
@@ -864,7 +877,8 @@ class Main extends Template {
                     var draw = await this.curl({
                             'url': `https://${host}/wxShopGift/draw`,
                             'form': `activityId=${activityId}&buyerPin=${secretPin}&hasFollow=false&accessType=app`,
-                            cookie: ad.cookie
+                            cookie: ad.cookie,
+                            referer: `https://${host}/`
                         }
                     )
                     if (typeof draw == 'object') {
@@ -922,7 +936,8 @@ class Main extends Template {
                         var getPrize = await this.curl({
                                 'url': `https://${host}/${type}/gameOverRecord`,
                                 form: `activityId=${activityId}&pin=${secretPin}&score=${this.rand(1000, 100000)}`,
-                                cookie: getPin.cookie
+                                cookie: getPin.cookie,
+                                referer: `https://${host}/`
                             }
                         )
                         if (typeof getPrize == 'object') {
@@ -952,7 +967,8 @@ class Main extends Template {
                     let c = await this.response({
                             'url': `https://${host}/${type}/currentFloor`,
                             'form': `activityId=${activityId}`,
-                            cookie: getPin.cookie
+                            cookie: getPin.cookie,
+                            referer: `https://${host}/`
                         }
                     )
                     if (this.haskey(c, 'content.data.currentFloors')) {
@@ -962,7 +978,8 @@ class Main extends Template {
                         var getPrize = await this.curl({
                                 'url': `https://${host}/wxBuildActivity/publish`,
                                 'form': `pin=${secretPin}&activityId=${activityId}&content=${encodeURIComponent(content)}`,
-                                cookie: c.cookie
+                                cookie: c.cookie,
+                                referer: `https://${host}/`
                             }
                         )
                         if (typeof getPrize == 'object') {
@@ -998,7 +1015,8 @@ class Main extends Template {
                         let join = await this.curl({
                                 'url': `https://${host}/${type}/saveMember`,
                                 'form': `pin=${secretPin}&activityId=${activityId}&signUuid=${signUuid}&pinImg=${encodeURIComponent('https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}`,
-                                cookie: getPin.cookie
+                                cookie: getPin.cookie,
+                                referer: `https://${host}/`
                             }
                         )
                         console.log(join)
@@ -1022,7 +1040,8 @@ class Main extends Template {
                         let join = await this.curl({
                                 'url': `https://${host}/${type}/saveCandidate`,
                                 'form': `pin=${secretPin}&activityId=${activityId}&signUuid=${signUuid}&pinImg=${encodeURIComponent('https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}&jdNick=${encodeURIComponent(pin)}`,
-                                cookie: getPin.cookie
+                                cookie: getPin.cookie,
+                                referer: `https://${host}/`
                             }
                         )
                         console.log(join)
@@ -1049,7 +1068,8 @@ class Main extends Template {
                 let getMemberLevel = await this.curl({
                         'url': `https://${host}/mc/wxMcLevelAndBirthGifts/getMemberLevel`,
                         'form': `venderId=${venderId}&pin=${secretPin}&activityId=${activityId}`,
-                        cookie: getPin.cookie
+                        cookie: getPin.cookie,
+                        referer: `https://${host}/`
                     }
                 )
                 if (this.haskey(getMemberLevel, 'data.level')) {
@@ -1060,7 +1080,8 @@ class Main extends Template {
                             let s = await this.curl({
                                     'url': `https://${host}/mc/wxMcLevelAndBirthGifts/sendLevelGifts`,
                                     'form': `venderId=${venderId}&pin=${secretPin}&level=${ll}&activityId=${activityId}`,
-                                    cookie: getPin.cookie
+                                    cookie: getPin.cookie,
+                                    referer: `https://${host}/`
                                 }
                             )
                             if (this.haskey(s, 'data.levelData')) {
@@ -1091,7 +1112,8 @@ class Main extends Template {
                 let g = await this.response({
                         'url': `https://${host}/common/pointRedeem/getGiftList`,
                         'form': `pin=${secretPin}&venderId=${venderId}`,
-                        cookie: getPin.cookie
+                        cookie: getPin.cookie,
+                        referer: `https://${host}/`
                     }
                 )
                 if (this.haskey(g, 'content.point')) {
@@ -1100,7 +1122,8 @@ class Main extends Template {
                     let reward = await this.curl({
                             'url': `https://${host}/pointExchange/exchange`,
                             'form': `pin=${secretPin}&activityId=${venderId}&beanCount=${point}`,
-                            cookie: getPin.cookie
+                            cookie: getPin.cookie,
+                            referer: `https://${host}/`
                         }
                     )
                     console.log(reward)
@@ -1122,7 +1145,8 @@ class Main extends Template {
                         let source = await this.response({
                                 'url': `https://${host}/wxCollectCard/saveSource`,
                                 'form': `activityId=${activityId}&pinImg=${encodeURIComponent('https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}&pin=${secretPin}&jdNick=${encodeURIComponent(pin)}`,
-                                cookie: getPin.cookie
+                                cookie: getPin.cookie,
+                                referer: `https://${host}/`
                             }
                         )
                         let uuid = this.haskey(source, 'content.data') || p.inviter.signUuid
@@ -1132,7 +1156,8 @@ class Main extends Template {
                     let draw = await this.curl({
                             'url': `https://${host}/wxCollectCard/drawCard`,
                             form,
-                            cookie: getPin.cookie
+                            cookie: getPin.cookie,
+                            referer: `https://${host}/`
                         }
                     )
                     await this.wait(200)
@@ -1154,7 +1179,8 @@ class Main extends Template {
                         getPrize = await this.curl({
                                 'url': `https://${host}/wxCollectCard/getPrize`,
                                 form: `activityId=${activityId}&pin=${secretPin}`,
-                                cookie: co || getPin.cookie
+                                cookie: co || getPin.cookie,
+                                referer: `https://${host}/`
                             }
                         )
                         if (getPrize.errorMessage && (getPrize.errorMessage.includes("擦肩") || getPrize.errorMessage.includes("未达到领奖条件"))) {
@@ -1222,9 +1248,10 @@ class Main extends Template {
                             for (let v of d[dict[task].list].slice(0, d.upLimit - d.finishedCount)) {
                                 if (!v.finished) {
                                     let dd = await this.response({
-                                            'url': `https://lzkjdz-isv.isvjcloud.com/wxFansInterActionActivity/${dict[task].task}`,
+                                            'url': `https://${host}/wxFansInterActionActivity/${dict[task].task}`,
                                             'form': `activityId=${activityId}&uuid=${uuid}&${dict[task].key}=${v[dict[task].key]}`,
-                                            cookie
+                                            cookie,
+                                            referer: `https://${host}/`
                                         }
                                     )
                                     console.log(task, typeof dd.content == 'object' ? dd.content : '可能出错了')
@@ -1236,9 +1263,10 @@ class Main extends Template {
                         else {
                             for (let kk = d.finishedCount; kk<d.upLimit; kk++) {
                                 let dd = await this.response({
-                                        'url': `https://lzkjdz-isv.isvjcloud.com/wxFansInterActionActivity/${dict[task].task}`,
+                                        'url': `https://${host}/wxFansInterActionActivity/${dict[task].task}`,
                                         'form': `activityId=${activityId}&uuid=${uuid}`,
-                                        cookie: cookie
+                                        cookie: cookie,
+                                        referer: `https://${host}/`
                                     }
                                 )
                                 console.log(task, typeof dd.content == 'object' ? dd.content : '可能出错了')
@@ -1252,9 +1280,10 @@ class Main extends Template {
                 for (let k = 0; k<3; k++) {
                     if (!data.actorInfo[prize[k]]) {
                         let draw = await this.response({
-                                'url': `https://lzkjdz-isv.isvjcloud.com/wxFansInterActionActivity/startDraw`,
+                                'url': `https://${host}/wxFansInterActionActivity/startDraw`,
                                 'form': `activityId=${activityId}&uuid=${uuid}&drawType=0${k + 1}`,
-                                cookie
+                                cookie,
+                                referer: `https://${host}/`
                             }
                         )
                         cookie = draw.cookie
@@ -1916,14 +1945,17 @@ class Main extends Template {
         }, 'post', p.cookie))
         switch (host) {
             case "cjhy-isv.isvjcloud.com":
+            case "cjhydz-isv.isvjcloud.com":
                 var h = await this.response({
                         'url': `https://${host}/wxCollectionActivity/activity?activityId=${activityId}`,
+                        referer: `https://${host}/`
                     }
                 )
                 break
             default:
                 var h = await this.response({
                         'url': `https://${host}/wxCollectionActivity/activity2/${activityId}?activityId=${activityId}`,
+                        referer: `https://${host}/`
                     }
                 )
                 break
@@ -1931,7 +1963,8 @@ class Main extends Template {
         let info = await this.response({
                 'url': `https://${host}/customer/getSimpleActInfoVo`,
                 form: `activityId=${activityId}`,
-                cookie: h.cookie
+                cookie: h.cookie,
+                referer: `https://${host}/`
             }
         )
         var getPin = await this.response({
