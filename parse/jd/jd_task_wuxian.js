@@ -434,8 +434,9 @@ class Main extends Template {
         let pageUrl = encodeURIComponent(`https://${host}/sign/signActivity?activityId=${activityId}&venderId=${venderId}`)
         let log = await this.response({
                 'url': `https://${host}/common/accessLog`,
-                'form': `venderId=${venderId}&code=${at}&pin=${secretPin}&activityId=${activityId}&pageUrl=${pageUrl}&subType=app`,
-                cookie: getPin.cookie
+                'form': `venderId=${venderId || 1}&code=${at || 99}&pin=${secretPin}&activityId=${activityId}&pageUrl=${pageUrl}&subType=app`,
+                cookie: getPin.cookie,
+                referer: `https://${host}`
             }
         )
         if (['sign'].includes(type)) {
@@ -583,8 +584,8 @@ class Main extends Template {
             }
             else {
                 let ad = await this.response({
-                        'url': `https://${host}/common/accessLogWithAD`,
-                        'form': `venderId=${venderId}&code=${p.inviter.activityType}&pin=${secretPin}&activityId=${activityId}&pageUrl=https%3A%2F%2Flzdz1-isv.isvjcloud.com&subType=app&adSource=`,
+                        'url': `https://${host}/common/accessLog`,
+                        'form': `venderId=1&code=99&pin=${secretPin}&activityId=${activityId}&pageUrl=https%3A%2F%2Flzdz1-isv.isvjcloud.com&subType=app&adSource=`,
                         cookie: getPin.cookie,
                         referer: `https://${host}`
                     }
@@ -592,10 +593,11 @@ class Main extends Template {
                 let f = await this.curl({
                         'url': `https://${host}/microDz/invite/activity/wx/acceptInvite`,
                         'form': `activityId=${activityId}&invitee=${secretPin}&inviteeNick=${pin}&inviteeImg=${encodeURIComponent('https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}&inviter=${p.inviter.inviter}&inviterNick=${p.inviter.inviterNick}&inviterImg=${p.inviter.imgUrl}`,
-                        cookie: ad.cookie,
+                        cookie: getPin.cookie,
                         referer: `https://${host}/`
                     }
                 )
+                console.log(f)
                 if (f.result) {
                     p.finish = 1
                     p.inviter.aid.push(pin)
