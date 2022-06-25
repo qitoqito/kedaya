@@ -15,12 +15,11 @@ class Main extends Template {
     }
 
     async prepare() {
-        let fp = this.fingerPrint || this.random(['5572387091469959', '7842615739583152'], 1)[0]
         this.algo = new this.modules.jdAlgo()
         this.algo.set({
             'appId': '9a38a',
             'type': 'wechat',
-            fp
+            // fp
         })
     }
 
