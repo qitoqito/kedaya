@@ -131,8 +131,8 @@ class Main extends Template {
             if (this.plan.valid.length) {
                 let c = this.plan.valid.concat(this.plan.except).filter(v => !this.plan.valid.includes(v) || !this.plan.except.includes(v))
                 if (c.length>0) {
-                    console.log([...['剩余Token'], ...c].join('\n'))
-                    this.notices([...['剩余Token'], ...c].join('\n'), 'message')
+                    console.log([...['剩余Token'], ...this.unique(c)].join('\n'))
+                    this.notices([...['剩余Token'], ...this.unique(c)].join('\n'), 'message')
                 }
             }
         }
