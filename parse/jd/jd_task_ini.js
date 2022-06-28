@@ -67,6 +67,9 @@ class Main extends Template {
                                     var a = (typeof pp[fn][kw] == 'object' ? pp[fn][kw] : pp[fn][kw].split("|"))
                                     var b = this.unique([...a, ...this.params[i].split("|")]).join("|")
                                 }
+                                else if (pp[`${fn}_${kw}`]) {
+                                    var b = this.unique([...pp[`${fn}_${kw}`], ...this.params[i].split("|")]).join("|")
+                                }
                                 else {
                                     b = this.params[i]
                                 }
