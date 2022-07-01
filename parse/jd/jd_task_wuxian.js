@@ -45,8 +45,8 @@ class Main extends Template {
                 let host = ''
                 if (i.match(/:\/\/([^\/]+)/)) {
                     host = this.match(/:\/\/([^\/]+)/, i)
-                    if (host == "cjhy-isv.isvjcloud.com") {
-                        host = "cjhydz-isv.isvjcloud.com"
+                    if (host == "cjhydz-isv.isvjcloud.com") {
+                        host = "cjhy-isv.isvjcloud.com"
                     }
                 }
                 let acid = this.match([/(\w{32})/, /(\w{24,27})/, /(\d{12,17})/], i)
