@@ -772,6 +772,8 @@ class Main extends Template {
                     console.log("加购有延迟,等待3秒...")
                     await this.wait(3000)
                 }
+                // cookie = getPin.cookie
+                let tempCookie = cookie
                 cookie = getPin.cookie
                 while (true) {
                     for (let nn = 0; nn<3; nn++) {
@@ -783,6 +785,9 @@ class Main extends Template {
                                     referer: `https://${host}/`
                                 }
                             )
+                            if (this.haskey(getPrize, 'data', 'AUTH.FAILED.VALID')) {
+                                cookie = tempCookie
+                            }
                             if (typeof getPrize == 'object') {
                                 break
                             }
