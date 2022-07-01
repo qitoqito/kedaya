@@ -89,7 +89,7 @@ class Main extends Template {
             if (this.haskey(exchangeLoad, 'data.data.awardSettings')) {
                 this.plan = (this.column(exchangeLoad.data.data.awardSettings, ['awardDes', 'id'], 'awardName'))
             }
-        }
+        } 
         if (Object.keys(this.plan).length>0) {
             if (this.profile.reward && this.plan[`${this.profile.reward}京豆`]) {
                 console.log(`即将兑换: ${this.profile.reward}京豆, 使用分数: ${this.plan[`${this.profile.reward}京豆`].awardDes}, 兑换id: ${this.plan[`${this.profile.reward}京豆`].id}`)
@@ -137,15 +137,15 @@ class Main extends Template {
     dmCreateSign(params) {
         let t = params.params.admJson
         let r = (new Date).valueOf()
-        let n = "20ee7d6400dda1c9622699123af2c2c8";
-        let a = "21699045";
+        let n = "85623312044258464325227666883546";
+        let a = "25747717";
         let o = JSON.stringify(t)
         let s = encodeURIComponent(o)
         let c = new RegExp("'", "g")
         let A = new RegExp("~", "g")
         s = s.replace(c, "%27")
         s = s.replace(A, "%7E")
-        let d = a + "admjson" + s + "appkey" + a + "timestamp" + r + n
+        let d =  a + "appKey" + a + "admJson" + s + "timestamp" + r + n
         params.params.commonParameter.appkey = a
         params.params.commonParameter.timestamp = r
         params.params.commonParameter.sign = this.md5(d.toLowerCase())
