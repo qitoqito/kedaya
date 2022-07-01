@@ -157,6 +157,7 @@ class Main extends Template {
                                 break
                             case 2001:
                             case 2003:
+                            case 2004:
                                 data.type = 'drawCenter'
                                 data.title = '幸运抽奖'
                                 data.pageUrl = `https://${host}/drawCenter/activity?activityId=${i.activityId}`
