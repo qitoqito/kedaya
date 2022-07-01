@@ -774,6 +774,13 @@ class Main extends Template {
                 }
                 // cookie = getPin.cookie
                 let tempCookie = cookie
+                getPin = await this.response({
+                        'url': `https://${host}/customer/getMyPing`,
+                        form: `userId=${venderId}&token=${this.isvObfuscator.token}&fromType=APP`,
+                        cookie: cookie,
+                        referer: `https://${host}/`
+                    }
+                )
                 cookie = getPin.cookie
                 while (true) {
                     for (let nn = 0; nn<3; nn++) {
@@ -1958,6 +1965,7 @@ class Main extends Template {
             "url": `https://${host}`,
             "id": ""
         }, 'post', p.cookie))
+        this.isvObfuscator = isvObfuscator
         switch (host) {
             case "cjhy-isv.isvjcloud.com":
             case "cjhydz-isv.isvjcloud.com":
