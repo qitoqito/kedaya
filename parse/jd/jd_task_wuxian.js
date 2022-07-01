@@ -45,6 +45,9 @@ class Main extends Template {
                 let host = ''
                 if (i.match(/:\/\/([^\/]+)/)) {
                     host = this.match(/:\/\/([^\/]+)/, i)
+                    if (host == "cjhy-isv.isvjcloud.com") {
+                        host = "cjhydz-isv.isvjcloud.com"
+                    }
                 }
                 let acid = this.match([/(\w{32})/, /(\w{24,27})/, /(\d{12,17})/], i)
                 if (acid) {
@@ -531,7 +534,8 @@ class Main extends Template {
             let c = await this.curl({
                     'url': `https://${host}/mc/beans/selectBeansForC`,
                     'form': `giftId=${activityId}&venderId=${venderId}&buyerPin=${secretPin}&beansLevel=1`,
-                    cookie: getPin.cookie, referer: `https://${host}/`
+                    cookie: getPin.cookie,
+                    referer: `https://${host}/`
                 }
             )
             if (this.haskey(c, 'data.usedNum')) {
@@ -541,7 +545,8 @@ class Main extends Template {
                     r = await this.curl({
                             'url': `https://${host}/mc/wxPointShop/exgBeans`,
                             'form': `buyerPin=${secretPin}&buyerNick=${getPin.content.data.pin}&giftId=${activityId}&venderId=${venderId}&beansLevel=${c.data.beansLevel}&exgBeanNum=${c.data.beansLevelCount}`,
-                            cookie: getPin.cookie, referer: `https://${host}/`
+                            cookie: getPin.cookie,
+                            referer: `https://${host}/`
                         }
                     )
                     count = c.data.beansLevelCount
@@ -558,7 +563,8 @@ class Main extends Template {
                         r = await this.curl({
                                 'url': `https://${host}/mc/wxPointShop/exgBeans`,
                                 'form': `buyerPin=${secretPin}&buyerNick=${getPin.content.data.pin}&giftId=${activityId}&venderId=${venderId}&beansLevel=&exgBeanNum=${this.haskey(point, 'data.buyerPoints') / 10}`,
-                                cookie: getPin.cookie, referer: `https://${host}/`
+                                cookie: getPin.cookie,
+                                referer: `https://${host}/`
                             }
                         )
                         count = this.haskey(point, 'data.buyerPoints') / 10
@@ -618,7 +624,8 @@ class Main extends Template {
             let get = await this.curl({
                     'url': `https://${host}/microDz/invite/activity/wx/getOpenCardAllStatuesNew`,
                     'form': `isInvited=1&activityId=${activityId}&pin=${secretPin}`,
-                    cookie: getPin.cookie, referer: `https://${host}/`
+                    cookie: getPin.cookie,
+                    referer: `https://${host}/`
                 }
             )
             if (this.haskey(get, 'data.reward')) {
@@ -639,7 +646,8 @@ class Main extends Template {
                 repeat: {
                     'url': `https://${host}/microDz/invite/activity/wx/getOpenCardAllStatuesNew`,
                     'form': `isInvited=1&activityId=${activityId}&pin=${secretPin}`,
-                    cookie: getPin.cookie, referer: `https://${host}/`
+                    cookie: getPin.cookie,
+                    referer: `https://${host}/`
                 }
             }
         }
@@ -651,7 +659,8 @@ class Main extends Template {
             var activityContent = await this.response({
                     url,
                     'form': `pin=${secretPin}&activityId=${activityId}&buyerPin=${secretPin}&signUuid=${signUuid}&nick=${pin}&friendUuid=${signUuid}`,
-                    cookie: `${getPin.cookie};`, referer: `https://${host}/`
+                    cookie: getPin.cookie,
+                    referer: `https://${host}/`
                 }
             )
             // console.log(activityContent.content.data)
@@ -763,6 +772,7 @@ class Main extends Template {
                     console.log("加购有延迟,等待3秒...")
                     await this.wait(3000)
                 }
+                cookie = getPin.cookie
                 while (true) {
                     for (let nn = 0; nn<3; nn++) {
                         for (let xx of Array(3)) {
