@@ -15,12 +15,6 @@ class Main extends Template {
     async prepare() {
         this.assert(this.custom, '请先添加环境变量')
         this.errMsg = new RegExp(`/奖品已发完|来晚了|全部被领取|明日再来|结束|${this.profile.errMsg}/`)
-        // if (this.expand) {
-        //     var query = this.query((this.getValue('expand').join("|") || ''), '\\|', 1)
-        // }
-        // else {
-        //     var query = this.profile
-        // }
         this.dict = this.profile
         this.dicts = {}
         this.isSend = []
@@ -749,6 +743,7 @@ class Main extends Template {
                         console.log(`加购已经完成`)
                     }
                     else {
+                        let err = 0
                         for (let k of skuList) {
                             let addOne = await this.response({
                                     'url': `https://${host}/wxCollectionActivity/addCart`,
@@ -761,11 +756,14 @@ class Main extends Template {
                             if (this.haskey(addOne, 'content.data.hasAddCartSize') == need) {
                                 break
                             }
-                            if (this.haskey(addOne, 'content.errorMessage').includes('异常')) {
-                                console.log(addOne.content.errorMessage)
+                            if (err>2) {
                                 break
                             }
+                            if (this.haskey(addOne, 'content.errorMessage').includes('异常')) {
+                                console.log(addOne.content.errorMessage)
+                            }
                             var cookie = `${addOne.cookie};AUTH_C_USER=${secretPin};`
+                            err = 0
                         }
                     }
                 }
@@ -793,6 +791,7 @@ class Main extends Template {
                                     referer: `https://${host}/`
                                 }
                             )
+                            console.log(getPrize)
                             if (this.haskey(getPrize, 'data', 'AUTH.FAILED.VALID')) {
                                 cookie = tempCookie
                             }
@@ -801,7 +800,7 @@ class Main extends Template {
                             }
                         }
                         if (this.haskey(getPrize, 'errorMessage') && (getPrize.errorMessage.includes("擦肩") || getPrize.errorMessage.includes("未达到领奖条件"))) {
-                            console.log('奖品与您擦肩而过了哟,重新获取')
+                            console.log(this.haskey(getPrize, 'errorMessage'))
                             await this.wait(1000)
                         }
                         else {
@@ -883,13 +882,6 @@ class Main extends Template {
                 }
             }
             else if (['wxShopGift'].includes(type)) {
-
-                // let ac = await this.response({
-                //         'url': `https://${host}/${type}/activityContent`,
-                //         'form': `activityId=${activityId}&buyerPin=${secretPin}`,
-                //         cookie: ad.cookie
-                //     }
-                // )
                 let cookie = getPin.cookie
                 for (let xx of Array(2)) {
                     var draw = await this.curl({
@@ -901,12 +893,12 @@ class Main extends Template {
                     )
                     if (this.haskey(getPrize, 'data', 'AUTH.FAILED.VALID')) {
                         let ad = await this.response({
-                        'url': `https://${host}/common/accessLogWithAD`,
-                        'form': `venderId=${venderId}&code=${at}&pin=${secretPin}&activityId=${activityId}&pageUrl=https%3A%2F%2Flzkj-isv.isvjcloud.com%2FwxShopGift%2Factivity%3FactivityId%3D${activityId}`,
-                        cookie: getPin.cookie,
-                        referer: `https://${host}/`
-                    }
-                )
+                                'url': `https://${host}/common/accessLogWithAD`,
+                                'form': `venderId=${venderId}&code=${at}&pin=${secretPin}&activityId=${activityId}&pageUrl=https%3A%2F%2Flzkj-isv.isvjcloud.com%2FwxShopGift%2Factivity%3FactivityId%3D${activityId}`,
+                                cookie: getPin.cookie,
+                                referer: `https://${host}/`
+                            }
+                        )
                         cookie = ad.cookie
                     }
                     if (typeof draw == 'object') {
