@@ -883,32 +883,36 @@ class Main extends Template {
                 }
             }
             else if (['wxShopGift'].includes(type)) {
-                let ad = await this.response({
-                        'url': `https://${host}/common/accessLogWithAD`,
-                        'form': `venderId=${venderId}&code=24&pin=${secretPin}&activityId=${activityId}&pageUrl=https%3A%2F%2Flzkj-isv.isvjcloud.com%2FwxShopGift%2Factivity%3FactivityId%3D${activityId}`,
-                        cookie: getPin.cookie,
-                        referer: `https://${host}/`
-                    }
-                )
+
                 // let ac = await this.response({
                 //         'url': `https://${host}/${type}/activityContent`,
                 //         'form': `activityId=${activityId}&buyerPin=${secretPin}`,
                 //         cookie: ad.cookie
                 //     }
                 // )
-                for (let xx of Array(3)) {
+                let cookie = getPin.cookie
+                for (let xx of Array(2)) {
                     var draw = await this.curl({
                             'url': `https://${host}/wxShopGift/draw`,
                             'form': `activityId=${activityId}&buyerPin=${secretPin}&hasFollow=false&accessType=app`,
-                            cookie: ad.cookie,
+                            cookie,
                             referer: `https://${host}/`
                         }
                     )
+                    if (this.haskey(getPrize, 'data', 'AUTH.FAILED.VALID')) {
+                        let ad = await this.response({
+                        'url': `https://${host}/common/accessLogWithAD`,
+                        'form': `venderId=${venderId}&code=${at}&pin=${secretPin}&activityId=${activityId}&pageUrl=https%3A%2F%2Flzkj-isv.isvjcloud.com%2FwxShopGift%2Factivity%3FactivityId%3D${activityId}`,
+                        cookie: getPin.cookie,
+                        referer: `https://${host}/`
+                    }
+                )
+                        cookie = ad.cookie
+                    }
                     if (typeof draw == 'object') {
                         break
                     }
                 }
-                // console.log(draw)
                 if (draw.result) {
                     console.log(this.haskey(activityContent.content, 'data.list') || activityContent.content)
                     let g = {
