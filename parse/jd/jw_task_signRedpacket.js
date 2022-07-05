@@ -24,7 +24,7 @@ class Main extends Template {
 
     async main(p) {
         let cookie = p.cookie;
-        for (let activityId of this.getValue('activityId').length ? this.getValue('activityId') : ["10004", "10003"]) {
+        for (let activityId of this.profile.activityId ? this.profile.activityId.split("|") : ["10004", "10003"]) {
             let q = await this.algo.curl({
                     'url': `https://api.m.jd.com/signTask/querySignStatus?client=apple&clientVersion=7.17.300&build=&uuid=oTGnpnJnfzHlnhyMFW_3v2IxIlAk&osVersion=iOS%2011.4&screen=320*568&networkType=wifi&partner=&forcebot=&d_brand=iPhone&d_model=iPhone%20SE%3CiPhone8%2C4%3E&lang=zh_CN&wifiBssid=&scope=&functionId=SignComponent_querySignStatus&appid=hot_channel&loginWQBiz=signcomponent&loginType=2&body={"activityId":"${activityId}","activeId":"","groupId":""}`,
                     cookie,
