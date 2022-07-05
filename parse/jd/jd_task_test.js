@@ -1,27 +1,26 @@
 const Template = require('../../template');
+
 class Main extends Template {
     constructor() {
         super()
         this.title = "框架测试"
-        // this.cron = "12 0,13 * * *"
-        this.help = 2
+        this.cron = "6 6 6 6 6"
+        this.help = 1
         this.task = 'test'
-        this.aid = 'main'
         this.readme = "这里是测试信息"
-        this.turn = 2
     }
+
     async prepare() {
         if (this.proxy) {
             console.log("proxy检测")
             let ip = await this.curl({
                 url: 'https://api.ipify.org/?format=json'
             })
-            console.log("当前外网IP:", ip.ip)
+            console.log("外网IP:", ip.ip)
             let tbIp = await this.curl({
-                url: 'http://ip.geo.iqiyi.com/cityjson?format=json',
-
+                url: 'http://pv.sohu.com/cityjson?',
             })
-            console.log("爱奇艺IP:", tbIp.data.ip)
+            console.log("搜狐IP:", this.match(/"cip"\s*:\s*"([^\"]+)"/, tbIp))
             console.log("\n")
         }
         let s = await this.curl({
@@ -41,13 +40,15 @@ class Main extends Template {
             })
         }
     }
-    async assist(p) {
-        console.log(`当前用户`, p.user, '当前助力', p.inviter.user)
-    }
+
     async main(p) {
         let cookie = p.cookie;
-        console.log(p.user, '框架测试')
-        this.notices('框架测试\n这边是换行符', p.user)
+        this.print('框架测试', p.user)
+        console.log(this.profile)
+        if (this.profile.custom) {
+            this.print(`custom: ${this.profile.custom}`, p.user)
+        }
     }
 }
+
 module.exports = Main;
