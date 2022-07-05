@@ -1,6 +1,7 @@
 const Template = require('../../template');
 
 class Main extends Template {
+    constructor() {
         super()
         this.title = "京东品牌闪购签到有礼"
         this.cron = "23 7,23 * * *"
