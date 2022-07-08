@@ -610,7 +610,7 @@ class Main extends Template {
                     let error = f.errorMessage || ''
                     console.log(error)
                     if (error.includes('队伍已经满员')) {
-                        this.finish(p.n)
+                        this.finish.push(p.n)
                     }
                 }
             }
