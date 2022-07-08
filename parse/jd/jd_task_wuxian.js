@@ -23,9 +23,8 @@ class Main extends Template {
         }
         let custom = this.getValue('custom')
         this.algo = new this.modules.jdAlgo({
-            appId: "169f1",
-            type: 'app',
-            fp: "8389547038003203",
+            appId: "8adfb",
+            type: 'lite',
         })
         for (let i of custom) {
             let query = this.query(i, '&', 1)
@@ -2008,17 +2007,17 @@ class Main extends Template {
         jdActivityId = jdActivityId || ''
         if (this.dict.openCard) {
             for (let kk of Array(3)) {
-                // var o = await this.algo.curl({
-                //         'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${venderId}","bindByVerifyCodeFlag":1,"registerExtend":{"v_birthday":"${this.rand(1990, 2002)}-07-${this.rand(10, 28)}"},"writeChildFlag":0,"activityId":"","channel":8016}&clientVersion=9.2.0&client=H5&uuid=88888`,
-                //         cookie
-                //     }
-                // )
-                var o = await this.curl(this.modules.jdUrl.app('bindWithVender', {
-                        "venderId": venderId.toString(),
-                        // "shopId": venderId.toString(),
-                        "bindByVerifyCodeFlag": 1
-                    }, 'post', cookie)
+                var o = await this.algo.curl({
+                        'url': `https://api.m.jd.com/client.action?appid=jd_shop_member&functionId=bindWithVender&body={"venderId":"${venderId}","bindByVerifyCodeFlag":1,"registerExtend":{},"writeChildFlag":0,"channel":8018802}&clientVersion=9.2.0&client=H5&uuid=88888`,
+                        cookie
+                    }
                 )
+                // var o = await this.curl(this.modules.jdUrl.app('bindWithVender', {
+                //         "venderId": venderId.toString(),
+                //        // "shopId": "",
+                //         "bindByVerifyCode1Flag": 1
+                //     }, 'post', cookie)
+                // )
                 if (o.success) {
                     break
                 }
