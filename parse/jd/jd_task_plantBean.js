@@ -369,7 +369,6 @@ class Main extends Template {
 
     async extra() {
         try {
-            let code = []
             let dict = this.column(this.code, '', 'user')
             let json = []
             for (let cookie of this.cookies.all) {
@@ -379,13 +378,12 @@ class Main extends Template {
                     json.push(dict[user])
                 }
             }
-            console.log(`运行助力码:`)
+            console.log(`全部助力码:`)
+            console.log(this.dumps(json))
             if (this.profile.cache) {
-                console.log(this.dumps(this.code))
                 console.log("已经设置缓存:/invite/jd_task_plantBean.json,跳过写入")
             }
             else {
-                console.log(this.dumps(json))
                 if (json.length) {
                     await this.modules.fs.writeFile(`${this.dirname}/invite/jd_task_plantBean.json`, this.dumps(json), (error) => {
                         if (error) return console.log("写入化失败" + error.message);
