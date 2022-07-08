@@ -5,9 +5,9 @@ class Main extends Template {
         super()
         this.title = "京东种豆得豆"
         this.cron = "12 */3 * * *"
-        this.task = 'own'
+        this.task = 'local'
         this.turn = 2
-        this.import = ['jdUrl', 'jdAlgo']
+        this.import = ['jdUrl', 'jdAlgo', 'fs']
     }
 
     async prepare() {
@@ -16,10 +16,18 @@ class Main extends Template {
             'appId': '0f6ed',
             'type': 'pingou',
         })
+        try {
+            let txt = this.modules.fs.readFileSync(`${this.dirname}/invite/jd_task_plantBean.json`).toString()
+            this.code = this.loads(txt)
+        } catch (e) {
+        }
+        console.log(this.dumps(this.code))
     }
 
     async main(p) {
         let cookie = p.cookie;
+        let user = p.user
+        let lists = this.column(this.code, 'plantUuid')
         if (this.turnCount == 0) {
             let index = await this.curl({
                     'url': `https://api.m.jd.com/client.action?functionId=plantBeanIndex`,
@@ -35,6 +43,9 @@ class Main extends Template {
             if (this.haskey(index, 'data.jwordShareInfo')) {
                 let share = this.query(index.data.jwordShareInfo.shareUrl, '&', 1)
                 plantUuid = share.plantUuid
+                if (!lists.includes(plantUuid)) {
+                    this.code.push({user, plantUuid})
+                }
             }
             let roundId
             for (let r of this.haskey(index, 'data.roundList')) {
@@ -54,6 +65,12 @@ class Main extends Template {
                     }
                 }
                 else if (r.roundState == 2) {
+                    let re = await this.curl({
+                            'url': `https://api.m.jd.com/client.action?functionId=receiveNutrients`,
+                            'form': `body={"monitor_refer":"plant_receiveNutrients","monitor_source":"plant_app_plant_index","roundId":"${r.roundId}","version":"9.2.4.0"}&client=apple&clientVersion=10.0.4&&appid=ld`,
+                            cookie
+                        }
+                    )
                     for (let j of r.bubbleInfos) {
                         console.log(`获取${j.name}: ${j.nutrNum}`)
                         let culture = await this.curl({
@@ -68,6 +85,15 @@ class Main extends Template {
             for (let i of this.haskey(index, 'data.taskList')) {
                 if (i.isFinished) {
                     console.log(i.taskName, "任务已经完成")
+                    if (i.taskType == 2) {
+                        if (plantUuid) {
+                            for (let kk of this.code) {
+                                if (kk.plantUuid == plantUuid) {
+                                    kk.finish = 1
+                                }
+                            }
+                        }
+                    }
                 }
                 else {
                     console.log(`开始做 ${i.taskName}任务`, i.taskType);
@@ -76,7 +102,11 @@ class Main extends Template {
                     switch (i.taskType) {
                         case 2:
                             if (plantUuid) {
-                                this.code.push(plantUuid)
+                                for (let kk of this.code) {
+                                    if (kk.plantUuid == plantUuid) {
+                                        kk.finish = 0
+                                    }
+                                }
                             }
                             break
                         case 57:
@@ -304,8 +334,10 @@ class Main extends Template {
                 this.jump = 1
             }
             await this.wait(2000)
-            for (let uuid of this.code) {
-                if (!this.dict[uuid]) {
+            for (let k of this.code) {
+                let uuid = k.plantUuid
+                if (k.finish == 0) {
+                    console.log(`正在助力: ${k.user}`)
                     let index = await this.curl({
                             'url': `https://api.m.jd.com/client.action?functionId=plantBeanIndex`,
                             'form': `body={"plantUuid":"${uuid}","monitor_source":"plant_m_plant_index","monitor_refer":"","version":"9.2.4.1"}&client=apple&clientVersion=10.0.4&appid=ld`,
@@ -325,13 +357,43 @@ class Main extends Template {
                     }
                     else if (res.state == '3') {
                         console.log(res.promptText)
-                        this.dict[uuid] = 1
+                        k.finish = 1
                     }
                     else if (res.state == '4') {
                         console.log(res.promptText)
                     }
                 }
             }
+        }
+    }
+
+    async extra() {
+        try {
+            let code = []
+            let dict = this.column(this.code, '', 'user')
+            let json = []
+            for (let cookie of this.cookies.all) {
+                let user = this.userName(cookie)
+                if (dict[user]) {
+                    dict[user].finish = 0
+                    json.push(dict[user])
+                }
+            }
+            console.log(`运行助力码:`)
+            if (this.profile.cache) {
+                console.log(this.dumps(this.code))
+                console.log("已经设置缓存:/invite/jd_task_plantBean.json,跳过写入")
+            }
+            else {
+                console.log(this.dumps(json))
+                if (json.length) {
+                    await this.modules.fs.writeFile(`${this.dirname}/invite/jd_task_plantBean.json`, this.dumps(json), (error) => {
+                        if (error) return console.log("写入化失败" + error.message);
+                        console.log("京东种豆得豆ShareCode写入成功");
+                    })
+                }
+            }
+        } catch (e) {
         }
     }
 }
