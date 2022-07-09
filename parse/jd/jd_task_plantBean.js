@@ -362,6 +362,8 @@ class Main extends Template {
                     else if (res.state == '4') {
                         console.log(res.promptText)
                     }
+                }else{
+                    console.log(`助力: ${k.user} 已经完成,不需要再助力了`)
                 }
             }
         }
