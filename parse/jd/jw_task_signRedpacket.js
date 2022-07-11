@@ -35,7 +35,8 @@ class Main extends Template {
                 }
             )
             let s = await this.algo.curl({
-                    'url': `https://api.m.jd.com/signTask/doSignTask?client=apple&clientVersion=7.16.280&functionId=SignComponent_doSignTask&appid=hot_channel&loginWQBiz=signcomponent&loginType=2&body={"activityId":"${activityId}"}`,
+                    'url': `https://api.m.jd.com/signTask/doSignTask`,
+                    form: `client=apple&clientVersion=7.16.280&functionId=SignComponent_doSignTask&appid=hot_channel&loginWQBiz=signcomponent&loginType=2&body={"activityId":"${activityId}"}`,
                     cookie,
                     headers: {
                         'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15F79 MicroMessenger/8.0.15(0x18000f2e) NetType/WIFI Language/zh_CN',
