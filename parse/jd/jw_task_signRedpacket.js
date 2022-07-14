@@ -64,7 +64,8 @@ class Main extends Template {
                 let info = task.data.scanTaskInfo
                 if (!info.completionFlag) {
                     let ss = await this.algo.curl({
-                            'url': `https://api.m.jd.com/scanTask/startScanTask?client=apple&clientVersion=7.17.300&functionId=SignComponent_doScanTask&appid=hot_channel&loginWQBiz=signcomponent&loginType=2&body={"itemId":"${info.itemId}","activityId":"${activityId}","scanAssignmentId":"${info.scanAssignmentId}","actionType":1}`,
+                            'url': `https://api.m.jd.com/scanTask/startScanTask`,
+                            form: `client=apple&clientVersion=7.17.300&functionId=SignComponent_doScanTask&appid=hot_channel&loginWQBiz=signcomponent&loginType=2&body={"itemId":"${info.itemId}","activityId":"${activityId}","scanAssignmentId":"${info.scanAssignmentId}","actionType":1}`,
                             // 'form':``,
                             cookie,
                             headers: {
@@ -72,11 +73,12 @@ class Main extends Template {
                                 referer: 'https://servicewechat.com/wx91d27dbf599dff74/616/page-frame.html'
                             }
                         }
-                    )
+                    ) 
                     console.log(`等待任务中...`)
                     await this.wait(8000)
                     let r = await this.algo.curl({
-                            'url': `https://api.m.jd.com/scanTask/startScanTask?client=apple&clientVersion=7.17.300&functionId=SignComponent_doScanTask&appid=hot_channel&loginWQBiz=signcomponent&loginType=2&body={"itemId":"${info.itemId}","activityId":"${activityId}","scanAssignmentId":"${info.scanAssignmentId}","actionType":0}`,
+                            'url': `https://api.m.jd.com/scanTask/startScanTask`,
+                            form: `client=apple&clientVersion=7.17.300&functionId=SignComponent_doScanTask&appid=hot_channel&loginWQBiz=signcomponent&loginType=2&body={"itemId":"${info.itemId}","activityId":"${activityId}","scanAssignmentId":"${info.scanAssignmentId}","actionType":0}`,
                             // 'form':``,
                             cookie,
                             headers: {
