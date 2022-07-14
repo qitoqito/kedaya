@@ -15,6 +15,17 @@ class Main extends Template {
         delete this.params.filename
         delete this.params.custom
         let wrap = parseInt(this.profile.wrap || 233)
+        let dirs = this.modules.fs.readdirSync(`${this.dirname}/parse/jd`);
+        let parseFile = []
+        let parseRegex = []
+        for (let i of dirs) {
+            let fileName = this.match(/(\w+_\w+_\w+)\./, i)
+            if (fileName) {
+                parseFile.push(fileName)
+                parseRegex.push(`${fileName}_`)
+            }
+        }
+        let reg = new RegExp(parseRegex.join("|"))
         try {
             var file = `${this.dirname}/config/${this.type}.ini`
             var ini = this.parseIni(file);
@@ -203,7 +214,7 @@ class Main extends Template {
                 else {
                     // 处理字符串
                     let keyword = this.match(new RegExp(this.keywords.map(d => `\\w+_\\w+_${d}`).join('|')), i)
-                    if (keyword) {
+                    if (keyword || this.match(reg, i)) {
                         let fn, kw
                         [fn, kw] = this.match(/(\w+)_(\w+)$/, i)
                         if (!pp[fn]) {
