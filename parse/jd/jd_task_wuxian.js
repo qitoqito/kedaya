@@ -739,7 +739,20 @@ class Main extends Template {
                 else {
                     cookie = `${getPin.cookie}`
                     if (has>=need) {
-                        console.log(`加购已经完成`)
+                        console.log(`加购已经完成...`)
+                        for (let k of skuList.slice(0, 2)) {
+                            let addOne = await this.response({
+                                    'url': `https://${host}/wxCollectionActivity/addCart`,
+                                    'form': `activityId=${activityId}&pin=${secretPin}&productId=${k}`,
+                                    cookie,
+                                    referer: `https://${host}/`
+                                }
+                            )
+                            if (this.haskey(addOne, 'content.result')) {
+                                var cookie = `${addOne.cookie};AUTH_C_USER=${secretPin};`
+                                break
+                            }
+                        }
                     }
                     else {
                         let err = 0
@@ -794,7 +807,7 @@ class Main extends Template {
                             if (this.haskey(getPrize, 'data', 'AUTH.FAILED.VALID')) {
                                 cookie = tempCookie
                             }
-                            if (typeof getPrize == 'object') {
+                            else if (typeof getPrize == 'object') {
                                 break
                             }
                         }
