@@ -117,7 +117,10 @@ class Main extends Template {
                         break
                     }
                 }
-                this.assert(this.haskey(state, 'data.data'), '没有获取到数据')
+                if (!this.haskey(state, 'data.data')) {
+                    console.log('没有获取到数据')
+                    continue
+                }
                 for (let i of this.haskey(state, 'data.data')) {
                     if (!i.isComplete) {
                         let k = 0
