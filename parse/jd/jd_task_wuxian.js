@@ -629,12 +629,13 @@ class Main extends Template {
             else {
                 console.log("可能已经领取奖励了")
             }
-            if (this.dict.count) {
-                if (this.unique(p.inviter.aid).length>=parseInt(this.dict.count)) {
-                    console.log(`组队满足: ${this.dict.count}`)
-                    this.finish.push(p.number)
-                }
+            let count = this.dict.count || 56
+            // if (this.dict.count) {
+            if (this.unique(p.inviter.aid).length>=parseInt(count)) {
+                console.log(`组队满足: ${count}`)
+                this.finish.push(p.number)
             }
+            // }
             this.dicts[pin] = {
                 cookie: p.cookie,
                 repeat: {
@@ -1575,7 +1576,7 @@ class Main extends Template {
                         cookie,
                         repeat: {
                             'url': `https://${host}/microDz/invite/activity/wx/getOpenCardAllStatuesNew`,
-                            'form': `isInvited=1&activityId=${activityId}&pin=${secretPin}`,
+                            'form': `isInvited=0&activityId=${activityId}&pin=${secretPin}`,
                             cookie: getPin.cookie
                         }
                     }
