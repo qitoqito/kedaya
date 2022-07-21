@@ -4,18 +4,12 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东互动整合"
-        this.cron = "12 6,20 * * *"
-        // this.help = 2
+        this.cron = "6 6 6 6 6"
         this.task = 'local'
         this.verify = 1
-        this.thread = 3
     }
 
     async prepare() {
-        this.code = [
-            "https://prodev.m.jd.com/mall/active/31GFSKyRbD3ehsHih2rQKArxfb8c/index.html",
-            // "https://prodev.m.jd.com/mall/active/2T8MxyGmn4CQtGJ1asZybjMvakmR/index.html"
-        ]
         let custom = this.getValue('custom')
         if (custom.length) {
             this.code = []
@@ -40,8 +34,9 @@ class Main extends Template {
                 let encryptProjectId = this.match(/\\"encryptProjectId\\":\\"(\w+)\\"/, html)
                 if (encryptProjectId) {
                     let appid = this.match(/appid\s*:\s*"(\w+)"/, html) || 'babelh5'
+                    let sourceCode = this.profile.sourceCode || 'aceaceqingzhan'
                     if (encryptProjectId) {
-                        this.shareCode.push({encryptProjectId, appid})
+                        this.shareCode.push({encryptProjectId, appid, sourceCode})
                     }
                 }
                 else if (this.match(/businessh5\/([^\/]+)/, html)) {
@@ -87,9 +82,10 @@ class Main extends Template {
         let cookie = p.cookie;
         let encryptProjectId = p.inviter.encryptProjectId
         let appid = p.inviter.appid
+        let sourceCode = p.inviter.sourceCode
         let l = await this.curl({
                 'url': `https://api.m.jd.com/client.action?functionId=queryInteractiveInfo`,
-                'form': `appid=${appid}&body={"encryptProjectId":"${encryptProjectId}","ext":{"rewardEncryptAssignmentId":null,"needNum":50},"sourceCode":"aceaceqingzhan"}&sign=11&t=1646206781226`,
+                'form': `appid=${appid}&body={"encryptProjectId":"${encryptProjectId}","ext":{"rewardEncryptAssignmentId":null,"needNum":50},"sourceCode":"${sourceCode}"}&sign=11&t=1646206781226`,
                 cookie
             }
         )
@@ -105,7 +101,7 @@ class Main extends Template {
                     for (let j of extra) {
                         let s = await this.curl({
                                 'url': `https://api.m.jd.com/client.action?functionId=doInteractiveAssignment`,
-                                'form': `appid=${appid}&body={"encryptProjectId":"${encryptProjectId}","encryptAssignmentId":"${i.encryptAssignmentId}","itemId":"${j.advId || j.itemId}","sourceCode":"aceaceqingzhan"}&sign=11&t=${this.timestamp}`,
+                                'form': `appid=${appid}&body={"encryptProjectId":"${encryptProjectId}","encryptAssignmentId":"${i.encryptAssignmentId}","itemId":"${j.advId || j.itemId}","sourceCode":"${sourceCode}"}&sign=11&t=${this.timestamp}`,
                                 cookie
                             }
                         )
@@ -124,14 +120,14 @@ class Main extends Template {
             for (let i = 0; i<30; i++) {
                 let r = await this.curl({
                         'url': `https://api.m.jd.com/client.action?functionId=doInteractiveAssignment`,
-                        'form': `appid=${appid}&body={"encryptProjectId":"${encryptProjectId}","encryptAssignmentId":"${lotteryId}","completionFlag":true,"ext":{"exchangeNum":1},"sourceCode":"aceaceqingzhan"}&sign=11&t=1646207845798`,
+                        'form': `appid=${appid}&body={"encryptProjectId":"${encryptProjectId}","encryptAssignmentId":"${lotteryId}","completionFlag":true,"ext":{"exchangeNum":1},"sourceCode":"${sourceCode}"}&sign=11&t=1646207845798`,
                         cookie
                     }
                 )
                 if (!r) {
                     break
                 }
-                else if (['风险等级未通过', "未登录", '兑换积分不足'].includes(r.msg)) {
+                else if (['风险等级未通过', "未登录", '兑换积分不足', '场景不匹配'].includes(r.msg)) {
                     console.log(r.msg)
                     break
                 }
