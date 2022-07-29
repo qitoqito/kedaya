@@ -1046,7 +1046,7 @@ class Main extends Template {
                         // await this.wait(3000)
                         let join = await this.curl({
                                 'url': `https://${host}/${type}/saveMember`,
-                                'form': `pin=${secretPin}&activityId=${activityId}&signUuid=${signUuid}&pinImg=${encodeURIComponent('https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}`,
+                                'form': `venderId=${venderId}&pin=${secretPin}&activityId=${activityId}&signUuid=${signUuid}&pinImg=${encodeURIComponent('https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}`,
                                 cookie: getPin.cookie,
                                 referer: `https://${host}/`
                             }
@@ -1670,7 +1670,7 @@ class Main extends Template {
                             )
                             let catpain = await this.curl({
                                     'url': `https://${host}/${p.inviter.type}/saveCaptain`,
-                                    'form': `activityId=${p.inviter.activityId}&pin=${secretPin}&pinImg=${encodeURIComponent('https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}`,
+                                    'form': `venderId=${venderId}&activityId=${p.inviter.activityId}&pin=${secretPin}&pinImg=${encodeURIComponent('https://storage.jd.com/karma/image/20220112/1dafd93018624d74b5f01f82c9ac97b0.png')}`,
                                     cookie: getPin.cookie
                                 }
                             )
@@ -1687,7 +1687,7 @@ class Main extends Template {
                             this.dicts[user] = {
                                 'pool': {
                                     'url': `https://${host}/${p.inviter.type}/activityContent`,
-                                    'form': `activityId=${p.inviter.activityId}&pin=${secretPin}`,
+                                    'form': `venderId=${venderId}&activityId=${p.inviter.activityId}&pin=${secretPin}`,
                                     cookie: getPin.cookie,
                                     host
                                 }
