@@ -7,9 +7,26 @@ class Main extends Template {
         this.cron = "6 6 6 6 6"
         this.task = 'local'
         this.verify = 1
+        this.import = ['fs', 'vm']
     }
 
     async prepare() {
+        try {
+            let js = await this.modules.fs.readFileSync(this.dirname + '/static/vendors.683f5a61.js', 'utf-8')
+            const fnMock = new Function;
+            const ctx = {
+                window: {addEventListener: fnMock},
+                document: {
+                    addEventListener: fnMock,
+                    removeEventListener: fnMock,
+                },
+                navigator: {userAgent: 'okhttp/3.12.1;jdmall;android;version/9.5.4;build/88136;screen/1440x3007;os/11;network/wifi;'}
+            };
+            this.modules.vm.createContext(ctx);
+            this.modules.vm.runInContext(js, ctx);
+            this.smashUtils = ctx.window.smashUtils;
+        } catch (e) {
+        }
         let custom = this.getValue('custom')
         if (custom.length) {
             this.code = []
@@ -28,13 +45,27 @@ class Main extends Template {
             for (let url of urls) {
                 let html = await this.curl({
                         url,
-                        ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 15_1_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.1 Mobile/15E148 Safari/604.1"
+                        ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:103.0) Gecko/20100101 Firefox/103.0",
+                        cookie: this.cookies.main[0],
+                        referer: "https://u.jd.com/"
                     }
                 )
                 let encryptProjectId = this.match(/\\"encryptProjectId\\":\\"(\w+)\\"/, html)
+                let flrs = this.match(/"paginationFlrs":"([^\"]+)"/g, html)
+                if (!encryptProjectId && flrs) {
+                    let id = this.match(/active\/(\w+)/, url)
+                    let floor = await this.curl({
+                            'url': `https://api.m.jd.com/?client=wh5&clientVersion=1.0.0&functionId=qryH5BabelFloors`,
+                            'form': `body={"activityId":"${id}","pageNum":"-1","innerAnchor":"","groupAnchor":"","innerExtId":"","hideTopFoot":"","hideHeadBar":"","multiTopTabDirect":"","innerLinkBase64":"","innerIndex":"1","focus":"","forceTop":"","addressId":"","posLng":"","posLat":"", "homeCityLng":"","homeCityLat":"","gps_area":"0_0_0_0","headId":"","headArea":"","warehouseId":"","jxppGroupid":"","jxppFreshman":"","dcId":"","babelChannel":"","mitemAddrId":"","geo":{"lng":"","lat":""},"flt":"","paginationParam":"2","paginationFlrs":"${flrs}","transParam":"","siteClient":"apple","siteClientVersion":"11.1.4","matProExt":{}}&osVersion=&d_model=`,
+                        }
+                    )
+                    encryptProjectId = this.match(/\\"encryptProjectId\\":\\"([^\\\\]+)\\"/, this.dumps(floor))
+                }
                 if (encryptProjectId) {
                     let appid = this.match(/appid\s*:\s*"(\w+)"/, html) || 'babelh5'
                     let sourceCode = this.profile.sourceCode || 'aceaceqingzhan'
+                    let enc = this.match(/"enc"\s*:\s*"(\w+)"/, html)
+                    this.encParams = enc || "EEB688970D7CEBBE0E4A8E70D9A4CEE845D567BFB30E9D050540C6227BC766DBD057D54D5F798DBEE3B421FFEC3B65FA55B3BCD394F235B29DD14D0E12B5FC82"
                     if (encryptProjectId) {
                         this.shareCode.push({encryptProjectId, appid, sourceCode})
                     }
@@ -99,13 +130,24 @@ class Main extends Template {
                 if (this.haskey(i, `ext.${i.ext.extraType}`)) {
                     let extra = i.ext[extraType]
                     for (let j of extra) {
+                        let body = await this.body(
+                            {
+                                encryptProjectId,
+                                "encryptAssignmentId": i.encryptAssignmentId,
+                                "itemId": j.itemId || j.advId,
+                                sourceCode
+                            }
+                        )
                         let s = await this.curl({
                                 'url': `https://api.m.jd.com/client.action?functionId=doInteractiveAssignment`,
-                                'form': `appid=${appid}&body={"encryptProjectId":"${encryptProjectId}","encryptAssignmentId":"${i.encryptAssignmentId}","itemId":"${j.advId || j.itemId}","sourceCode":"${sourceCode}"}&sign=11&t=${this.timestamp}`,
+                                'form': `appid=${appid}&body=${this.dumps(body)}&sign=11&t=1653132222710`,
                                 cookie
                             }
                         )
                         console.log(i.assignmentName, s.msg)
+                        if (this.haskey(s, 'msg', '风险等级未通过')) {
+                            return
+                        }
                     }
                 }
                 else {
@@ -118,9 +160,18 @@ class Main extends Template {
         let gifts = []
         if (lotteryId) {
             for (let i = 0; i<30; i++) {
+                let body = await this.body(
+                    {
+                        encryptProjectId,
+                        "encryptAssignmentId": lotteryId,
+                        "completionFlag": true,
+                        "ext": {"exchangeNum": 1},
+                        sourceCode
+                    }
+                )
                 let r = await this.curl({
                         'url': `https://api.m.jd.com/client.action?functionId=doInteractiveAssignment`,
-                        'form': `appid=${appid}&body={"encryptProjectId":"${encryptProjectId}","encryptAssignmentId":"${lotteryId}","completionFlag":true,"ext":{"exchangeNum":1},"sourceCode":"${sourceCode}"}&sign=11&t=1646207845798`,
+                        'form': `appid=${appid}&body=${this.dumps(body)}&sign=11&t=1646207845798`,
                         cookie
                     }
                 )
@@ -221,6 +272,25 @@ class Main extends Template {
         if (gifts.length) {
             this.notices(gifts.join("\n"), p.user)
         }
+    }
+
+    async body(params) {
+        let random = this.smashUtils.getRandom(8)
+        let log = this.smashUtils.get_risk_result({
+            id: random,
+            data: {
+                random
+            }
+        }).log;
+        let b = {
+            "extParam": {
+                "forceBot": "1",
+                "businessData": {"random": random},
+                "signStr": log,
+            },
+            "enc": this.encParams
+        }
+        return {...b, ...params}
     }
 }
 
