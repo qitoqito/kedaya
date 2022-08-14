@@ -7,7 +7,7 @@ class Main extends Template {
         this.task = 'local'
         this.verify = 1
         this.manual = 1
-        this.import = ['fs', 'jdAlgo', 'jdUrl']
+        this.import = ['fs', 'jdAlgo', 'jdUrl', 'jdObf']
         this.model = 'share'
         this.filter = "activityId"
     }
@@ -1971,7 +1971,7 @@ class Main extends Template {
         //     form: this.random(this.dict.ob, 1)[0],
         //     cookie: p.cookie
         // })
-        let isvObfuscator = await this.curl(this.modules.jdUrl.app('isvObfuscator', {
+        let isvObfuscator = await this.curl(this.modules.jdObf.app('isvObfuscator', {
             "url": `https://${host}`,
             "id": ""
         }, 'post', p.cookie))
