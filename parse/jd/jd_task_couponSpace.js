@@ -16,7 +16,7 @@ class Main extends Template {
             for (let j = 0; j<6; j++) {
                 let s = await this.curl({
                         'url': `https://api.m.jd.com/api?functionId=explorePlanet_taskList&appid=coupon-space&client=wh5&t=1658305468890`,
-                        'form': `body={"activityId":3}`,
+                        'form': `body={"activityId":4}`,
                         cookie
                     }
                 )
@@ -35,7 +35,7 @@ class Main extends Template {
                     else {
                         let h = await this.curl({
                                 'url': `https://api.m.jd.com/api?functionId=explorePlanet_openGroup&appid=coupon-space&client=wh5&t=1658309818120`,
-                                'form': `body={"activityId":3}`,
+                                'form': `body={"activityId":4}`,
                                 cookie
                             }
                         )
@@ -53,7 +53,7 @@ class Main extends Template {
                             console.log(`正在做: ${k.taskDesc}`)
                             let d = await this.curl({
                                     'url': `https://api.m.jd.com/api?functionId=explorePlanet_taskReport&appid=coupon-space&client=wh5&t=1658305485458`,
-                                    'form': `body={"activityId":3,"encryptTaskId":"${k.encryptTaskId}","itemId":"${k.itemId}","encryptProjectId":"${s.data.result.specialComponentTaskPid}"}`,
+                                    'form': `body={"activityId":4,"encryptTaskId":"${k.encryptTaskId}","itemId":"${k.itemId}","encryptProjectId":"${s.data.result.specialComponentTaskPid}"}`,
                                     cookie
                                 }
                             )
@@ -70,7 +70,7 @@ class Main extends Template {
                             console.log(`正在做: ${i.taskDesc}`)
                             let d = await this.curl({
                                     'url': `https://api.m.jd.com/api?functionId=explorePlanet_taskReport&appid=coupon-space&client=wh5&t=1658305485458`,
-                                    'form': `body={"activityId":3,"encryptTaskId":"${i.encryptTaskId}","itemId":"${i.itemId}","encryptProjectId":"${s.data.result.componentTaskPid}"}`,
+                                    'form': `body={"activityId":4,"encryptTaskId":"${i.encryptTaskId}","itemId":"${i.itemId}","encryptProjectId":"${s.data.result.componentTaskPid}"}`,
                                     cookie
                                 }
                             )
@@ -99,7 +99,7 @@ class Main extends Template {
                 else {
                     let h = await this.curl({
                             'url': `https://api.m.jd.com/api?functionId=explorePlanet_assist&appid=coupon-space&client=wh5&t=1658310251360`,
-                            'form': `body={"activityId":"2","groupId":"${c.groupId}","uuid":"${this.uuid(40)}"}`,
+                            'form': `body={"activityId":4,"groupId":"${c.groupId}","uuid":"${this.uuid(40)}"}`,
                             cookie
                         }
                     )
@@ -129,7 +129,7 @@ class Main extends Template {
             while (1) {
                 let s = await this.curl({
                         'url': `https://api.m.jd.com/api?functionId=explorePlanet_explore&appid=coupon-space&client=wh5&t=1658311414445`,
-                        'form': `body={"activityId":3}`,
+                        'form': `body={"activityId":4}`,
                         cookie
                     }
                 )
@@ -153,11 +153,20 @@ class Main extends Template {
             }
             let c = await this.curl({
                     'url': `https://api.m.jd.com/api?functionId=explorePlanet_compositeCard&appid=coupon-space&client=wh5&t=1658311922645`,
-                    'form': `body={"activityId":3}`,
+                    'form': `body={"activityId":4}`,
                     cookie
                 }
             )
             console.log(c.data)
+            let reward = await this.curl({
+                    'url': `https://api.m.jd.com/api?functionId=explorePlanet_divideReward&appid=coupon-space&client=wh5&t=1659366893866`,
+                    'form': `body={"activityId":4}`,
+                    cookie
+                }
+            )
+            if (this.haskey(reward, 'data.result.discount')) {
+                this.print(`获得红包: ${reward.data.result.discount}`, p.user)
+            }
         }
     }
 }
