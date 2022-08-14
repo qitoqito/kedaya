@@ -7,7 +7,7 @@ class Main extends Template {
         this.cron = "36 0,9,21 * * *"
         this.help = 'main'
         this.task = 'local'
-        this.import = ['fs', 'jdUrl']
+        this.import = ['fs', 'jdUrl', 'jdObf']
     }
 
     async prepare() {
@@ -20,7 +20,7 @@ class Main extends Template {
 
     async main(p) {
         let cookie = p.cookie
-        let isvObfuscator = await this.curl(this.modules.jdUrl.app('isvObfuscator', {
+        let isvObfuscator = await this.curl(this.modules.jdObf.app('isvObfuscator', {
             "url": `https://mpdz-car-dz.isvjcloud.com`,
             "id": ""
         }, 'post', cookie))
@@ -376,7 +376,7 @@ class Main extends Template {
         let A = new RegExp("~", "g")
         s = s.replace(c, "%27")
         s = s.replace(A, "%7E")
-        let d =  a + "appKey" + a + "admJson" + s + "timestamp" + r + n
+        let d = a + "appKey" + a + "admJson" + s + "timestamp" + r + n
         params.params.commonParameter.appkey = a
         params.params.commonParameter.timestamp = r
         params.params.commonParameter.sign = this.md5(d.toLowerCase())
