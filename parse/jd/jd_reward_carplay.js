@@ -6,7 +6,7 @@ class Main extends Template {
         this.title = "京东头文字J兑换"
         this.cron = "6 6 6 6 6"
         this.task = 'local'
-        this.import = ['fs', 'jdUrl']
+        this.import = ['fs', 'jdUrl', 'jdObf']
     }
 
     async prepare() {
@@ -19,7 +19,7 @@ class Main extends Template {
 
     async main(p) {
         let cookie = p.cookie
-        let isvObfuscator = await this.curl(this.modules.jdUrl.app('isvObfuscator', {
+        let isvObfuscator = await this.curl(this.modules.jdObf.app('isvObfuscator', {
             "url": `https://mpdz-car-dz.isvjcloud.com`,
             "id": ""
         }, 'post', cookie))
@@ -89,7 +89,7 @@ class Main extends Template {
             if (this.haskey(exchangeLoad, 'data.data.awardSettings')) {
                 this.plan = (this.column(exchangeLoad.data.data.awardSettings, ['awardDes', 'id'], 'awardName'))
             }
-        } 
+        }
         if (Object.keys(this.plan).length>0) {
             if (this.profile.reward && this.plan[`${this.profile.reward}京豆`]) {
                 console.log(`即将兑换: ${this.profile.reward}京豆, 使用分数: ${this.plan[`${this.profile.reward}京豆`].awardDes}, 兑换id: ${this.plan[`${this.profile.reward}京豆`].id}`)
