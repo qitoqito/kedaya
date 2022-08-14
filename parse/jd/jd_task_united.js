@@ -6,7 +6,7 @@ class Main extends Template {
         this.title = "京东大牌集合任务"
         this.cron = "6 6 6 6 6"
         this.task = 'local'
-        this.import = ['jdUrl']
+        this.import = ['jdUrl', 'jdObf']
         this.verify = 1
         // this.thread = 3
     }
@@ -47,7 +47,7 @@ class Main extends Template {
     async main(p) {
         let cookie = p.cookie;
         try {
-            let isvObfuscator = await this.curl(this.modules.jdUrl.app('isvObfuscator', {
+            let isvObfuscator = await this.curl(this.modules.jdObf.app('isvObfuscator', {
                 "url": `https://jinggengjcq-isv.isvjcloud.com`,
                 "id": ""
             }, 'post', cookie))
