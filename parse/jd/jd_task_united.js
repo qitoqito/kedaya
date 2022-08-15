@@ -6,12 +6,13 @@ class Main extends Template {
         this.title = "京东大牌集合任务"
         this.cron = "6 6 6 6 6"
         this.task = 'local'
-        this.import = ['jdUrl', 'jdObf']
+        this.import = ['jdUrl', 'jdObf', 'redisCache']
         this.verify = 1
         // this.thread = 3
     }
 
     async prepare() {
+        this.cache = this.modules.redisCache
         this.assert(this.profile.custom, '请正确填写custom')
         for (let i of this.unique(this.getValue('custom'))) {
             let a = await this.curl({
@@ -47,10 +48,21 @@ class Main extends Template {
     async main(p) {
         let cookie = p.cookie;
         try {
-            let isvObfuscator = await this.curl(this.modules.jdObf.app('isvObfuscator', {
-                "url": `https://jinggengjcq-isv.isvjcloud.com`,
-                "id": ""
-            }, 'post', cookie))
+            let cacheKey = this.md5(`isvObfuscator_${p.user}`)
+            try {
+                var isvObfuscator = await this.cache.get(cacheKey)
+            } catch (e) {
+            }
+            if (!isvObfuscator) {
+                var isvObfuscator = await this.curl(this.modules.jdObf.app('isvObfuscator', {
+                    "url": `https://lzdz1-isv.isvjcloud.com`,
+                    "id": ""
+                }, 'post', p.cookie))
+                if (this.haskey(isvObfuscator, 'token') && this.cache.set) {
+                    await this.cache.set(cacheKey, isvObfuscator)
+                    await this.cache.expire(cacheKey, 1800)
+                }
+            }
             let gifts = 0
             if (this.haskey(isvObfuscator, 'message', '参数异常，请退出重试')) {
                 console.log(`用户过期或者异常`)
@@ -254,6 +266,12 @@ class Main extends Template {
             }
         } catch (e) {
             console.log(e)
+        }
+    }
+
+    async extra() {
+        if (this.cache.set) {
+            await this.cache.close()
         }
     }
 }

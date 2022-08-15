@@ -7,10 +7,11 @@ class Main extends Template {
         this.cron = "36 0,9,21 * * *"
         this.help = 'main'
         this.task = 'local'
-        this.import = ['fs', 'jdUrl', 'jdObf']
+        this.import = ['fs', 'jdUrl', 'jdObf', 'redisCache']
     }
 
     async prepare() {
+        this.cache = this.modules.redisCache
         try {
             let txt = this.modules.fs.readFileSync(`${this.dirname}/invite/jd_task_carplay.json`).toString()
             this.dict = this.loads(txt)
@@ -20,10 +21,21 @@ class Main extends Template {
 
     async main(p) {
         let cookie = p.cookie
-        let isvObfuscator = await this.curl(this.modules.jdObf.app('isvObfuscator', {
-            "url": `https://mpdz-car-dz.isvjcloud.com`,
-            "id": ""
-        }, 'post', cookie))
+        let cacheKey = this.md5(`isvObfuscator_${p.user}`)
+        try {
+            var isvObfuscator = await this.cache.get(cacheKey)
+        } catch (e) {
+        }
+        if (!isvObfuscator) {
+            var isvObfuscator = await this.curl(this.modules.jdObf.app('isvObfuscator', {
+                "url": `https://lzdz1-isv.isvjcloud.com`,
+                "id": ""
+            }, 'post', p.cookie))
+            if (this.haskey(isvObfuscator, 'token') && this.cache.set) {
+                await this.cache.set(cacheKey, isvObfuscator)
+                await this.cache.expire(cacheKey, 1800)
+            }
+        }
         if (!this.haskey(this.dict, `${p.user}.carId`)) {
             for (let i = 0; i<3; i++) {
                 var load = await this.curl({
@@ -362,6 +374,9 @@ class Main extends Template {
             for (let i in this.dict) {
                 this.dict[i].complete = 0
             }
+        }
+        if (this.cache.set) {
+            await this.cache.close()
         }
     }
 

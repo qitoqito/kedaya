@@ -1,6 +1,9 @@
-const redis = require("redis");
+function Cache() {
+}
+
 try {
-    let cli = process.communal.redisCli
+    var redis = require("redis");
+    var cli = process.communal.redisCli
     var c = {
         port: cli.port,
         host: cli.host,
@@ -13,10 +16,6 @@ try {
     var config = require("../config/config");
     var c = config.redis
 }
-
-function Cache() {
-}
-
 try {
     let client = redis.createClient(c.port, c.host, c.options);
     client.on("error", function(err) {
