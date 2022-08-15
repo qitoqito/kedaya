@@ -19,6 +19,7 @@ class Main extends Template {
         else {
             this.print("redis连接错误")
         }
+        await this.cache.close()
     }
 }
 
