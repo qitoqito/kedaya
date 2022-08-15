@@ -13,8 +13,11 @@ try {
         }
     }
 } catch (e) {
-    var config = require("../config/config");
-    var c = config.redis
+    try {
+        var config = require("../config/config");
+        var c = config.redis
+    } catch (ee) {
+    }
 }
 try {
     let client = redis.createClient(c.port, c.host, c.options);
