@@ -144,6 +144,9 @@ class Main extends Template {
                 console.log(`请先正确设置reward兑换选项`)
             }
         }
+    }
+
+    async extra() {
         if (this.cache.set) {
             await this.cache.close()
         }
