@@ -31,21 +31,20 @@ try {
         client.on("error", function(err) {
             console.log(err);
         });
-        (async () => {
+        Cache.connect = async function() {
             await client.connect();
-        })();
+        }
         Cache.set = async function(key, value) {
-            value = JSON.stringify(value);
-            return await client.set(key, value);
+            return await client.set(key, JSON.stringify(value));
         };
         Cache.expire = async function(key, time) {
             return await client.expire(key, time);
         };
         Cache.get = async (key) => {
-            return await client.get(key);
+            return process.communal.jsonParse(await client.get(key));
         };
         Cache.close = async function() {
-            return client.quit();
+            return await client.quit();
         }
     }
     else {
@@ -53,32 +52,30 @@ try {
         client.on("error", function(err) {
             console.log(err);
         });
-        let text = async (key) => {
+        Cache.connect = async function() {
+            await client.on("connect", function(res) {
+            });
+        }
+        Cache.set = async function(key, value) {
+            return client.set(key, JSON.stringify(value));
+        };
+        Cache.get = async (key) => {
             let doc = await new Promise((resolve) => {
                 client.get(key, function(err, res) {
                     return resolve(res);
                 });
             });
-            return JSON.parse(doc);
-        };
-        Cache.set = function(key, value) {
-            value = JSON.stringify(value);
-            return client.set(key, value, function(err) {
-                if (err) {
-                    console.error(err);
-                }
-            });
-        };
-        Cache.get = async (key) => {
-            return await text(key);
+            return process.communal.jsonParse(doc);
         };
         Cache.expire = function(key, time) {
             return client.expire(key, time);
         };
         Cache.close = async function() {
-            return client.quit();
+            return await client.quit();
         }
     }
 } catch (e) {
+    Cache.connect = function() {
+    }
 }
 module.exports = Cache;

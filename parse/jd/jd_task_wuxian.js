@@ -14,6 +14,7 @@ class Main extends Template {
 
     async prepare() {
         this.cache = this.modules.redisCache
+        await this.cache.connect()
         this.assert(this.custom, '请先添加环境变量')
         this.errMsg = new RegExp(`/奖品已发完|来晚了|全部被领取|明日再来|结束|${this.profile.errMsg}/`)
         this.dict = this.profile

@@ -13,6 +13,7 @@ class Main extends Template {
 
     async prepare() {
         this.cache = this.modules.redisCache
+        await this.cache.connect()
         this.assert(this.profile.custom, '请正确填写custom')
         for (let i of this.unique(this.getValue('custom'))) {
             let a = await this.curl({

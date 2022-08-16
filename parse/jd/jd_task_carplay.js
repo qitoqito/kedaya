@@ -12,6 +12,7 @@ class Main extends Template {
 
     async prepare() {
         this.cache = this.modules.redisCache
+        await this.cache.connect()
         try {
             let txt = this.modules.fs.readFileSync(`${this.dirname}/invite/jd_task_carplay.json`).toString()
             this.dict = this.loads(txt)

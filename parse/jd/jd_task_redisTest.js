@@ -11,10 +11,12 @@ class Main extends Template {
 
     async prepare() {
         this.cache = this.modules.redisCache
-        await this.cache.set("test", this.rand(5, 100))
+        await this.cache.connect()
+        await this.cache.set("test", {a: this.rand(5, 100)})
+        await this.cache.expire("test", 10)
         let test = await this.cache.get("test")
         if (test) {
-            this.print(`redis连接正常,随机数: ${test}`)
+            this.print(`redis连接正常,随机数: ${test.a}`)
         }
         else {
             this.print("redis连接错误")
