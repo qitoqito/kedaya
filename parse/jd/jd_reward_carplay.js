@@ -10,7 +10,7 @@ class Main extends Template {
     }
 
     async prepare() {
-        this.fileExpire = this.haskey(this.fileCache, 'isvObfuscator_expire') || 3000
+        this.fileExpire = this.haskey(this.fileCache, 'isvObfuscator_expire') || 1800
         this.fileSalt = this.haskey(this.fileCache, 'isvObfuscator_salt') || "abcdefg"
         this.cache = this.modules["node-file-cache"].create()
         try {
@@ -25,6 +25,7 @@ class Main extends Template {
         let cacheKey = this.md5(`${this.fileSalt}_isvObfuscator_${p.user}`)
         try {
             var isvObfuscator = await this.cache.get(cacheKey)
+            console.log("读取本地缓存token成功...")
         } catch (e) {
         }
         if (!isvObfuscator) {
@@ -36,6 +37,7 @@ class Main extends Template {
                 // await this.cache.set(cacheKey, isvObfuscator)
                 // await this.cache.expire(cacheKey, 1800)
                 await this.cache.set(cacheKey, isvObfuscator, {life: parseInt(this.fileExpire)})
+                console.log("写入本地缓存token成功...")
             }
         }
         if (!this.haskey(this.dict, `${p.user}.carId`)) {
