@@ -5,16 +5,19 @@ class Main extends Template {
         super()
         this.title = "京东超级互动城"
         this.task = 'local'
+        this.corn = "6.6.6.6"
         this.verify = 1
         this.manual = 1
-        this.import = ['fs', 'jdAlgo', 'jdUrl', 'jdObf', 'redisCache']
+        this.import = ['fs', 'jdAlgo', 'jdUrl', 'jdObf', 'node-file-cache']
         this.model = 'share'
         this.filter = "activityId"
     }
 
     async prepare() {
-        this.cache = this.modules.redisCache
-        await this.cache.connect()
+        this.fileExpire = this.haskey(this.fileCache, 'isvObfuscator_expire') || 3000
+        this.fileSalt = this.haskey(this.fileCache, 'isvObfuscator_salt') || "abcdefg"
+        this.cache = this.modules["node-file-cache"].create()
+        // await this.cache.connect()
         this.assert(this.custom, '请先添加环境变量')
         this.errMsg = new RegExp(`/奖品已发完|来晚了|全部被领取|明日再来|结束|${this.profile.errMsg}/`)
         this.dict = this.profile
@@ -1444,7 +1447,7 @@ class Main extends Template {
         let gifts = []
         let skuList = []
         if (type == 'exchangeActDetail') {
-            let cacheKey = this.md5(`isvObfuscator_${p.user}`)
+            let cacheKey = this.md5(`${this.fileSalt}_isvObfuscator_${p.user}`)
             try {
                 var isvObfuscator = await this.cache.get(cacheKey)
             } catch (e) {
@@ -1455,8 +1458,9 @@ class Main extends Template {
                     "id": ""
                 }, 'post', p.cookie))
                 if (this.haskey(isvObfuscator, 'token') && this.cache.set) {
-                    await this.cache.set(cacheKey, isvObfuscator)
-                    await this.cache.expire(cacheKey, 1800)
+                    // await this.cache.set(cacheKey, isvObfuscator)
+                    // await this.cache.expire(cacheKey, 1800)
+                    await this.cache.set(cacheKey, isvObfuscator, {life: parseInt(this.fileExpire)})
                 }
             }
             let reward = await this.curl({
@@ -1474,7 +1478,7 @@ class Main extends Template {
     }
 
     async lType(p) {
-        let cacheKey = this.md5(`isvObfuscator_${p.user}`)
+        let cacheKey = this.md5(`${this.fileSalt}_isvObfuscator_${p.user}`)
         try {
             var isvObfuscator = await this.cache.get(cacheKey)
         } catch (e) {
@@ -1485,8 +1489,9 @@ class Main extends Template {
                 "id": ""
             }, 'post', p.cookie))
             if (this.haskey(isvObfuscator, 'token') && this.cache.set) {
-                await this.cache.set(cacheKey, isvObfuscator)
-                await this.cache.expire(cacheKey, 1800)
+                // await this.cache.set(cacheKey, isvObfuscator)
+                // await this.cache.expire(cacheKey, 1800)
+                await this.cache.set(cacheKey, isvObfuscator, {life: parseInt(this.fileExpire)})
             }
         }
         let u = await this.curl({
@@ -1988,7 +1993,7 @@ class Main extends Template {
         let venderId = p.inviter.venderId
         let shopId = p.inviter.shopId
         let sid = p.inviter.sid || ''
-        let cacheKey = this.md5(`isvObfuscator_${p.user}`)
+        let cacheKey = this.md5(`${this.fileSalt}_isvObfuscator_${p.user}`)
         try {
             var isvObfuscator = await this.cache.get(cacheKey)
         } catch (e) {
@@ -1999,8 +2004,9 @@ class Main extends Template {
                 "id": ""
             }, 'post', p.cookie))
             if (this.haskey(isvObfuscator, 'token') && this.cache.set) {
-                await this.cache.set(cacheKey, isvObfuscator)
-                await this.cache.expire(cacheKey, 1800)
+                // await this.cache.set(cacheKey, isvObfuscator)
+                // await this.cache.expire(cacheKey, 1800)
+                await this.cache.set(cacheKey, isvObfuscator, {life: parseInt(this.fileExpire)})
             }
         }
         this.isvObfuscator = isvObfuscator
@@ -2159,9 +2165,9 @@ class Main extends Template {
                 console.log("ID写入成功");
             })
         }
-        if (this.cache.set) {
-            await this.cache.close()
-        }
+        // if (this.cache.set) {
+        //     await this.cache.close()
+        // }
     }
 }
 

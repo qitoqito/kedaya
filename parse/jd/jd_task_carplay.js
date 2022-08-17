@@ -7,12 +7,13 @@ class Main extends Template {
         this.cron = "36 0,9,21 * * *"
         this.help = 'main'
         this.task = 'local'
-        this.import = ['fs', 'jdUrl', 'jdObf', 'redisCache']
+        this.import = ['fs', 'jdUrl', 'jdObf', 'node-file-cache']
     }
 
     async prepare() {
-        this.cache = this.modules.redisCache
-        await this.cache.connect()
+        this.fileExpire = this.haskey(this.fileCache, 'isvObfuscator_expire') || 3000
+        this.fileSalt = this.haskey(this.fileCache, 'isvObfuscator_salt') || "abcdefg"
+        this.cache = this.modules["node-file-cache"].create()
         try {
             let txt = this.modules.fs.readFileSync(`${this.dirname}/invite/jd_task_carplay.json`).toString()
             this.dict = this.loads(txt)
@@ -22,7 +23,7 @@ class Main extends Template {
 
     async main(p) {
         let cookie = p.cookie
-        let cacheKey = this.md5(`isvObfuscator_${p.user}`)
+        let cacheKey = this.md5(`${this.fileSalt}_isvObfuscator_${p.user}`)
         try {
             var isvObfuscator = await this.cache.get(cacheKey)
         } catch (e) {
@@ -33,8 +34,9 @@ class Main extends Template {
                 "id": ""
             }, 'post', p.cookie))
             if (this.haskey(isvObfuscator, 'token') && this.cache.set) {
-                await this.cache.set(cacheKey, isvObfuscator)
-                await this.cache.expire(cacheKey, 1800)
+                // await this.cache.set(cacheKey, isvObfuscator)
+                // await this.cache.expire(cacheKey, 1800)
+                await this.cache.set(cacheKey, isvObfuscator, {life: parseInt(this.fileExpire)})
             }
         }
         if (!this.haskey(this.dict, `${p.user}.carId`)) {
@@ -376,9 +378,9 @@ class Main extends Template {
                 this.dict[i].complete = 0
             }
         }
-        if (this.cache.set) {
-            await this.cache.close()
-        }
+        // if (this.cache.set) {
+        //     await this.cache.close()
+        // }
     }
 
     dmCreateSign(params) {

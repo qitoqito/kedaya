@@ -6,14 +6,15 @@ class Main extends Template {
         this.title = "京东大牌集合任务"
         this.cron = "6 6 6 6 6"
         this.task = 'local'
-        this.import = ['jdUrl', 'jdObf', 'redisCache']
+        this.import = ['jdUrl', 'jdObf', 'node-file-cache']
         this.verify = 1
         // this.thread = 3
     }
 
     async prepare() {
-        this.cache = this.modules.redisCache
-        await this.cache.connect()
+        this.fileExpire = this.haskey(this.fileCache, 'isvObfuscator_expire') || 3000
+        this.fileSalt = this.haskey(this.fileCache, 'isvObfuscator_salt') || "abcdefg"
+        this.cache = this.modules["node-file-cache"].create()
         this.assert(this.profile.custom, '请正确填写custom')
         for (let i of this.unique(this.getValue('custom'))) {
             let a = await this.curl({
@@ -49,7 +50,7 @@ class Main extends Template {
     async main(p) {
         let cookie = p.cookie;
         try {
-            let cacheKey = this.md5(`isvObfuscator_${p.user}`)
+            let cacheKey = this.md5(`${this.fileSalt}_isvObfuscator_${p.user}`)
             try {
                 var isvObfuscator = await this.cache.get(cacheKey)
             } catch (e) {
@@ -60,8 +61,9 @@ class Main extends Template {
                     "id": ""
                 }, 'post', p.cookie))
                 if (this.haskey(isvObfuscator, 'token') && this.cache.set) {
-                    await this.cache.set(cacheKey, isvObfuscator)
-                    await this.cache.expire(cacheKey, 1800)
+                    // await this.cache.set(cacheKey, isvObfuscator)
+                    // await this.cache.expire(cacheKey, 1800)
+                    await this.cache.set(cacheKey, isvObfuscator, {life: parseInt(this.fileExpire)})
                 }
             }
             let gifts = 0
@@ -270,11 +272,11 @@ class Main extends Template {
         }
     }
 
-    async extra() {
-        if (this.cache.set) {
-            await this.cache.close()
-        }
-    }
+    // async extra() {
+    //     if (this.cache.set) {
+    //         await this.cache.close()
+    //     }
+    // }
 }
 
 module.exports = Main;
