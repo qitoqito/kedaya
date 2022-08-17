@@ -1450,7 +1450,6 @@ class Main extends Template {
             let cacheKey = this.md5(`${this.fileSalt}_isvObfuscator_${p.user}`)
             try {
                 var isvObfuscator = await this.cache.get(cacheKey)
-                console.log("读取本地缓存token成功...")
             } catch (e) {
             }
             if (!isvObfuscator) {
@@ -1464,6 +1463,9 @@ class Main extends Template {
                     await this.cache.set(cacheKey, isvObfuscator, {life: parseInt(this.fileExpire)})
                     console.log("写入本地缓存token成功...")
                 }
+            }
+            else {
+                console.log("读取本地缓存token成功...")
             }
             let reward = await this.curl({
                     'url': `https://${host}/ql/front/postQlExchange`,
@@ -1483,7 +1485,6 @@ class Main extends Template {
         let cacheKey = this.md5(`${this.fileSalt}_isvObfuscator_${p.user}`)
         try {
             var isvObfuscator = await this.cache.get(cacheKey)
-            console.log("读取本地缓存token成功...")
         } catch (e) {
         }
         if (!isvObfuscator) {
@@ -1497,6 +1498,9 @@ class Main extends Template {
                 await this.cache.set(cacheKey, isvObfuscator, {life: parseInt(this.fileExpire)})
                 console.log("写入本地缓存token成功...")
             }
+        }
+        else {
+            console.log("读取本地缓存token成功...")
         }
         let u = await this.curl({
                 'url': `https://fjzy-isv.isvjcloud.com/index.php?mod=games&action=buyerTokenJson`,
@@ -2000,7 +2004,6 @@ class Main extends Template {
         let cacheKey = this.md5(`${this.fileSalt}_isvObfuscator_${p.user}`)
         try {
             var isvObfuscator = await this.cache.get(cacheKey)
-            console.log("读取本地缓存token成功...")
         } catch (e) {
         }
         if (!isvObfuscator) {
@@ -2014,6 +2017,9 @@ class Main extends Template {
                 await this.cache.set(cacheKey, isvObfuscator, {life: parseInt(this.fileExpire)})
                 console.log("写入本地缓存token成功...")
             }
+        }
+        else {
+            console.log("读取本地缓存token成功...")
         }
         this.isvObfuscator = isvObfuscator
         switch (host) {
