@@ -15,13 +15,13 @@ class Main extends Template {
 
     async prepare() {
         this.algo = new this.modules.jdAlgo({
-            type: 'lite', 'appId': '6e8d7',
+            type: 'lite', 'appId': '6e8d7', version: "3.1"
         })
     }
 
     async main(p) {
         let cookie = p.cookie;
-        let linkId = this.cuustom || "OER5a5ybAQYDrCUKrN2WhQ"
+        let linkId = this.custom || "dLrrEKJW8fVBcHB62TjiIQ"
         let home = await this.curl({
                 'url': `https://api.m.jd.com/?functionId=superRedBagHome&body={"linkId":"${linkId}"}&t=1650025237128&appid=activities_platform`,
                 // 'form':``,
