@@ -8,16 +8,16 @@ class Main extends Template {
         this.corn = "6.6.6.6"
         this.verify = 1
         this.manual = 1
-        this.import = ['fs', 'jdAlgo', 'jdUrl', 'jdObf', 'node-file-cache']
-        this.model = 'share'
+        this.import = ['fs', 'jdAlgo', 'jdUrl', 'jdObf', 'fileCache']
+        this.model = 'help'
         this.filter = "activityId"
     }
 
     async prepare() {
         this.fileExpire = this.haskey(this.fileCache, 'isvObfuscator_expire') || 1800
         this.fileSalt = this.haskey(this.fileCache, 'isvObfuscator_salt') || "abcdefg"
-        this.cache = this.modules["node-file-cache"].create()
-        // await this.cache.connect()
+        this.cache = this.modules["fileCache"]
+        await this.cache.connect({file: `${this.dirname}/temp/isvToken.json`})
         this.assert(this.custom, '请先添加环境变量')
         this.errMsg = new RegExp(`/奖品已发完|来晚了|全部被领取|明日再来|结束|${this.profile.errMsg}/`)
         this.dict = this.profile
@@ -1447,26 +1447,7 @@ class Main extends Template {
         let gifts = []
         let skuList = []
         if (type == 'exchangeActDetail') {
-            let cacheKey = this.md5(`${this.fileSalt}_isvObfuscator_${p.user}`)
-            try {
-                var isvObfuscator = await this.cache.get(cacheKey)
-            } catch (e) {
-            }
-            if (!isvObfuscator) {
-                var isvObfuscator = await this.curl(this.modules.jdObf.app('isvObfuscator', {
-                    "url": `https://lzdz1-isv.isvjcloud.com`,
-                    "id": ""
-                }, 'post', p.cookie))
-                if (this.haskey(isvObfuscator, 'token') && this.cache.set) {
-                    // await this.cache.set(cacheKey, isvObfuscator)
-                    // await this.cache.expire(cacheKey, 1800)
-                    await this.cache.set(cacheKey, isvObfuscator, {life: parseInt(this.fileExpire)})
-                    console.log("写入本地缓存token成功...")
-                }
-            }
-            else {
-                console.log("读取本地缓存token成功...")
-            }
+            let isvObfuscator = await this.isvToken(p)
             let reward = await this.curl({
                     'url': `https://${host}/ql/front/postQlExchange`,
                     'form': `act_id=9e8080cd7f4f2d0f017f68437a964e83&user_id=618229`,
@@ -1482,26 +1463,7 @@ class Main extends Template {
     }
 
     async lType(p) {
-        let cacheKey = this.md5(`${this.fileSalt}_isvObfuscator_${p.user}`)
-        try {
-            var isvObfuscator = await this.cache.get(cacheKey)
-        } catch (e) {
-        }
-        if (!isvObfuscator) {
-            var isvObfuscator = await this.curl(this.modules.jdObf.app('isvObfuscator', {
-                "url": `https://lzdz1-isv.isvjcloud.com`,
-                "id": ""
-            }, 'post', p.cookie))
-            if (this.haskey(isvObfuscator, 'token') && this.cache.set) {
-                // await this.cache.set(cacheKey, isvObfuscator)
-                // await this.cache.expire(cacheKey, 1800)
-                await this.cache.set(cacheKey, isvObfuscator, {life: parseInt(this.fileExpire)})
-                console.log("写入本地缓存token成功...")
-            }
-        }
-        else {
-            console.log("读取本地缓存token成功...")
-        }
+        let isvObfuscator = await this.isvToken(p)
         let u = await this.curl({
                 'url': `https://fjzy-isv.isvjcloud.com/index.php?mod=games&action=buyerTokenJson`,
                 'form': `buyerTokenJson={"state":"0","data":"${isvObfuscator.token}","msg":""}&venderId=${p.inviter.activityId}&yxId=5510`,
@@ -2001,26 +1963,8 @@ class Main extends Template {
         let venderId = p.inviter.venderId
         let shopId = p.inviter.shopId
         let sid = p.inviter.sid || ''
-        let cacheKey = this.md5(`${this.fileSalt}_isvObfuscator_${p.user}`)
-        try {
-            var isvObfuscator = await this.cache.get(cacheKey)
-        } catch (e) {
-        }
-        if (!isvObfuscator) {
-            var isvObfuscator = await this.curl(this.modules.jdObf.app('isvObfuscator', {
-                "url": `https://lzdz1-isv.isvjcloud.com`,
-                "id": ""
-            }, 'post', p.cookie))
-            if (this.haskey(isvObfuscator, 'token') && this.cache.set) {
-                // await this.cache.set(cacheKey, isvObfuscator)
-                // await this.cache.expire(cacheKey, 1800)
-                await this.cache.set(cacheKey, isvObfuscator, {life: parseInt(this.fileExpire)})
-                console.log("写入本地缓存token成功...")
-            }
-        }
-        else {
-            console.log("读取本地缓存token成功...")
-        }
+        let isvObfuscator = await this.isvToken(p)
+        this.assert(isvObfuscator.token, "没有获取到isvToken")
         this.isvObfuscator = isvObfuscator
         switch (host) {
             case "cjhy-isv.isvjcloud.com":
@@ -2084,6 +2028,29 @@ class Main extends Template {
             }
             console.log(`开卡中${venderId}`, o.message)
         }
+    }
+
+    async isvToken(p) {
+        let cacheKey = this.md5(`${this.fileSalt}_isvObfuscator_${p.user}`)
+        try {
+            var isvObfuscator = await this.cache.get(cacheKey)
+        } catch (e) {
+        }
+        if (!isvObfuscator) {
+            var isvObfuscator = await this.curl(this.modules.jdObf.app('isvObfuscator', {
+                "url": `https://lzdz1-isv.isvjcloud.com`,
+                "id": ""
+            }, 'post', p.cookie))
+            if (this.haskey(isvObfuscator, 'token') && this.cache.set) {
+                await this.cache.set(cacheKey, isvObfuscator, parseInt(this.fileExpire))
+                console.log("写入本地缓存token成功...")
+            }
+        }
+        else {
+            console.log("读取本地缓存token成功...")
+        }
+        console.log(`isvToken: ${this.haskey(isvObfuscator, 'token') || "没有获取到isvToken"}`)
+        return isvObfuscator
     }
 
     async extra() {
