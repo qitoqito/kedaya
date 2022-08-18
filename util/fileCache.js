@@ -103,9 +103,11 @@ if (fileCache.type == "redis") {
     }
 }
 else {
-    var cc = require('node-file-cache')
+    var cc = require('node-file-cache') 
     Cache.connect = async (params) => {
-        cc = cc.create(params)
+        if (cc.create) {
+            cc = cc.create(params)
+        }
     }
     Cache.get = async (key) => {
         return cc.get(key)
