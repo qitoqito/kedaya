@@ -31,6 +31,15 @@ if (fileCache.type == "redis") {
             }
         }
         Cache.set = async function(key, value, expire = 0) {
+            var error = 0
+            try {
+                await client.connect();
+            } catch (e) {
+                error = 1
+            }
+            // if (!error) {
+            //     await process.communal.wait(3000)
+            // }
             await client.set(key, JSON.stringify(value));
             if (expire) {
                 await client.expire(key, expire)
@@ -40,6 +49,15 @@ if (fileCache.type == "redis") {
             return await client.expire(key, time);
         };
         Cache.get = async (key) => {
+            var error = 0
+            try {
+                await client.connect();
+            } catch (e) {
+                error = 1
+            }
+            // if (!error) {
+            //     await process.communal.wait(3000)
+            // }
             return process.communal.jsonParse(await client.get(key));
         };
         Cache.close = async function() {
@@ -55,12 +73,20 @@ if (fileCache.type == "redis") {
             client = redis.createClient(c.port, c.host, c.options);
         }
         Cache.set = async function(key, value, expire = 0) {
+            if (!client.connected) {
+                // await process.communal.wait(3000)
+                client = redis.createClient(c.port, c.host, c.options);
+            }
             await client.set(key, JSON.stringify(value));
             if (expire) {
                 await client.expire(key, expire)
             }
         };
         Cache.get = async (key) => {
+            if (!client.connected) {
+                // await process.communal.wait(3000)
+                client = redis.createClient(c.port, c.host, c.options);
+            }
             let doc = await new Promise((resolve) => {
                 client.get(key, function(err, res) {
                     return resolve(res);

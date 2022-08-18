@@ -136,11 +136,13 @@ class Main extends Template {
         }
     }
 
-    // async extra() {
-    //     if (this.cache.set) {
-    //         await this.cache.close()
-    //     }
-    // }
+    async extra() {
+        if (this.cache.set) {
+            console.log(`关闭缓存....`)
+            await this.cache.close()
+        }
+    }
+
     dmCreateSign(params) {
         let t = params.params.admJson
         let r = (new Date).valueOf()
@@ -172,11 +174,11 @@ class Main extends Template {
             }, 'post', p.cookie))
             if (this.haskey(isvObfuscator, 'token') && this.cache.set) {
                 await this.cache.set(cacheKey, isvObfuscator, parseInt(this.fileExpire))
-                console.log("写入本地缓存token成功...")
+                console.log("写入isvToken缓存成功...")
             }
         }
         else {
-            console.log("读取本地缓存token成功...")
+            console.log("读取isvToken缓存成功...")
         }
         console.log(`isvToken: ${this.haskey(isvObfuscator, 'token') || "没有获取到isvToken"}`)
         return isvObfuscator
