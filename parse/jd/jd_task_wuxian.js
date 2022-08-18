@@ -2030,29 +2030,6 @@ class Main extends Template {
         }
     }
 
-    async isvToken(p) {
-        let cacheKey = this.md5(`${this.fileSalt}_isvObfuscator_${p.user}`)
-        try {
-            var isvObfuscator = await this.cache.get(cacheKey)
-        } catch (e) {
-        }
-        if (!isvObfuscator) {
-            var isvObfuscator = await this.curl(this.modules.jdObf.app('isvObfuscator', {
-                "url": `https://lzdz1-isv.isvjcloud.com`,
-                "id": ""
-            }, 'post', p.cookie))
-            if (this.haskey(isvObfuscator, 'token') && this.cache.set) {
-                await this.cache.set(cacheKey, isvObfuscator, parseInt(this.fileExpire))
-                console.log("写入本地缓存token成功...")
-            }
-        }
-        else {
-            console.log("读取本地缓存token成功...")
-        }
-        console.log(`isvToken: ${this.haskey(isvObfuscator, 'token') || "没有获取到isvToken"}`)
-        return isvObfuscator
-    }
-
     async extra() {
         // 此处用来跑组队开卡
         for (let i in this.dicts) {
@@ -2147,6 +2124,29 @@ class Main extends Template {
         // if (this.cache.set) {
         //     await this.cache.close()
         // }
+    }
+
+    async isvToken(p) {
+        let cacheKey = this.md5(`${this.fileSalt}_isvObfuscator_${this.userName(p.cookie)}`)
+        try {
+            var isvObfuscator = await this.cache.get(cacheKey)
+        } catch (e) {
+        }
+        if (!isvObfuscator) {
+            var isvObfuscator = await this.curl(this.modules.jdObf.app('isvObfuscator', {
+                "url": `https://lzdz1-isv.isvjcloud.com`,
+                "id": ""
+            }, 'post', p.cookie))
+            if (this.haskey(isvObfuscator, 'token') && this.cache.set) {
+                await this.cache.set(cacheKey, isvObfuscator, parseInt(this.fileExpire))
+                console.log("写入本地缓存token成功...")
+            }
+        }
+        else {
+            console.log("读取本地缓存token成功...")
+        }
+        console.log(`isvToken: ${this.haskey(isvObfuscator, 'token') || "没有获取到isvToken"}`)
+        return isvObfuscator
     }
 }
 

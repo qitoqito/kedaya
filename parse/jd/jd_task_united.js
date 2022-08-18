@@ -260,7 +260,7 @@ class Main extends Template {
     }
 
     async isvToken(p) {
-        let cacheKey = this.md5(`${this.fileSalt}_isvObfuscator_${p.user}`)
+        let cacheKey = this.md5(`${this.fileSalt}_isvObfuscator_${this.userName(p.cookie)}`)
         try {
             var isvObfuscator = await this.cache.get(cacheKey)
         } catch (e) {
