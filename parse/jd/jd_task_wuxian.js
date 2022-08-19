@@ -9,7 +9,7 @@ class Main extends Template {
         this.verify = 1
         this.manual = 1
         this.import = ['fs', 'jdAlgo', 'jdUrl', 'jdObf', 'fileCache']
-        this.model = 'help'
+        this.model = 'share'
         this.filter = "activityId"
     }
 
