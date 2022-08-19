@@ -19,7 +19,7 @@ class Main extends Template {
         this.cache = this.modules["fileCache"]
         await this.cache.connect({file: `${this.dirname}/temp/isvToken.json`})
         this.assert(this.custom, '请先添加环境变量')
-        this.errMsg = new RegExp(`/奖品已发完|来晚了|全部被领取|明日再来|结束|${this.profile.errMsg}/`)
+        this.errMsg = new RegExp(`/奖品已发完|来晚了|全部被领取|明日再来|结束|优惠券|奖项已经领完|${this.profile.errMsg}/`)
         this.dict = this.profile
         this.dicts = {}
         this.isSend = []
@@ -135,7 +135,7 @@ class Main extends Template {
                             case 100:
                                 data.type = 'wxTeam'
                                 data.title = "组队瓜分"
-                                data.pageUrl = `https://${host}/wxTeam/activity2?activityId=${i.activityId}`
+                                data.pageUrl = `https://${host}/wxTeam/activity?activityId=${i.activityId}`
                                 break
                             case 99:
                             case 99999:
@@ -1627,8 +1627,21 @@ class Main extends Template {
                             cookie: getPin.cookie
                         }
                     )
+                    try {
+                        let prizeName = ''
+                        if (this.haskey(ac, 'data.active.prizeType', 9)) {
+                            prizeName = '积分'
+                        }
+                        else if (this.haskey(ac, 'data.active.prizeType', 6)) {
+                            prizeName = '京豆'
+                        }
+                        this.notices(`活动详情:\n每人可组 ${ac.data.active.maxGroup} 队\n队内每人获得: ${ac.data.active.prizeNumbers} ${prizeName}\n队长额外获得: ${ac.data.active.extraPrizeNumbers} ${prizeName}`)
+                        console.log(`活动详情:\n每人可组 ${ac.data.active.maxGroup} 队\n队内每人获得: ${ac.data.active.prizeNumbers} ${prizeName}\n队长额外获得: ${ac.data.active.extraPrizeNumbers} ${prizeName}`)
+                    } catch (ee) {
+                    }
                     if (this.haskey(ac, 'data.active.endTimeStr') && new Date(ac.data.active.endTimeStr.replace(/-/g, '/')).getTime()<new Date().getTime()) {
-                        console.log("活动已经结束")
+                        this.notices("活动已经结束")
+                        console.log("活动结束了哦")
                         this.shareCode = []
                         return
                     }
@@ -2066,7 +2079,7 @@ class Main extends Template {
                         var url = `https://${data.host}/pool/updateCaptain`
                         try {
                             for (let kk of ac.data.successRetList) {
-                                let member = (this.column(kk.memberList, 'jdNick')).join("  ")
+                                let member = (this.column(kk.memberList, 'jdNick').length ? this.column(kk.memberList, 'jdNick') : this.column(kk.memberList, 'nickName')).join("  ")
                                 let c = kk.memberList[0].captainId
                                 let s = await this.curl({
                                         url,
