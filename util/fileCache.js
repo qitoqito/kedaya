@@ -2,7 +2,7 @@ function Cache() {
 }
 
 var fileCache = process.communal.fileCache
-if (fileCache.type == "redis") {
+if (process.communal.haskey(fileCache, 'type', 'redis')) {
     var cli = process.communal.redisCli
     var redis = require("redis");
     var c = {
@@ -37,9 +37,9 @@ if (fileCache.type == "redis") {
             } catch (e) {
                 error = 1
             }
-            // if (!error) {
-            //     await process.communal.wait(3000)
-            // }
+            if (!error) {
+                await process.communal.wait(3000)
+            }
             await client.set(key, JSON.stringify(value));
             if (expire) {
                 await client.expire(key, expire)
@@ -55,9 +55,9 @@ if (fileCache.type == "redis") {
             } catch (e) {
                 error = 1
             }
-            // if (!error) {
-            //     await process.communal.wait(3000)
-            // }
+            if (!error) {
+                await process.communal.wait(3000)
+            }
             return process.communal.jsonParse(await client.get(key));
         };
         Cache.close = async function() {
@@ -74,7 +74,7 @@ if (fileCache.type == "redis") {
         }
         Cache.set = async function(key, value, expire = 0) {
             if (!client.connected) {
-                // await process.communal.wait(3000)
+                await process.communal.wait(3000)
                 client = redis.createClient(c.port, c.host, c.options);
             }
             await client.set(key, JSON.stringify(value));
@@ -84,7 +84,7 @@ if (fileCache.type == "redis") {
         };
         Cache.get = async (key) => {
             if (!client.connected) {
-                // await process.communal.wait(3000)
+                await process.communal.wait(3000)
                 client = redis.createClient(c.port, c.host, c.options);
             }
             let doc = await new Promise((resolve) => {
@@ -103,7 +103,7 @@ if (fileCache.type == "redis") {
     }
 }
 else {
-    var cc = require('node-file-cache') 
+    var cc = require('node-file-cache')
     Cache.connect = async (params) => {
         if (cc.create) {
             cc = cc.create(params)
