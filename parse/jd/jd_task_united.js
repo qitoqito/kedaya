@@ -174,12 +174,12 @@ class Main extends Template {
                         console.log(`任务完成:`, i.missionName)
                     }
                 }
-                if (gifts) {
-                    this.print(`获得京豆: ${gifts}`, p.user)
-                }
-                else {
-                    console.log(`什么也没有`)
-                }
+            }
+            if (gifts) {
+                this.print(`获得京豆: ${gifts}`, p.user)
+            }
+            else {
+                console.log(`什么也没有`)
             }
             let skuList = p.inviter.skuList
             if (skuList.length>0) {
