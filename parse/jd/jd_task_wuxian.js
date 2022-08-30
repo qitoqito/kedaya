@@ -1015,10 +1015,10 @@ class Main extends Template {
                         var getPrize = await this.curl({
                                 'url': `https://${host}/wxBuildActivity/publish`,
                                 'form': `pin=${secretPin}&activityId=${activityId}&content=${encodeURIComponent(content)}`,
-                                cookie: c.cookie,
+                                cookie: getPin.cookie,
                                 referer: `https://${host}/`
                             }
-                        )
+                        ) 
                         if (typeof getPrize == 'object') {
                             break
                         }
