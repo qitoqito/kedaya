@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东东东农场"
-        this.cron = "33 0,11,17,22 * * *"
+        this.cron = "33 */4 * * *"
         // this.thread = 2
         this.task = 'local'
         this.import = ['fs', 'jdAlgo']
@@ -14,7 +14,6 @@ class Main extends Template {
         this.algo = new this.modules.jdAlgo({
             appId: "86ba5",
             type: 'app',
-            fp: "0129507404073662",
         })
         console.log("正在获取助力码")
         try {
@@ -40,7 +39,11 @@ class Main extends Template {
         let init = await this.algo.curl({
                 'url': 'https://api.m.jd.com/client.action?functionId=initForFarm',
                 'form': `body={"version":16,"channel":3}&appid=wh5&client=apple&clientVersion=10.2.4`,
-                cookie
+                cookie,
+                algo: {
+                    type: "app",
+                    appId: "235ec",
+                }
             }
         )
         if (init.code == '3') {
@@ -112,7 +115,11 @@ class Main extends Template {
                 let tj = await this.algo.curl({
                         'url': `https://api.m.jd.com/client.action?functionId=initForFarm&body={"mpin":"","utm_campaign":"","utm_medium":"appshare","shareCode":"${i}-inviteFriend","utm_term":"Wxfriends","utm_source":"iosapp","imageUrl":"","nickName":"","version":16,"channel":2,"babelChannel":0}&appid=wh5&client=apple&clientVersion=10.2.4`,
                         // 'form':``,
-                        cookie
+                        cookie,
+                        algo: {
+                            type: "app",
+                            appId: "235ec",
+                        }
                     }
                 )
             }
@@ -126,7 +133,11 @@ class Main extends Template {
         let qdd = await this.algo.curl({
                 'url': `https://api.m.jd.com/client.action?functionId=clockInForFarm&body={"type":1,"version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                 // 'form':``,
-                cookie
+                cookie,
+                algo: {
+                    type: "app",
+                    appId: "6cebf",
+                }
             }
         )
         // let qdd = await this.algo.curl({
@@ -145,7 +156,11 @@ class Main extends Template {
         qdd = await this.algo.curl({
                 'url': `https://api.m.jd.com/client.action?functionId=clockInInitForFarm&body={"timestamp":${this.timestamp},"version":16,"channel":1,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                 // 'form':``,
-                cookie
+                cookie,
+                algo: {
+                    type: "app",
+                    appId: "1a13f",
+                }
             }
         )
         for (let i of qdd.themes || []) {
@@ -207,7 +222,11 @@ class Main extends Template {
             let taskList = await this.algo.curl({
                     'url': `https://api.m.jd.com/client.action?functionId=taskInitForFarm&body={"version":16,"channel":${n},"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
                     // 'form':``,
-                    cookie
+                    cookie,
+                    algo: {
+                        type: "app",
+                        appId: "6ceb9",
+                    }
                 }
             )
             for (let i in taskList) {
@@ -475,8 +494,12 @@ class Main extends Template {
                 continue
             }
             let s = await this.algo.curl({
-                    'url': `https://api.m.jd.com/client.action?functionId=initForFarm&body={"mpin":"","utm_medium":"appshare","shareCode":"${code.shareCode}","utm_term":"Wxfriends","utm_source":"iosapp","imageUrl":"","nickName":"","version":16,"channel":2,"babelChannel":"121"}&appid=wh5&client=apple&clientVersion=10.2.4`,
-                    'cookie': p.cookie
+                    'url': `https://api.m.jd.com/client.action?functionId=initForFarm&body={"mpin":"","utm_campaign":"t_335139774","utm_medium":"appshare","shareCode":"${code.shareCode}","utm_term":"Wxfriends","utm_source":"iosapp","imageUrl":"","nickName":"${p.user}","version":16,"channel":2,"babelChannel":0}&appid=wh5&osVersion=iOS%2013.7&screen=375*667&networkType=true&timestamp=1662220836165&d_brand=iPhone&d_model=iPhone%206s%3CiPhone8%2C1%3E&wqDefault=true&client=ios&clientVersion=8.0.27`,
+                    'cookie': p.cookie,
+                    algo: {
+                        type: "app",
+                        appId: "235ec",
+                    }
                 }
             )
             if (s.code === '0') {
@@ -505,7 +528,7 @@ class Main extends Template {
                 }
             }
             else {
-                console.log(`助力失败::${JSON.stringify(s)}`);
+                console.log(`助力失败: ${JSON.stringify(s)}`);
             }
         }
         // 天天红包
