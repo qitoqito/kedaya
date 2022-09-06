@@ -7,7 +7,7 @@ class Main extends Template {
         this.cron = "30 8,22 * * *"
         this.task = 'local'
         this.import = ['crypto-js']
-        this.thread = 6
+        // this.thread = 6
     }
 
     async middle(p) {
@@ -255,7 +255,7 @@ class Main extends Template {
             for (let i of this.haskey(s, 'hongBaoList')) {
                 dict.all.push(i.balance)
                 let expire = end>i.endTime / 1000
-                let orgLimitStr = i.orgLimitStr
+                let orgLimitStr = i.hongbaoName
                 if (orgLimitStr.includes("商城")) {
                     dict.app.push(i.balance)
                     if (expire) {
