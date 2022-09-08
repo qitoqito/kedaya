@@ -94,7 +94,7 @@ class Main extends Template {
                     return
                 }
                 else {
-                    await this.wait(this.rand(3000, 60000))
+                    await this.wait(this.rand(3000, 6000))
                 }
             }
         }
