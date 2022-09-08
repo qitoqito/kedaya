@@ -39,12 +39,14 @@ class Main extends Template {
                     t.push(`🦁 账户京贴: ${data || 0}元`)
                     break
                 case 'redpacket':
-                    t.push(`🦊 当前红包: ${data.all}元`)
+             t.push(`🦊 当前红包: ${data.all}元`)
                     t.push(`🦊 即将到期: ${data.expire}元`)
+                    t.push(`🦊 还未生效: ${data.disable}元`)
                     t.push(`🦊 通用红包: ${data.current[0]}元, 过期: ${data.current[1]}元`)
                     t.push(`🦊 商城红包: ${data.app[0]}元, 过期: ${data.app[1]}元`)
                     t.push(`🦊 京喜红包: ${data.pingou[0]}元, 过期: ${data.pingou[1]}元`)
                     t.push(`🦊 极速红包: ${data.lite[0]}元, 过期: ${data.lite[1]}元`)
+                    t.push(`🦊 京微红包: ${data.wechat[0]}元, 过期: ${data.wechat[1]}元`)
                     t.push(`🦊 健康红包: ${data.healthy[0]}元, 过期: ${data.healthy[1]}元`)
                     break
                 case 'bean':
@@ -236,6 +238,7 @@ class Main extends Template {
             lite: [],
             pingou: [],
             healthy: [],
+            wechat: [],
         }
         let dict = {
             current: [0],
@@ -244,52 +247,68 @@ class Main extends Template {
             pingou: [0],
             lite: [0],
             healthy: [0],
+            wechat: [0],
             appExpire: [0],
             pingouExpire: [0],
             liteExpire: [0],
             healthyExpire: [0],
+            wechatExpire: [0],
             all: [0],
             expire: [0],
+            disable: [0],
         }
         try {
             for (let i of this.haskey(s, 'hongBaoList')) {
                 dict.all.push(i.balance)
                 let expire = end>i.endTime / 1000
-                let orgLimitStr = i.hongbaoName
-                if (orgLimitStr.includes("商城")) {
-                    dict.app.push(i.balance)
-                    if (expire) {
-                        dict.appExpire.push(i.balance)
-                        dict.expire.push(i.balance)
+                let disable = end - 2>i.beginTime / 1000
+                let orgLimitStr = i.orgLimitStr
+                if (disable) {
+                    if (orgLimitStr.includes("商城")) {
+                        dict.app.push(i.balance)
+                        if (expire) {
+                            dict.appExpire.push(i.balance)
+                            dict.expire.push(i.balance)
+                        }
                     }
-                }
-                else if (orgLimitStr.includes("京喜")) {
-                    dict.pingou.push(i.balance)
-                    if (expire) {
-                        dict.pingouExpire.push(i.balance)
-                        dict.expire.push(i.balance)
+                    else if (orgLimitStr.includes("京喜")) {
+                        dict.pingou.push(i.balance)
+                        if (expire) {
+                            dict.pingouExpire.push(i.balance)
+                            dict.expire.push(i.balance)
+                        }
                     }
-                }
-                else if (orgLimitStr.includes("健康")) {
-                    dict.healthy.push(i.balance)
-                    if (expire) {
-                        dict.healthyExpire.push(i.balance)
-                        dict.expire.push(i.balance)
+                    else if (orgLimitStr.includes("健康")) {
+                        dict.healthy.push(i.balance)
+                        if (expire) {
+                            dict.healthyExpire.push(i.balance)
+                            dict.expire.push(i.balance)
+                        }
                     }
-                }
-                else if (orgLimitStr.includes("极速")) {
-                    dict.lite.push(i.balance)
-                    if (expire) {
-                        dict.liteExpire.push(i.balance)
-                        dict.expire.push(i.balance)
+                    else if (orgLimitStr.includes("极速") || orgLimitStr.includes("特价")) {
+                        dict.lite.push(i.balance)
+                        if (expire) {
+                            dict.liteExpire.push(i.balance)
+                            dict.expire.push(i.balance)
+                        }
+                    }
+                    else if (orgLimitStr.includes("小程序")) {
+                        dict.wechat.push(i.balance)
+                        if (expire) {
+                            dict.wechatExpire.push(i.balance)
+                            dict.expire.push(i.balance)
+                        }
+                    }
+                    else {
+                        dict.current.push(i.balance)
+                        if (expire) {
+                            dict.currentExpire.push(i.balance)
+                            dict.expire.push(i.balance)
+                        }
                     }
                 }
                 else {
-                    dict.current.push(i.balance)
-                    if (expire) {
-                        dict.currentExpire.push(i.balance)
-                        dict.expire.push(i.balance)
-                    }
+                    dict.disable.push(i.balance)
                 }
             }
         } catch (e) {
@@ -299,6 +318,7 @@ class Main extends Template {
         }
         r.all = this.sum(dict.all, 2)
         r.expire = this.sum(dict.expire, 2)
+        r.disable = this.sum(dict.disable, 2)
         this.dict[p.user].redpacket = r
     }
 
