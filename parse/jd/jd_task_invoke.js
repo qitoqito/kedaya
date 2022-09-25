@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东精选任务"
-        this.cron = "3 0,14 * * *"
+        this.cron = "6 6 6 6 6"
         this.import = ['jdUrl']
     }
 

@@ -4,14 +4,10 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东删除购物车"
-        // this.cron = "23 23 * * *"
+        this.cron = "6 6 6 6 6"
         this.task = 'local'
         this.readme = "购物车删除,慎用脚本"
         this.import = ['jdUrl']
-    }
-
-    async prepare() {
-        this.dict = this.getData('custom')
     }
 
     async main(p) {
