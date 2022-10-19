@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东东东农场"
-        this.cron = "33 */4 * * *"
+        this.cron = "33 0,11,17,22 * * *"
         // this.thread = 2
         this.task = 'local'
         this.import = ['fs', 'jdAlgo']
@@ -111,6 +111,7 @@ class Main extends Template {
                     // 'form':``,
                     cookie
                 })
+                await this.wait(2000)
                 console.log("添加好友:", i)
                 let tj = await this.algo.curl({
                         'url': `https://api.m.jd.com/client.action?functionId=initForFarm&body={"mpin":"","utm_campaign":"","utm_medium":"appshare","shareCode":"${i}-inviteFriend","utm_term":"Wxfriends","utm_source":"iosapp","imageUrl":"","nickName":"","version":16,"channel":2,"babelChannel":0}&appid=wh5&client=apple&clientVersion=10.2.4`,
@@ -122,6 +123,7 @@ class Main extends Template {
                         }
                     }
                 )
+                await this.wait(2000)
             }
             await this.algo.curl({
                     'url': `https://api.m.jd.com/client.action?functionId=awardInviteFriendForFarm&body={}&appid=wh5&client=apple&clientVersion=10.2.4`,
@@ -494,12 +496,12 @@ class Main extends Template {
                 continue
             }
             let s = await this.algo.curl({
-                    'url': `https://api.m.jd.com/client.action?functionId=initForFarm&body={"mpin":"","utm_campaign":"t_335139774","utm_medium":"appshare","shareCode":"${code.shareCode}","utm_term":"Wxfriends","utm_source":"iosapp","imageUrl":"","nickName":"${p.user}","version":16,"channel":2,"babelChannel":0}&appid=wh5&osVersion=iOS%2013.7&screen=375*667&networkType=true&timestamp=1662220836165&d_brand=iPhone&d_model=iPhone%206s%3CiPhone8%2C1%3E&wqDefault=true&client=ios&clientVersion=8.0.27`,
+                    'url': `https://api.m.jd.com/client.action?functionId=initForFarm&body={"mpin":"","utm_campaign":"t_335139774","utm_medium":"appshare","shareCode":"${code.shareCode}","utm_term":"Wxfriends","utm_source":"iosapp","imageUrl":"","nickName":"${p.user}","version":16,"channel":3,"babelChannel":0}&appid=wh5&osVersion=iOS%2013.7&screen=375*667&networkType=true&timestamp=1662220836165&d_brand=iPhone&d_model=iPhone%206s%3CiPhone8%2C1%3E&wqDefault=true&client=ios&clientVersion=8.0.27`,
                     'cookie': p.cookie,
                     algo: {
                         type: "app",
                         appId: "235ec",
-                    }
+                    },
                 }
             )
             if (s.code === '0') {
@@ -526,6 +528,10 @@ class Main extends Template {
                     console.log(`您当前助力次数已耗尽，跳出助力`);
                     break
                 }
+            }
+            else if (s.code == "403") {
+                console.log("运行环境异常，请您从正规渠道参与活动，稍后再试~")
+                break
             }
             else {
                 console.log(`助力失败: ${JSON.stringify(s)}`);
