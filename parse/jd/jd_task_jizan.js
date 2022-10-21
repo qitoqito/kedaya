@@ -29,7 +29,7 @@ class Main extends Template {
             )
             if (this.haskey(main, 'result.data.listData')) {
                 for (let i of main.result.data.listData) {
-                    if (i.rewardStatus == 0 || i.remainGradNum) {
+                    if ((i.rewardStatus == 0 || i.remainGradNum) && i.challengeGoalValue != i.challengeCompleteNum) {
                         let subject = await this.curl(this.modules.jdUrl.app("channelBff_querySubject", {
                                 "scene": "",
                                 "topContentId": "",
@@ -40,6 +40,7 @@ class Main extends Template {
                                 "page": 1
                             }, 'post', cookie)
                         )
+
                         console.log(`正在运行: ${this.haskey(subject, 'result.subjectVo.title')}`)
                         for (let j of this.haskey(subject, 'result.subjectVo.contentList')) {
                             let done = await this.curl(this.modules.jdUrl.app("subject_interactive_done", {
