@@ -42,6 +42,7 @@ class Main extends Template {
                             }, 'post', cookie)
                         )
                         console.log(done)
+                        await this.wait(2000)
                         let message = this.haskey(done, 'message')
                         if (message.includes('火爆')) {
                             console.log("火爆了,退出该任务")
