@@ -8,6 +8,16 @@ class Main extends Template {
         // this.thread = 2
         this.task = 'local'
         this.import = ['fs', 'jdAlgo']
+        this.readme=`[jd_task_farm]
+#signCard=1                   # 加签卡
+#doubleCard=1             # 双倍水滴卡
+#fastCard=1                   # 快速浇水卡
+#beanCard=1                # 水滴换豆卡
+#stock=200                    # 保留水滴数
+#tenWater=1                 # 只做10次浇水的任务,后续不浇水
+cache=1                          # 缓存助力code
+#helpWaitting=20000     # 助力等待时间20s,默认6s
+`
     }
 
     async prepare() {
@@ -342,6 +352,7 @@ class Main extends Template {
                                                     }
                                                 )
                                                 nnn++
+                                                await this.wait(3000)
                                             }
                                             if (nnn == 2) {
                                                 break
@@ -501,7 +512,7 @@ class Main extends Template {
                     algo: {
                         type: "app",
                         appId: "235ec",
-                    },
+                    }
                 }
             )
             if (s.code === '0') {
@@ -528,6 +539,8 @@ class Main extends Template {
                     console.log(`您当前助力次数已耗尽，跳出助力`);
                     break
                 }
+                let helpWaitting = parseInt(this.profile.helpWaitting || 6000)
+                await this.wait(helpWaitting)
             }
             else if (s.code == "403") {
                 console.log("运行环境异常，请您从正规渠道参与活动，稍后再试~")
@@ -577,6 +590,7 @@ class Main extends Template {
             if (!this.haskey(he, 'canHongbaoContineUse')) {
                 break
             }
+            await this.wait(3000)
         }
         // 天天红包定时奖励
         await this.algo.curl({
