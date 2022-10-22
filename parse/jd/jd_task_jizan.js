@@ -14,7 +14,7 @@ class Main extends Template {
 
     async main(p) {
         let cookie = p.cookie;
-        for (let n = 0; n<2; n++) {
+        for (let n = 0; n<4; n++) {
             if (n == 0) {
                 var tab = "recommend"
             }
@@ -37,10 +37,9 @@ class Main extends Template {
                                 "topContents": "",
                                 "tabId": -1,
                                 "subjectId": i.subjectId,
-                                "page": 1
+                                "page": this.rand(2, 9)
                             }, 'post', cookie)
                         )
-
                         console.log(`正在运行: ${this.haskey(subject, 'result.subjectVo.title')}`)
                         for (let j of this.haskey(subject, 'result.subjectVo.contentList')) {
                             let done = await this.curl(this.modules.jdUrl.app("subject_interactive_done", {
