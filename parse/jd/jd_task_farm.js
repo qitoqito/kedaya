@@ -8,7 +8,7 @@ class Main extends Template {
         // this.thread = 2
         this.task = 'local'
         this.import = ['fs', 'jdAlgo']
-        this.readme=`[jd_task_farm]
+        this.readme = `[jd_task_farm]
 #signCard=1                   # 加签卡
 #doubleCard=1             # 双倍水滴卡
 #fastCard=1                   # 快速浇水卡
@@ -17,6 +17,7 @@ class Main extends Template {
 #tenWater=1                 # 只做10次浇水的任务,后续不浇水
 cache=1                          # 缓存助力code
 #helpWaitting=20000     # 助力等待时间20s,默认6s
+#helpRandom=1            # 随机助力
 `
     }
 
@@ -502,7 +503,8 @@ cache=1                          # 缓存助力code
         let salveHelpAddWater = 0;
         let remainTimes = 3;//今日剩余助力次数,默认3次（京东农场每人每天3次助力机会）。
         let helpSuccessPeoples = '';//成功助力好友
-        for (let code of this.code) {
+        let helpCode = this.profile.helpRandom ? this.random(this.code, this.code.length) : this.code
+        for (let code of helpCode) {
             if (code.finish) {
                 continue
             }
