@@ -7,6 +7,7 @@ class Main extends Template {
         this.cron = "6 6 6 6 6"
         this.task = 'local'
         this.import = ['jdUrl']
+        this.interval = 6000
     }
 
     async prepare() {
@@ -14,21 +15,27 @@ class Main extends Template {
 
     async main(p) {
         let cookie = p.cookie;
-        for (let n = 0; n<4; n++) {
+        let err = 0
+        for (let n = 0; n<6; n++) {
             if (n == 0) {
                 var tab = "recommend"
             }
             else {
                 var tab = "joined"
             }
+            let page = n<5 ? 1 : 2
             let main = await this.curl({
                     'url': `https://api.m.jd.com/subject_challenge_main`,
-                    'form': `appid=contenth5_common&functionId=subject_challenge_main&body={"page":1,"pageSize":10,"tabSource":"${tab}"}&client=h5&clientVersion=11.3.0`,
+                    'form': `appid=contenth5_common&functionId=subject_challenge_main&body={"page":${page},"pageSize":10,"tabSource":"${tab}"}&client=h5&clientVersion=11.3.0`,
                     cookie
                 }
             )
             if (this.haskey(main, 'result.data.listData')) {
                 for (let i of main.result.data.listData) {
+                    if (err>3) {
+                        console.log(`火爆超过三次,退出运行`)
+                        return
+                    }
                     if ((i.rewardStatus == 0 || i.remainGradNum) && i.challengeGoalValue != i.challengeCompleteNum) {
                         let subject = await this.curl(this.modules.jdUrl.app("channelBff_querySubject", {
                                 "scene": "",
@@ -37,7 +44,7 @@ class Main extends Template {
                                 "topContents": "",
                                 "tabId": -1,
                                 "subjectId": i.subjectId,
-                                "page": this.rand(2, 9)
+                                "page": n<5 ? n + 1 : this.rand(2, 9),
                             }, 'post', cookie)
                         )
                         console.log(`正在运行: ${this.haskey(subject, 'result.subjectVo.title')}`)
@@ -49,11 +56,16 @@ class Main extends Template {
                                 }, 'post', cookie)
                             )
                             console.log(done)
-                            // await this.wait(2000)
+                            await this.wait(3000)
                             let message = this.haskey(done, 'message')
                             if (message.includes('火爆')) {
                                 console.log("火爆了,退出该任务")
+                                err++
                                 break
+                            }
+                            if (message.includes("您已在该视频做过任务啦")) {
+                                console.log("您已在该视频做过任务啦")
+                                // break
                             }
                             if (this.haskey(done, 'data.rewardsInfo')) {
                                 this.print(done.data.rewardsInfo.rewardMsg, p.user)
