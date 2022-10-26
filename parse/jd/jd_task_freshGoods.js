@@ -22,6 +22,16 @@ class Main extends Template {
 
     async main(p) {
         let cookie = p.cookie;
+        if (!this.dict[p.user]) {
+            this.dict[p.user] = {}
+        }
+        if (this.dict[p.user].next) {
+            let next = this.dict[p.user].next - new Date().getTime()
+            if (next>0) {
+                console.log("正在等待: ", next)
+                await this.wait(next)
+            }
+        }
         let fp = this.uuid('lc', 32)
         let eid = this.uuid('c', 90)
         let uuid = this.uuid("lc", 40)
@@ -61,6 +71,7 @@ class Main extends Template {
             await this.wait(500)
         }
         this.nextPin = list.data.pin
+        this.dict[p.user].next = new Date().getTime() + 10000
         for (let n of Array(1)) {
             let r = await this.algo.curl({
                     'url': `https://api.m.jd.com/api?client=iOS&clientVersion=11.3.0&appid=jdchoujiang_h5&t=1666756124856&functionId=freshgoodsDraw&body={"code":"${this.code}","eid":"${eid}","fp":"${fp}"}&openid=-1&uuid=${uuid}&build=168341&osVersion=15.1.1&networkType=wifi&partner=&d_brand=iPhone&d_model=iPhone13,3&code=${this.code}&eid=${eid}&fp=${fp}`,
