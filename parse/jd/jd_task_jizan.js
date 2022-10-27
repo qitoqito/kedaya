@@ -7,7 +7,7 @@ class Main extends Template {
         this.cron = "6 6 6 6 6"
         this.task = 'local'
         this.import = ['jdUrl']
-        this.interval = 6000
+        this.interval = 8000
     }
 
     async prepare() {
@@ -56,7 +56,7 @@ class Main extends Template {
                                 }, 'post', cookie)
                             )
                             console.log(done)
-                            await this.wait(3000)
+                            await this.wait(this.rand(5000, 8000))
                             let message = this.haskey(done, 'message')
                             if (message.includes('火爆')) {
                                 console.log("火爆了,退出该任务")
