@@ -3,18 +3,33 @@ const Template = require('../../template');
 class Main extends Template {
     constructor() {
         super()
-        this.title = "京东618超级盲盒"
+        this.title = "京东超市盲盒"
         this.cron = "6 6 6 6 6"
         this.help = 2
         this.task = 'local'
+        this.import = ['jdAlgo']
     }
 
     async prepare() {
-        this.linkId = this.profile.custom || "9Ff9Nj3xSRJlPyJInuDoKA"
+        this.linkId = this.profile.custom || "qHqXOx2bvqgFOzTH_-iJoQ"
+        this.algo = new this.modules.jdAlgo({
+            type: "lite", "version": "3.1", 'appId': '568c6'
+        })
     }
 
     async main(p) {
         let cookie = p.cookie;
+        let daily = await this.algo.curl({
+                'url': `https://api.m.jd.com/?functionId=starShopDraw&body={%22linkId%22:%22qHqXOx2bvqgFOzTH_-iJoQ%22,%22isDailyRaffle%22:true}&appid=activities_platform&t=1667131611830&client=ios&clientVersion=4.2.0&cthr=1&build=1217&screen=375*667&networkType=wifi&d_brand=iPhone&d_model=iPhone8,1&lang=zh_CN&osVersion=13.7&partner=`,
+                cookie
+            }
+        )
+        if (this.haskey(daily, 'data.prizeValue')) {
+            this.print(`获得: ${daily.data.prizeValue}${daily.data.prizeConfigName}`)
+        }
+        else {
+            console.log(this.haskey(daily, 'errMsg'))
+        }
         let s = await this.curl({
                 'url': `https://api.m.jd.com/?functionId=apTaskList&body={"linkId":"${this.linkId}"}&_t=1654226708008&appid=activities_platform&cthr=1`,
                 // 'form':``,
@@ -56,6 +71,7 @@ class Main extends Template {
                 cookie
             }
         )
+        console.log(draw)
         if (this.haskey(draw, 'data')) {
             this.print(`${draw.data.prizeConfigName} : ${draw.data.prizeValue}`, p.user)
         }
