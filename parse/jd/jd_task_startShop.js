@@ -20,7 +20,7 @@ class Main extends Template {
     async main(p) {
         let cookie = p.cookie;
         let daily = await this.algo.curl({
-                'url': `https://api.m.jd.com/?functionId=starShopDraw&body={%22linkId%22:%22qHqXOx2bvqgFOzTH_-iJoQ%22,%22isDailyRaffle%22:true}&appid=activities_platform&t=1667131611830&client=ios&clientVersion=4.2.0&cthr=1&build=1217&screen=375*667&networkType=wifi&d_brand=iPhone&d_model=iPhone8,1&lang=zh_CN&osVersion=13.7&partner=`,
+                'url': `https://api.m.jd.com/?functionId=starShopDraw&body={"linkId":"${this.linkId}","isDailyRaffle":true}&appid=activities_platform&t=1667131611830&client=ios&clientVersion=4.2.0&cthr=1&build=1217&screen=375*667&networkType=wifi&d_brand=iPhone&d_model=iPhone8,1&lang=zh_CN&osVersion=13.7&partner=`,
                 cookie
             }
         )
@@ -65,18 +65,24 @@ class Main extends Template {
                 console.log('任务已经完成:', i.taskTitle)
             }
         }
-        let draw = await this.curl({
-                'url': `https://api.m.jd.com/?functionId=starShopDraw&body={"linkId":"${this.linkId}"}&_t=1655468068076&appid=activities_platform&client=ios&clientVersion=11.0.6&cthr=1&networkType=wifi&d_brand=iPhone&d_model=iPhone13,3&lang=zh_CN&osVersion=15.1.1&partner=`,
-                // 'form':``,
-                cookie
+        for (let i of Array(5)) {
+            let draw = await this.algo.curl({
+                    'url': `https://api.m.jd.com/?functionId=starShopDraw&body={"linkId":"${this.linkId}"}&_t=1655468068076&appid=activities_platform&client=ios&clientVersion=11.0.6&cthr=1&networkType=wifi&d_brand=iPhone&d_model=iPhone13,3&lang=zh_CN&osVersion=15.1.1&partner=`,
+                    // 'form':``,
+                    cookie
+                }
+            )
+            console.log(draw)
+            let code = this.haskey(draw, 'code')
+            if (this.haskey(draw, 'data')) {
+                this.print(`${draw.data.prizeConfigName} : ${draw.data.prizeValue}`, p.user)
             }
-        )
-        console.log(draw)
-        if (this.haskey(draw, 'data')) {
-            this.print(`${draw.data.prizeConfigName} : ${draw.data.prizeValue}`, p.user)
-        }
-        else {
-            console.log(`什么也没有抽到`)
+            else if (code == 600012) {
+                break
+            }
+            else {
+                console.log(`什么也没有抽到`)
+            }
         }
     }
 }
