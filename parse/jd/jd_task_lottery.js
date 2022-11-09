@@ -4,14 +4,34 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东抽奖机"
-        this.cron = "26 0,18 * * *"
+        this.cron = "26 6,18 * * *"
         this.help = 'main'
         this.task = 'local'
-        this.thread = 3
+        // this.thread = 3
         this.filter = 'appId'
+        this.header = {
+            "user-agent": "jd"
+        }
+        this.import = ['jdUrl', 'crypto-js', 'fs', 'vm']
     }
 
     async prepare() {
+        try {
+            let js = await this.modules.fs.readFileSync(this.dirname + '/static/vendors.683f5a61.js', 'utf-8')
+            const fnMock = new Function;
+            const ctx = {
+                window: {addEventListener: fnMock},
+                document: {
+                    addEventListener: fnMock,
+                    removeEventListener: fnMock,
+                },
+                navigator: {userAgent: 'okhttp/3.12.1;jdmall;android;version/9.5.4;build/88136;screen/1440x3007;os/11;network/wifi;'}
+            };
+            this.modules.vm.createContext(ctx);
+            this.modules.vm.runInContext(js, ctx);
+            this.smashUtils = ctx.window.smashUtils;
+        } catch (e) {
+        }
         let custom = this.getValue('custom')
         let expand = this.getValue('expand')
         if (custom.length) {
@@ -70,14 +90,14 @@ class Main extends Template {
             if (inviter.includes(p.user)) {
                 this.dict[p.user]['report'].push({
                     'url': `https://api.m.jd.com/client.action`,
-                    'form': `functionId=${lottery}_getLotteryResult&body={"appId":"${appId}"}&client=wh5&clientVersion=1.0.0`,
+                    'form': `functionId=${lottery}_getLotteryResult&body=${this.dumps(await this.body({"appId": appId}))}&client=wh5&clientVersion=1.0.0`,
                     cookie
                 })
             }
         }
         let l = await this.curl({
                 'url': `https://api.m.jd.com/`,
-                'form': `appid=wh5&clientVersion=1.0.0&functionId=${home}_getHomeData&body={"taskToken":"","appId":"${appId}","channelId":${channelId}`,
+                'form': `appid=wh5&clientVersion=1.0.0&functionId=${home}_getHomeData&body={"taskToken":"","appId":"${appId}","channelId":${channelId}}`,
                 cookie
             }
         )
@@ -96,7 +116,7 @@ class Main extends Template {
                     }
                     let collectScore = await this.curl({
                         url: `https://api.m.jd.com/client.action?advId=${collect}_collectScore`,
-                        form: `functionId=${collect}_collectScore&body=${JSON.stringify(body)}&client=wh5&clientVersion=1.0.0`,
+                        form: `functionId=${collect}_collectScore&body=${JSON.stringify(await this.body(body))}&client=wh5&clientVersion=1.0.0`,
                         cookie
                     })
                 }
@@ -110,7 +130,7 @@ class Main extends Template {
                     if (i.subTitleName && i.subTitleName.includes("浏览")) {
                         let getFeedDetail = await this.curl({
                             'url': `https://api.m.jd.com/client.action?advId=${home}_getHomeData`,
-                            'form': `functionId=${home}_getHomeData&body={"taskId":"${i.taskId}"}&client=wh5&clientVersion=1.0.0`,
+                            'form': `functionId=${home}_getHomeData&body=${this.dumps(await this.body({"taskId": i.taskId}))}&client=wh5&clientVersion=1.0.0`,
                             cookie
                         })
                         for (let y of getFeedDetail.data.result.addProductVos[0].productInfoVos.splice(0, 5)) {
@@ -121,7 +141,7 @@ class Main extends Template {
                             }
                             let collectScore = await this.curl({
                                 url: `https://api.m.jd.com/client.action?advId=${collect}_collectScore`,
-                                form: `functionId=${collect}_collectScore&body=${JSON.stringify(body)}&client=wh5&clientVersion=1.0.0`,
+                                form: `functionId=${collect}_collectScore&body=${JSON.stringify(await this.body(body))}&client=wh5&clientVersion=1.0.0`,
                                 cookie
                             })
                             console.log(p.index, "加购获得:", this.haskey(collectScore, 'data.result.acquiredScore'))
@@ -134,7 +154,7 @@ class Main extends Template {
                         }
                         let collectScore = await this.curl({
                             url: `https://api.m.jd.com/client.action?advId=${collect}_collectScore`,
-                            form: `functionId=${collect}_collectScore&body=${JSON.stringify(body)}&client=wh5&clientVersion=1.0.0`,
+                            form: `functionId=${collect}_collectScore&body=${JSON.stringify(await this.body(body))}&client=wh5&clientVersion=1.0.0`,
                             cookie
                         })
                         console.log(collectScore);
@@ -154,7 +174,7 @@ class Main extends Template {
                     }
                     let collectScore = await this.curl({
                         url: `https://api.m.jd.com/client.action?advId=${collect}_collectScore`,
-                        form: `functionId=${collect}_collectScore&body=${JSON.stringify(body)}&client=wh5&clientVersion=1.0.0`,
+                        form: `functionId=${collect}_collectScore&body=${JSON.stringify(await this.body(body))}&client=wh5&clientVersion=1.0.0`,
                         cookie
                     })
                     this.haskey(collectScore, 'data.result.taskToken') ? console.log(p.index, "获取任务:", collectScore.data.result.taskToken) : console.log(p.index, "获取奖励中", this.haskey(collectScore, 'data.result.score.score'))
@@ -170,7 +190,7 @@ class Main extends Template {
                         }
                         collectScore = await this.curl({
                             url: `https://api.m.jd.com/client.action?advId=${collect}_collectScore`,
-                            form: `functionId=${collect}_collectScore&body=${JSON.stringify(body)}&client=wh5&clientVersion=1.0.0`,
+                            form: `functionId=${collect}_collectScore&body=${JSON.stringify(await this.body(body))}&client=wh5&clientVersion=1.0.0`,
                             cookie
                         })
                         console.log(p.index, '获得奖励:', this.haskey(collectScore, 'data.result.score'));
@@ -182,7 +202,10 @@ class Main extends Template {
             }
             let c = await this.curl({
                     'url': `https://api.m.jd.com/client.action`,
-                    'form': `functionId=${lottery}_getLotteryResult&body={"appId":"${appId}","taskId":${i.taskId}}&client=wh5&clientVersion=1.0.0`,
+                    'form': `functionId=${lottery}_getLotteryResult&body=${this.dumps(await this.body({
+                        "appId": appId,
+                        "taskId": i.taskId
+                    }))}&client=wh5&clientVersion=1.0.0`,
                     cookie
                 }
             )
@@ -209,14 +232,15 @@ class Main extends Template {
         }
         let s = await this.curl({
                 'url': `https://api.m.jd.com/client.action`,
-                'form': `functionId=${home}_getHomeData&body={"appId":"${appId}","taskToken":""}&client=wh5&clientVersion=1.0.0`,
+                'form': `functionId=${home}_getHomeData&body=${this.dumps(await this.body({"appId": appId}))}&client=wh5&clientVersion=1.0.0`,
                 cookie
             }
         )
-        for (let z = 0; z<s.data.result.userInfo.lotteryNum; z++) {
+        for (let z = 0; z<s.data.result.userInfo.userScore / s.data.result.userInfo.scorePerLottery; z++) {
+            let body = await this.body({"appId": appId})
             let c = await this.curl({
                     'url': `https://api.m.jd.com/client.action`,
-                    'form': `functionId=${lottery}_getLotteryResult&body={"appId":"${appId}"}&client=wh5&clientVersion=1.0.0`,
+                    'form': `functionId=${lottery}_getLotteryResult&body=${this.dumps(await this.body(body))}&client=wh5&clientVersion=1.0.0`,
                     cookie
                 }
             )
@@ -242,6 +266,21 @@ class Main extends Template {
             }
         }
         this.dict[p.user]['gifts'] = [...this.dict[p.user]['gifts'], ...gifts]
+    }
+
+    async body(params) {
+        let random = this.smashUtils.getRandom(8)
+        let log = this.smashUtils.get_risk_result({
+            id: random,
+            data: {
+                random
+            }
+        }).log;
+        let b = {
+            "random": random,
+            log
+        }
+        return {...b, ...params}
     }
 
     async extra() {
