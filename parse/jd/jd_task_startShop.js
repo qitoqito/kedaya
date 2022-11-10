@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东超市盲盒"
-        this.cron = "6 6 6 6 6"
+        this.cron = "6 0 * * *"
         this.help = 2
         this.task = 'local'
         this.import = ['jdAlgo']
@@ -25,7 +25,7 @@ class Main extends Template {
             }
         )
         if (this.haskey(daily, 'data.prizeValue')) {
-            this.print(`获得: ${daily.data.prizeValue}${daily.data.prizeConfigName}`)
+            this.print(`获得: ${daily.data.prizeValue}${daily.data.prizeConfigName}`, p.user)
         }
         else {
             console.log(this.haskey(daily, 'errMsg'))
@@ -77,7 +77,7 @@ class Main extends Template {
             if (this.haskey(draw, 'data')) {
                 this.print(`${draw.data.prizeConfigName} : ${draw.data.prizeValue}`, p.user)
             }
-            else if (code == 600012) {
+            else if (code == 600012 || code == 600007) {
                 break
             }
             else {
