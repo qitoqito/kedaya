@@ -5,5 +5,17 @@ module.exports = {
         'kejiwanjia': [/pin=([^;]+)/, /username=([^;]+)/],
         'baidu': /pin=([^;]+)/,
     },
-    communal: ['options', 'curl', 'jsonParse', 'uuid', 'response', 'location', 'dumps', 'loads', 'match', 'matchAll', 'md5', 'unique', 'rand', 'random', 'compact', 'column', 'wait', 'query', 'sha1', 'md5', 'sha256', 'hmacsha256', 'query', 'haskey', 'type', 'parseIni', 'redisCli', 'fileCache']
+    communal: ['options', 'curl', 'jsonParse', 'uuid', 'response', 'location', 'dumps', 'loads', 'match', 'matchAll', 'md5', 'unique', 'rand', 'random', 'compact', 'column', 'wait', 'query', 'sha1', 'md5', 'sha256', 'hmacsha256', 'query', 'haskey', 'type', 'parseIni', 'redisCli', 'fileCache'],
+    timerRegular: {
+        jd: {
+            wait: 120,
+            rule:
+                {
+                    'url':
+                        'https://api.m.jd.com/client.action?functionId=queryMaterialProducts&client=wh5',
+                    'haskey':
+                        'currentTime2'
+                }
+        }
+    }
 }
