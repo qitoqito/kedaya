@@ -7,7 +7,7 @@ class Main extends Template {
         this.cron = "23 */6 * * *"
         this.aid = 'local'
         this.task = 'own'
-        this.thread = 2
+        // this.thread = 2
         this.turn = 2
                 this.readme = `[jd_task_pet] 
 #helpWaitting=20000     # 助力等待时间20s,默认6s`
