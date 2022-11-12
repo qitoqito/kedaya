@@ -236,7 +236,7 @@ class Main extends Template {
                 cookie
             }
         )
-        for (let z = 0; z<s.data.result.userInfo.userScore / s.data.result.userInfo.scorePerLottery; z++) {
+        for (let z = 0; z< Math.min(s.data.result.userInfo.userScore / s.data.result.userInfo.scorePerLottery,10); z++) {
             let body = await this.body({"appId": appId})
             let c = await this.curl({
                     'url': `https://api.m.jd.com/client.action`,
