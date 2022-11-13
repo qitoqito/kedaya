@@ -32,7 +32,7 @@ class Main extends Template {
             }
         }
         try {
-            this.dict[s.data.data.pin] = {
+            this.dict[pin] = {
                 ...dict,
                 ...{
                     pin: s.data.data.pin,
