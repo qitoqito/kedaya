@@ -8,6 +8,7 @@ class Main extends Template {
         // this.thread = 6
         this.task = 'all'
         this.import = ['jdUrl', 'fs']
+        this.readme=`[jd_task_checkCookie]\nchange=1 #过期后,使用wskey生成ptkey`
     }
 
     async main(p) {
@@ -22,7 +23,7 @@ class Main extends Template {
         )
         if ((s.islogin == '0')) {
             console.log(p.user, "账号过期了呀🐶")
-            this.notices("账号过期了呀🐶", p.user)
+            // this.notices("账号过期了呀🐶", p.user)
             if (this.profile.change) {
                 let ua = "Mozilla/5.0 (iPad; CPU OS 12_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1"
                 let wskey = ''
@@ -70,7 +71,7 @@ class Main extends Template {
                 }
                 if (openKey.includes('app_open')) {
                     console.log(p.user, 'openKey生成成功🍀')
-                    this.notices('openKey生成成功', p.user)
+                    // this.notices('openKey生成成功', p.user)
                     this.n++
                     let q1 = this.query(openKey, ';', 'split')
                     let q2 = this.query(cookie, ';', 'split')
@@ -273,6 +274,9 @@ class Main extends Template {
         }
         else {
             console.log('没有可执行数据')
+        }
+        if (this.n) {
+            this.print(`此次共有${this.n}个账户生成新cookie`)
         }
     }
 }
