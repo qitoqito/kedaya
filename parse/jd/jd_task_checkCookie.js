@@ -22,8 +22,7 @@ class Main extends Template {
             }
         )
         if ((s.islogin == '0')) {
-            console.log(p.user, "账号过期了呀🐶")
-            // this.notices("账号过期了呀🐶", p.user)
+            console.log(p.user, "账号过期了呀🐶") 
             if (this.profile.change) {
                 let ua = "Mozilla/5.0 (iPad; CPU OS 12_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1"
                 let wskey = ''
@@ -82,6 +81,8 @@ class Main extends Template {
                 else {
                     this.notices('openKey生成失败', p.user)
                 }
+            }else{
+                this.notices("账号过期了呀🐶", p.user)
             }
         }
         else {
