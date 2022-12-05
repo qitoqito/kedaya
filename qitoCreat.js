@@ -313,7 +313,7 @@ QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的�
                                 }
                             }
                         } catch (ee) {
-                            console.log(ee)
+                            // console.log(ee)
                         }
                     }
                 }
