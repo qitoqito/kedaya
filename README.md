@@ -44,7 +44,9 @@
     filename_msgExcept=pin1|pin2|pin3 (通知账号黑名单)
 
 # 食用方法
-    # 青龙面板
+    # qinglong面板
+    rm -rf /ql/data/repo/qitoqito_kedaya && ql repo https://github.com/qitoqito/kedaya.git kedaya && cp -a /ql/data/repo/qitoqito_kedaya/. /ql/data/scripts && task qitoCreat.js now
+    # 青龙面板(旧)
 	rm -rf /ql/repo/qitoqito_kedaya && ql repo https://github.com/qitoqito/kedaya.git kedaya && cp -a /ql/repo/qitoqito_kedaya/. /ql/scripts && task qitoCreat.js now
    
     # v3系列
