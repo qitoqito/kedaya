@@ -125,7 +125,7 @@ cache=1                          # 缓存助力code
                     cookie,
                     algo: {
                         version: "3.1",
-                        type: "app",
+                        type: "web",
                         appId: "eaf91",
                     }
                 })
@@ -137,7 +137,7 @@ cache=1                          # 缓存助力code
                         cookie,
                         algo: {
                             version: "3.1",
-                            type: "app",
+                            type: "web",
                             appId: "8a2af",
                         }
                     }
@@ -157,7 +157,7 @@ cache=1                          # 缓存助力code
                 cookie,
                 algo: {
                     version: "3.1",
-                    type: "app",
+                    type: "web",
                     appId: "32b94",
                 }
             }
@@ -181,7 +181,7 @@ cache=1                          # 缓存助力code
                 cookie,
                 algo: {
                     version: "3.1",
-                    type: "app",
+                    type: "web",
                     appId: "08dc3",
                 }
             }
@@ -194,7 +194,7 @@ cache=1                          # 缓存助力code
                         cookie,
                         algo: {
                             version: "3.1",
-                            type: "app",
+                            type: "web",
                             appId: "4a0b4",
                         }
                     }
@@ -206,7 +206,7 @@ cache=1                          # 缓存助力code
                         cookie,
                         algo: {
                             version: "3.1",
-                            type: "app",
+                            type: "web",
                             appId: "4a0b4",
                         }
                     }
@@ -221,7 +221,7 @@ cache=1                          # 缓存助力code
                 cookie,
                 algo: {
                     version: "3.1",
-                    type: "app",
+                    type: "web",
                     appId: "c901b",
                 }
             }
@@ -264,7 +264,7 @@ cache=1                          # 缓存助力code
                     cookie,
                     algo: {
                         version: "3.1",
-                        type: "app",
+                        type: "web",
                         appId: "fcb5a",
                     }
                 }
@@ -300,7 +300,7 @@ cache=1                          # 缓存助力code
                                             cookie,
                                             algo: {
                                                 version: "3.1",
-                                                type: "app",
+                                                type: "web",
                                                 appId: "53f09",
                                             }
                                         }
@@ -311,7 +311,7 @@ cache=1                          # 缓存助力code
                                             cookie,
                                             algo: {
                                                 version: "3.1",
-                                                type: "app",
+                                                type: "web",
                                                 appId: "53f09",
                                             }
                                         }
@@ -352,7 +352,7 @@ cache=1                          # 缓存助力code
                                         cookie,
                                         algo: {
                                             version: "3.1",
-                                            type: "app",
+                                            type: "web",
                                             appId: "0c010",
                                         }
                                     }
@@ -360,7 +360,12 @@ cache=1                          # 缓存助力code
                                 let s = await this.algo.curl({
                                         'url': `https://api.m.jd.com/client.action?functionId=firstWaterTaskForFarm&body={"version":19,"channel":1,"babelChannel":"121"}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
                                         // 'form':``,
-                                        cookie
+                                        cookie,
+                                        algo: {
+                                            version: "3.1",
+                                            type: "web",
+                                            appId: "0cf1e",
+                                        }
                                     }
                                 )
                                 if (s.code === '0') {
@@ -394,7 +399,7 @@ cache=1                          # 缓存助力code
                                                         cookie,
                                                         algo: {
                                                             version: "3.1",
-                                                            type: "app",
+                                                            type: "web",
                                                             appId: "673a0",
                                                         }
                                                     }
@@ -414,7 +419,12 @@ cache=1                          # 缓存助力code
                                 let ss = await this.algo.curl({
                                         'url': `https://api.m.jd.com/client.action?functionId=waterFriendGotAwardForFarm&body={"version":19,"channel":1,"babelChannel":"121"}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
                                         // 'form':``,
-                                        cookie
+                                        cookie,
+                                        algo: {
+                                            version: "3.1",
+                                            type: "web",
+                                            appId: "d08ff",
+                                        }
                                     }
                                 )
                             }
@@ -430,7 +440,7 @@ cache=1                          # 缓存助力code
                                         cookie,
                                         algo: {
                                             version: "3.1",
-                                            type: "app",
+                                            type: "web",
                                             appId: "57b30",
                                         }
                                     }
@@ -453,17 +463,18 @@ cache=1                          # 缓存助力code
                                         cookie,
                                         algo: {
                                             version: "3.1",
-                                            type: "app",
+                                            type: "web",
                                             appId: "67dfc",
                                         }
                                     }
                                 )
+                                await this.wait(3000)
                                 await this.algo.curl({
                                         'url': `https://api.m.jd.com/client.action?functionId=ddnc_getTreasureBoxAward&body={"babelChannel":"121","line":"","channel":1,"type":2,"version":19}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
                                         cookie,
                                         algo: {
                                             version: "3.1",
-                                            type: "app",
+                                            type: "web",
                                             appId: "67dfc",
                                         }
                                     }
@@ -479,7 +490,7 @@ cache=1                          # 缓存助力code
                                                 // 'form':``,
                                                 cookie, algo: {
                                                     version: "3.1",
-                                                    type: "app",
+                                                    type: "web",
                                                     appId: "0c010",
                                                 }
                                             }
@@ -510,7 +521,7 @@ cache=1                          # 缓存助力code
                                         // 'form':``,
                                         cookie, algo: {
                                             version: "3.1",
-                                            type: "app",
+                                            type: "web",
                                             appId: "67dfc",
                                         }
                                     }
@@ -538,7 +549,7 @@ cache=1                          # 缓存助力code
                                         // 'form':``,
                                         cookie, algo: {
                                             version: "3.1",
-                                            type: "app",
+                                            type: "web",
                                             appId: "67dfc",
                                         }
                                     }
@@ -564,7 +575,7 @@ cache=1                          # 缓存助力code
                         appId: "5c767",
                     }
                 }
-            ) 
+            )
             if (s.code === '0') {
                 if (!s.hasLimit) {
                     console.log(`小鸭子游戏:${s.title}`);
@@ -673,7 +684,7 @@ cache=1                          # 缓存助力code
                     'cookie': p.cookie,
                     algo: {
                         version: "3.1",
-                        type: "app",
+                        type: "web",
                         appId: "8a2af",
                     }
                 }
@@ -712,7 +723,7 @@ cache=1                          # 缓存助力code
                     cookie,
                     algo: {
                         version: "3.1",
-                        type: "app",
+                        type: "web",
                         appId: "92354",
                     }
                 }
@@ -725,7 +736,7 @@ cache=1                          # 缓存助力code
                                 cookie,
                                 algo: {
                                     version: "3.1",
-                                    type: "app",
+                                    type: "web",
                                     appId: "15507",
                                 }
                             }
@@ -744,7 +755,7 @@ cache=1                          # 缓存助力code
                 cookie,
                 algo: {
                     version: "3.1",
-                    type: "app",
+                    type: "web",
                     appId: "8a2af",
                 }
             }
@@ -758,7 +769,7 @@ cache=1                          # 缓存助力code
                 cookie,
                 algo: {
                     version: "3.1",
-                    type: "app",
+                    type: "web",
                     appId: "157b6",
                 }
             }
@@ -772,7 +783,7 @@ cache=1                          # 缓存助力code
                             cookie,
                             algo: {
                                 version: "3.1",
-                                type: "app",
+                                type: "web",
                                 appId: "86ba5",
                             }
                         }
@@ -795,7 +806,7 @@ cache=1                          # 缓存助力code
                             cookie,
                             algo: {
                                 version: "3.1",
-                                type: "app",
+                                type: "web",
                                 appId: "86ba5",
                             }
                         }
@@ -818,7 +829,7 @@ cache=1                          # 缓存助力code
                             cookie,
                             algo: {
                                 version: "3.1",
-                                type: "app",
+                                type: "web",
                                 appId: "86ba5",
                             }
                         }
@@ -840,7 +851,7 @@ cache=1                          # 缓存助力code
                 cookie,
                 algo: {
                     version: "3.1",
-                    type: "app",
+                    type: "web",
                     appId: "32b94",
                 }
             }
@@ -862,7 +873,7 @@ cache=1                          # 缓存助力code
                             cookie,
                             algo: {
                                 version: "3.1",
-                                type: "app",
+                                type: "web",
                                 appId: "86ba5",
                             }
                         }
@@ -887,7 +898,7 @@ cache=1                          # 缓存助力code
                             cookie,
                             algo: {
                                 version: "3.1",
-                                type: "app",
+                                type: "web",
                                 appId: "0c010",
                             }
                         }
