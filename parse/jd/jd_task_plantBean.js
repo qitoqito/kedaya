@@ -7,15 +7,12 @@ class Main extends Template {
         this.cron = "12 */3 * * *"
         this.task = 'local'
         this.turn = 2
+        this.interval = 6000
         this.import = ['jdUrl', 'jdAlgo', 'fs']
     }
 
     async prepare() {
         this.algo = new this.modules['jdAlgo']()
-        this.algo.set({
-            'appId': '0f6ed',
-            'type': 'pingou',
-        })
         try {
             let txt = this.modules.fs.readFileSync(`${this.dirname}/invite/jd_task_plantBean.json`).toString()
             this.code = this.loads(txt)
@@ -29,14 +26,23 @@ class Main extends Template {
         let user = p.user
         let lists = this.column(this.code, 'plantUuid')
         if (this.turnCount == 0) {
-            let index = await this.curl({
+            var index = await this.algo.curl({
                     'url': `https://api.m.jd.com/client.action?functionId=plantBeanIndex`,
                     'form': `body={"monitor_source":"plant_app_plant_index","monitor_refer":"","version":"9.2.4.1"}&client=apple&clientVersion=10.0.4&&appid=ld`,
-                    cookie
+                    cookie,
+                    algo: {
+                        'appId': 'd246a',
+                        'type': 'web',
+                        'version': '3.1'
+                    }
                 }
             )
             if (this.haskey(index, 'code', '3')) {
                 console.log(`没有获取到数据`)
+                return
+            }
+            else if (this.haskey(index, 'code', '411')) {
+                console.log(`前方道路拥挤,等待两分钟`)
                 return
             }
             var plantUuid
@@ -128,6 +134,30 @@ class Main extends Template {
                                     'url': `https://wq.jd.com/jxjdsignin/IssueReward?channel=jx_zdddsq&_t=1657108494784&_stk=_t%2Cchannel&sceneval=2&g_login_type=1&g_ty=ajax&appCode=msc588d6d5`,
                                     // 'form':``,
                                     cookie
+                                }
+                            )
+                            break
+                        case 96:
+                            let sign = await this.curl({
+                                    'url': `https://wq.jd.com/tjjdsignin/SignedInfo?channel=jx_zdddsq&_t=1663080425215&&_stk=_t%2Cchannel&_=1663080425642&sceneval=2&g_login_type=1&g_ty=ajax&appCode=msc588d6d5`,
+                                    algo: {
+                                        version: "3.1",
+                                        appId: '0f6ed',
+                                        type: "pingou"
+                                    },
+                                    cookie
+                                }
+                            )
+                            await this.wait(4000)
+                            let reward2 = await this.curl({
+                                    'url': `https://wq.jd.com/tjjdsignin/IssueReward?channel=jx_zdddsq&_t=1663080432487&_stk=_t%2Cchannel&sceneval=2&g_login_type=1&g_ty=ajax&appCode=msc588d6d5`,
+                                    // 'form':``,
+                                    cookie,
+                                    algo: {
+                                        version: "3.1",
+                                        appId: '0f6ed',
+                                        type: "pingou"
+                                    }
                                 }
                             )
                             break
@@ -301,6 +331,7 @@ class Main extends Template {
                             console.log(this.haskey(ss, 'data.nutrToast'))
                             break
                     }
+                    await this.wait(2000)
                 }
             }
             let friendList = await this.curl({
@@ -311,10 +342,15 @@ class Main extends Template {
             )
             for (let i of this.haskey(friendList, 'data.friendInfoList')) {
                 if (i.nutrCount) {
-                    let collectUserNutr = await this.curl({
+                    let collectUserNutr = await this.algo.curl({
                             'url': `https://api.m.jd.com/client.action?functionId=collectUserNutr`,
                             'form': `body={"monitor_refer":"collectUserNutr","monitor_source":"plant_app_plant_index","roundId":"${roundId}","paradiseUuid":"${i.paradiseUuid}","version":"9.2.4.1"}&client=apple&clientVersion=10.0.4&&appid=ld`,
-                            cookie
+                            cookie,
+                            algo: {
+                                'appId': '14357',
+                                'type': 'web',
+                                'version': '3.1'
+                            }
                         }
                     )
                     let collectResult = this.haskey(collectUserNutr, 'data.collectResult')
@@ -333,15 +369,20 @@ class Main extends Template {
             if (this.code.length == 0) {
                 this.jump = 1
             }
-            await this.wait(2000)
             for (let k of this.code) {
                 let uuid = k.plantUuid
                 if (k.finish == 0) {
+                    await this.wait(6000)
                     console.log(`正在助力: ${k.user}`)
-                    let index = await this.curl({
+                    let index = await this.algo.curl({
                             'url': `https://api.m.jd.com/client.action?functionId=plantBeanIndex`,
                             'form': `body={"plantUuid":"${uuid}","monitor_source":"plant_m_plant_index","monitor_refer":"","version":"9.2.4.1"}&client=apple&clientVersion=10.0.4&appid=ld`,
-                            cookie
+                            cookie,
+                            algo: {
+                                'appId': 'd246a',
+                                'type': 'web',
+                                'version': '3.1'
+                            }
                         }
                     )
                     if (this.haskey(index, 'code', '3')) {
@@ -362,7 +403,8 @@ class Main extends Template {
                     else if (res.state == '4') {
                         console.log(res.promptText)
                     }
-                }else{
+                }
+                else {
                     console.log(`助力: ${k.user} 已经完成,不需要再助力了`)
                 }
             }
