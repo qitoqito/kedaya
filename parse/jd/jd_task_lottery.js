@@ -50,6 +50,23 @@ class Main extends Template {
         }
         for (let cookie of this.cookies['help']) {
             for (let i of this.shareCode) {
+                if (!i.lottery) {
+                    let lotteryList = ['interact_template', 'splitHongbao']
+                    let body = await this.body({"appId": i.appId})
+                    for (let l of lotteryList) {
+                        let c = await this.curl({
+                                'url': `https://api.m.jd.com/client.action`,
+                                'form': `functionId=${l}_getLotteryResult&body=${this.dumps(await this.body(body))}&client=wh5&clientVersion=1.0.0`,
+                                cookie
+                            }
+                        )
+                        let msg = this.haskey(c, 'data.bizMsg')
+                        if (this.haskey(c, 'data.success') || msg.includes("抽奖")) {
+                            i.lottery = l
+                            break
+                        }
+                    }
+                }
                 let s = await this.curl({
                         'url': `https://api.m.jd.com/client.action`,
                         'form': `functionId=${i.home || 'healthyDay'}_getHomeData&body={"appId":"${i.appId}","taskToken":""}&client=wh5&clientVersion=1.0.0`,
@@ -61,7 +78,11 @@ class Main extends Template {
                         if (j.assistTaskDetailVo) {
                             i.taskId = j.taskId
                             i.inviter = i.inviter || []
-                            i.inviter.push({taskToken: j.assistTaskDetailVo.taskToken, user: this.userName(cookie)})
+                            i.inviter.push({
+                                taskToken: j.assistTaskDetailVo.taskToken,
+                                user: this.userName(cookie),
+                                lottery: i.lottery
+                            })
                             break
                         }
                     }
@@ -209,6 +230,7 @@ class Main extends Template {
                     cookie
                 }
             )
+            console.log(c)
             if (c.data.result) {
                 if (this.haskey(c, 'data.result.userAwardsCacheDto.redPacketVO')) {
                     text = `获得红包: ${c.data.result.userAwardsCacheDto.redPacketVO.value}`
@@ -236,7 +258,7 @@ class Main extends Template {
                 cookie
             }
         )
-        for (let z = 0; z< Math.min(s.data.result.userInfo.userScore / s.data.result.userInfo.scorePerLottery,10); z++) {
+        for (let z = 0; z<Math.min(s.data.result.userInfo.userScore / s.data.result.userInfo.scorePerLottery, 10); z++) {
             let body = await this.body({"appId": appId})
             let c = await this.curl({
                     'url': `https://api.m.jd.com/client.action`,
