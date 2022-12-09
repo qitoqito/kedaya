@@ -391,9 +391,12 @@ class Main extends Template {
                 }
             }
         }
-        if (this.dict[user].gifts.length) {
-            console.log(user, `本次运行奖励:\n${this.dict[user].gifts.join("\n")}`)
-            this.notices(this.dict[user].gifts.join("\n"), user)
+        for (let cookie of this.cookies[this.task]) {
+            let user = this.userName(cookie)
+            if (this.dict[user].gifts.length) {
+                console.log(user, `本次运行奖励:\n${this.dict[user].gifts.join("\n")}`)
+                this.notices(this.dict[user].gifts.join("\n"), user)
+            }
         }
         // }
     }
