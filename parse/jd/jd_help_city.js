@@ -6,11 +6,9 @@ class Main extends Template {
         this.title = "城城分现金助力"
         this.cron = "6 6 6 6 6"
         this.help = '3'
-        this.import = ['jdRisk', 'jdUrl']
     }
 
     async prepare() {
-        this.risk = new this.modules.jdRisk()
         for (let i of this.cookies['help']) {
             let params = {
                 'url': 'https://api.m.jd.com/client.action',
