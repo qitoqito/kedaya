@@ -6,26 +6,38 @@ class Main extends Template {
         this.title = "城城分现金助力"
         this.cron = "6 6 6 6 6"
         this.help = '3'
+        this.verify = 1
+        this.readme = '默认前3个主号,如果想自行添加助力码\n[jd_help_city]\ninviteId=id1|id2|id3'
     }
 
     async prepare() {
-        for (let i of this.cookies['help']) {
-            let params = {
-                'url': 'https://api.m.jd.com/client.action',
-                'form': 'functionId=city_getHomeDatav1&appid=signed_wh5&body={"lbsCity":"","realLbsCity":"","inviteId":"","headImg":"","userName":"","taskChannel":"1","location":"","safeStr":""}&osVersion=15.1.1&screen=390*844&networkType=wifi&timestamp=1670575798295&d_brand=iPhone&d_model=iPhone13,3&client=iOS&clientVersion=11.3.0&partner=&build=168341&openudid=7b01d4690ef13716984dcfcf96068f36b41f6c51',
-                cookie: i
+        if (this.profile.inviteId) {
+            for (let inviteId of this.getValue('inviteId')) {
+                this.shareCode.push({
+                    inviteId
+                })
             }
-            let s = await this.curl(params)
-            try {
-                this.shareCode.push(this.compact(s.data.result.userActBaseInfo, ['inviteId', 'nickname']))
-            } catch {
+        }
+        else {
+            for (let i of this.cookies['help']) {
+                let params = {
+                    'url': 'https://api.m.jd.com/client.action',
+                    'form': 'functionId=city_getHomeDatav1&appid=signed_wh5&body={"lbsCity":"","realLbsCity":"","inviteId":"","headImg":"","userName":"","taskChannel":"1","location":"","safeStr":""}&osVersion=15.1.1&screen=390*844&networkType=wifi&timestamp=1670575798295&d_brand=iPhone&d_model=iPhone13,3&client=iOS&clientVersion=11.3.0&partner=&build=168341&openudid=7b01d4690ef13716984dcfcf96068f36b41f6c51',
+                    cookie: i
+                }
+                let s = await this.curl(params)
+                try {
+                    this.shareCode.push(this.compact(s.data.result.userActBaseInfo, ['inviteId', 'nickname']))
+                } catch {
+                }
             }
         }
     }
 
     async main(p) {
         let cookie = p.cookie
-        console.log(`正在给 ${p.inviter.nickname} 助力`)
+        this.options["headers"]["user-agent"] = this.getUa()
+        console.log(`正在给 ${p.inviter.nickname || p.inviter.inviteId} 助力`)
         let params = {
             'url': 'https://api.m.jd.com/client.action',
             'form': `functionId=city_getHomeDatav1&appid=signed_wh5&body={"lbsCity":"16","realLbsCity":"1341","inviteId":"${p.inviter.inviteId}","headImg":"","userName":"","taskChannel":"1"}&osVersion=15.1.1&screen=390*844&networkType=wifi&timestamp=1670575798295&d_brand=iPhone&d_model=iPhone13,3&client=iOS&clientVersion=11.3.0&partner=&build=168341&openudid=7b01d4690ef13716984dcfcf96068f36b41f6c51`,
