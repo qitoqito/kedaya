@@ -40,6 +40,7 @@ cache=1                          # 缓存助力code
 
     async main(p) {
         let cookie = p.cookie;
+        this.options["headers"]["user-agent"] = this.getUa()
         let init = await this.algo.curl({
                 'url': 'https://api.m.jd.com/client.action?functionId=initForFarm',
                 'form': `body={"version":19,"channel":1}&appid=signed_wh5&client=iOS&clientVersion=11.3.0`,
