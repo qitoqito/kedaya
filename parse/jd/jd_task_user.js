@@ -35,7 +35,7 @@ class Main extends Template {
             this.dict[pin] = {
                 ...dict,
                 ...{
-                    pin: s.data.data.pin,
+                    pin,
                     userName: s.data.data.userName || s.data.data.pin,
                     index: p.index.toString(),
                     phone: s.data.data.mobile,
