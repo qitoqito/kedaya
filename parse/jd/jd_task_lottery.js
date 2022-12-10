@@ -288,7 +288,7 @@ class Main extends Template {
             for (let i in this.plan) {
                 let inviter = this.plan[i]
                 if (inviter.length>0) {
-                    for (let zz of this.random(inviter, 6)) {
+                    for (let zz of inviter) {
                         let help = zz.inviter || []
                         if (zz.finish) {
                             console.log(`${zz.user}助力已满,不用再助力了`)
