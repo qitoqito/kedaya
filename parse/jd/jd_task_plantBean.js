@@ -23,6 +23,7 @@ class Main extends Template {
 
     async main(p) {
         let cookie = p.cookie;
+        this.options["headers"]["user-agent"] = this.getUa()
         let user = p.user
         let lists = this.column(this.code, 'plantUuid')
         if (this.turnCount == 0) {
