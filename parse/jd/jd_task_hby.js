@@ -6,65 +6,43 @@ class Main extends Template {
         this.title = "京东红包雨"
         this.cron = "6 6 6 6 6"
         this.task = 'local'
-        this.thread = 3
+        this.verify = 1
+        this.readme = "custom=红包雨url,现在验证activityNo参数,无法直接使用纯数字babelProjectId作为custom"
     }
 
     async prepare() {
-        let body = {}
-        if (this.custom) {
-            if (isNaN(this.custom)) {
-                try {
-                    body = this.loads(this.custom)
-                } catch {
-                    let url
-                    if (this.match(/^http/, this.custom)) {
-                        url = this.custom
-                    }
-                    else {
-                        url = `https://prodev.m.jd.com/mall/active/${this.custom}/index.html`
-                    }
-                    let s = await this.curl({
-                            'url': url,
-                        }
-                    )
-                    let babelProjectId = this.match(/"activityId"\s*:\s*"(\d+)"/, s)
-                    let babelPageId = this.match(/"pageId"\s*:\s*"(\d+)"/, s)
-                    if (babelPageId && babelProjectId) {
-                        body = {babelProjectId, babelPageId}
-                    }
+        if (isNaN(this.custom)) {
+            try {
+                body = this.loads(this.custom)
+            } catch {
+                let url
+                if (this.match(/^http/, this.custom)) {
+                    url = this.custom
                 }
-            }
-            else {
-                body = {
-                    "babelProjectId": this.custom.toString(),
-                    "babelPageId": "3644410",
-                    "latitude": "0.000000",
-                    "longitude": "0.000000",
-                    "activityNo": "TF8Y1nRzvG--tYyTJr-al",
-                    "click": "1"
+                else {
+                    url = `https://prodev.m.jd.com/mall/active/${this.custom}/index.html`
+                }
+                let s = await this.curl({
+                        'url': url,
+                    }
+                )
+                let babelProjectId = this.match(/"activityId"\s*:\s*"(\d+)"/, s)
+                let babelPageId = this.match(/"pageId"\s*:\s*"(\d+)"/, s)
+                let activityNo = this.match(/"promoId"\s*:\s*"(\w+)"/, s)
+                if (babelPageId && babelProjectId) {
+                    this.shareCode.push({babelProjectId, babelPageId, activityNo})
                 }
             }
         }
-        if (this.dumps(body) == '{}') {
-            body = {
-                "babelProjectId": "01226321",
-                "babelPageId": "3644410",
-                "latitude": "0.000000",
-                "longitude": "0.000000",
-                "activityNo": "TF8Y1nRzvG--tYyTJr-al",
-                "click": "1"
-            }
-        }
-        this.dict = body
-        console.log('当前红包雨:', this.dumps(this.dict))
     }
 
     async main(p) {
         let cookie = p.cookie
+        this.options["headers"]["user-agent"] = this.getUa()
         for (let i of Array(2)) {
             let s = await this.curl({
                     'url': `https://api.m.jd.com/client.action`,
-                    'form': `functionId=hby_lottery&appid=publicUseApi&body=${this.dumps(this.dict)}&t=${this.timestamp}&client=wh5&clientVersion=1.0.0&networkType=&ext={"prstate":"0"}`,
+                    'form': `functionId=hby_lottery&appid=publicUseApi&body=${this.dumps(p.inviter)}&t=${this.timestamp}&client=wh5&clientVersion=1.0.0&networkType=&ext={"prstate":"0"}`,
                     cookie
                 }
             )
