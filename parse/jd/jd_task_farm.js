@@ -778,6 +778,7 @@ cache=1                          # 缓存助力code
         if (this.haskey(myCard, 'cardInfos')) {
             let cardInfos = this.column(myCard.cardInfos, 'useTimesInDay', 'type')
             if (this.profile.doubleCard && amount>99 && myCard.doubleCard) {
+                await this.wait(2000)
                 for (let i of Array(3)) {
                     let doubleCard = await this.algo.curl({
                             'url': `https://api.m.jd.com/client.action?functionId=userMyCardForFarm&body={"cardType":"doubleCard","type":"","version":19,"channel":1,"babelChannel":"121"}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
@@ -801,6 +802,7 @@ cache=1                          # 缓存助力code
                 }
             }
             if (this.profile.beanCard && myCard.beanCard) {
+                await this.wait(2000)
                 for (let i = 0; i<Math.min(Math.floor(amount / 110), 1); i++) {
                     let d = await this.algo.curl({
                             'url': `https://api.m.jd.com/client.action?functionId=userMyCardForFarm&body={"cardType":"beanCard","type":"","version":19,"channel":1,"babelChannel":"121"}&appid=signed_wh5&client=iOS&clientVersion=10.4.0`,
@@ -823,6 +825,7 @@ cache=1                          # 缓存助力code
                 }
             }
             if (this.profile.signCard && myCard.signCard) {
+                await this.wait(2000)
                 for (let i of Array(3)) {
                     let signCard = await this.algo.curl({
                             'url': `https://api.m.jd.com/client.action?functionId=userMyCardForFarm&body={"cardType":"signCard","type":"","version":19,"channel":1,"babelChannel":"121"}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
@@ -863,7 +866,7 @@ cache=1                          # 缓存助力code
         }
         let stock = parseInt(this.profile.stock || 110)
         if (!this.profile.tenWater) {
-            if (myCard.fastCard && amount - 100>stock) {
+            if (this.profile.fastCard && myCard.fastCard && amount - 100>stock) {
                 await this.wait(2000)
                 for (let i = 0; i<(amount / 100); i++) {
                     if (amount - 100<stock) {
