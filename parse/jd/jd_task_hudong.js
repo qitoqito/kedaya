@@ -138,8 +138,8 @@ class Main extends Template {
         for (let i of Array(3)) {
             var l = await this.curl({
                     'url': `https://api.m.jd.com/client.action?functionId=queryInteractiveInfo`,
-                'form': `appid=${appid}&body={"encryptProjectId":"${encryptProjectId}","ext":{"rewardEncryptAssignmentId":null,"needNum":50},"sourceCode":"${sourceCode}"}&sign=11&t=1646206781226`,
-                cookie
+                    'form': `appid=${appid}&body={"encryptProjectId":"${encryptProjectId}","ext":{"rewardEncryptAssignmentId":null,"needNum":50},"sourceCode":"${sourceCode}"}&sign=11&t=1646206781226`,
+                    cookie
                 }
             )
             if (this.haskey(l, 'assignmentList')) {
