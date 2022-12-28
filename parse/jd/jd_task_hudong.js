@@ -62,12 +62,33 @@ class Main extends Template {
                     encryptProjectId = this.match(/\\"encryptProjectId\\":\\"([^\\\\]+)\\"/, this.dumps(floor))
                 }
                 if (encryptProjectId) {
+                    let js = this.matchAll(/src="(.*?\.js)"/g, html).filter(d => d.includes('main.'))
                     let appid = this.match(/appid\s*:\s*"(\w+)"/, html) || 'babelh5'
                     let sourceCode = this.profile.sourceCode || 'aceaceqingzhan'
                     let enc = this.match(/"enc"\s*:\s*"(\w+)"/, html)
                     this.encParams = enc || "EEB688970D7CEBBE0E4A8E70D9A4CEE845D567BFB30E9D050540C6227BC766DBD057D54D5F798DBEE3B421FFEC3B65FA55B3BCD394F235B29DD14D0E12B5FC82"
+                    if (js) {
+                        for (let a of js) {
+                            let jsContent = await this.curl({
+                                    'url': `https:${a}`,
+                                }
+                            )
+                            let sc = this.match(/"(acea\w+)"/, jsContent)
+                            if (sc) {
+                                sourceCode = sc
+                            }
+                            let aid = this.match(/appid\s*:\s*"(\w+)"/, jsContent)
+                            if (aid) {
+                                appid = aid
+                            }
+                            if (sc && aid) {
+                                break
+                            }
+                        }
+                    }
+                    let projectId = this.matchAll(/"(encryptProjectId\w+)"\s*:\s*"(\w+)"/g, html)
                     if (encryptProjectId) {
-                        this.shareCode.push({encryptProjectId, appid, sourceCode})
+                        this.shareCode.push({encryptProjectId, appid, sourceCode, projectId})
                     }
                 }
                 else if (this.match(/businessh5\/([^\/]+)/, html)) {
@@ -112,15 +133,24 @@ class Main extends Template {
     async hudongz(p) {
         let cookie = p.cookie;
         let encryptProjectId = p.inviter.encryptProjectId
-        let appid = p.inviter.appid
-        let sourceCode = p.inviter.sourceCode
-        let l = await this.curl({
-                'url': `https://api.m.jd.com/client.action?functionId=queryInteractiveInfo`,
+        let appid = p.inviter.appid || "aceacesy20221130"
+        let sourceCode = p.inviter.sourceCode || "content_ecology"
+        for (let i of Array(3)) {
+            var l = await this.curl({
+                    'url': `https://api.m.jd.com/client.action?functionId=queryInteractiveInfo`,
                 'form': `appid=${appid}&body={"encryptProjectId":"${encryptProjectId}","ext":{"rewardEncryptAssignmentId":null,"needNum":50},"sourceCode":"${sourceCode}"}&sign=11&t=1646206781226`,
                 cookie
+                }
+            )
+            if (this.haskey(l, 'assignmentList')) {
+                break
             }
-        )
+            else {
+                await this.wait(500)
+            }
+        }
         let lotteryId
+        console.log(this.haskey(l, 'msg'))
         for (let i of this.haskey(l, 'assignmentList')) {
             if (i.completionFlag) {
                 console.log(`任务已经完成: ${i.assignmentName}`)
@@ -129,24 +159,55 @@ class Main extends Template {
                 let extraType = i.ext.extraType
                 if (this.haskey(i, `ext.${i.ext.extraType}`)) {
                     let extra = i.ext[extraType]
-                    for (let j of extra) {
-                        let body = await this.body(
-                            {
-                                encryptProjectId,
-                                "encryptAssignmentId": i.encryptAssignmentId,
-                                "itemId": j.itemId || j.advId,
-                                sourceCode
-                            }
-                        )
-                        let s = await this.curl({
-                                'url': `https://api.m.jd.com/client.action?functionId=doInteractiveAssignment`,
-                                'form': `appid=${appid}&body=${this.dumps(body)}&sign=11&t=1653132222710`,
+                    if (extraType == 'sign1') {
+                        let sign = await this.curl({
+                                'url': `https://api.m.jd.com/client.action`,
+                                'form': `functionId=doInteractiveAssignment&appid=${appid}&body={"encryptProjectId":"${encryptProjectId}","sourceCode":"${sourceCode}","encryptAssignmentId":"${i.encryptAssignmentId}","completionFlag":true,"itemId":"1"}`,
                                 cookie
                             }
                         )
-                        console.log(i.assignmentName, s.msg)
-                        if (this.haskey(s, 'msg', '风险等级未通过')) {
-                            return
+                    }
+                    else if (extraType == 'assistTaskDetail') {
+                        let index = parseInt(p.index) + 1
+                        for (let o of Array(i.assignmentTimesLimit)) {
+                            for (let k of Array(5)) {
+                                let assist = await this.curl({
+                                        'url': `https://api.m.jd.com/client.action?uuid=434e858e755c9b1ec6e6d6abc0348d9b6d985300&client=wh5&clientVersion=1.0.0&osVersion=11.4&networkType=wifi&ext=%7B%22prstate%22:%220%22%7D&&appid=content_ecology&functionId=doInteractiveAssignment&t=1672239456979&body={"geo":{"lng":"","lat":""},"mcChannel":0,"encryptProjectId":"${encryptProjectId}","encryptAssignmentId":"${i.encryptAssignmentId}","sourceCode":"${sourceCode}","itemId":"${extra.itemId}","actionType":0,"completionFlag":true,"ext":{"assistEncryptAssignmentId":"${i.encryptAssignmentId}","assistInfoFlag":2,"inviteId":"S76QxFElM"}}`,
+                                        // 'form':``,
+                                        cookie: this.cookies[this.task][index] || this.cookies.all[this.rand(0, this.cookies[this.task].length)]
+                                    }
+                                )
+                                index++
+                                console.log(assist)
+                                if (this.haskey(assist, 'msg', '任务完成')) {
+                                    break
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        try {
+                            for (let j of extra) {
+                                let body = await this.body(
+                                    {
+                                        encryptProjectId,
+                                        "encryptAssignmentId": i.encryptAssignmentId,
+                                        "itemId": j.itemId || j.advId,
+                                        sourceCode
+                                    }
+                                )
+                                let s = await this.curl({
+                                        'url': `https://api.m.jd.com/client.action?functionId=doInteractiveAssignment`,
+                                        'form': `appid=${appid}&body=${this.dumps(body)}&sign=11&t=1653132222710`,
+                                        cookie
+                                    }
+                                )
+                                console.log(i.assignmentName, s.msg)
+                                if (this.haskey(s, 'msg', '风险等级未通过')) {
+                                    return
+                                }
+                            }
+                        } catch (e) {
                         }
                     }
                 }
@@ -195,9 +256,48 @@ class Main extends Template {
                     console.log(`什么也没有抽到`)
                 }
             }
-            if (gifts.length) {
-                this.notices(gifts.join("\n"), p.user)
+        }
+        if (p.inviter.projectId) {
+            for (let i of p.inviter.projectId) {
+                l = await this.curl({
+                        'url': `https://api.m.jd.com/client.action?functionId=queryInteractiveInfo`,
+                        'form': `appid=${appid}&body={"encryptProjectId":"${i[1]}","ext":{"rewardEncryptAssignmentId":null,"needNum":50},"sourceCode":"${sourceCode}"}&sign=11&t=1646206781226`,
+                        cookie
+                    }
+                )
+                if (this.haskey(l, 'assignmentList') && l.assignmentList.length == 1) {
+                    for (let kk of Array(10)) {
+                        let r = await this.curl({
+                                'url': `https://api.m.jd.com/client.action?uuid=60f0226f67be77007d7dc5817801e282dda1211e&client=wh5&clientVersion=1.0.0&osVersion=15.6.1&networkType=wifi&ext=%7B%22prstate%22:%220%22%7D&appid=${appid}&functionId=doInteractiveAssignment&body={"geo":{"lng":"","lat":""},"mcChannel":0,"encryptProjectId":"${i[1]}","encryptAssignmentId":"${l.assignmentList[0].encryptAssignmentId}","sourceCode":"${sourceCode}","itemId":"","actionType":"","completionFlag":true,"ext":{"exchangeNum":1}}`,
+                                cookie,
+                                form: "",
+                            }
+                        )
+                        if (!r) {
+                            break
+                        }
+                        else if (['风险等级未通过', "未登录", '兑换积分不足', '场景不匹配'].includes(r.msg)) {
+                            console.log(r.msg)
+                            break
+                        }
+                        if (this.haskey(r, 'rewardsInfo.successRewards')) {
+                            for (let g in r.rewardsInfo.successRewards) {
+                                let data = r.rewardsInfo.successRewards[g]
+                                console.log(data)
+                                for (let k of data) {
+                                    gifts.push(k.rewardName)
+                                }
+                            }
+                        }
+                        else {
+                            console.log(`什么也没有抽到`)
+                        }
+                    }
+                }
             }
+        }
+        if (gifts.length>0) {
+            this.notices(gifts.join("\n"), p.user)
         }
     }
 
@@ -269,7 +369,7 @@ class Main extends Template {
                 console.log(`什么也没有抽到`)
             }
         }
-        if (gifts.length) {
+        if (gifts.length>0) {
             this.notices(gifts.join("\n"), p.user)
         }
     }
