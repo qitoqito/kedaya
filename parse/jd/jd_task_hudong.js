@@ -86,7 +86,7 @@ class Main extends Template {
                             }
                         }
                     }
-                    let projectId = this.matchAll(/"(encryptProjectId\w+)"\s*:\s*"(\w+)"/g, html)
+                    let projectId = this.matchAll(/"(encryptProjectI\w+)"\s*:\s*"(\w+)"/g, html)
                     if (encryptProjectId) {
                         this.shareCode.push({encryptProjectId, appid, sourceCode, projectId})
                     }
