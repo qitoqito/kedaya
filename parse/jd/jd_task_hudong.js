@@ -73,7 +73,7 @@ class Main extends Template {
                                     'url': `https:${a}`,
                                 }
                             )
-                            let sc = this.match(/"(acea\w+)"/, jsContent)
+                            let sc = this.match(/"(ace\w+\d+)"/, jsContent)
                             if (sc) {
                                 sourceCode = sc
                             }
