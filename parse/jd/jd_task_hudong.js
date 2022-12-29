@@ -283,8 +283,8 @@ class Main extends Template {
                         if (this.haskey(r, 'rewardsInfo.successRewards')) {
                             for (let g in r.rewardsInfo.successRewards) {
                                 let data = r.rewardsInfo.successRewards[g]
-                                console.log(data)
                                 for (let k of data) {
+                                    console.log('获得:', k.rewardName)
                                     gifts.push(k.rewardName)
                                 }
                             }
