@@ -15,14 +15,14 @@ class Main extends Template {
 
     async prepare() {
         this.algo = new this.modules.jdAlgo({
-            type: 'lite', 'appId': '6e8d7', version: "3.1"
+            type: 'lite', 'appId': 'fd3f6', version: "3.1"
         })
     }
 
     async main(p) {
         let cookie = p.cookie;
         let linkId = this.custom || "dLrrEKJW8fVBcHB62TjiIQ"
-        let home = await this.curl({
+        let home = await this.algo.curl({
                 'url': `https://api.m.jd.com/?functionId=superRedBagHome&body={"linkId":"${linkId}"}&t=1650025237128&appid=activities_platform`,
                 // 'form':``,
                 cookie
@@ -36,7 +36,10 @@ class Main extends Template {
             let s = await this.algo.curl({
                     'url': `https://api.m.jd.com/?functionId=superRedBagDraw&body={"linkId":"${linkId}"}&t=1643040859389&appid=activities_platform`,
                     // 'form':``,`
-                    cookie
+                    cookie,
+                    algo: {
+                        type: 'lite', 'appId': '6e8d7', version: "3.1"
+                    }
                 }
             )
             if (this.haskey(s, 'data.prizeDrawVo')) {
