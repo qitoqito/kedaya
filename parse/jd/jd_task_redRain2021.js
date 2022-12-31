@@ -4,13 +4,14 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东小魔方红包雨"
-        this.cron = "12 0,13,20 * * *"
+        this.cron = "12 0,14,20 * * *"
         this.task = 'local'
         this.import = ['jdUrl']
         this.verify = 1
     }
 
     async prepare() {
+        console.log(this.getDate(this.timestamp, '1'))
         let s = await this.curl({
                 url: 'https://api.m.jd.com/client.action?functionId=xview2Config&clientVersion=11.3.2&build=98450&client=android&ef=1&ep=%7B%22hdid%22%3A%22JM9F1ywUPwflvMIpYPok0tt5k9kW4ArJEU3lfLhxBqw%3D%22%2C%22ts%22%3A1668133263098%2C%22ridx%22%3A-1%2C%22cipher%22%3A%7B%22area%22%3A%22CJvpCJYmCV81CNS4C182Ctq4Dm%3D%3D%22%2C%22d_model%22%3A%22Vu9RBUPCCNK%3D%22%2C%22wifiBssid%22%3A%22dW5hbw93bq%3D%3D%22%2C%22osVersion%22%3A%22CJK%3D%22%2C%22d_brand%22%3A%22IPVLV0VT%22%2C%22screen%22%3A%22CtS2DIenCNqm%22%2C%22uuid%22%3A%22DJruCNK5DtGmZNqmDQO2Zq%3D%3D%22%2C%22aid%22%3A%22DJruCNK5DtGmZNqmDQO2Zq%3D%3D%22%2C%22openudid%22%3A%22DJruCNK5DtGmZNqmDQO2Zq%3D%3D%22%7D%2C%22ciphertype%22%3A5%2C%22version%22%3A%221.2.0%22%2C%22appname%22%3A%22com.jingdong.app.mall%22%7D&st=1668148535443&sign=7dd658a66305f1485c5f38d77e02f194&sv=121',
                 form: `lmt=0&body={"api-version":"1.1.0"}`,
@@ -61,7 +62,7 @@ class Main extends Template {
                                             'url': `https:${a}`,
                                         }
                                     )
-                                    let sc = this.match(/"(ace\w+\d+)"/, jsContent)
+                                    let sc = this.match(/"(ace[a-zA-Z]+\d+)"/, jsContent)
                                     if (sc) {
                                         dict.sourceCode = sc
                                         break
