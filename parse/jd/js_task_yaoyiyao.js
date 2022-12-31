@@ -7,7 +7,7 @@ class Main extends Template {
         this.cron = "6 6 6 6 6"
         this.help = 2
         this.task = 'local'
-        this.thread = 6
+        // this.thread = 3
         this.import = [
             'jdAlgo'
         ]
@@ -22,12 +22,20 @@ class Main extends Template {
     async main(p) {
         let cookie = p.cookie;
         let linkId = this.custom || "dLrrEKJW8fVBcHB62TjiIQ"
-        let home = await this.algo.curl({
-                'url': `https://api.m.jd.com/?functionId=superRedBagHome&body={"linkId":"${linkId}"}&t=1650025237128&appid=activities_platform`,
-                // 'form':``,
-                cookie
+        for (let i of Array(3)) {
+            var home = await this.algo.curl({
+                    'url': `https://api.m.jd.com/?functionId=superRedBagHome&body={"linkId":"${linkId}"}&t=1650025237128&appid=activities_platform`,
+                    // 'form':``,
+                    cookie
+                }
+            )
+            if (this.haskey(home, 'data')) {
+                break
             }
-        )
+            else {
+                await this.wait(800)
+            }
+        }
         if (!this.haskey(home, 'data.isLogin')) {
             console.log("未登录或者黑名单")
             return
@@ -48,7 +56,7 @@ class Main extends Template {
             else {
                 console.log(p.user, '什么也没有')
             }
-            await this.wait(500)
+            await this.wait(1000)
         }
         for (let n = 1; n<6; n++) {
             let l = await this.curl({
