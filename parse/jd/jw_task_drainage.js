@@ -100,6 +100,9 @@ class Main extends Template {
             }
         )
         console.log("引流:", this.haskey(drainageTask, 'message') || drainageTask)
+        if (this.haskey(drainage, 'data.point')) {
+            console.log(`签到天数: ${drainage.data.signInfo.signDays}\n现有金币: ${drainage.data.point}`)
+        }
     }
 }
 
