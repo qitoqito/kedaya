@@ -7,13 +7,14 @@ class Main extends Template {
         this.cron = "6 6 6 6 6"
         this.task = 'local'
         this.verify = 1
-        this.readme = "custom=红包雨url,现在验证activityNo参数,无法直接使用纯数字babelProjectId作为custom"
+        this.readme = "custom=红包雨url或body"
+        this.import = ['jdUrl']
     }
 
     async prepare() {
         if (isNaN(this.custom)) {
             try {
-                body = this.loads(this.custom)
+                this.shareCode = [this.loads(this.custom)]
             } catch {
                 let url
                 if (this.match(/^http/, this.custom)) {
@@ -38,7 +39,6 @@ class Main extends Template {
 
     async main(p) {
         let cookie = p.cookie
-        this.options["headers"]["user-agent"] = this.getUa()
         for (let i of Array(2)) {
             let s = await this.curl({
                     'url': `https://api.m.jd.com/client.action`,
@@ -46,17 +46,15 @@ class Main extends Template {
                     cookie
                 }
             )
-            console.log(this.haskey(s, 'data'))
             try {
-                console.log(p.user, s.data.result.hbInfo.discount)
-                this.notices(`获得红包: ${s.data.result.hbInfo.discount}元`, p.user)
+                this.print(`获得红包: ${s.data.result.hbInfo.discount}元`, p.user)
             } catch (e) {
-                console.log("没有获得红包")
+                console.log(this.haskey(s, 'data.bizMsg') || "没有获得红包")
             }
             if (this.haskey(s, 'data.result.sceneId') && this.haskey(s, 'data.result.share')) {
                 let share = await this.curl({
                         'url': `https://api.m.jd.com/client.action`,
-                        'form': `functionId=hby_share&appid=publicUseApi&body={"sceneId":"${this.haskey(s, 'data.result.sceneId')}","activityNo":"TF8Y1nRzvG--tYyTJr-al"}&t=${this.timestamp}&client=wh5&clientVersion=1.0.0&&networkType=&ext={"prstate":"0"}`,
+                        'form': `functionId=hby_share&appid=publicUseApi&body={"sceneId":"${this.haskey(s, 'data.result.sceneId')}","activityNo":"${p.inviter.activityNo}"}&t=${this.timestamp}&client=wh5&clientVersion=1.0.0&&networkType=&ext={"prstate":"0"}`,
                         cookie
                     }
                 )
