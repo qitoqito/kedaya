@@ -28,7 +28,7 @@ class Main extends Template {
                 }
             )
             let assist = this.haskey(s, 'data.assistTask')
-            if (assist && assist.assistNum != assist.completionCnt) {
+            if (assist && assist.assistNum != assist.completionCnt && assist.itemId) {
                 this.shareCode.push({
                     user: this.userName(cookie),
                     itemId: assist.itemId,
@@ -119,7 +119,6 @@ class Main extends Template {
                     }
                 }
             }
-     
             for (let i of this.haskey(s, 'data.scanTaskList')) {
                 if (i.status != 2) {
                     console.log(`正在浏览: ${i.title}`)
