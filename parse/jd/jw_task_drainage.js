@@ -8,7 +8,7 @@ class Main extends Template {
         this.help = 'main'
         this.task = 'local'
         this.import = ['jdAlgo']
-        this.model = 'help'
+        this.model = 'shuffle'
         this.turn = 2
     }
 
@@ -80,45 +80,15 @@ class Main extends Template {
             }
         }
         else {
-            for (let i of this.shareCode) {
-                if (!i.finish && i.user != p.user) {
-                    let assist = await this.curl({
-                            'url': `https://api.m.jd.com/miniTask_assistCheck?g_ty=ls&g_tk=1236659202`,
-                            'form': `functionId=miniTask_assistCheck&t=1673620049238&body={"itemId":"${p.inviter.itemId}"}&appid=hot_channel&loginType=2&clientType=wxapp&client=apple&clientVersion=8.13.120&build=&osVersion=iOS%2015.1.1&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone%2012%20Pro%3CiPhone13%2C3%3E&d_name=&lang=zh_CN`,
-                            cookie,
-                            referer: "https://servicewechat.com/wx91d27dbf599dff74/654/page-frame.html",
-                            "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 11_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15F79 MicroMessenger/8.0.15(0x18000f2e) NetType/4G Language/zh_CN"
-                        }
-                    )
-                    console.log("正在助力:", i.user, this.haskey(assist, 'data') || this.haskey(assist, 'message'))
-                    if (this.haskey(assist, 'data', 'SUCCESS')) {
-                        let sign = await this.algo.curl({
-                                'url': `https://api.m.jd.com/mini_doSign?g_ty=ls&g_tk=1629788202`,
-                                'form': `functionId=mini_doSign&t=1662909416431&body={"itemId":"1"}&appid=hot_channel&loginType=11&clientType=wxapp&client=apple&clientVersion=7.21.80&build=&osVersion=iOS%2011.4&screen=320*568&networkType=4g&d_brand=iPhone&d_model=iPhone%20SE%3CiPhone8%2C4%3E&d_name=&lang=zh_CN`,
-                                cookie,
-                                referer: "https://servicewechat.com/wx91d27dbf599dff74/654/page-frame.html",
-                                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 11_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15F79 MicroMessenger/8.0.15(0x18000f2e) NetType/4G Language/zh_CN"
-                            }
-                        )
-                        if (this.haskey(sign, 'message').includes('进入')) {
-                            console.log(sign.message)
-                        }
-                        else {
-                            console.log("签到:", this.haskey(sign, 'message') || this.haskey(sign, 'data.toastMsg') || sign)
-                            i.completionCnt++
-                            if (i.completionCnt == i.assistNum) {
-                                i.finish = 1
-                            }
-                        }
-                    }
-                    if (this.haskey(assist, 'message').includes('完成')) {
-                        console.log('好友人气过高，已经完成啦~')
-                    }
-                    else {
-                        break
-                    }
+            let assist = await this.curl({
+                    'url': `https://api.m.jd.com/miniTask_assistCheck?g_ty=ls&g_tk=1236659202`,
+                    'form': `functionId=miniTask_assistCheck&t=1673620049238&body={"itemId":"${p.inviter.itemId}"}&appid=hot_channel&loginType=2&clientType=wxapp&client=apple&clientVersion=8.13.120&build=&osVersion=iOS%2015.1.1&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone%2012%20Pro%3CiPhone13%2C3%3E&d_name=&lang=zh_CN`,
+                    cookie,
+                    referer: "https://servicewechat.com/wx91d27dbf599dff74/654/page-frame.html",
+                    "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 11_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15F79 MicroMessenger/8.0.15(0x18000f2e) NetType/4G Language/zh_CN"
                 }
-            }
+            )
+            console.log("正在助力:", p.inviter.user, this.haskey(assist, 'data') || this.haskey(assist, 'message'))
             for (let i of this.haskey(s, 'data.scanTaskList')) {
                 if (i.status != 2) {
                     console.log(`正在浏览: ${i.title}`)
