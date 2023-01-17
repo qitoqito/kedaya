@@ -89,6 +89,15 @@ class Main extends Template {
                 }
             )
             console.log("正在助力:", p.inviter.user, this.haskey(assist, 'data') || this.haskey(assist, 'message'))
+            let sign = await this.algo.curl({
+                    'url': `https://api.m.jd.com/mini_doSign?g_ty=ls&g_tk=1629788202`,
+                    'form': `functionId=mini_doSign&t=1662909416431&body={"itemId":"1"}&appid=hot_channel&loginType=11&clientType=wxapp&client=apple&clientVersion=7.21.80&build=&osVersion=iOS%2011.4&screen=320*568&networkType=4g&d_brand=iPhone&d_model=iPhone%20SE%3CiPhone8%2C4%3E&d_name=&lang=zh_CN`,
+                    cookie,
+                    referer: "https://servicewechat.com/wx91d27dbf599dff74/654/page-frame.html",
+                    "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 11_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15F79 MicroMessenger/8.0.15(0x18000f2e) NetType/4G Language/zh_CN"
+                }
+            )
+            console.log("签到:", this.haskey(sign, 'data.signDays') || this.haskey(sign, 'message') || sign)
             for (let i of this.haskey(s, 'data.scanTaskList')) {
                 if (i.status != 2) {
                     console.log(`正在浏览: ${i.title}`)
