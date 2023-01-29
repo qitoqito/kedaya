@@ -15,3 +15,4 @@ invite/jd_task_farm.json
 config/jd.ini
 package-lock.json
 dump.rdb
+config/proxy.ini
