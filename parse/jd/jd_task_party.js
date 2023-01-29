@@ -64,31 +64,33 @@ class Main extends Template {
                     return
                 }
             }
-            let s = await this.algo.curl({
-                    'url': `https://api.m.jd.com/`,
-                    'form': `functionId=party_welcome&body={"area":"0_0_0_0","uuid":"${this.uuid(16, 'nc')}"}&client=apple&clientVersion=11.4.2&appid=signed_wh5&build=168451&osVersion=13.7&networkType=wifi&d_brand=iPhone&d_model=iPhone8,1&partner=&t=1673853464447`,
-                    cookie
+            for (let _ of Array(2)) {
+                var s = await this.algo.curl({
+                        'url': `https://api.m.jd.com/`,
+                        'form': `functionId=party_welcome&body={"area":"0_0_0_0","uuid":"${this.uuid(16, 'nc')}"}&client=apple&clientVersion=11.4.2&appid=signed_wh5&build=168451&osVersion=13.7&networkType=wifi&d_brand=iPhone&d_model=iPhone8,1&partner=&t=1673853464447`,
+                        cookie
+                    }
+                )
+                if (this.haskey(s, 'data.result.award')) {
+                    for (let i of this.haskey(s, 'data.result.award')) {
+                        if (i.type == 2) {
+                            this.print(`红包: ${i.amount}`, p.user)
+                        }
+                        else if (i.type == 1) {
+                            this.print(`优惠券: ${i.amount} ${i.usageThreshold}`, p.user)
+                        }
+                        else if (i.type == 5) {
+                            console.log(p.user, `祝福语: ${i.text1} ${i.text2}`)
+                        }
+                        else {
+                            this.print(`未知类型: ${i.ype}`, p.user)
+                            console.log("获得", i)
+                        }
+                    }
                 }
-            )
-            if (this.haskey(s, 'data.result.award')) {
-                for (let i of this.haskey(s, 'data.result.award')) {
-                    if (i.type == 2) {
-                        this.print(`红包: ${i.amount}`, p.user)
-                    }
-                    else if (i.type == 1) {
-                        this.print(`优惠券: ${i.amount} ${i.usageThreshold}`, p.user)
-                    }
-                    else if (i.type == 5) {
-                        console.log(p.user, `祝福语: ${i.text1} ${i.text2}`)
-                    }
-                    else {
-                        this.print(`未知类型: ${i.ype}`, p.user)
-                        console.log("获得", i)
-                    }
+                else {
+                    console.log(this.haskey(s, 'data.bizMsg') || s)
                 }
-            }
-            else {
-                console.log(this.haskey(s, 'data.bizMsg') || s)
             }
             for (let i of Array(3)) {
                 let r = await this.algo.curl({
