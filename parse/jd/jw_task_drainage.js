@@ -17,6 +17,7 @@ class Main extends Template {
         this.algo.set({
             'appId': '60d61',
             'type': 'wechat',
+            version: "3.1"
         })
         for (let cookie of this.cookies.help) {
             let s = await this.algo.curl({
