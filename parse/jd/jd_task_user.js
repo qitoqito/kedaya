@@ -23,6 +23,7 @@ class Main extends Template {
         let keys = [...custom, ...['id', 'msgWhite', 'msgBlack', 'send', 'wskey', 'verify', 'nickName', 'phone']]
         let query = this.expand ? this.query(this['expand'], '\\|', 1) : {}
         let dict = {}
+        let userDict = this.haskey(this.userDict, pin) || {}
         for (let i of keys) {
             if (this.haskey(this.userDict, `${pin}.${i}`) && this.userDict[pin][i]) {
                 dict[i] = this.haskey(this.userDict, `${pin}.${i}`)
@@ -33,6 +34,7 @@ class Main extends Template {
         }
         try {
             this.dict[pin] = {
+                ...userDict,
                 ...dict,
                 ...{
                     pin,
@@ -45,6 +47,7 @@ class Main extends Template {
         } catch {
             let pin = this.userPin(cookie)
             this.dict[pin] = {
+                ...userDict,
                 ...{
                     pin,
                     userName: pin,
