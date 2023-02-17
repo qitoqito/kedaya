@@ -7,9 +7,9 @@ console.log(`
 
 QITOQITO_PLATFORM=按照所使用面板正确填写 qinglong|jtask|jd 其中一个
 
-QITOQITO_SYNC=1 当有此变量时,本地脚本的定时任务跟随仓库同步启用
+QITOQITO_SYNC=1 当有此变量时,本地禁止运行的脚本会跟随仓库同步启用
 
-QITOQITO_DISABLE=1 当有此变量时,本地脚本的定时任务跟随仓库同步禁用
+QITOQITO_DISABLE=1 当有此变量时,本地可运行的脚本会跟随仓库同步禁用
 
 QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的入口文件
         `)
@@ -60,25 +60,25 @@ QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的�
     }
     let change = {}
     if (map) {
-        if (typeof map=='object') {
-            for (let i in map){
-                change[i]={
-                    map:map[i],
-                    type:map[i].split("_")[0]
-                }
-            }
-        }else{
-            for (let k of map.replace(/\&/g, "\|").split("|")) {
-            let a = k.split("=")
-            for (let i of a[0].split(',')) {
+        if (typeof map == 'object') {
+            for (let i in map) {
                 change[i] = {
-                    map: a[1],
-                    type: a[1].split("_")[0]
+                    map: map[i],
+                    type: map[i].split("_")[0]
                 }
             }
         }
+        else {
+            for (let k of map.replace(/\&/g, "\|").split("|")) {
+                let a = k.split("=")
+                for (let i of a[0].split(',')) {
+                    change[i] = {
+                        map: a[1],
+                        type: a[1].split("_")[0]
+                    }
+                }
+            }
         }
-
         console.log(change)
     }
     let content = `
@@ -167,9 +167,9 @@ QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的�
         command = 'http://127.0.0.1:5700'
     }
     if (command.includes('http')) {
-        try{
+        try {
             var json = fs.readFileSync('../config/auth.json', "utf-8");
-        }catch(ea){
+        } catch (ea) {
             var json = fs.readFileSync('../../config/auth.json', "utf-8");
         }
         let auth = JSON.parse(json)
@@ -205,7 +205,8 @@ QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的�
             }
         }
         if (cron.data) {
-            let crontab = column(cron.data, 'command')
+            let data = cron.data.hasOwnProperty('data') ? cron.data.data : cron.data
+            let crontab = column(data, 'command')
             for (let i in dicts) {
                 for (let j of dicts[i]) {
                     if (j.includes('.js')) {
@@ -220,7 +221,7 @@ QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的�
                             if (crontab.includes(`task ${filename}`)) {
                                 if (!kedaya.cron) {
                                     if (!kedaya.manual) {
-                                        for (let z of cron.data) {
+                                        for (let z of data) {
                                             try {
                                                 if (z.name.includes(label) && z.command.includes(`task ${filename}`)) {
                                                     if (z.isDisabled) {
@@ -256,7 +257,7 @@ QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的�
                                     }
                                 }
                                 else {
-                                    for (let z of cron.data) {
+                                    for (let z of data) {
                                         try {
                                             if (z.name.includes(label) && z.command.includes(`task ${filename}`)) {
                                                 if (z.isDisabled) {
@@ -324,14 +325,13 @@ QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的�
         }
     }
     else {
-        try{
+        try {
             var crontab = fs.readFileSync('../config/crontab.list', "utf-8");
-            var file='../config/crontab.list'
-        }catch(eb){
+            var file = '../config/crontab.list'
+        } catch (eb) {
             var crontab = fs.readFileSync('../../config/crontab.list', "utf-8");
-            var file='../../config/crontab.list'
+            var file = '../../config/crontab.list'
         }
-
         let add = []
         let del = []
         var spl = crontab.split("\n");
