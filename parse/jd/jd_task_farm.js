@@ -8,6 +8,7 @@ class Main extends Template {
         // this.thread = 2
         this.task = 'local'
         this.import = ['fs', 'jdAlgo']
+        this.delay = 1000
         this.readme = `[jd_task_farm]
 #signCard=1                   # 加签卡
 #doubleCard=1             # 双倍水滴卡
@@ -28,6 +29,11 @@ cache=1                          # 缓存助力code
             version: "3.1"
         })
         console.log("正在获取助力码")
+        this.fcode = []
+        try {
+            this.fcode = this.loads(this.modules.fs.readFileSync(`${this.dirname}/invite/jd_task_farmFriend.json`).toString())
+        } catch (e) {
+        }
         try {
             let txt = this.modules.fs.readFileSync(`${this.dirname}/invite/jd_task_farm.json`).toString()
             if (txt.includes("shareCode")) {
@@ -40,7 +46,7 @@ cache=1                          # 缓存助力code
 
     async main(p) {
         let cookie = p.cookie;
-        this.options["headers"]["user-agent"] = this.getUa()
+        let finish = 0
         let init = await this.algo.curl({
                 'url': 'https://api.m.jd.com/client.action?functionId=initForFarm',
                 'form': `body={"version":19,"channel":1}&appid=signed_wh5&client=iOS&clientVersion=11.3.0`,
@@ -55,7 +61,6 @@ cache=1                          # 缓存助力code
         if (!this.haskey(init, 'code', "0")) {
             init = await this.curl({
                     'url': `https://api.m.jd.com/client.action?functionId=initForFarm&body={"imageUrl":"","nickName":"","version":4,"channel":1}&appid=wh5`,
-                    // 'form':``,
                     cookie
                 }
             )
@@ -75,6 +80,7 @@ cache=1                          # 缓存助力code
         }
         if (init.farmUserPro.treeState == 2) {
             console.log("可以兑换奖品了")
+            finish = 1
             this.notices('可以兑换奖品了', p.user)
         }
         else if (init.farmUserPro.treeState == 0) {
@@ -95,7 +101,6 @@ cache=1                          # 缓存助力code
                     console.log(`正在种植:`, goods.name)
                     let choic = await this.algo.curl({
                             'url': `https://api.m.jd.com/client.action?functionId=choiceGoodsForFarm&body={"goodsType":"${goods.type}","type":"0","babelChannel":"121","version":19,"channel":1}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
-                            // 'form':``,
                             cookie
                         }
                     )
@@ -105,8 +110,7 @@ cache=1                          # 缓存助力code
         let amount = this.haskey(init, 'farmUserPro.totalEnergy')
         let treeTotalEnergy = this.haskey(init, 'farmUserPro.treeTotalEnergy')
         let fi = await this.curl({
-                'url': `https://api.m.jd.com/client.action?functionId=friendListInitForFarm&body={"version":19,"channel":1,"babelChannel":"121","lat":"0","lng":"0"}&appid=wh5&area=16_1341_0_0&osVersion=15.1.1&screen=390*844&networkType=wifi&timestamp=1670428885339&d_brand=iPhone&d_model=iPhone13%2C3&wqDefault=false&client=iOS&clientVersion=11.3.0&partner=&build=168341&openudid=7b01d4690ef13716984dcfcf96068f36b41f6c51`,
-                // 'form':``,
+                'url': `https://api.m.jd.com/client.action?functionId=friendListInitForFarm&body={"version":19,"channel":1,"babelChannel":"121","lat":"0","lng":"0"}&appid=wh5&osVersion=15.1.1&screen=390*844&networkType=wifi&timestamp=1670428885339&d_brand=iPhone&d_model=iPhone13%2C3&wqDefault=false&client=iOS&clientVersion=11.3.0&partner=&build=168341&openudid=7b01d4690ef13716984dcfcf96068f36b41f6c51`,
                 cookie
             }
         )
@@ -115,26 +119,19 @@ cache=1                          # 缓存助力code
                 shareCode: init.farmUserPro.shareCode, user: p.user
             })
         }
-        this.dict[this.userPin(cookie)] = {shareCode: init.farmUserPro.shareCode, user: p.user}
+        if (finish) {
+            this.dict[this.userPin(cookie)] = {shareCode: init.farmUserPro.shareCode, user: p.user, finish: 1}
+        }
+        else {
+            this.dict[this.userPin(cookie)] = {shareCode: init.farmUserPro.shareCode, user: p.user}
+        }
         if (!fi.newFriendMsg) {
-            let fcode = this.column([...this.code], 'shareCode')
-            for (let i of this.random(fcode, 3)) {
-                console.log("删除好友:", i)
-                let sc = await this.algo.curl({
-                    'url': `https://api.m.jd.com/client.action?functionId=deleteFriendForFarm&body={"shareCode":"${i}","version":19,"channel":1,"babelChannel":"121"}&appid=signed_wh5&client=iOS&clientVersion=10.4.2`,
-                    // 'form':``,
-                    cookie,
-                    algo: {
-                        version: "3.1",
-                        type: "web",
-                        appId: "eaf91",
-                    }
-                })
-                await this.wait(2000)
+            this.fcode = this.unique([...this.fcode, ...this.column(fi.friends, 'shareCode'), ...this.column([...this.code], 'shareCode')])
+            let fcode = this.fcode
+            for (let i of this.random(fcode, 4)) {
                 console.log("添加好友:", i)
                 let tj = await this.algo.curl({
                         'url': `https://api.m.jd.com/client.action?functionId=initForFarm&body={"mpin":"","utm_campaign":"","utm_medium":"appshare","shareCode":"${i}-inviteFriend","utm_term":"Wxfriends","utm_source":"iosapp","imageUrl":"","nickName":"","version":19,"channel":2,"babelChannel":0}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
-                        // 'form':``,
                         cookie,
                         algo: {
                             version: "3.1",
@@ -143,18 +140,21 @@ cache=1                          # 缓存助力code
                         }
                     }
                 )
-                await this.wait(2000)
+                console.log("添加状态码:", this.haskey(tj, 'helpResult.code'))
             }
             await this.algo.curl({
-                    'url': `https://api.m.jd.com/client.action?functionId=awardInviteFriendForFarm&body={}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
-                    // 'form':``,
-                    cookie
+                    'url': `https://api.m.jd.com/client.action?functionId=awardInviteFriendForFarm&body={"version":19,"channel":1,"babelChannel":"10","lat":"0","lng":"0"}&appid=signed_wh5&osVersion=15.1.1&screen=390*844&networkType=wifi&timestamp=1676961148171&d_brand=iPhone&d_model=iPhone13%2C3&wqDefault=false&client=iOS&clientVersion=11.6.0&partner=&build=168528`,
+                    cookie,
+                    algo: {
+                        version: "3.1",
+                        type: "web",
+                        appId: "2b5ca",
+                    }
                 }
             )
         }
         let qdd = await this.algo.curl({
                 'url': `https://api.m.jd.com/client.action?functionId=clockInForFarm&body={"type":1,"version":19,"channel":1,"babelChannel":"121"}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
-                // 'form':``,
                 cookie,
                 algo: {
                     version: "3.1",
@@ -163,12 +163,6 @@ cache=1                          # 缓存助力code
                 }
             }
         )
-        // let qdd = await this.algo.curl({
-        //         'url': `https://api.m.jd.com/client.action?functionId=clockInInitForFarm&body={"timestamp":${this.timestamp},"version":19,"channel":1,"babelChannel":"121"}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
-        //         // 'form':``,
-        //         cookie
-        //     }
-        // )
         if (qdd.amount) {
             console.log("签到获得水滴", qdd.amount)
         }
@@ -178,7 +172,6 @@ cache=1                          # 缓存助力code
         // 7天奖励
         qdd = await this.algo.curl({
                 'url': `https://api.m.jd.com/client.action?functionId=clockInInitForFarm&body={"timestamp":${this.timestamp},"version":19,"channel":1,"babelChannel":"121"}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
-                // 'form':``,
                 cookie,
                 algo: {
                     version: "3.1",
@@ -191,7 +184,6 @@ cache=1                          # 缓存助力code
             if (!i.hadGot) {
                 let fo = await this.algo.curl({
                         'url': `https://api.m.jd.com/client.action?functionId=clockInFollowForFarm&body={"id":"${i.id}","type":"theme","step":1,"version":19,"channel":1,"babelChannel":"121"}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
-                        // 'form':``,
                         cookie,
                         algo: {
                             version: "3.1",
@@ -203,7 +195,6 @@ cache=1                          # 缓存助力code
                 await this.wait(5000)
                 let foo = await this.algo.curl({
                         'url': `https://api.m.jd.com/client.action?functionId=clockInFollowForFarm&body={"id":"${i.id}","type":"theme","step":2,"version":19,"channel":1,"babelChannel":"121"}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
-                        // 'form':``,
                         cookie,
                         algo: {
                             version: "3.1",
@@ -218,7 +209,6 @@ cache=1                          # 缓存助力code
         // 领取弹窗水滴
         let tcs = await this.algo.curl({
                 'url': `https://api.m.jd.com/client.action?functionId=gotWaterGoalTaskForFarm&body={"type":3,"version":19,"channel":1,"babelChannel":"121"}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
-                // 'form':``,
                 cookie,
                 algo: {
                     version: "3.1",
@@ -261,7 +251,6 @@ cache=1                          # 缓存助力code
         for (let n = 1; n<=2; n++) {
             let taskList = await this.algo.curl({
                     'url': `https://api.m.jd.com/client.action?functionId=taskInitForFarm&body={"version":19,"channel":${n},"babelChannel":"121"}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
-                    // 'form':``,
                     cookie,
                     algo: {
                         version: "3.1",
@@ -349,7 +338,6 @@ cache=1                          # 缓存助力code
                             if (!dotask.f) {
                                 let js = await this.algo.curl({
                                         'url': `https://api.m.jd.com/client.action?functionId=waterGoodForFarm&body={"version":19,"channel":1,"babelChannel":"121"}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
-                                        // 'form':``,
                                         cookie,
                                         algo: {
                                             version: "3.1",
@@ -360,7 +348,6 @@ cache=1                          # 缓存助力code
                                 )
                                 let s = await this.algo.curl({
                                         'url': `https://api.m.jd.com/client.action?functionId=firstWaterTaskForFarm&body={"version":19,"channel":1,"babelChannel":"121"}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
-                                        // 'form':``,
                                         cookie,
                                         algo: {
                                             version: "3.1",
@@ -384,8 +371,7 @@ cache=1                          # 缓存助力code
                             if (!dotask.f) {
                                 if (dotask.waterFriendCountKey<dotask.waterFriendMax) {
                                     let f = await this.curl({
-                                            'url': `https://api.m.jd.com/client.action?functionId=friendListInitForFarm&body={"version":19,"channel":1,"babelChannel":"121","lat":"0","lng":"0"}&appid=wh5&area=16_1341_0_0&osVersion=15.1.1&screen=390*844&networkType=wifi&timestamp=1670428885339&d_brand=iPhone&d_model=iPhone13%2C3&wqDefault=false&client=iOS&clientVersion=11.3.0&partner=&build=168341&openudid=7b01d4690ef13716984dcfcf96068f36b41f6c51`,
-                                            // 'form':``,
+                                            'url': `https://api.m.jd.com/client.action?functionId=friendListInitForFarm&body={"version":19,"channel":1,"babelChannel":"121","lat":"0","lng":"0"}&appid=wh5&osVersion=15.1.1&screen=390*844&networkType=wifi&timestamp=1670428885339&d_brand=iPhone&d_model=iPhone13%2C3&wqDefault=false&client=iOS&clientVersion=11.3.0&partner=&build=168341&openudid=7b01d4690ef13716984dcfcf96068f36b41f6c51`,
                                             cookie
                                         }
                                     )
@@ -396,7 +382,6 @@ cache=1                          # 缓存助力code
                                                 console.log(`正在给: ${ff.shareCode} 浇水`)
                                                 let s = await this.algo.curl({
                                                         'url': `https://api.m.jd.com/client.action?functionId=waterFriendForFarm&body={"shareCode":"${ff.shareCode}","version":19,"channel":1,"babelChannel":"121"}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
-                                                        // 'form':``,
                                                         cookie,
                                                         algo: {
                                                             version: "3.1",
@@ -406,7 +391,7 @@ cache=1                          # 缓存助力code
                                                     }
                                                 )
                                                 nnn++
-                                                await this.wait(3000)
+                                                // await this.wait(3000)
                                             }
                                             if (nnn == 2) {
                                                 break
@@ -419,7 +404,6 @@ cache=1                          # 缓存助力code
                                 }
                                 let ss = await this.algo.curl({
                                         'url': `https://api.m.jd.com/client.action?functionId=waterFriendGotAwardForFarm&body={"version":19,"channel":1,"babelChannel":"121"}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
-                                        // 'form':``,
                                         cookie,
                                         algo: {
                                             version: "3.1",
@@ -437,7 +421,6 @@ cache=1                          # 缓存助力code
                             if (!dotask.f) {
                                 let s = await this.algo.curl({
                                         'url': `https://api.m.jd.com/client.action?functionId=gotThreeMealForFarm&body={"version":19,"channel":1,"babelChannel":"121"}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
-                                        // 'form':``,
                                         cookie,
                                         algo: {
                                             version: "3.1",
@@ -469,7 +452,6 @@ cache=1                          # 缓存助力code
                                         }
                                     }
                                 )
-                                await this.wait(3000)
                                 await this.algo.curl({
                                         'url': `https://api.m.jd.com/client.action?functionId=ddnc_getTreasureBoxAward&body={"babelChannel":"121","line":"","channel":1,"type":2,"version":19}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
                                         cookie,
@@ -488,7 +470,6 @@ cache=1                          # 缓存助力code
                                     for (let kk = 0; kk<dotask.totalWaterTaskLimit - dotask.totalWaterTaskTimes + 6; kk++) {
                                         await this.algo.curl({
                                                 'url': `https://api.m.jd.com/client.action?functionId=waterGoodForFarm&body={"version":19,"channel":1,"babelChannel":"121"}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
-                                                // 'form':``,
                                                 cookie, algo: {
                                                     version: "3.1",
                                                     type: "web",
@@ -500,7 +481,6 @@ cache=1                          # 缓存助力code
                                 }
                                 let s = await this.algo.curl({
                                         'url': `https://api.m.jd.com/client.action?functionId=totalWaterTaskForFarm&body={"version":19,"channel":1,"babelChannel":"121"}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
-                                        // 'form':``,
                                         cookie
                                     }
                                 )
@@ -519,7 +499,6 @@ cache=1                          # 缓存助力code
                             if (!dotask.f) {
                                 await this.algo.curl({
                                         'url': `https://api.m.jd.com/client.action?functionId=ddnc_getTreasureBoxAward&body={"babelChannel":"121","line":"getBean","channel":1,"type":1,"version":19}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
-                                        // 'form':``,
                                         cookie, algo: {
                                             version: "3.1",
                                             type: "web",
@@ -527,27 +506,8 @@ cache=1                          # 缓存助力code
                                         }
                                     }
                                 )
-                                // await this.algo.curl({
-                                //         'url': `https://api.m.jd.com/client.action?functionId=findBeanScene`,
-                                //         'form': 'functionId=findBeanScene&body=%7B%22rnClient%22%3A%222%22%2C%22viewChannel%22%3A%22AppHome%22%2C%22source%22%3A%22AppHome%22%2C%22rnVersion%22%3A%224.7%22%7D&uuid=b39756aeea55b9cebae9f&client=iOS&clientVersion=10.0.10&st=1638541231790&sv=100&sign=f7c5657c19354b17600ed5d59a6c0047',
-                                //         cookie
-                                //     }
-                                // )
-                                // await this.algo.curl({
-                                //         'url': `https://api.m.jd.com/client.action?functionId=beanTaskList`,
-                                //         'form': 'functionId=beanTaskList&body=%7B%22viewChannel%22%3A%22AppHome%22%7D&uuid=a2874756f39b780840&client=iOS&clientVersion=10.0.10&st=1638541338389&sv=100&sign=f1aff99ef35e77739fef2967328475d1',
-                                //         cookie
-                                //     }
-                                // )
-                                // await this.algo.curl({
-                                //         'url': `https://api.m.jd.com/client.action?functionId=farmMarkStatus&body={"version":19,"channel":1,"babelChannel":"121"}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
-                                //         // 'form':``,
-                                //         cookie
-                                //     }
-                                // )
                                 await this.algo.curl({
                                         'url': `https://api.m.jd.com/client.action?functionId=ddnc_getTreasureBoxAward&body={"babelChannel":"121","line":"getBean","channel":1,"type":2,"version":19}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
-                                        // 'form':``,
                                         cookie, algo: {
                                             version: "3.1",
                                             type: "web",
@@ -558,8 +518,6 @@ cache=1                          # 缓存助力code
                             }
                             break
                         default:
-                            // console.log(i)
-                            // console.log(dotask)
                             break
                     }
                 }
@@ -568,7 +526,6 @@ cache=1                          # 缓存助力code
         for (let i = 0; i<10; i++) {
             let s = await this.algo.curl({
                     'url': `https://api.m.jd.com/client.action?functionId=getFullCollectionReward&body={"type":2,"version":19,"channel":1,"babelChannel":"121"}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
-                    // 'form':``,
                     cookie,
                     algo: {
                         version: "3.1",
@@ -611,7 +568,7 @@ cache=1                          # 缓存助力code
                     ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 15_1_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.29(0x18001d38) NetType/WIFI Language/zh_CN"
                 }
             )
-            if (s.code === '0') {
+            if (this.haskey(s, 'code', '0')) {
                 if (s.helpResult.code === '0') {
                     //助力成功
                     salveHelpAddWater += s.helpResult.salveHelpAddWater;
@@ -636,7 +593,6 @@ cache=1                          # 缓存助力code
                     break
                 }
                 let helpWaitting = parseInt(this.profile.helpWaitting || 6000)
-                await this.wait(helpWaitting)
             }
             else if (s.code == "403") {
                 console.log("运行环境异常，请您从正规渠道参与活动，稍后再试~")
@@ -649,17 +605,15 @@ cache=1                          # 缓存助力code
         // 天天红包
         let red = await this.curl({
                 'url': `https://api.m.jd.com/client.action?functionId=initForTurntableFarm&body={"version":19,"channel":1}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
-                // 'form':``,
                 cookie,
             }
         )
-        for (let i of red.turntableBrowserAds) {
+        for (let i of this.haskey(red, 'turntableBrowserAds')) {
             if (!i.status) {
                 console.log(`正在浏览:${i.main}`)
                 let bt = await this.curl({
                         'url1': `https://api.m.jd.com/client.action?functionId=browserForTurntableFarm&body={"type":1,"adId":"${i.adId}","version":19,"channel":1}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
                         'url': `https://api.m.jd.com/client.action?functionId=browserForTurntableFarm&body={"type":1,"adId":"${i.adId}","version":4,"channel":1}&appid=wh5`,
-                        // 'form':``,
                         cookie,
                     }
                 )
@@ -667,7 +621,6 @@ cache=1                          # 缓存助力code
                 await this.wait(i.browserTimes * 1000)
                 let btt = await this.curl({
                         'url': `https://api.m.jd.com/client.action?functionId=browserForTurntableFarm&body={"type":2,"adId":"${i.adId}","version":4,"channel":1}&appid=wh5`,
-                        // 'form':``,
                         cookie
                     }
                 )
@@ -675,8 +628,9 @@ cache=1                          # 缓存助力code
         }
         let codess = [...this.code, ...this.code]
         for (let i = 0; i<5; i++) {
-            let codd = (codess[i + p.index + 3] || codess[i] || codess[0]).shareCode
-            if (i>3) {
+            let codd = (codess[i + p.index + 3] || codess[i] || this.random(codess, 1)[0]).shareCode
+            console.log("天天红包助力:", codd)
+            if (i>4) {
                 // 把一些错误剩余没有助力到的给主号
                 codd = codess[this.rand(0, 3)].shareCode
             }
@@ -690,32 +644,33 @@ cache=1                          # 缓存助力code
                     }
                 }
             )
-            if (!this.haskey(he, 'canHongbaoContineUse')) {
+            if (!this.haskey(he, 'helpResult')) {
                 break
             }
-            await this.wait(3000)
+            console.log("助力状态码:", this.haskey(he, 'helpResult.code'))
+            if (this.haskey(he, 'helpResult.code', '13')) {
+                break
+            }
+            // await this.wait(3000)
         }
         // 天天红包定时奖励
         await this.curl({
                 'url': `https://api.m.jd.com/client.action?functionId=timingAwardForTurntableFarm&body={"version":19,"channel":1}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
-                // 'form':``,
                 cookie
             }
         )
         let cj = await this.curl({
                 'url': `https://api.m.jd.com/client.action?functionId=initForTurntableFarm&body={"version":19,"channel":1}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
-                // 'form':``,
                 cookie
             }
         )
         for (let i = 0; i<cj.remainLotteryTimes; i++) {
             let s = await this.curl({
                     'url': `https://api.m.jd.com/client.action?functionId=lotteryForTurntableFarm&body={"type":1,"version":4,"channel":1}&appid=wh5`,
-                    // 'form':``,
                     cookie
                 }
             )
-            await this.wait(2000)
+            // await this.wait(2000)
             console.log("抽奖:", this.dumps(s))
         }
         for (let i of Array(4)) {
@@ -745,7 +700,7 @@ cache=1                          # 缓存助力code
                         if (excc.amount) {
                             console.log("助力有奖获得水滴:", excc.amount)
                         }
-                        this.wait(1000)
+                        // this.wait(1000)
                     }
                 }
             }
@@ -763,10 +718,8 @@ cache=1                          # 缓存助力code
         )
         amount = this.haskey(init, 'farmUserPro.totalEnergy') || amount
         // let treeTotalEnergy = this.haskey(init, 'farmUserPro.treeTotalEnergy')
-        let custom = this.getValue('custom')
         let myCard = await this.algo.curl({
                 'url': `https://api.m.jd.com/client.action?functionId=myCardInfoForFarm&body={"version":19,"channel":1,"babelChannel":"121"}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
-                // 'form':``,
                 cookie,
                 algo: {
                     version: "3.1",
@@ -778,7 +731,7 @@ cache=1                          # 缓存助力code
         if (this.haskey(myCard, 'cardInfos')) {
             let cardInfos = this.column(myCard.cardInfos, 'useTimesInDay', 'type')
             if (this.profile.doubleCard && amount>99 && myCard.doubleCard) {
-                await this.wait(2000)
+                // await this.wait(2000)
                 for (let i of Array(3)) {
                     let doubleCard = await this.algo.curl({
                             'url': `https://api.m.jd.com/client.action?functionId=userMyCardForFarm&body={"cardType":"doubleCard","type":"","version":19,"channel":1,"babelChannel":"121"}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
@@ -793,7 +746,7 @@ cache=1                          # 缓存助力code
                     if (this.haskey(doubleCard, 'addWater')) {
                         console.log("双倍水滴:", doubleCard.addWater)
                         amount += doubleCard.addWater
-                        await this.wait(2000)
+                        // await this.wait(2000)
                     }
                     else {
                         console.log("加倍失败")
@@ -802,10 +755,10 @@ cache=1                          # 缓存助力code
                 }
             }
             if (this.profile.beanCard && myCard.beanCard) {
-                await this.wait(2000)
-                for (let i = 0; i<Math.min(Math.floor(amount / 110), 1); i++) {
+                // await this.wait(2000)
+                for (let i = 0; i<=Math.min(parseInt(amount / 101), myCard.beanCard); i++) {
                     let d = await this.algo.curl({
-                            'url': `https://api.m.jd.com/client.action?functionId=userMyCardForFarm&body={"cardType":"beanCard","type":"","version":19,"channel":1,"babelChannel":"121"}&appid=signed_wh5&client=iOS&clientVersion=10.4.0`,
+                            'url': `https://api.m.jd.com/client.action?functionId=userMyCardForFarm&body={"cardType":"beanCard","type":"","version":19,"channel":1,"babelChannel":"121","lat":"0","lng":"0"}&appid=signed_wh5&client=iOS&clientVersion=10.4.0`,
                             cookie,
                             algo: {
                                 version: "3.1",
@@ -817,7 +770,7 @@ cache=1                          # 缓存助力code
                     if (d.beanCount) {
                         amount = amount - d.useWater
                         console.log(p.user, `水滴换豆: ${d.beanCount}`)
-                        await this.wait(2000)
+                        // await this.wait(2000)
                     }
                     else {
                         break
@@ -825,11 +778,10 @@ cache=1                          # 缓存助力code
                 }
             }
             if (this.profile.signCard && myCard.signCard) {
-                await this.wait(2000)
+                // await this.wait(2000)
                 for (let i of Array(3)) {
                     let signCard = await this.algo.curl({
                             'url': `https://api.m.jd.com/client.action?functionId=userMyCardForFarm&body={"cardType":"signCard","type":"","version":19,"channel":1,"babelChannel":"121"}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
-                            // 'form':``,
                             cookie,
                             algo: {
                                 version: "3.1",
@@ -840,7 +792,7 @@ cache=1                          # 缓存助力code
                     )
                     if (this.haskey(signCard, 'signDay')) {
                         console.log("正在加签:", signCard.signDay)
-                        await this.wait(2000)
+                        // await this.wait(2000)
                     }
                     else {
                         console.log("加签失败")
@@ -851,7 +803,6 @@ cache=1                          # 缓存助力code
         }
         let jl = await this.algo.curl({
                 'url': `https://api.m.jd.com/client.action?functionId=clockInForFarm&body={"type":2,"version":19,"channel":1,"babelChannel":"121"}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
-                // 'form':``,
                 cookie,
                 algo: {
                     version: "3.1",
@@ -867,7 +818,7 @@ cache=1                          # 缓存助力code
         let stock = parseInt(this.profile.stock || 110)
         if (!this.profile.tenWater) {
             if (this.profile.fastCard && myCard.fastCard && amount - 100>stock) {
-                await this.wait(2000)
+                // await this.wait(2000)
                 for (let i = 0; i<(amount / 100); i++) {
                     if (amount - 100<stock) {
                         break
@@ -885,7 +836,7 @@ cache=1                          # 缓存助力code
                     if (this.haskey(fastCard, 'waterEnergy')) {
                         console.log("快速浇水:", fastCard.waterEnergy)
                         amount = amount - fastCard.waterEnergy
-                        await this.wait(2000)
+                        // await this.wait(2000)
                     }
                     else {
                         console.log("快速浇水失败")
@@ -893,12 +844,11 @@ cache=1                          # 缓存助力code
                     }
                 }
             }
-            await this.wait(2000)
+            // await this.wait(2000)
             for (let i = 0; i<(amount - stock) / 10; i++) {
                 for (let j = 0; j<3; j++) {
                     var js = await this.algo.curl({
                             'url': `https://api.m.jd.com/client.action?functionId=waterGoodForFarm&body={"type":"","version":19,"channel":1,"babelChannel":"121"}&appid=signed_wh5&client=iOS&clientVersion=10.2.4`,
-                            // 'form':``,
                             cookie,
                             algo: {
                                 version: "3.1",
@@ -911,7 +861,7 @@ cache=1                          # 缓存助力code
                         break
                     }
                     else {
-                        await this.wait(2000)
+                        // await this.wait(2000)
                     }
                 }
                 if (!js.totalEnergy) {
@@ -928,7 +878,6 @@ cache=1                          # 缓存助力code
     async extra() {
         console.log(`此次运行助力码:`)
         console.log(this.dumps(Object.values(this.dict)))
-        let custom = this.getValue('custom')
         if (this.profile.cache) {
             console.log("已经设置缓存:/invite/jd_task_farm.json,跳过写入")
         }
@@ -938,6 +887,7 @@ cache=1                          # 缓存助力code
             for (let cookie of this.cookies.all) {
                 let pin = this.userPin(cookie)
                 if (this.dict[pin]) {
+                    delete this.dict[pin].finish
                     json.push(this.dict[pin])
                 }
             }
@@ -948,6 +898,10 @@ cache=1                          # 缓存助力code
                 })
             }
         }
+        await this.modules.fs.writeFile(`${this.dirname}/invite/jd_task_farmFriend.json`, this.dumps(this.fcode), (error) => {
+            if (error) return console.log("写入化失败" + error.message);
+            console.log("东东农场好友列表写入成功");
+        })
     }
 }
 
