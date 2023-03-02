@@ -4,6 +4,7 @@ module.exports = {
         'jd': /pin=([^;]+)/,
         'kejiwanjia': [/pin=([^;]+)/, /username=([^;]+)/],
         'baidu': /pin=([^;]+)/,
+        'smzdm': /pin=([^;]+)/,
     },
     communal: ['options', 'curl', 'jsonParse', 'uuid', 'response', 'location', 'dumps', 'loads', 'match', 'matchAll', 'md5', 'unique', 'rand', 'random', 'compact', 'column', 'wait', 'query', 'sha1', 'md5', 'sha256', 'hmacsha256', 'query', 'haskey', 'type', 'parseIni', 'redisCli', 'fileCache', 'userAgents', 'userName', 'userPin', 'userDict', 'userRegular', 'urlProxy', 'proxyRow', 'proxyList', 'delay'],
     timerRegular: {
@@ -12,9 +13,9 @@ module.exports = {
             rule:
                 {
                     'url':
-                        'https://api.m.jd.com/client.action?functionId=queryMaterialProducts&client=wh5',
+                        'https://api.m.jd.com/client.action?functionId=jdDiscoveryRedPoint&body=%7B%7D&uuid=487f7b22f68312d2c1bbc93b1&client=apple&clientVersion=10.0.10&st=1677768101596&sv=120&sign=fbaf17e9b2a79543cd3e296665517fb5',
                     'haskey':
-                        'currentTime2'
+                        'time'
                 }
         }
     },
