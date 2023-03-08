@@ -38,7 +38,7 @@ class Main extends Template {
                 break
             }
             console.log(this.haskey(s, 'data.rewardValue') || this.haskey(s, 'data'))
-            if (this.haskey(s, 'data.rewardValue')) {
+            if (this.haskey(s, 'data.rewardValue') && this.haskey(s, 'data.rewardType', 2)) {
                 gifts.push(s.data.rewardValue)
             }
         }
