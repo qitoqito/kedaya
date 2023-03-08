@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东超市红包雨"
-        // this.cron = "2 0,20 * * *"
+        this.cron = "6 6 6 6 6"
         this.help = 'main'
         this.task = 'local'
         this.verify = 1
@@ -18,10 +18,28 @@ class Main extends Template {
             'type': 'web',
             "version": "3.0",
         })
+        let body = {
+            cityId: '1231',
+            townId: '56789',
+            provinceId: '16',
+            informationParam: {},
+            sourceId: 1,
+            synVersion: true,
+            countyId: '2345',
+            lat: '0',
+            lng: '0',
+            pageIndex: 1
+        }
+        let s = await this.curl(this.modules.jdUrl.app('smt_index', body, 'post', ''))
+        let activity_id = 1308
+        if (this.haskey(s, 'floatIcon.jump.params.url') && s.floatIcon.jump.params.url.includes("activity_id")) {
+            let q = this.query(s.floatIcon.jump.params.url, '&', 'split')
+            activity_id = q.activity_id
+        }
         let ar = await this.curl(this.modules.jdUrl.app('arMarketGetActivity', {
                 "preview": "",
                 "jdSdkVersion": "1.0.9",
-                "activity_id": "1212",
+                "activity_id": activity_id,
                 "v": "1.0",
                 "platform": "1"
             })
