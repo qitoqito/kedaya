@@ -206,7 +206,7 @@ class Main extends Template {
                         console.log(p.user, `任务完成: ${i.assignmentName}`)
                     }
                     else if (i.ext && this.dumps(i.ext) != '{}' && !i.assignmentName.includes('邀请') && !i.assignmentName.includes('开卡')) {
-                        let vos = i.ext.sign2 || i.ext.followShop || i.ext.brandMemberList || i.ext.shoppingActivity
+                        let vos = i.ext.sign2 || i.ext.followShop || i.ext.brandMemberList || i.ext.shoppingActivity || i.ext.productsInfo
                         let dotime = i.assignmentTimesLimit - i.completionCnt
                         for (let t = 0; t<dotime; t++) {
                             console.log(p.user, i.assignmentName, "第", t + 1, "次")
