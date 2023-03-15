@@ -145,19 +145,16 @@ class Main extends Template {
 
     dmCreateSign(params) {
         let t = params.params.admJson
-        let r = (new Date).valueOf()
-        let n = "85623312044258464325227666883546";
-        let a = "25747717";
-        let o = JSON.stringify(t)
-        let s = encodeURIComponent(o)
-        let c = new RegExp("'", "g")
-        let A = new RegExp("~", "g")
-        s = s.replace(c, "%27")
-        s = s.replace(A, "%7E")
-        let d = a + "appKey" + a + "admJson" + s + "timestamp" + r + n
-        params.params.commonParameter.appkey = a
-        params.params.commonParameter.timestamp = r
-        params.params.commonParameter.sign = this.md5(d.toLowerCase())
+        let n = (new Date).valueOf(), r = JSON.stringify(t)
+        let u = encodeURIComponent(r)
+        let o = new RegExp("'", "g")
+        let s = new RegExp("~", "g")
+        u = u.replace(o, "%27")
+        u = u.replace(s, "%7E")
+        let c = "k9mbrALjx4pLq5sgpO" + u + "z" + n + "xgwky6n09be8ih0x63s9i5zwdfdmou00"
+        params.params.commonParameter.appkey = '1760007'
+        params.params.commonParameter.timestamp = n
+        params.params.commonParameter.sign = this.md5(c.toLowerCase())
         return params
     }
 
