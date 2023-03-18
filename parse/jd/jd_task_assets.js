@@ -6,7 +6,7 @@ class Main extends Template {
         this.title = "京东资产汇总"
         this.cron = "30 8,22 * * *"
         this.task = 'local'
-        this.import = ['crypto-js']
+        this.import = ['crypto-js', 'jdUrl']
         // this.thread = 6
     }
 
@@ -24,7 +24,7 @@ class Main extends Template {
         await this.getMs(p)
         await this.getEarn(p)
         await this.getCoin(p)
-        await this.getEgg(p)
+        // await this.getEgg(p)
         // await this.getCattle(p)
         await this.getPet(p)
         await this.getFarm(p)
@@ -39,7 +39,7 @@ class Main extends Template {
                     t.push(`🦁 账户京贴: ${data || 0}元`)
                     break
                 case 'redpacket':
-             t.push(`🦊 当前红包: ${data.all}元`)
+                    t.push(`🦊 当前红包: ${data.all}元`)
                     t.push(`🦊 即将到期: ${data.expire}元`)
                     t.push(`🦊 还未生效: ${data.disable}元`)
                     t.push(`🦊 通用红包: ${data.current[0]}元, 过期: ${data.current[1]}元`)
@@ -164,22 +164,10 @@ class Main extends Template {
     }
 
     async getCoin(p) {
-        let params = {
-            functionId: 'MyAssetsService.execute',
-            body: '{"method":"userCoinRecord","data":{"channel":1,"pageNum":1,"pageSize":20}}',
-            appid: 'lite-android',
-            client: 'apple',
-            uuid: this.uuid(32),
-            clientVersion: '8.3.6',
-            t: this.timestamp
-        }
-        let m = Object.keys(params).sort().map(d => params[d]).join("&")
-        params.sign = this.modules['crypto-js'].HmacSHA256(m, '12aea658f76e453faf803d15c40a72e0').toString()
-        let s = await this.curl({
-                url: 'https://api.m.jd.com/api',
-                form: params,
-                cookie: p.cookie
-            }
+        let s = await this.curl(this.modules.jdUrl.lite('MyAssetsService.execute', {
+                "method": "userCoinRecord",
+                "data": {"channel": 1, "pageNum": 1, "pageSize": 20}
+            }, 'post', p.cookie)
         )
         this.dict[p.user].coin = this.haskey(s, 'data.goldBalance')
     }
@@ -271,6 +259,13 @@ class Main extends Template {
                             dict.expire.push(i.balance)
                         }
                     }
+                    else if (orgLimitStr.includes("极速") || orgLimitStr.includes("特价")) {
+                        dict.lite.push(i.balance)
+                        if (expire) {
+                            dict.liteExpire.push(i.balance)
+                            dict.expire.push(i.balance)
+                        }
+                    }
                     else if (orgLimitStr.includes("京喜")) {
                         dict.pingou.push(i.balance)
                         if (expire) {
@@ -282,13 +277,6 @@ class Main extends Template {
                         dict.healthy.push(i.balance)
                         if (expire) {
                             dict.healthyExpire.push(i.balance)
-                            dict.expire.push(i.balance)
-                        }
-                    }
-                    else if (orgLimitStr.includes("极速") || orgLimitStr.includes("特价")) {
-                        dict.lite.push(i.balance)
-                        if (expire) {
-                            dict.liteExpire.push(i.balance)
                             dict.expire.push(i.balance)
                         }
                     }
