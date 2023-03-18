@@ -17,16 +17,20 @@ class Main extends Template {
             'url': `https://kai.jd.com/client?appId=applet_jpass&body=%257B%257D&functionId=UserExportService.getUserInfo&requestId=0.72076678870461081641259143802&sign=431fa578b3a6c82c50b37ed7e6406973&_s=2&_i=55`,
             cookie
         })
-        console.log(s.data)
+        if (this.haskey(s, 'data.data')) {
+            console.log("数据获取成功...")
+        }
+        else {
+            console.log("数据获取失败...")
+        }
         let pin = this.userPin(cookie)
         let custom = this.getValue('custom')
         let keys = [...custom, ...['id', 'msgWhite', 'msgBlack', 'send', 'wskey', 'verify', 'nickName', 'phone']]
-        let query = this.expand ? this.query(this['expand'], '\\|', 1) : {}
         let dict = {}
-        let userDict = this.haskey(this.userDict, pin) || {}
+        let userDict = this.userDict.hasOwnProperty(pin) ? this.userDict[pin] : {}
         for (let i of keys) {
-            if (this.haskey(this.userDict, `${pin}.${i}`) && this.userDict[pin][i]) {
-                dict[i] = this.haskey(this.userDict, `${pin}.${i}`)
+            if (userDict[i]) {
+                dict[i] = userDict[i]
             }
             else {
                 dict[i] = ''
@@ -52,12 +56,10 @@ class Main extends Template {
                     pin,
                     userName: pin,
                     index: p.index.toString(),
-                    // display: (parseInt(p.index) + 1).toString(),
-                    // phone
                 },
-                ...dict
             }
         }
+        console.log(this.dict[pin])
         this.dict['message'] = {
             "userName": "message",
             "nickName": "框架通知",
