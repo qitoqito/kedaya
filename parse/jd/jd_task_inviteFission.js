@@ -26,7 +26,7 @@ class Main extends Template {
         for (let cookie of this.cookies.help) {
             let user = this.userName(cookie)
             let home = await this.algo.curl({
-                    'url': `https://api.m.jd.com/?functionId=inviteFissionBeforeHome&body={"linkId":"0l57_ZyiJ8Ak6cbk48fpHQ","isJdApp":true,"inviter":""}&t=1677821302550&appid=activities_platform&client=ios&clientVersion=11.6.3`,
+                    'url': `https://api.m.jd.com/?functionId=inviteFissionBeforeHome&body={"linkId":"r6t4R7GyqpQdtgFN9juaQw","isJdApp":true,"inviter":""}&t=1677821302550&appid=activities_platform&client=ios&clientVersion=11.6.3`,
                     // 'form':``,
                     cookie,
                     algo: {
@@ -42,7 +42,7 @@ class Main extends Template {
                 let count = 0, finish = 0;
                 if (this.profile.count) {
                     let invite = await this.algo.curl({
-                            'url': `https://api.m.jd.com/?functionId=inviteFissionHome&body={"linkId":"0l57_ZyiJ8Ak6cbk48fpHQ","inviter":""}&t=1677822607330&appid=activities_platform&client=ios&clientVersion=11.6.3`,
+                            'url': `https://api.m.jd.com/?functionId=inviteFissionHome&body={"linkId":"r6t4R7GyqpQdtgFN9juaQw","inviter":""}&t=1677822607330&appid=activities_platform&client=ios&clientVersion=11.6.3`,
                             // 'form':``,
                             cookie,
                             algo: {
@@ -86,7 +86,7 @@ class Main extends Template {
             else {
                 console.log(p.inviter.inviter)
                 let home = await this.algo.curl({
-                        'url': `https://api.m.jd.com/?functionId=inviteFissionBeforeHome&body={"linkId":"0l57_ZyiJ8Ak6cbk48fpHQ","isJdApp":true,"inviter":"${p.inviter.inviter}"}&t=1677821302550&appid=activities_platform&client=ios&clientVersion=11.6.3`,
+                        'url': `https://api.m.jd.com/?functionId=inviteFissionBeforeHome&body={"linkId":"r6t4R7GyqpQdtgFN9juaQw","isJdApp":true,"inviter":"${p.inviter.inviter}"}&t=1677821302550&appid=activities_platform&client=ios&clientVersion=11.6.3`,
                         // 'form':``,
                         cookie,
                         algo: {
@@ -97,6 +97,11 @@ class Main extends Template {
                     }
                 )
                 let helpResult = this.haskey(home, 'data.helpResult')
+                if (!helpResult) {
+                    console.log(this.haskey(home, 'errMsg') || '错误了...')
+                    this.complete.push(p.index)
+                }
+                console.log("助力状态:", helpResult)
                 if (helpResult == 1) {
                     console.log("助力成功...")
                     this.dict[p.inviter.user].count++
@@ -108,8 +113,12 @@ class Main extends Template {
                     console.log("没有助力次数了...")
                     this.complete.push(p.index)
                 }
+                else if (helpResult == 2) {
+                    console.log("活动火爆...")
+                    this.complete.push(p.index)
+                }
                 let invite = await this.algo.curl({
-                        'url': `https://api.m.jd.com/?functionId=inviteFissionHome&body={"linkId":"0l57_ZyiJ8Ak6cbk48fpHQ","inviter":"${p.inviter.inviter}"}&t=1677822607330&appid=activities_platform&client=ios&clientVersion=11.6.3`,
+                        'url': `https://api.m.jd.com/?functionId=inviteFissionHome&body={"linkId":"r6t4R7GyqpQdtgFN9juaQw","inviter":"${p.inviter.inviter}"}&t=1677822607330&appid=activities_platform&client=ios&clientVersion=11.6.3`,
                         // 'form':``,
                         cookie,
                         algo: {
@@ -124,7 +133,7 @@ class Main extends Template {
         else {
             for (let k of Array(2)) {
                 let invite = await this.algo.curl({
-                        'url': `https://api.m.jd.com/?functionId=inviteFissionHome&body={"linkId":"0l57_ZyiJ8Ak6cbk48fpHQ","inviter":""}&t=1677822607330&appid=activities_platform&client=ios&clientVersion=11.6.3`,
+                        'url': `https://api.m.jd.com/?functionId=inviteFissionHome&body={"linkId":"r6t4R7GyqpQdtgFN9juaQw","inviter":""}&t=1677822607330&appid=activities_platform&client=ios&clientVersion=11.6.3`,
                         // 'form':``,
                         cookie,
                         algo: {
@@ -139,7 +148,7 @@ class Main extends Template {
                 let error = 0
                 for (let i of Array(prizeNum)) {
                     let draw = await this.algo.curl({
-                            'url': `https://api.m.jd.com/?functionId=inviteFissionDrawPrize&body={%22linkId%22:%220l57_ZyiJ8Ak6cbk48fpHQ%22,%22lbs%22:%22null%22}&t=1677826749458&appid=activities_platform&client=ios&clientVersion=11.6.3`,
+                            'url': `https://api.m.jd.com/?functionId=inviteFissionDrawPrize&body={%22linkId%22:%22r6t4R7GyqpQdtgFN9juaQw%22,%22lbs%22:%22null%22}&t=1677826749458&appid=activities_platform&client=ios&clientVersion=11.6.3`,
                             // 'form':``,
                             cookie,
                             algo: {
@@ -165,7 +174,7 @@ class Main extends Template {
                 }
                 for (let _ = 1; _<=4; _++) {
                     let list = await this.curl({
-                            'url': `https://api.m.jd.com/?functionId=superRedBagList&body={"linkId":"0l57_ZyiJ8Ak6cbk48fpHQ","pageNum":${_},"pageSize":10,"business":"fission"}&t=1677826759113&appid=activities_platform&client=ios&clientVersion=11.6.3`,
+                            'url': `https://api.m.jd.com/?functionId=superRedBagList&body={"linkId":"r6t4R7GyqpQdtgFN9juaQw","pageNum":${_},"pageSize":10,"business":"fission"}&t=1677826759113&appid=activities_platform&client=ios&clientVersion=11.6.3`,
                             // 'form':``,
                             cookie
                         }
@@ -185,7 +194,7 @@ class Main extends Template {
                             console.log("正在提现:", i.amount)
                             let cash = await this.algo.curl({
                                     'url': `https://api.m.jd.com/`,
-                                    'form': `functionId=apCashWithDraw&body={"linkId":"0l57_ZyiJ8Ak6cbk48fpHQ","businessSource":"NONE","base":{"id":${i.id},"business":"fission","poolBaseId":${i.poolBaseId},"prizeGroupId":${i.prizeGroupId},"prizeBaseId":${i.prizeBaseId},"prizeType":${i.prizeType}}}&t=1677826760325&appid=activities_platform&client=ios&clientVersion=11.6.3`,
+                                    'form': `functionId=apCashWithDraw&body={"linkId":"r6t4R7GyqpQdtgFN9juaQw","businessSource":"NONE","base":{"id":${i.id},"business":"fission","poolBaseId":${i.poolBaseId},"prizeGroupId":${i.prizeGroupId},"prizeBaseId":${i.prizeBaseId},"prizeType":${i.prizeType}}}&t=1677826760325&appid=activities_platform&client=ios&clientVersion=11.6.3`,
                                     cookie,
                                     algo: {
                                         type: "main",
@@ -209,7 +218,7 @@ class Main extends Template {
                             if (this.profile.change) {
                                 let change = await this.curl({
                                         'url': `https://api.m.jd.com/`,
-                                        'form': `functionId=apRecompenseDrawPrize&body={"linkId":"0l57_ZyiJ8Ak6cbk48fpHQ","drawRecordId":${i.id},"business":"fission","poolId":${i.poolBaseId},"prizeGroupId":${i.prizeGroupId},"prizeId":${i.prizeBaseId}}&t=1677828892054&appid=activities_platform&client=ios&clientVersion=11.6.2&cthr=1&uuid=31dbd03adc234a4f7b53d2ab98fe45e442ef8c23&build=168548&screen=375*667&networkType=wifi&d_brand=iPhone&d_model=iPhone8,1&lang=zh_CN&osVersion=13.7&partner=&eid=eidI9f3b812081s9gBRFzHVvSLKFyLkI3gRVC4AUR0pS4q%2FTLWhDlWOgSf3sd8Pw8GQF2mt5nHCd%2BUPdaH%2BNFDpcnMR8V4l92V0jkRYYg32WNMM5UbBj`,
+                                        'form': `functionId=apRecompenseDrawPrize&body={"linkId":"r6t4R7GyqpQdtgFN9juaQw","drawRecordId":${i.id},"business":"fission","poolId":${i.poolBaseId},"prizeGroupId":${i.prizeGroupId},"prizeId":${i.prizeBaseId}}&t=1677828892054&appid=activities_platform&client=ios&clientVersion=11.6.2&cthr=1&uuid=31dbd03adc234a4f7b53d2ab98fe45e442ef8c23&build=168548&screen=375*667&networkType=wifi&d_brand=iPhone&d_model=iPhone8,1&lang=zh_CN&osVersion=13.7&partner=&eid=eidI9f3b812081s9gBRFzHVvSLKFyLkI3gRVC4AUR0pS4q%2FTLWhDlWOgSf3sd8Pw8GQF2mt5nHCd%2BUPdaH%2BNFDpcnMR8V4l92V0jkRYYg32WNMM5UbBj`,
                                         cookie
                                     }
                                 )
