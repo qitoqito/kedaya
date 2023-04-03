@@ -16,13 +16,14 @@ class Main extends Template {
             appId: "8adfb",
             type: 'lite',
         })
-        let sourcesList = ['card', 'sign', 'secondfloor']
+        let sourcesList = ['card', 'sign', 'secondfloor', 'run']
         for (let source of sourcesList) {
             switch (source) {
                 case "card":
                 case "sign":
                     var url = `https://api.m.jd.com/?uuid=7b01d4690ef13716984dcfcf96068f36b41f6c51&client=wh5&appid=ProductZ4Brand&functionId=showSecondFloor${source[0].toUpperCase() + source.substr(1)}Info&t=${this.timestamp}&body={"source":"${source}"}`
                     break
+                case 'run':
                 case "secondfloor":
                     var url = `https://api.m.jd.com/?uuid=7b01d4690ef13716984dcfcf96068f36b41f6c51&client=wh5&appid=ProductZ4Brand&functionId=superBrandSecondFloorMainPage&t=${this.timestamp}&body={"source":"${source}"}`
                     break
@@ -92,6 +93,7 @@ class Main extends Template {
                                 await this.sign(p, source)
                             }
                             break
+                        case "run":
                         case "secondfloor":
                             if (this.dict[`${source}`].status) {
                                 await this.secondfloor(p, source)
@@ -510,8 +512,15 @@ class Main extends Template {
                 cookie
             }
         )
+        // console.log(this.dumps(s.data.result))
+        // console.log(s.data.result.activityBaseInfo)
+        // console.log(s.data.result.activityUserInfo)
         let userStarNum = this.haskey(s, 'data.result.activityUserInfo.userStarNum')
         if (userStarNum>0) {
+            if (this.haskey(s, 'data.result.activityBaseInfo.drawStarNum')) {
+                userStarNum = userStarNum / parseInt(s.data.result.activityBaseInfo.drawStarNum)
+            }
+            console.log("抽奖次数:", userStarNum)
             for (let i = 1; i<(userStarNum + 1); i++) {
                 console.log(p.user, `第${i}次抽奖`)
                 let ss = await this.curl({
@@ -520,6 +529,10 @@ class Main extends Template {
                         cookie
                     }
                 )
+                if (this.haskey(ss, 'data.bizMsg', '积分不足')) {
+                    console.log("积分不足")
+                    break
+                }
                 try {
                     for (let r of ss.data.result.rewards) {
                         if (r.awardName == '京豆') {
