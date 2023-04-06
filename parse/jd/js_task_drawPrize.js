@@ -72,6 +72,7 @@ class Main extends Template {
                                 referer: `https://wqs.jd.com/channel/jisu/recommend.html?jisuchannel=jisuban_jdpay1&PTAG=139597.3.9&channel=jisuban_jdpay1&topskus=&channelSign=${this.haskey(data, 'sign')}&originsource=100107&originplatform=jdapp&originchannel=jisuban_jdpay1`,
                             }
                         )
+                        console.log(draw)
                         this.print(data.tips, p.user)
                     }
                 }
