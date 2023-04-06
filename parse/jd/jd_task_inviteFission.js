@@ -7,15 +7,16 @@ class Main extends Template {
         this.cron = "6 6 6 6 6"
         this.help = 'main'
         this.task = 'local'
-        this.turn = 2
+        this.turn = 3
         this.import = ['jdAlgo']
-        this.delay = 800
+        this.delay = 500
         this.model = 'user'
         this.hint = {
             help: "每天最多助力3人,有些黑号提现不了,请自行设置主号",
             change: "部分黑号提现不了,可以将现金转换红包,如需转换,请自行设置节点 change=1",
-            delay: "默认800,即每次请求间隔为0.8s,如需修改,请自行设置节点 delay=n",
-            count: '如需设置主号最多助力人数,请自行设置节点 count=n'
+            delay: "默认500,即每次请求间隔为0.5s,如需修改,请自行设置节点 delay=n",
+            count: '如需设置主号最多助力人数,请自行设置节点 count=n',
+            stop: '抽奖过程中,如果抽到优惠券就停止抽奖'
         }
         this.verify = 1
     }
@@ -42,7 +43,8 @@ class Main extends Template {
                 let count = 0, finish = 0;
                 if (this.profile.count) {
                     let invite = await this.algo.curl({
-                            'url': `https://api.m.jd.com/?functionId=inviteFissionHome&body={"linkId":"r6t4R7GyqpQdtgFN9juaQw","inviter":""}&t=1677822607330&appid=activities_platform&client=ios&clientVersion=11.6.3`,
+                            'url': `https://api.m.jd.com/`,
+                            form: `functionId=inviteFissionHome&body={"linkId":"r6t4R7GyqpQdtgFN9juaQw","inviter":""}&t=1677822607330&appid=activities_platform&client=ios&clientVersion=11.6.3`,
                             // 'form':``,
                             cookie,
                             algo: {
@@ -86,7 +88,8 @@ class Main extends Template {
             else {
                 console.log(p.inviter.inviter)
                 let home = await this.algo.curl({
-                        'url': `https://api.m.jd.com/?functionId=inviteFissionBeforeHome&body={"linkId":"r6t4R7GyqpQdtgFN9juaQw","isJdApp":true,"inviter":"${p.inviter.inviter}"}&t=1677821302550&appid=activities_platform&client=ios&clientVersion=11.6.3`,
+                        'url': `https://api.m.jd.com/`,
+                        form: `functionId=inviteFissionBeforeHome&body={"linkId":"r6t4R7GyqpQdtgFN9juaQw","isJdApp":true,"inviter":"${p.inviter.inviter}"}&t=1677821302550&appid=activities_platform&client=ios&clientVersion=11.6.3`,
                         // 'form':``,
                         cookie,
                         algo: {
@@ -113,6 +116,10 @@ class Main extends Template {
                     console.log("没有助力次数了...")
                     this.complete.push(p.index)
                 }
+                else if (helpResult == 4) {
+                    console.log("助力次数用完了...")
+                    this.complete.push(p.index)
+                }
                 else if (helpResult == 2) {
                     console.log("活动火爆...")
                     this.complete.push(p.index)
@@ -130,7 +137,8 @@ class Main extends Template {
                 )
             }
         }
-        else {
+        else if (this.turnCount == 1) {
+            console.log("正在抽奖...")
             for (let k of Array(2)) {
                 let invite = await this.algo.curl({
                         'url': `https://api.m.jd.com/?functionId=inviteFissionHome&body={"linkId":"r6t4R7GyqpQdtgFN9juaQw","inviter":""}&t=1677822607330&appid=activities_platform&client=ios&clientVersion=11.6.3`,
@@ -170,63 +178,69 @@ class Main extends Template {
                         break
                     }
                     console.log("抽中类型:", prizeType, '抽中面额:', this.haskey(draw, 'data.prizeValue'))
-                    await this.wait(1000)
-                }
-                for (let _ = 1; _<=4; _++) {
-                    let list = await this.curl({
-                            'url': `https://api.m.jd.com/?functionId=superRedBagList&body={"linkId":"r6t4R7GyqpQdtgFN9juaQw","pageNum":${_},"pageSize":10,"business":"fission"}&t=1677826759113&appid=activities_platform&client=ios&clientVersion=11.6.3`,
-                            // 'form':``,
-                            cookie
-                        }
-                    )
-                    if (!this.haskey(list, 'data.items')) {
+                    if (parseInt(prizeType) == 1 && this.profile.stop) {
+                        console.log("抽到优惠券了,退出抽奖等会再来....")
                         break
                     }
-                    let num = 0
-                    for (let i of this.haskey(list, 'data.items')) {
-                        if (i.prizeType == 4 && i.state == 0) {
-                            num++
+                    await this.wait(1000)
+                }
+            }
+        }
+        else {
+            console.log("正在提现...")
+            for (let _ = 1; _<=4; _++) {
+                let list = await this.curl({
+                        'url': `https://api.m.jd.com/?functionId=superRedBagList&body={"linkId":"r6t4R7GyqpQdtgFN9juaQw","pageNum":${_},"pageSize":10,"business":"fission"}&t=1677826759113&appid=activities_platform&client=ios&clientVersion=11.6.3`,
+                        // 'form':``,
+                        cookie
+                    }
+                )
+                if (!this.haskey(list, 'data.items')) {
+                    break
+                }
+                let num = 0
+                for (let i of this.haskey(list, 'data.items')) {
+                    if (i.prizeType == 4 && i.state == 0) {
+                        num++
+                    }
+                }
+                let kn = 0
+                for (let i of this.haskey(list, 'data.items')) {
+                    if (i.prizeType == 4 && i.state == 0) {
+                        let cash = await this.algo.curl({
+                                'url': `https://api.m.jd.com/`,
+                                'form': `functionId=apCashWithDraw&body={"linkId":"r6t4R7GyqpQdtgFN9juaQw","businessSource":"NONE","base":{"id":${i.id},"business":"fission","poolBaseId":${i.poolBaseId},"prizeGroupId":${i.prizeGroupId},"prizeBaseId":${i.prizeBaseId},"prizeType":${i.prizeType}}}&t=1677826760325&appid=activities_platform&client=ios&clientVersion=11.6.3`,
+                                cookie,
+                                algo: {
+                                    type: "main",
+                                    version: "3.1",
+                                    appId: '3c023'
+                                }
+                            }
+                        )
+                        this.print(`现金: ${i.amount}  ${this.haskey(cash, 'data.message')}`, p.user)
+                        let message = this.haskey(cash, 'data.message')
+                        if (message.includes('风控')) {
+                            console.log("风控账户,不能提现")
+                            break
+                        }
+                        kn++
+                        if (kn<num) {
+                            await this.wait(6000)
                         }
                     }
-                    let kn = 0
-                    for (let i of this.haskey(list, 'data.items')) {
-                        if (i.prizeType == 4 && i.state == 0) {
-                            console.log("正在提现:", i.amount)
-                            let cash = await this.algo.curl({
+                    else if (i.prizeType == 4 && i.state == 2) {
+                        if (this.profile.change) {
+                            let change = await this.curl({
                                     'url': `https://api.m.jd.com/`,
-                                    'form': `functionId=apCashWithDraw&body={"linkId":"r6t4R7GyqpQdtgFN9juaQw","businessSource":"NONE","base":{"id":${i.id},"business":"fission","poolBaseId":${i.poolBaseId},"prizeGroupId":${i.prizeGroupId},"prizeBaseId":${i.prizeBaseId},"prizeType":${i.prizeType}}}&t=1677826760325&appid=activities_platform&client=ios&clientVersion=11.6.3`,
-                                    cookie,
-                                    algo: {
-                                        type: "main",
-                                        version: "3.1",
-                                        appId: '3c023'
-                                    }
+                                    'form': `functionId=apRecompenseDrawPrize&body={"linkId":"r6t4R7GyqpQdtgFN9juaQw","drawRecordId":${i.id},"business":"fission","poolId":${i.poolBaseId},"prizeGroupId":${i.prizeGroupId},"prizeId":${i.prizeBaseId}}&t=1677828892054&appid=activities_platform&client=ios&clientVersion=11.6.2&cthr=1&uuid=31dbd03adc234a4f7b53d2ab98fe45e442ef8c23&build=168548&screen=375*667&networkType=wifi&d_brand=iPhone&d_model=iPhone8,1&lang=zh_CN&osVersion=13.7&partner=&eid=eidI9f3b812081s9gBRFzHVvSLKFyLkI3gRVC4AUR0pS4q%2FTLWhDlWOgSf3sd8Pw8GQF2mt5nHCd%2BUPdaH%2BNFDpcnMR8V4l92V0jkRYYg32WNMM5UbBj`,
+                                    cookie
                                 }
                             )
-                            console.log(this.haskey(cash, 'data.message'))
-                            let message = this.haskey(cash, 'data.message')
-                            if (message.includes('风控')) {
-                                console.log("风控账户,不能提现")
-                                break
-                            }
-                            kn++
-                            if (kn<num) {
-                                await this.wait(6000)
-                            }
+                            console.log(`转换现金:`, i.amount, this.haskey(change, 'data. prizeDesc'))
                         }
-                        else if (i.prizeType == 4 && i.state == 2) {
-                            if (this.profile.change) {
-                                let change = await this.curl({
-                                        'url': `https://api.m.jd.com/`,
-                                        'form': `functionId=apRecompenseDrawPrize&body={"linkId":"r6t4R7GyqpQdtgFN9juaQw","drawRecordId":${i.id},"business":"fission","poolId":${i.poolBaseId},"prizeGroupId":${i.prizeGroupId},"prizeId":${i.prizeBaseId}}&t=1677828892054&appid=activities_platform&client=ios&clientVersion=11.6.2&cthr=1&uuid=31dbd03adc234a4f7b53d2ab98fe45e442ef8c23&build=168548&screen=375*667&networkType=wifi&d_brand=iPhone&d_model=iPhone8,1&lang=zh_CN&osVersion=13.7&partner=&eid=eidI9f3b812081s9gBRFzHVvSLKFyLkI3gRVC4AUR0pS4q%2FTLWhDlWOgSf3sd8Pw8GQF2mt5nHCd%2BUPdaH%2BNFDpcnMR8V4l92V0jkRYYg32WNMM5UbBj`,
-                                        cookie
-                                    }
-                                )
-                                console.log(`转换现金:`, i.amount, this.haskey(change, 'data. prizeDesc'))
-                            }
-                            else {
-                                console.log('提现失败金额:', i.amount, '如需转换成红包请设置change节点参数')
-                            }
+                        else {
+                            console.log('提现失败金额:', i.amount, '如需转换成红包请设置change节点参数')
                         }
                     }
                 }
