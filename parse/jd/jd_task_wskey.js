@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东WSKEY转换"
-        // this.cron = "50 */2 * * *"
+        this.cron = "6 6 6 6 6"
         this.task = 'local'
         this.import = ['jdUrl', 'fs']
         this.readme = "使用前需先在config/jdUser配置用户wskey,以及将verify字段设置为1或2,脚本才能正常转换cookie,当verify设置为2时,即使当前cookie没有过期,也会强制转换更新\n慎重使用wskey相关脚本,此脚本没有用到外部服务器计算genToken"
@@ -106,8 +106,7 @@ class Main extends Template {
                     this.dict[pin] = newCookie + ';'
                 }
                 else {
-                    console.log('openKey生成失败', p.user)
-                    this.notices('openKey生成失败', p.user)
+                    this.print(`openKey生成失败 -- ${this.userPin(p.cookie)}`, p.user)
                 }
             }
             else {
