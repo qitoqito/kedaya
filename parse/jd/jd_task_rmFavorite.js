@@ -15,7 +15,7 @@ class Main extends Template {
         let page = 1
         for (let i = 0; i<count / 20; i++) {
             let s = await this.curl({
-                    'url': `https://m.jingxi.com/fav/comm/FavCommQueryFilter?cp=${page}&pageSize=20&category=0&promote=0&cutPrice=0&coupon=0&stock=0&_=1650625973463&&sceneval=2&g_login_type=1&callback=aaa`,
+                    'url': `https://wq.jd.com/fav/shop/QueryShopFavList?cp=${page}&pageSize=10&lastlogintime=1681810631&_=1681810636733&g_login_type=0&appCode=msd95910c4&callback=jsonpCBKA&g_tk=646642342&g_ty=ls`,
                     cookie
                 }
             )
@@ -24,28 +24,35 @@ class Main extends Template {
                 console.log("当前商品收藏数:", s.totalNum)
                 if (s.totalNum>0) {
                     page = Math.ceil(s.totalNum / 20)>1 ? this.rand(1, Math.ceil(s.totalNum / 20)) : 1
-                    // commTitle
+                    // shopName
                     if (this.profile.whiteList || this.dict.whiteList) {
                         let whiteList = (this.profile.whiteList || this.dict.whiteList).split(",").join('|')
-                        var data = s.data.filter(d => !d.commTitle.match(whiteList))
+                        var data = s.data.filter(d => !d.shopName.match(whiteList))
                     }
                     else if (this.profile.blackList || this.dict.blackList) {
                         let blackList = (this.profile.blackList || this.dict.blackList).blackList.split(",").join('|')
-                        var data = s.data.filter(d => d.commTitle.match(blackList))
+                        var data = s.data.filter(d => d.shopName.match(blackList))
                     }
                     else {
                         var data = s.data
                     }
                     // console.log(s.data)
-                    // console.log(this.column(s.data, 'commTitle').join("|"))
+                    // console.log(this.column(s.data, 'shopName').join("|"))
                     if (data.length>0) {
-                        console.log(`正在删除:`, this.column(data, 'commTitle').join("|"))
+                        console.log(`正在删除:`, this.column(data, 'shopName').join("|"))
+                        // let rm = await this.curl({
+                        //         'url': `https://api.m.jd.com/api?functionId=batchCancelFavorite&body={"skus":"${this.column(data, 'shopId').join(",")}"}&appid=follow_for_concert&client=pc`,
+                        //         cookie
+                        //     }
+                        // )
+                        // console.log(rm.resultMsg)
                         let rm = await this.curl({
-                                'url': `https://api.m.jd.com/api?functionId=batchCancelFavorite&body={"skus":"${this.column(data, 'commId').join(",")}"}&appid=follow_for_concert&client=pc`,
+                                'url': `https://wq.jd.com/fav/shop/batchunfollow?shopId=${this.column(data, 'shopId').join(",")}&_=1681810861733&g_login_type=0&appCode=msd95910c4&callback=jsonpCBKE&g_tk=646642342&g_ty=ls`,
+                                // 'form':``,
                                 cookie
                             }
                         )
-                        console.log(rm.resultMsg)
+                        console.log(rm)
                     }
                     else {
                         break
