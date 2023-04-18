@@ -79,7 +79,7 @@ class Main extends Template {
                     this.dict[pin] = newCookie + ';'
                 }
                 else {
-                    this.notices('openKey生成失败', p.user)
+                    this.print(`openKey生成失败 -- ${this.userPin(p.cookie)}`, p.user)
                 }
             }else{
                 this.notices("账号过期了呀🐶", p.user)
