@@ -15,7 +15,7 @@ class Main extends Template {
         let page = 1
         for (let i = 0; i<count / 20; i++) {
             let s = await this.curl({
-                    'url': `https://wq.jd.com/fav/shop/QueryShopFavList?cp=${page}&pageSize=10&lastlogintime=1681810631&_=1681810636733&g_login_type=0&appCode=msd95910c4&callback=jsonpCBKA&g_tk=646642342&g_ty=ls`,
+                    'url': `https://wq.jd.com/fav/shop/QueryShopFavList?cp=${page}&pageSize=20&lastlogintime=1681810631&_=1681810636733&g_login_type=0&appCode=msd95910c4&callback=jsonpCBKA&g_tk=646642342&g_ty=ls`,
                     cookie
                 }
             )
