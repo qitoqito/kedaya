@@ -6,7 +6,12 @@ class Main extends Template {
         this.title = "京东删除商品收藏"
         this.cron = "6 6 6 6 6"
         this.task = 'local'
-        this.readme = "商品关注删除,慎用脚本"
+        this.import = ['jdAlgo']
+        this.readme = '有频率限制,不要一次删除太多'
+    }
+
+    async prepare() {
+        this.algo = new this.modules.jdAlgo()
     }
 
     async main(p) {
@@ -14,45 +19,44 @@ class Main extends Template {
         let count = parseInt(this.profile.count || this.dict.count || 20)
         let page = 1
         for (let i = 0; i<count / 20; i++) {
-            let s = await this.curl({
-                    'url': `https://wq.jd.com/fav/shop/QueryShopFavList?cp=${page}&pageSize=20&lastlogintime=1681810631&_=1681810636733&g_login_type=0&appCode=msd95910c4&callback=jsonpCBKA&g_tk=646642342&g_ty=ls`,
-                    cookie
+            let s = await this.algo.curl({
+                    'url': `https://api.m.jd.com/?appid=jd-cphdeveloper-m&functionId=queryFollowProduct&body={"cp":${page},"pageSize":20,"category":"","promote":0,"cutPrice":0,"coupon":0,"stock":0,"tenantCode":"jgm","bizModelCode":"6","bizModeClientType":"M","externalLoginType":"1"}&loginType=2&uuid=40501164094171678865533299&openudid=40501164094171678865533299&sceneval=2&g_login_type=1&g_tk=646642342&g_ty=ajax&appCode=msd95910c4`,
+                    // 'form':``,
+                    cookie,
+                    algo: {
+                        appId: "c420a",
+                        version: "3.1",
+                        type: "main"
+                    }
                 }
             )
-            if (this.haskey(s, 'data')) {
+            if (this.haskey(s, 'followProductList')) {
                 // console.log(s.data)
                 console.log("当前商品收藏数:", s.totalNum)
                 if (s.totalNum>0) {
                     page = Math.ceil(s.totalNum / 20)>1 ? this.rand(1, Math.ceil(s.totalNum / 20)) : 1
-                    // shopName
+                    // commTitle
                     if (this.profile.whiteList || this.dict.whiteList) {
                         let whiteList = (this.profile.whiteList || this.dict.whiteList).split(",").join('|')
-                        var data = s.data.filter(d => !d.shopName.match(whiteList))
+                        var data = s.followProductList.filter(d => !d.commTitle.match(whiteList))
                     }
                     else if (this.profile.blackList || this.dict.blackList) {
                         let blackList = (this.profile.blackList || this.dict.blackList).blackList.split(",").join('|')
-                        var data = s.data.filter(d => d.shopName.match(blackList))
+                        var data = s.followProductList.filter(d => d.commTitle.match(blackList))
                     }
                     else {
-                        var data = s.data
+                        var data = s.followProductList
                     }
                     // console.log(s.data)
-                    // console.log(this.column(s.data, 'shopName').join("|"))
+                    // console.log(this.column(s.data, 'commTitle').join("|"))
                     if (data.length>0) {
-                        console.log(`正在删除:`, this.column(data, 'shopName').join("|"))
-                        // let rm = await this.curl({
-                        //         'url': `https://api.m.jd.com/api?functionId=batchCancelFavorite&body={"skus":"${this.column(data, 'shopId').join(",")}"}&appid=follow_for_concert&client=pc`,
-                        //         cookie
-                        //     }
-                        // )
-                        // console.log(rm.resultMsg)
+                        console.log(`正在删除:`, this.column(data, 'commTitle').join("|"))
                         let rm = await this.curl({
-                                'url': `https://wq.jd.com/fav/shop/batchunfollow?shopId=${this.column(data, 'shopId').join(",")}&_=1681810861733&g_login_type=0&appCode=msd95910c4&callback=jsonpCBKE&g_tk=646642342&g_ty=ls`,
-                                // 'form':``,
+                                'url': `https://api.m.jd.com/api?functionId=batchCancelFavorite&body={"skus":"${this.column(data, 'commId').join(",")}"}&appid=follow_for_concert&client=pc`,
                                 cookie
                             }
                         )
-                        console.log(rm)
+                        console.log(rm.resultMsg)
                     }
                     else {
                         break
