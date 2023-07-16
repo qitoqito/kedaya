@@ -15,6 +15,7 @@
     "qrcode-terminal": "^0.12.0",
     "readline-sync": "^1.4.10",
     "request": "2.88.2",
+    "secp256k1": "^5.0.0",
     "stream": "0.0.2",
     "tough-cookie": "^4.0.0",
     "tunnel": "0.0.6",
@@ -22,7 +23,6 @@
     "ws": "^7.4.3",
     "zlib": "^1.0.5"
   },
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
