@@ -12,7 +12,7 @@ class Main extends Template {
         this.delay = 500
         this.model = 'user'
         this.hint = {
-            help: "每天最多助力3人,有些黑号提现不了,请自行设置主号",
+            help: "每天最多助力1人,有些黑号提现不了,请自行设置主号",
             change: "部分黑号提现不了,可以将现金转换红包,如需转换,请自行设置节点 change=1",
             delay: "默认500,即每次请求间隔为0.5s,如需修改,请自行设置节点 delay=n",
             count: '如需设置主号最多助力人数,请自行设置节点 count=n',
@@ -39,6 +39,7 @@ class Main extends Template {
                 }
             )
             let inviter = this.haskey(home, 'data.inviter')
+            let countDownTime = 0
             if (inviter) {
                 console.log(user, ':', home.data.inviter)
                 let count = 0, finish = 0;
@@ -49,7 +50,7 @@ class Main extends Template {
                             // 'form':``,
                             cookie,
                             algo: {
-                                type: "lite",
+                                type: "main",
                                 version: "4.1",
                                 appId: 'eb67b'
                             }
@@ -59,13 +60,14 @@ class Main extends Template {
                     if (count>=parseInt(this.profile.count)) {
                         finish = 1
                     }
+                    countDownTime = invite.data.countDownTime
                 }
                 this.dict[user] = {
                     inviter, count, finish
                 }
                 this.shareCode.push({
                     user,
-                    inviter, count, finish
+                    inviter, count, finish, min: parseInt(countDownTime / 60000)
                 })
             }
         }
@@ -130,7 +132,7 @@ class Main extends Template {
                         // 'form':``,
                         cookie,
                         algo: {
-                            type: "lite",
+                            type: "main",
                             version: "4.1",
                             appId: 'eb67b'
                         }
@@ -145,7 +147,7 @@ class Main extends Template {
                     // 'form':``,
                     cookie,
                     algo: {
-                        type: "lite",
+                        type: "main",
                         version: "4.1",
                         appId: 'eb67b'
                     }
@@ -154,13 +156,20 @@ class Main extends Template {
             let prizeNum = this.haskey(invite, 'data.prizeNum')
             console.log("可抽奖次数:", prizeNum)
             let error = 0
+            let dict = {
+                2: '红包',
+                4: '现金',
+                6: '礼包'
+            }
+            let redpacket = [0]
+            let cash = [0]
             for (let i of Array(prizeNum)) {
                 let draw = await this.algo.curl({
                         'url': `https://api.m.jd.com/?functionId=inviteFissionDrawPrize&body={%22linkId%22:%22${this.linkId}%22,%22lbs%22:%22null%22}&t=1677826749458&appid=activities_platform&client=ios&clientVersion=11.6.3`,
                         // 'form':``,
                         cookie,
                         algo: {
-                            type: "lite",
+                            type: "main",
                             version: "4.1",
                             appId: 'c02c6'
                         }
@@ -177,38 +186,37 @@ class Main extends Template {
                     console.log("已经连续3次没有获取到抽奖数据,跳过本次抽奖...")
                     break
                 }
-                console.log("抽中类型:", prizeType, '抽中面额:', this.haskey(draw, 'data.prizeValue'))
+                console.log("抽中类型:", dict[prizeType] || prizeType, '抽中面额:', this.haskey(draw, 'data.prizeValue'))
                 if (parseInt(prizeType) == 1 && this.profile.stop) {
                     console.log("抽到优惠券了,退出抽奖等会再来....")
                     break
                 }
+                if (prizeType == 2) {
+                    redpacket.push(this.haskey(draw, 'data.prizeValue'))
+                }
+                else if (prizeType == 4) {
+                    cash.push(this.haskey(draw, 'data.prizeValue'))
+                }
                 await this.wait(1000)
+            }
+            if (cash.length>1 || redpacket.length>1) {
+                this.print(`现金: ${this.sum(cash, 2)} 红包: ${this.sum(redpacket, 2)}`, p.user)
             }
         }
         else {
             console.log("正在提现...")
             for (let _ = 1; _<=4; _++) {
-                let list = await this.curl({
-                        'url': `https://api.m.jd.com/?functionId=superRedBagList&body={"linkId":"${this.linkId}","pageNum":${_},"pageSize":10,"business":"fission"}&t=1677826759113&appid=activities_platform&client=ios&clientVersion=11.6.3`,
+                let list = await this.algo.curl({
+                        'url': `https://api.m.jd.com/?functionId=superRedBagList&body={"linkId":"${this.linkId}","pageNum":${_},"pageSize":100,"business":"fission"}&t=1677826759113&appid=activities_platform&client=ios&clientVersion=11.6.3`,
                         // 'form':``,
                         cookie,
                         algo: {
-                            type: "lite",
+                            type: "main",
                             version: "4.1",
                             appId: 'f2b1d'
                         }
                     }
                 )
-                if (!this.haskey(list, 'data.items')) {
-                    break
-                }
-                let num = 0
-                for (let i of this.haskey(list, 'data.items')) {
-                    if (i.prizeType == 4 && i.state == 0) {
-                        num++
-                    }
-                }
-                let kn = 0
                 for (let i of this.haskey(list, 'data.items')) {
                     if (i.prizeType == 4 && i.state == 0) {
                         let cash = await this.algo.curl({
@@ -216,22 +224,19 @@ class Main extends Template {
                                 'form': `functionId=apCashWithDraw&body={"linkId":"${this.linkId}","businessSource":"NONE","base":{"id":${i.id},"business":"fission","poolBaseId":${i.poolBaseId},"prizeGroupId":${i.prizeGroupId},"prizeBaseId":${i.prizeBaseId},"prizeType":${i.prizeType}}}&t=1677826760325&appid=activities_platform&client=ios&clientVersion=11.6.3`,
                                 cookie,
                                 algo: {
-                                    type: "lite",
+                                    type: "main",
                                     version: "4.1",
                                     appId: '3c023'
                                 }
                             }
                         )
-                        this.print(`现金: ${i.amount}  ${this.haskey(cash, 'data.message')}`, p.user)
+                        console.log(`现金: ${i.amount}  ${this.haskey(cash, 'data.message')}`, p.user)
                         let message = this.haskey(cash, 'data.message')
                         if (message.includes('风控')) {
                             console.log("风控账户,不能提现")
                             break
                         }
-                        kn++
-                        if (kn<num) {
-                            await this.wait(6000)
-                        }
+                        await this.wait(6000)
                     }
                     else if (i.prizeType == 4 && i.state == 2) {
                         if (this.profile.change) {
@@ -248,6 +253,7 @@ class Main extends Template {
                         }
                     }
                 }
+                await this.wait(1000)
             }
         }
     }
