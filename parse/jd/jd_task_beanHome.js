@@ -7,35 +7,98 @@ class Main extends Template {
         this.cron = "19 3,19 * * *"
         this.help = 2
         this.task = 'local'
-        this.thread = 3
+        // this.thread = 3
         this.import = ['jdAlgo']
     }
 
     async prepare() {
         this.algo = new this.modules['jdAlgo']()
-        this.algo.set({
-            'appId': '0f6ed',
-            'type': 'pingou',
-            verify: 1,
-            fp: '9927480322631734'
-        })
+        let feeds = await this.algo.curl({
+                'url': `https://api.m.jd.com/client.action?functionId=homeFeedsList&body={"page":1,"appid":"fd4bb","needSecurity":true,"bizId":"active","pageId":"JingDou_SceneHome"}&appid=signed_wh5&client=apple&clientVersion=11.8.2&networkType=wifi&osVersion=11.4&screen=320*504&uuid=434e858e755c9b1ec6e6d6abc0348d9b6d985300&openudid=434e858e755c9b1ec6e6d6abc0348d9b6d985300&d_model=iPhone8,4`,
+                algo: {
+                    appId: "fd4bb",
+                    type: 'main',
+                    version: "3.1"
+                }
+            }
+        )
+        this.feeds = []
+        if (this.haskey(feeds, 'data.feedsList')) {
+            this.feeds = (this.column(feeds.data.feedsList, 'skuId'))
+        }
     }
 
     async main(p) {
         let cookie = p.cookie;
+        let dict = {
+            A: 'K',
+            B: 'L',
+            C: 'M',
+            D: 'N',
+            E: 'O',
+            F: 'P',
+            G: 'Q',
+            H: 'R',
+            I: 'S',
+            J: 'T',
+            K: 'A',
+            L: 'B',
+            M: 'C',
+            N: 'D',
+            O: 'E',
+            P: 'F',
+            Q: 'G',
+            R: 'H',
+            S: 'I',
+            T: 'J',
+            e: 'o',
+            f: 'p',
+            g: 'q',
+            h: 'r',
+            i: 's',
+            j: 't',
+            k: 'u',
+            l: 'v',
+            m: 'w',
+            n: 'x',
+            o: 'e',
+            p: 'f',
+            q: 'g',
+            r: 'h',
+            s: 'i',
+            t: 'j',
+            u: 'k',
+            v: 'l',
+            w: 'm',
+            x: 'n'
+        }
+        let uuid = this.sha1(this.uuid(40))
+        uuid = '0721076da75ec3ea8e5f481e6d68bb4b7420c38d'
+        let encrypt = {
+            "ciphertype": 5,
+            "cipher": {
+                "ud": new Buffer.from(uuid).toString('base64').split("").map(d => dict[d] || d).join(""),
+                "sv": "CJUkCI4n",
+                "iad": ""
+            },
+            "ts": this.timestamp,
+            "hdid": "JM9F1ywUPwflvMIpYPok0tt5k9kW4ArJEU3lfLhxBqw=",
+            "version": "1.0.3",
+            "appname": "com.360buy.jdmobile",
+            "ridx": -1
+        }
+        let ua = `jdapp;iPhone;12.0.8;;;M/5.0;appBuild/168782;jdSupportDarkMode/0;ef/1;ep/${encodeURIComponent(this.dumps(encrypt))};Mozilla/5.0 (iPhone; CPU iPhone OS 15_1_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;`
+        this.options.headers['user-agent'] = ua
         let gifts = []
-        for (let i of Array(10)) {
+        for (let i = 0; i<10; i++) {
             console.log(`正在浏览任务`)
+            // this.feeds[i] || this.rand(10000000, 20000000).toString()
             let task = await this.curl({
-                    'url': `https://api.m.jd.com/client.action?functionId=beanHomeTask&body=${this.dumps({
-                        "awardFlag": false,
-                        "skuId": this.rand(10000000, 20000000).toString(),
-                        "source": "feeds",
-                        "type": '1'
-                    })}&appid=ld&client=apple&build=167283&clientVersion=9.1.0`,
+                    url: `https://api.m.jd.com/client.action?functionId=beanHomeTask&body={"skuId":"${this.feeds[i]}","awardFlag":false,"type":"1","source":"feeds","scanTime":${new Date().getTime()}}&appid=ld&client=apple&clientVersion=12.0.8&networkType=wifi&osVersion=15.1.1&loginType=2&screen=390*753&uuid=${uuid}&openudid=${uuid}&d_model=iPhone13,3&jsonp=jsonp_1691746000054_62149`,
                     cookie
                 }
             )
+            console.log(task)
             if (!this.haskey(task, 'data')) {
                 console.log("浏览任务可能已完成")
                 break
@@ -46,7 +109,7 @@ class Main extends Template {
                         'url': `https://api.m.jd.com/client.action?functionId=beanHomeTask&body=${this.dumps({
                             "awardFlag": true,
                             "source": "feeds"
-                        })}&appid=ld&client=apple&build=167283&clientVersion=9.1.0`,
+                        })}&appid=ld&client=apple&clientVersion=12.0.8&networkType=wifi&osVersion=15.1.1&loginType=2&screen=390*753&uuid=${uuid}&openudid=${uuid}&d_model=iPhone13,3&jsonp=jsonp_1691746000054_62149`,
                         cookie
                     }
                 )
@@ -59,12 +122,15 @@ class Main extends Template {
             await this.wait(2000)
         }
         let taskList = await this.curl({
-                'url': `https://api.m.jd.com/client.action?functionId=findBeanHome&body=${this.dumps({
-                    "rnClient": "2",
-                    "viewChannel": "AppHome",
+                'url': `https://api.m.jd.com/client.action?functionId=findBeanScene&body=${this.dumps({
                     "source": "AppHome",
-                    "rnVersion": "4.7"
-                })}&appid=ld&client=apple&build=167283&clientVersion=9.1.0`,
+                    "viewChannel": "AppHome",
+                    "rnVersion": "3.9",
+                    "rnClient": "1",
+                    "appid": "ea6f2",
+                    "needSecurity": true,
+                    "bizId": "active"
+                })}&appid=ld&client=apple&build=167283&clientVersion=9.1.0&uuid=${uuid}&openudid=${uuid}&d_model=iPhone13,3&area=0_0_0_0&jsonp=jsonp_1691742966852_76927`,
                 // 'form':``,
                 cookie
             }
@@ -81,7 +147,7 @@ class Main extends Template {
                                     "itemId": "zddd",
                                     "source": "home",
                                     "type": "3"
-                                })}&appid=ld&client=apple&build=167283&clientVersion=9.1.0`,
+                                })}&appid=ld&client=apple&build=167283&clientVersion=9.1.0&uuid=${uuid}&openudid=${uuid}&d_model=iPhone13,3&area=0_0_0_0&jsonp=jsonp_1691742966852_76927`,
                                 // 'form':``,
                                 cookie
                             }
@@ -103,7 +169,7 @@ class Main extends Template {
                                         "itemId": j.stageId,
                                         "source": "home",
                                         "type": `4_${j.stageId}`
-                                    })}&appid=ld&client=apple&build=167283&clientVersion=9.1.0`,
+                                    })}&appid=ld&client=apple&build=167283&clientVersion=9.1.0&uuid=${uuid}&openudid=${uuid}&d_model=iPhone13,3&area=0_0_0_0&jsonp=jsonp_1691742966852_76927`,
                                     // 'form':``,
                                     cookie
                                 }
@@ -122,7 +188,7 @@ class Main extends Template {
                 'url': `https://api.m.jd.com/client.action?functionId=beanHomeTask&body=${this.dumps({
                     "awardFlag": true,
                     "source": "home"
-                })}&appid=ld&client=apple&build=167283&clientVersion=9.1.0`,
+                })}&appid=ld&client=apple&build=167283&clientVersion=9.1.0&uuid=${uuid}&openudid=${uuid}&d_model=iPhone13,3&area=0_0_0_0&jsonp=jsonp_1691742966852_76927`,
                 cookie
             }
         )
@@ -133,7 +199,7 @@ class Main extends Template {
         for (let n = 0; n<5; n++) {
             let unlock = 1
             let beanTaskList = await this.curl({
-                    'url': `https://api.m.jd.com/client.action?functionId=beanTaskList&body=${this.dumps({"viewChannel": "AppHome"})}&appid=ld&client=apple&build=167283&clientVersion=9.1.0`,
+                    'url': `https://api.m.jd.com/client.action?functionId=beanTaskList&body={"viewChannel":"AppHome","beanVersion":1,"imei":"${uuid}","prstate":"0","aid":"","idfa":"","op_type":1,"app_info":"390*753^iPhone13,3^apple^12.0.8^wifi","location_info":"0-0-0"}&appid=ld&client=apple&clientVersion=12.0.8&networkType=wifi&osVersion=15.1.1&loginType=2&screen=390*753&uuid=${uuid}&openudid=${uuid}&d_model=iPhone13,3&area=0_0_0_0&jsonp=jsonp_1691742966852_76927`,
                     cookie
                 }
             )
@@ -144,7 +210,7 @@ class Main extends Template {
                         'url': `https://api.m.jd.com/client.action?functionId=beanHomeIconDoTask&body=${this.dumps({
                             "flag": "0",
                             "viewChannel": "AppHome"
-                        })}&appid=ld&client=apple&build=167283&clientVersion=9.1.0`,
+                        })}&appid=ld&client=apple&build=167283&clientVersion=9.1.0&uuid=${uuid}&openudid=${uuid}&d_model=iPhone13,3&area=0_0_0_0&jsonp=jsonp_1691742966852_76927`,
                         cookie
                     })
                 }
@@ -155,7 +221,7 @@ class Main extends Template {
                         'url': `https://api.m.jd.com/client.action?functionId=beanHomeIconDoTask&body=${this.dumps({
                             "flag": "1",
                             "viewChannel": "AppHome"
-                        })}&appid=ld&client=apple&build=167283&clientVersion=9.1.0`,
+                        })}&appid=ld&client=apple&build=167283&clientVersion=9.1.0&uuid=${uuid}&openudid=${uuid}&d_model=iPhone13,3&area=0_0_0_0&jsonp=jsonp_1691742966852_76927`,
                         cookie
                     })
                     if (this.haskey(beanHomeIconDoTask, 'data.growthResult.sceneLevelConfig.beanNum')) {
@@ -171,20 +237,14 @@ class Main extends Template {
                 if (i.status != 2) {
                     unlock = 0
                     let doTask = await this.curl({
-                            'url': `https://api.m.jd.com/client.action?functionId=beanDoTask&body=${this.dumps({
-                                "actionType": 1,
-                                "taskToken": i.subTaskVOS[0].taskToken
-                            })}&appid=ld&client=apple&build=167283&clientVersion=9.1.0`,
+                            'url': `https://api.m.jd.com/client.action?functionId=beanDoTask&body={"actionType":1,"taskToken":"${i.subTaskVOS[0].taskToken}"}&appid=ld&client=apple&clientVersion=12.0.8&networkType=wifi&osVersion=15.1.1&loginType=2&screen=390*753&uuid=${uuid}&openudid=${uuid}&d_model=iPhone13,3&jsonp=jsonp_1691745591235_71237`,
                             cookie
                         }
                     )
                     if (i.waitDuration) {
                         await this.wait(i.waitDuration * 1000)
                         doTask = await this.curl({
-                                'url': `https://api.m.jd.com/client.action?functionId=beanDoTask&body=${this.dumps({
-                                    "actionType": 0,
-                                    "taskToken": i.subTaskVOS[0].taskToken
-                                })}&appid=ld&client=apple&build=167283&clientVersion=9.1.0`,
+                                'url': `https://api.m.jd.com/client.action?functionId=beanDoTask&body={"actionType":0,"taskToken":"${i.subTaskVOS[0].taskToken}"}&appid=ld&client=apple&clientVersion=12.0.8&networkType=wifi&osVersion=15.1.1&loginType=2&screen=390*753&uuid=${uuid}&openudid=${uuid}&d_model=iPhone13,3&jsonp=jsonp_1691745591235_71237`,
                                 cookie
                             }
                         )
@@ -229,7 +289,11 @@ class Main extends Template {
             let jx = await this.algo.curl({
                     'url': `https://wq.jd.com/jxjdsignin/SignedInfo?_stk=_t&_=1652057484805&sceneval=2&g_login_type=1&g_ty=ajax&appCode=msc588d6d5`,
                     // 'form':``,
-                    cookie
+                    cookie, algo: {
+                        'appId': '0f6ed',
+                        'type': 'pingou',
+                        verify: 1,
+                    }
                 }
             )
             if (this.haskey(jx, 'data')) {
@@ -237,7 +301,11 @@ class Main extends Template {
                     await this.algo.curl({
                             'url': `https://m.jingxi.com/fanxiantask/signhb/query?type=1&signhb_source=5&smp=bd67efc3be1c59bcab4f8b90e3a0f708&ispp=0&tk=&_stk=ispp%2Csignhb_source%2Csmp%2Ctk%2Ctype&_ste=1`,
                             // 'form':``,
-                            cookie
+                            cookie, algo: {
+                                'appId': '0f6ed',
+                                'type': 'pingou',
+                                verify: 1,
+                            }
                         }
                     )
                 }
@@ -250,6 +318,20 @@ class Main extends Template {
                     )
                 }
             }
+        }
+        let signBeanAct = await this.curl({
+                'url': `https://api.m.jd.com/client.action?functionId=signBeanAct&body={"fp":"-1","shshshfp":"-1","shshshfpa":"-1","referUrl":"-1","userAgent":"-1","jda":"-1","rnVersion":"3.9"}&appid=ld&client=apple&clientVersion=12.0.8&networkType=wifi&osVersion=15.1.1&loginType=2&screen=390*753&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&openudid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&d_model=iPhone13,3&jsonp=jsonp_1691799935388_50967`,
+                // 'form':``,
+                cookie
+            }
+        )
+        if (this.haskey(signBeanAct, 'data.dailyAward.beanAward.beanCount')) {
+            console.log(`领京豆: ${this.haskey(signBeanAct, 'data.dailyAward.beanAward.beanCount')}`)
+            gifts.push(this.haskey(signBeanAct, 'data.dailyAward.beanAward.beanCount'))
+        }
+        else if (this.haskey(signBeanAct, 'data.continuityAward.beanAward.beanCount')) {
+            console.log(`领京豆: ${this.haskey(signBeanAct, 'data.continuityAward.beanAward.beanCount')}`)
+            gifts.push(this.haskey(signBeanAct, 'data.continuityAward.beanAward.beanCount'))
         }
         if (gifts.length>0) {
             let sum = this.sum(gifts)
