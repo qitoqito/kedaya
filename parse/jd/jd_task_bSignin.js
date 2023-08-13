@@ -7,12 +7,15 @@ class Main extends Template {
         this.cron = "6 6,18 * * *"
         this.task = 'local'
         this.import = ['jdAlgo', 'jdUrl']
+        this.hint = {
+            'reward': "微信提现金额"
+        }
     }
 
     async prepare() {
         this.algo = new this.modules.jdAlgo({
-            'appId': '61e2b',
-            version: '3.1',
+            appId: '61e2b',
+            version: "4.1",
             type: 'main'
         })
     }
@@ -26,7 +29,7 @@ class Main extends Template {
                 cookie,
                 algo: {
                     'appId': '61e2b',
-                    version: '3.1',
+                    version: "4.1",
                     type: 'main'
                 }
             }
@@ -60,54 +63,79 @@ class Main extends Template {
                             break
                         case 'BROWSE_CHANNEL':
                         case 'BROWSE_PRODUCT':
-                            let detail = await this.algo.curl({
+                            let s = await this.algo.curl({
                                     'url': `https://api.m.jd.com/`,
-                                    'form': `functionId=apTaskDetail&body={"taskType":"${i.taskType}","taskId":${i.id},"channel":4,"checkVersion":true,"cityId":"","provinceId":"","countyId":"","linkId":"FIz2zkvbepstVFm3uqLOUA"}&t=${new Date().getTime()}&appid=activities_platform&client=ios&clientVersion=11.6.3&cthr=1&build=168563&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone13,3&lang=zh_CN&osVersion=15.1.1&partner=&eid=eidId7f9812189s4Ywiz164KTQqoeSyoW1uZwmMItV216n8pCJ26eJPEqZb5n8VkyLjW71hRQ6fhLku8USG3jg%2BHtZ7ecv%2BJ2CWEYpUd99P1GvH7bppT`,
+                                    form: `functionId=apsDoTask&body={"taskType":"${i.taskType}","taskId":${i.id},"channel":4,"checkVersion":true,"cityId":"","provinceId":"","countyId":"","linkId":"FIz2zkvbepstVFm3uqLOUA","taskInsert":false,"itemId":"${encodeURIComponent(i.taskSourceUrl)}"}&t=1680593355070&appid=activities_platform&client=ios&clientVersion=11.6.3&cthr=1&build=168563&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone13,3&lang=zh_CN&osVersion=15.1.1&partner=&eid=eidId7f9812189s4Ywiz164KTQqoeSyoW1uZwmMItV216n8pCJ26eJPEqZb5n8VkyLjW71hRQ6fhLku8USG3jg%2BHtZ7ecv%2BJ2CWEYpUd99P1GvH7bppT`,
+                                    cookie,
+                                    algo: {
+                                        'appId': '54ed7',
+                                        version: "4.1",
+                                        type: 'main'
+                                    }
+                                }
+                            )
+                            let d = await this.algo.curl({
+                                    'url': `https://api.m.jd.com/`,
+                                    'form': `functionId=apTaskDrawAward&body={"taskType":"${i.taskType}","taskId":${i.id},"channel":4,"checkVersion":true,"cityId":"","provinceId":"","countyId":"","linkId":"FIz2zkvbepstVFm3uqLOUA"}&t=${new Date().getTime()}&appid=activities_platform&client=ios&clientVersion=11.6.3&cthr=1&build=168563&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone13,3&lang=zh_CN&osVersion=15.1.1&partner=&eid=eidId7f9812189s4Ywiz164KTQqoeSyoW1uZwmMItV216n8pCJ26eJPEqZb5n8VkyLjW71hRQ6fhLku8USG3jg%2BHtZ7ecv%2BJ2CWEYpUd99P1GvH7bppT`,
                                     cookie
                                 }
                             )
-                            if (this.haskey(detail, 'data.taskItemList')) {
-                                let itemId = (detail.data.taskItemList[j] || detail.data.taskItemList[0]).itemId
-                                let s = await this.algo.curl({
-                                        'url': `https://api.m.jd.com/`,
-                                        form: `functionId=apsDoTask&body={"taskType":"${i.taskType}","taskId":${i.id},"channel":4,"checkVersion":true,"cityId":"","provinceId":"","countyId":"","linkId":"FIz2zkvbepstVFm3uqLOUA","taskInsert":false,"itemId":"${encodeURIComponent(itemId)}"}&t=1680593355070&appid=activities_platform&client=ios&clientVersion=11.6.3&cthr=1&build=168563&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone13,3&lang=zh_CN&osVersion=15.1.1&partner=&eid=eidId7f9812189s4Ywiz164KTQqoeSyoW1uZwmMItV216n8pCJ26eJPEqZb5n8VkyLjW71hRQ6fhLku8USG3jg%2BHtZ7ecv%2BJ2CWEYpUd99P1GvH7bppT`,
-                                        cookie,
-                                        algo: {
-                                            'appId': '54ed7',
-                                            version: '3.1',
-                                            type: 'main'
-                                        }
-                                    }
-                                )
-                                let d = await this.algo.curl({
-                                        'url': `https://api.m.jd.com/`,
-                                        'form': `functionId=apTaskDrawAward&body={"taskType":"${i.taskType}","taskId":${i.id},"channel":4,"checkVersion":true,"cityId":"","provinceId":"","countyId":"","linkId":"FIz2zkvbepstVFm3uqLOUA"}&t=${new Date().getTime()}&appid=activities_platform&client=ios&clientVersion=11.6.3&cthr=1&build=168563&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone13,3&lang=zh_CN&osVersion=15.1.1&partner=&eid=eidId7f9812189s4Ywiz164KTQqoeSyoW1uZwmMItV216n8pCJ26eJPEqZb5n8VkyLjW71hRQ6fhLku8USG3jg%2BHtZ7ecv%2BJ2CWEYpUd99P1GvH7bppT`,
-                                        cookie
-                                    }
-                                )
-                                console.log('任务完成:', d.success)
-                            }
-                            break
+                            console.log('任务完成:', d.success)
                     }
+                    break
                 }
+            }
+            else if (i.canDrawAwardNum) {
+                let d = await this.algo.curl({
+                        'url': `https://api.m.jd.com/`,
+                        'form': `functionId=apTaskDrawAward&body={"taskType":"${i.taskType}","taskId":${i.id},"channel":4,"checkVersion":true,"cityId":"","provinceId":"","countyId":"","linkId":"FIz2zkvbepstVFm3uqLOUA"}&t=${new Date().getTime()}&appid=activities_platform&client=ios&clientVersion=11.6.3&cthr=1&build=168563&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone13,3&lang=zh_CN&osVersion=15.1.1&partner=&eid=eidId7f9812189s4Ywiz164KTQqoeSyoW1uZwmMItV216n8pCJ26eJPEqZb5n8VkyLjW71hRQ6fhLku8USG3jg%2BHtZ7ecv%2BJ2CWEYpUd99P1GvH7bppT`,
+                        cookie
+                    }
+                )
+                console.log('任务完成:', d.success)
             }
             else {
                 console.log(`任务完成`, i.taskTitle)
             }
         }
-        let home = await this.algo.curl({
-                'url': `https://api.m.jd.com/`,
-                'form': `functionId=bSignInHome&body={"linkId":"FIz2zkvbepstVFm3uqLOUA"}&t=1680596305517&appid=activities_platform&client=ios&clientVersion=11.6.6&build=168631&screen=375*667&networkType=wifi&d_brand=iPhone&d_model=iPhone8,1&lang=zh_CN&osVersion=13.7&partner=&eid=eidId5508121e3s7GcdDwrCSSOe%2FGLUsbjKY3hnHRUmWgBYNr6CNLIg40msRpxIBuiZ5VFk052xiCOSHOJwtB58n6OBzhJWXl6CPdj4J7hjJxn6UuHNp`,
-                cookie,
-                algo: {
-                    'appId': '76674',
-                    version: '3.1',
-                    type: 'main'
+        if (this.profile.reward) {
+            let
+                balance = await this.curl({
+                        'url': `https://api.m.jd.com/`,
+                        'form': `functionId=BSignInMyBalance&body={"linkId":"FIz2zkvbepstVFm3uqLOUA"}&t=1681800811744&appid=activities_platform&client=ios&clientVersion=11.8.0&cthr=1&uuid=&build=&screen=375*667&networkType=&d_brand=&d_model=&lang=zh_CN&osVersion=&partner=`,
+                        cookie
+                    }
+                )
+            let
+                totalAmount = this.haskey(balance, 'data.totalAmount')
+            if (totalAmount) {
+                totalAmount = parseFloat(totalAmount)
+                console.log('现金:', totalAmount)
+                let array = []
+                for (let i of balance.data.wxExchange) {
+                    if (i.amount<=totalAmount && i.status == 1 && i.amount.toString() == this.profile.reward.toString()) {
+                        array.push(i)
+                    }
+                }
+                for (let i of array.reverse()) {
+                    console.log("正在兑换:", i.amount)
+                    let reward = await this.algo.curl({
+                            'url': `https://api.m.jd.com/`,
+                            'form': `functionId=bSignInExchange&body={"awardType":${i.exchangeType},"gear":${i.gear},"linkId":"FIz2zkvbepstVFm3uqLOUA"}&t=1681800820879&appid=activities_platform&client=ios&clientVersion=11.8.0&cthr=1&uuid=&build=&screen=375*667&networkType=&d_brand=&d_model=&lang=zh_CN&osVersion=&partner=`,
+                            cookie,
+                            algo: {
+                                appId: "ff179"
+                            }
+                        }
+                    )
+                    if (this.haskey(reward, 'success')) {
+                        this.print(`提现: ${i.amount} ${reward.data.msg}`, p.user)
+                    }
+                    else {
+                        console.log(reward)
+                    }
                 }
             }
-        )
-        if (this.haskey(home, 'data.signInCoin')) {
-            console.log('现金:', home.data.signInCoin)
         }
     }
 }
