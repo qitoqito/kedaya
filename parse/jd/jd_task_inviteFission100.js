@@ -3,7 +3,7 @@ const Template = require('../../template');
 class Main extends Template {
     constructor() {
         super()
-        this.title = "京东抽现金赢大礼"
+        this.title = "京东好友助力瓜分大奖100"
         this.cron = "6 6 6 6 6"
         this.help = 'main'
         this.task = 'local'
@@ -22,7 +22,7 @@ class Main extends Template {
     }
 
     async prepare() {
-        this.linkId = this.custom || '3orGfh1YkwNLksxOcN8zWQ'
+        this.linkId = this.custom || 'EcuVpjGGfccY3Ic_1ni83w'
         this.algo = new this.modules.jdAlgo()
         console.log("获取助力码中...")
         for (let cookie of this.cookies.help) {

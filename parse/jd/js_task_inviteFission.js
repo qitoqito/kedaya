@@ -67,7 +67,8 @@ class Main extends Template {
                 }
                 this.shareCode.push({
                     user,
-                    inviter, count, finish, min: parseInt(countDownTime / 60000)
+                    inviter, count, finish,
+                    min: parseInt(countDownTime / 60000)
                 })
             }
         }
@@ -92,13 +93,13 @@ class Main extends Template {
                 console.log(p.inviter.inviter)
                 let home = await this.algo.curl({
                         'url': `https://api.m.jd.com/`,
-                        form: `functionId=inviteFissionBeforeHome&body={"linkId":"${this.linkId}","isJdApp":true,"inviter":"${p.inviter.inviter}"}&t=1686444659424&appid=activities_platform&client=ios&clientVersion=1.0.0&build=&screen=375*667&networkType=wifi&d_brand=&d_model=&lang=zh_CN&osVersion=15_7_5&partner=&cthr=1`,
+                        form: `functionId=inviteFissionhelp&body={"linkId":"${this.linkId}","isJdApp":true,"inviter":"${p.inviter.inviter}"}&t=1686444659424&appid=activities_platform&client=ios&clientVersion=1.0.0&build=&screen=375*667&networkType=wifi&d_brand=&d_model=&lang=zh_CN&osVersion=15_7_5&partner=&cthr=1`,
                         // 'form':``,
                         cookie,
                         algo: {
                             type: "main",
                             version: "4.1",
-                            appId: '02f8d'
+                            appId: 'c5389'
                         }
                     }
                 )
@@ -157,6 +158,7 @@ class Main extends Template {
             console.log("可抽奖次数:", prizeNum)
             let error = 0
             let dict = {
+                1: '优惠券',
                 2: '红包',
                 4: '现金',
                 6: '礼包'
@@ -176,16 +178,6 @@ class Main extends Template {
                     }
                 )
                 let prizeType = this.haskey(draw, 'data.prizeType')
-                if (!prizeType) {
-                    error++
-                }
-                else {
-                    error = 0
-                }
-                if (error>2) {
-                    console.log("已经连续3次没有获取到抽奖数据,跳过本次抽奖...")
-                    break
-                }
                 console.log("抽中类型:", dict[prizeType] || prizeType, '抽中面额:', this.haskey(draw, 'data.prizeValue'))
                 if (parseInt(prizeType) == 1 && this.profile.stop) {
                     console.log("抽到优惠券了,退出抽奖等会再来....")
