@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东新农场"
-        this.cron = [`${this.rand(0, 59)} ${this.rand(0, 9)} * * *`, `${this.rand(0, 59)} ${this.rand(14, 21)} * * *`]
+        this.cron = `${this.rand(0, 59)} ${this.rand(0, 9)},${this.rand(14, 21)} * * *`
         this.help = 'main'
         this.task = 'local'
         this.import = ['fs', 'jdAlgo']

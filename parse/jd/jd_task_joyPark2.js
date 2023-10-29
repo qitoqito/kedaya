@@ -3,8 +3,8 @@ const Template = require('../../template');
 class Main extends Template {
     constructor() {
         super()
-        this.title = "京东汪汪庄园"
-        this.cron = `${this.rand(0, 59)} ${this.rand(4, 7)},${this.rand(16, 19)} * * *`
+        this.title = "京东极简版汪汪庄园"
+        this.cron = `${this.rand(0, 59)} ${this.rand(8, 11)},${this.rand(20, 23)} * * *`
         this.task = 'local'
         this.import = ['jdAlgo', 'fs']
         this.delay = 1200
@@ -15,7 +15,7 @@ class Main extends Template {
     }
 
     async prepare() {
-        this.linkId = "99DZNpaCTAv8f4TuKXr0Ew"
+        this.linkId = "jBNXcoiASxGof0f2RFI2Sw"
         this.clientVersion = "11.6.3"
         this.build = "1247"
         this.algo = new this.modules.jdAlgo({
