@@ -35,7 +35,7 @@ class Main extends Template {
         })
         if (this.turnCount == 1) {
             if (!this.cookies.help.includes(cookie)) {
-                console.log("每轮运行助力水滴获取,当前账号不是被助力账号,此次将跳过运行")
+                console.log("本轮运行助力水滴获取,当前账号不是被助力账号,此次将跳过运行")
                 return
             }
         }
@@ -124,7 +124,7 @@ class Main extends Template {
                         this.dict[i].finish = 1
                     }
                 }
-                await this.wait(3000)
+                await this.wait(4000)
             }
         }
         let helpInfo = await this.wget({
@@ -147,7 +147,7 @@ class Main extends Template {
                 else {
                     console.log("获取助力奖励失败")
                 }
-                await this.wait(3000)
+                await this.wait(4000)
             }
         }
         let wheelsLottery = await this.algo.curl({
@@ -202,7 +202,7 @@ class Main extends Template {
                         console.log('浇水失败:', this.haskey(water, 'data.bizMsg'))
                         break
                     }
-                    await this.wait(3000)
+                    await this.wait(4000)
                 }
                 if (i.taskDoTimes != i.taskLimitTimes) {
                     let award = await this.wget({
@@ -268,15 +268,15 @@ class Main extends Template {
                     else {
                         console.log("任务失败:", this.haskey(doWork, 'data.bizMsg'))
                     }
-                    await this.wait(3000)
+                    await this.wait(4000)
                 }
                 else {
                     console.log("没有获取到itemId")
-                    await this.wait(1000)
+                    await this.wait(3000)
                 }
             }
             else if (i.taskStatus == 2) {
-                await this.wait(3000)
+                await this.wait(4000)
                 console.log("获取任务奖励:", i.mainTitle)
                 let award = await this.wget({
                     fn: 'farm_task_receive_award',
@@ -299,13 +299,13 @@ class Main extends Template {
             console.log("跳过浇水: 检测到配置了tenWater参数,跳过浇水")
         }
         else {
-            let stock = parseInt(this.profile.stock || 100000)
+            let stock = parseInt(this.profile.stock || 0)
             let bottleWater = home.bottleWater - waterConut * 10
-            console.log("剩余水滴:", bottleWater)
-            if (stock>=bottleWater) {
+            if (stock && stock>=bottleWater) {
                 console.log("跳过浇水: 检测到配置了stock参数,剩余水滴小于保留水滴数")
             }
             else {
+                console.log("剩余水滴:", bottleWater)
                 let count = parseInt((bottleWater - stock) / 10)
                 console.log("剩余可浇水次数:", count)
                 for (let _ of Array(count)) {
@@ -326,7 +326,7 @@ class Main extends Template {
                         console.log('浇水失败:', this.haskey(water, 'data.bizMsg'))
                         break
                     }
-                    await this.wait(3000)
+                    await this.wait(4000)
                 }
             }
         }
