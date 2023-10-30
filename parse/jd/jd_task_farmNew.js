@@ -44,6 +44,10 @@ class Main extends Template {
             return
         }
         let home = this.haskey(farmHome, 'data.result') || {}
+        if (this.haskey(farmHome, 'code', -30001)) {
+            console.log("cookie失效,登陆失败")
+            return
+        }
         if (!home.skuName) {
             console.log("没有种树")
             let board = await this.wget({
@@ -81,6 +85,7 @@ class Main extends Template {
             }
         }
         let inviteCode = home.farmHomeShare.inviteCode
+        let bottleWater = home.bottleWater
         if (!this.dict[p.user]) {
             this.dict[p.user] = {inviteCode}
         }
@@ -143,6 +148,7 @@ class Main extends Template {
                 })
                 if (this.haskey(award, 'data.success')) {
                     console.log("获取助力奖励成功:", award.data.result.amount)
+                    bottleWater += award.data.result.amount
                 }
                 else {
                     console.log("获取助力奖励失败")
@@ -183,45 +189,11 @@ class Main extends Template {
         let waterConut = 0
         for (let i of this.haskey(taskList, 'data.result.taskList')) {
             if (i.mainTitle.includes("浇水10次")) {
-                for (let _ of Array(i.taskLimitTimes - i.taskDoTimes)) {
-                    let water = await this.wget({
-                        fn: 'farm_water',
-                        body: {"version": 1, "waterType": 1},
-                        algo: {'appId': '28981'},
-                        cookie
-                    })
-                    let bottleWater = this.haskey(water, 'data.result.bottleWater')
-                    if (bottleWater) {
-                        console.log("浇水中,剩余水滴:", bottleWater)
-                        waterConut++
-                        if (bottleWater<10) {
-                            break
-                        }
-                    }
-                    else {
-                        console.log('浇水失败:', this.haskey(water, 'data.bizMsg'))
-                        break
-                    }
-                    await this.wait(4000)
-                }
-                if (i.taskDoTimes != i.taskLimitTimes) {
-                    let award = await this.wget({
-                        fn: 'farm_task_receive_award',
-                        body: {"version": 1, "taskType": i.taskType, "taskId": i.taskId, "channel": 0},
-                        algo: {'appId': '33e0f'},
-                        cookie
-                    })
-                    if (this.haskey(award, 'data.result.taskAward')) {
-                        console.log("获得奖励:", award.data.result.taskAward)
-                    }
-                    else {
-                        console.log("获取失败:", this.haskey(award, 'data.bizMsg'))
-                    }
-                }
             }
             else if (i.mainTitle.includes("下单")) {
             }
             else if (i.taskDoTimes != i.taskLimitTimes) {
+                await this.wait(4000)
                 console.log("正在运行:", i.mainTitle)
                 let itemId = i.taskSourceUrl
                 let taskInsert = false
@@ -260,6 +232,11 @@ class Main extends Template {
                         })
                         if (this.haskey(award, 'data.result.taskAward')) {
                             console.log("获得奖励:", award.data.result.taskAward)
+                            for (let kk of award.data.result.taskAward) {
+                                if (this.haskey(kk, 'awardType', 1)) {
+                                    bottleWater += kk.awardValue
+                                }
+                            }
                         }
                         else {
                             console.log("获取失败:", this.haskey(award, 'data.bizMsg'))
@@ -268,11 +245,9 @@ class Main extends Template {
                     else {
                         console.log("任务失败:", this.haskey(doWork, 'data.bizMsg'))
                     }
-                    await this.wait(4000)
                 }
                 else {
                     console.log("没有获取到itemId")
-                    await this.wait(3000)
                 }
             }
             else if (i.taskStatus == 2) {
@@ -286,6 +261,11 @@ class Main extends Template {
                 })
                 if (this.haskey(award, 'data.result.taskAward')) {
                     console.log("获得奖励:", award.data.result.taskAward)
+                    for (let kk of award.data.result.taskAward) {
+                        if (this.haskey(kk, 'awardType', 1)) {
+                            bottleWater += kk.awardValue
+                        }
+                    }
                 }
                 else {
                     console.log("获取失败:", this.haskey(award, 'data.bizMsg'))
@@ -295,17 +275,63 @@ class Main extends Template {
                 console.log("任务已完成:", i.mainTitle)
             }
         }
+        // 等运行完其他任务再浇水10次,获取的水滴数才是正确的
+        for (let i of this.haskey(taskList, 'data.result.taskList')) {
+            if (i.mainTitle.includes("浇水10次")) {
+                if (i.taskDoTimes != i.taskLimitTimes) {
+                    console.log("正在运行:", i.mainTitle)
+                    for (let _ of Array(i.taskLimitTimes - i.taskDoTimes)) {
+                        let water = await this.wget({
+                            fn: 'farm_water',
+                            body: {"version": 1, "waterType": 1},
+                            algo: {'appId': '28981'},
+                            cookie
+                        })
+                        let bottleWater2 = this.haskey(water, 'data.result.bottleWater')
+                        if (bottleWater2) {
+                            bottleWater = bottleWater2
+                            console.log("浇水中,剩余水滴:", bottleWater)
+                            waterConut++
+                            if (bottleWater<10) {
+                                break
+                            }
+                        }
+                        else {
+                            console.log('浇水失败:', this.haskey(water, 'data.bizMsg'))
+                            break
+                        }
+                        await this.wait(4000)
+                    }
+                    let award = await this.wget({
+                        fn: 'farm_task_receive_award',
+                        body: {"version": 1, "taskType": i.taskType, "taskId": i.taskId, "channel": 0},
+                        algo: {'appId': '33e0f'},
+                        cookie
+                    })
+                    if (this.haskey(award, 'data.result.taskAward')) {
+                        console.log("获得奖励:", award.data.result.taskAward)
+                        for (let kk of award.data.result.taskAward) {
+                            if (this.haskey(kk, 'awardType', 1)) {
+                                bottleWater += kk.awardValue
+                            }
+                        }
+                    }
+                    else {
+                        console.log("获取失败:", this.haskey(award, 'data.bizMsg'))
+                    }
+                }
+            }
+        }
         if (this.profile.tenWater) {
             console.log("跳过浇水: 检测到配置了tenWater参数,跳过浇水")
         }
         else {
             let stock = parseInt(this.profile.stock || 0)
-            let bottleWater = home.bottleWater - waterConut * 10
             if (stock && stock>=bottleWater) {
                 console.log("跳过浇水: 检测到配置了stock参数,剩余水滴小于保留水滴数")
             }
             else {
-                console.log("剩余水滴:", bottleWater)
+                console.log("剩余水滴:", bottleWater, '保留水滴数:', stock)
                 let count = parseInt((bottleWater - stock) / 10)
                 console.log("剩余可浇水次数:", count)
                 for (let _ of Array(count)) {
@@ -315,8 +341,8 @@ class Main extends Template {
                         algo: {'appId': '28981'},
                         cookie
                     })
-                    let bottleWater = this.haskey(water, 'data.result.bottleWater')
-                    if (bottleWater) {
+                    if (this.haskey(water, 'data.result.bottleWater')) {
+                        bottleWater = this.haskey(water, 'data.result.bottleWater')
                         console.log("浇水中,剩余水滴:", bottleWater)
                         if (bottleWater<10) {
                             break
