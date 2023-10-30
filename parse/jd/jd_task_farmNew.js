@@ -376,11 +376,13 @@ class Main extends Template {
         for (let cookie of this.cookies.help) {
             let user = this.userName(cookie)
             if (this.dict[user]) {
+                delete this.dict[user].finish
                 dict[user] = this.dict[user]
             }
         }
         for (let pin in this.dict) {
             if (!dict[pin]) {
+                delete this.dict[pin].finish
                 dict[pin] = this.dict[pin]
             }
         }
