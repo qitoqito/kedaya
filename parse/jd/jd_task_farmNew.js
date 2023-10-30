@@ -8,7 +8,11 @@ class Main extends Template {
         this.help = 'main'
         this.task = 'local'
         this.import = ['fs', 'jdAlgo']
-        this.hint = {'tenWater': '1 #每天只做10次浇水任务', 'stock': "100 #保留水滴数"}
+        this.hint = {
+            'tenWater': '1 #每天只做10次浇水任务',
+            'stock': "100 #保留水滴数",
+            'cache': "1 #缓存助力code,设置后不会每次运行后都把助力码都写入json"
+        }
         this.turn = 2
     }
 
@@ -18,9 +22,11 @@ class Main extends Template {
             type: 'main',
             version: "4.2"
         })
+        this._cc = 0
         try {
             let txt = this.modules.fs.readFileSync(`${this.dirname}/invite/jd_task_farmNew.json`).toString()
             this.dict = this.loads(txt)
+            this._cc = 1
         } catch (e) {
         }
     }
@@ -28,8 +34,8 @@ class Main extends Template {
     async main(p) {
         let cookie = p.cookie;
         let farmHome = await this.wget({
-            'fn': 'farm_home',
-            'body': {"version": 1},
+            fn: 'farm_home',
+            body: {"version": 1},
             algo: {appId: 'c57f6'},
             cookie,
         })
@@ -372,24 +378,29 @@ class Main extends Template {
     async extra() {
         console.log(`此次运行助力码:`)
         console.log(this.dumps((this.dict)))
-        let dict = {}
-        for (let cookie of this.cookies.help) {
-            let user = this.userName(cookie)
-            if (this.dict[user]) {
-                delete this.dict[user].finish
-                dict[user] = this.dict[user]
+        if (!this.profile.cache || !this._cc) {
+            let dict = {}
+            for (let cookie of this.cookies.help) {
+                let user = this.userName(cookie)
+                if (this.dict[user]) {
+                    delete this.dict[user].finish
+                    dict[user] = this.dict[user]
+                }
             }
-        }
-        for (let pin in this.dict) {
-            if (!dict[pin]) {
-                delete this.dict[pin].finish
-                dict[pin] = this.dict[pin]
+            for (let pin in this.dict) {
+                if (!dict[pin]) {
+                    delete this.dict[pin].finish
+                    dict[pin] = this.dict[pin]
+                }
             }
+            await this.modules.fs.writeFile(`${this.dirname}/invite/jd_task_farmNew.json`, this.dumps(dict), (error) => {
+                if (error) return console.log("写入化失败" + error.message);
+                console.log("新东东农场助力列表写入成功");
+            })
         }
-        await this.modules.fs.writeFile(`${this.dirname}/invite/jd_task_farmNew.json`, this.dumps(dict), (error) => {
-            if (error) return console.log("写入化失败" + error.message);
-            console.log("新东东农场好友列表写入成功");
-        })
+        else {
+            console.log("跳过写入: 检测到配置了cache参数,已有缓存:/invite/jd_task_farmNew.json")
+        }
     }
 }
 
