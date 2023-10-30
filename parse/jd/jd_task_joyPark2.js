@@ -423,6 +423,7 @@ class Main extends Template {
                 }
             }
         } catch (e) {
+            console.log(e)
         }
         clearInterval(reports)
     }
@@ -849,9 +850,10 @@ class Main extends Template {
             if (this.inviteIds.length>1) {
                 this.taskId = this.random(this.inviteIds, 1)[0]
             }
+
             var baseInfo = await this.algoCurl({
                     'url': `https://api.m.jd.com/`,
-                    'form': `functionId=joyBaseInfo&body={"taskId":"${inviterPin ? this.taskId : ''}","inviteType":"1","inviterPin":"${inviterPin}","linkId":"${this.linkId}"}&t=1681012535084&appid=activities_platform&client=ios&clientVersion=${this.clientVersion}&cthr=1&uuid=bd573a56457eba54de7a6c0787c1fbb4fde28eb2&build=${this.build}&screen=375*667&networkType=wifi&d_brand=iPhone&d_model=iPhone8,1&lang=zh_CN&osVersion=15.1.1&partner=&eid=eidI08a2812293saa9h49%2BwmQbOdWcGqiWsHQ2vYen7SFhReSdDTvgVd9CzRHKrkpiAq6WU2YgJf8TchQcbWEAdBOCTuiYEdV5DxTHW0eO1PylPf2QAx`,
+                    'form': `functionId=joyBaseInfo&body={"taskId":"","inviteType":"1","inviterPin":"${inviterPin}","linkId":"${this.linkId}"}&t=1681012535084&appid=activities_platform&client=ios&clientVersion=${this.clientVersion}&cthr=1&uuid=bd573a56457eba54de7a6c0787c1fbb4fde28eb2&build=${this.build}&screen=375*667&networkType=wifi&d_brand=iPhone&d_model=iPhone8,1&lang=zh_CN&osVersion=15.1.1&partner=&eid=eidI08a2812293saa9h49%2BwmQbOdWcGqiWsHQ2vYen7SFhReSdDTvgVd9CzRHKrkpiAq6WU2YgJf8TchQcbWEAdBOCTuiYEdV5DxTHW0eO1PylPf2QAx`,
                     cookie,
                     algo: {
                         appId: "4abce"
@@ -870,7 +872,9 @@ class Main extends Template {
                 await this.wait(1200)
             }
         }
+
         var data = this.haskey(baseInfo, 'data')
+
         if (this.haskey(baseInfo, 'data.level') == 1 && !this.haskey(baseInfo, 'data.joyCoin')) {
             await this.algoCurl({
                     'url': `https://api.m.jd.com/`,
