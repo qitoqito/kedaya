@@ -23,6 +23,7 @@ class Main extends Template {
             version: "3.1"
         })
         this.inviteIds = []
+        this.taskId=''
         let fcode = []
         try {
             let txt = this.modules.fs.readFileSync(`${this.dirname}/invite/jd_task_joyPark.json`).toString()
@@ -853,7 +854,7 @@ class Main extends Template {
 
             var baseInfo = await this.algoCurl({
                     'url': `https://api.m.jd.com/`,
-                    'form': `functionId=joyBaseInfo&body={"taskId":"","inviteType":"1","inviterPin":"${inviterPin}","linkId":"${this.linkId}"}&t=1681012535084&appid=activities_platform&client=ios&clientVersion=${this.clientVersion}&cthr=1&uuid=bd573a56457eba54de7a6c0787c1fbb4fde28eb2&build=${this.build}&screen=375*667&networkType=wifi&d_brand=iPhone&d_model=iPhone8,1&lang=zh_CN&osVersion=15.1.1&partner=&eid=eidI08a2812293saa9h49%2BwmQbOdWcGqiWsHQ2vYen7SFhReSdDTvgVd9CzRHKrkpiAq6WU2YgJf8TchQcbWEAdBOCTuiYEdV5DxTHW0eO1PylPf2QAx`,
+                    'form': `functionId=joyBaseInfo&body={"taskId":"${inviterPin ? this.taskId : ''}","inviteType":"1","inviterPin":"${inviterPin}","linkId":"${this.linkId}"}&t=1681012535084&appid=activities_platform&client=ios&clientVersion=${this.clientVersion}&cthr=1&uuid=bd573a56457eba54de7a6c0787c1fbb4fde28eb2&build=${this.build}&screen=375*667&networkType=wifi&d_brand=iPhone&d_model=iPhone8,1&lang=zh_CN&osVersion=15.1.1&partner=&eid=eidI08a2812293saa9h49%2BwmQbOdWcGqiWsHQ2vYen7SFhReSdDTvgVd9CzRHKrkpiAq6WU2YgJf8TchQcbWEAdBOCTuiYEdV5DxTHW0eO1PylPf2QAx`,
                     cookie,
                     algo: {
                         appId: "4abce"
