@@ -92,6 +92,7 @@ class Main extends Template {
         }
         let inviteCode = home.farmHomeShare.inviteCode
         let bottleWater = home.bottleWater
+        console.log("当前进度:", home.waterTips)
         if (!this.dict[p.user]) {
             this.dict[p.user] = {inviteCode}
         }
@@ -172,7 +173,7 @@ class Main extends Template {
             console.log("抽奖获得:", wheelsLottery.data.prizeCode)
         }
         else {
-            console.log(this.haskey(wheelsLottery, 'errMsg') || '啥都没有抽到')
+            console.log('啥都没有抽到')
         }
         let signIn = await this.algo.curl({
                 'url': `https://api.m.jd.com/api`,
@@ -199,31 +200,33 @@ class Main extends Template {
             else if (i.mainTitle.includes("下单")) {
             }
             else if (i.taskDoTimes != i.taskLimitTimes) {
-                await this.wait(4000)
                 console.log("正在运行:", i.mainTitle)
                 let itemId = i.taskSourceUrl
-                let taskInsert = false
-                if (!itemId) {
+                let taskDetaiList = []
+                if (itemId) {
+                    taskDetaiList.push({'itemId': itemId})
+                }
+                else {
                     let detail = await this.wget({
                         fn: 'farm_task_detail',
                         body: {"version": 1, "taskType": i.taskType, "taskId": i.taskId, "channel": 0},
                         algo: {},
                         cookie
                     })
-                    itemId = (this.haskey(detail, 'data.result.taskDetaiList.0.itemId'))
-                    if (itemId) {
-                        taskInsert = true
+                    if (this.haskey(detail, 'data.result.taskDetaiList')) {
+                        taskDetaiList = detail.data.result.taskDetaiList
                     }
                 }
-                if (itemId) {
+                for (let kk of taskDetaiList.reverse()) {
+                    await this.wait(4000)
                     let doWork = await this.wget({
                         fn: 'farm_do_task',
                         body: {
                             "version": 1,
                             "taskType": i.taskType,
                             "taskId": i.taskId,
-                            "taskInsert": taskInsert,
-                            "itemId": new Buffer.from(itemId).toString('base64'),
+                            "taskInsert": kk.taskInsert || false,
+                            "itemId": new Buffer.from(kk.itemId).toString('base64'),
                             "channel": 0
                         },
                         algo: {'appId': '28981'},
@@ -251,9 +254,6 @@ class Main extends Template {
                     else {
                         console.log("任务失败:", this.haskey(doWork, 'data.bizMsg'))
                     }
-                }
-                else {
-                    console.log("没有获取到itemId")
                 }
             }
             else if (i.taskStatus == 2) {
