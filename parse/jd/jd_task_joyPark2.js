@@ -423,6 +423,28 @@ class Main extends Template {
                     console.log('移动狗子去工作...', this.haskey(move, 'success'))
                 }
             }
+            let cashPrize = await this.algoCurl({
+                    'url': `https://api.m.jd.com/?functionId=gameMyCashPrize&body={"linkId":"${this.linkId}","pageNum":1,"pageSize":10}&t=${new Date().getTime()}&appid=activities_platform&client=ios&clientVersion=${this.clientVersion}&build=${this.build}&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone13,3&lang=zh_CN&osVersion=11.4&partner=&eid=eidIb24b812115s9jUHzkyfNSICH4T313nxTSY1B9QqDr0IUV8vdzISUvNGSXxO%2BeCNY01V69ImKsiy4ptOddRzE0E%2F950ionHyQBWNiEguhXNM%2B%2BD5v`,
+                    // 'form':``,
+                    cookie
+                }
+            )
+            for (let i of this.haskey(cashPrize, 'data.items')) {
+                if (i.prizeType == 4 && i.state == 0) {
+                    let sss = await this.algoCurl({
+                            'url': 'https://api.m.jd.com/',
+                            form: `functionId=apCashWithDraw&body={"businessSource":"JOY_PARK","base":{"id":${i.id},"business":"joyPark","poolBaseId":${i.poolBaseId},"prizeGroupId":${i.prizeGroupId},"prizeBaseId":${i.prizeBaseId},"prizeType":${i.prizeType},"activityId":"${i.activityId}"},"linkId":"${this.linkId}","inviter":""}&t=${new Date().getTime()}&appid=activities_platform&client=ios&clientVersion=${this.clientVersion}&cthr=1&uuid=db953e5e7cc5812dae6b5e45a04201cc4f3e2030&build=${this.build}&screen=375*667&networkType=wifi&d_brand=iPhone&d_model=iPhone8,1&lang=zh_CN&osVersion=13.7&partner=&eid=eidI16fe81226asdsrs6k2OTTyOBBbhCfGtXwbK7PBFBEWxOgr9KLEUyLLuTguf4fW8nrXFjtSacDPyb%2FWv6KWmFaBUhrlMiSnB5H42FsBr2f72YyFA4`,
+                            cookie
+                        }
+                    )
+                    if (this.haskey(sss, 'data.message'), "无效的openId，当前pin尚未绑定微信") {
+                        console.log("无效的openId，当前pin尚未绑定微信")
+                        break
+                    }
+                    this.print(`提现${i.prizeValue} ${this.haskey(sss, 'data.message')}`, p.user)
+                    await this.wait(5000)
+                }
+            }
         } catch (e) {
             console.log(e)
         }
