@@ -163,17 +163,52 @@ class Main extends Template {
                 await this.wait(4000)
             }
         }
-        let wheelsLottery = await this.algo.curl({
+        let luTask = await this.algo.curl({
                 'url': `https://api.m.jd.com/api`,
-                'form': `functionId=wheelsLottery&body={"linkId":"VssYBUKJOen7HZXpC8dRFA"}&t=1698555438657&appid=activities_platform&client=ios&clientVersion=12.1.6&cthr=1&loginType=&build=168909&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone13,3&lang=zh_CN&osVersion=15.1.1&partner=-1`,
-                cookie, algo: {'appId': 'bd6c8'},
+                'form': `functionId=apTaskList&body={"linkId":"VssYBUKJOen7HZXpC8dRFA"}&t=1699162457203&appid=activities_platform&client=ios&clientVersion=12.2.2&cthr=1&loginType=&loginWQBiz=wegame&openudid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&build=168923&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone13,3&lang=zh_CN&osVersion=15.1.1&partner=-1`,
+                cookie
             }
         )
-        if (this.haskey(wheelsLottery, 'data.prizeCode')) {
-            console.log("抽奖获得:", wheelsLottery.data.prizeCode)
+        for (let i of this.haskey(luTask, 'data')) {
+            if (i.taskDoTimes == i.taskLimitTimes) {
+                console.log("任务已完成:", i.taskShowTitle)
+            }
+            else {
+                console.log("正在运行:", i.taskShowTitle)
+                let luDo = await this.algo.curl({
+                        'url': `https://api.m.jd.com/api`,
+                        'form': `functionId=apsDoTask&body={"taskType":"${i.taskType}","taskId":${i.id},"channel":4,"checkVersion":true,"cityId":"1234","provinceId":"12","countyId":"1314","linkId":"VssYBUKJOen7HZXpC8dRFA","itemId":"${encodeURIComponent(i.taskSourceUrl)}"}&t=1699162692631&appid=activities_platform&client=ios&clientVersion=12.2.2&cthr=1&loginType=&loginWQBiz=wegame&build=168923&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone13,3&lang=zh_CN&osVersion=15.1.1&partner=-1`,
+                        cookie,
+                        algo: {appId: '54ed7', version: '3.1'}
+                    }
+                )
+                if (this.haskey(luDo, 'success')) {
+                    console.log("任务完成,抽奖次数+1")
+                }
+                else {
+                    console.log("任务失败", luDo)
+                }
+                await this.wait(3000)
+            }
         }
-        else {
-            console.log('啥都没有抽到')
+        for (let i of Array(10)) {
+            let wheelsLottery = await this.algo.curl({
+                    'url': `https://api.m.jd.com/api`,
+                    'form': `functionId=wheelsLottery&body={"linkId":"VssYBUKJOen7HZXpC8dRFA"}&t=1698555438657&appid=activities_platform&client=ios&clientVersion=12.1.6&cthr=1&loginType=&build=168909&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone13,3&lang=zh_CN&osVersion=15.1.1&partner=-1`,
+                    cookie, algo: {'appId': 'bd6c8'},
+                }
+            )
+            if (this.haskey(wheelsLottery, 'data.prizeCode')) {
+                console.log("抽奖获得:", wheelsLottery.data.prizeCode)
+            }
+            else {
+                if (this.haskey(wheelsLottery, 'code', 4000)) {
+                    console.log('没有抽奖次数')
+                    break
+                }
+                console.log('啥都没有抽到')
+            }
+            await this.wait(3000)
         }
         let signIn = await this.algo.curl({
                 'url': `https://api.m.jd.com/api`,
