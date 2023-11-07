@@ -16,14 +16,14 @@ class Main extends Template {
 
     async prepare() {
         this.linkId = "jBNXcoiASxGof0f2RFI2Sw"
-        this.clientVersion = "11.6.3"
-        this.build = "1247"
+        this.clientVersion = "12.2.2"
+        this.build = "168923"
         this.algo = new this.modules.jdAlgo({
             type: "main",
             version: "3.1"
         })
         this.inviteIds = []
-        this.taskId=''
+        this.taskId = ''
         let fcode = []
         try {
             let txt = this.modules.fs.readFileSync(`${this.dirname}/invite/jd_task_joyPark.json`).toString()
@@ -873,14 +873,13 @@ class Main extends Template {
             if (this.inviteIds.length>1) {
                 this.taskId = this.random(this.inviteIds, 1)[0]
             }
-
             var baseInfo = await this.algoCurl({
                     'url': `https://api.m.jd.com/`,
                     'form': `functionId=joyBaseInfo&body={"taskId":"${inviterPin ? this.taskId : ''}","inviteType":"1","inviterPin":"${inviterPin}","linkId":"${this.linkId}"}&t=1681012535084&appid=activities_platform&client=ios&clientVersion=${this.clientVersion}&cthr=1&uuid=bd573a56457eba54de7a6c0787c1fbb4fde28eb2&build=${this.build}&screen=375*667&networkType=wifi&d_brand=iPhone&d_model=iPhone8,1&lang=zh_CN&osVersion=15.1.1&partner=&eid=eidI08a2812293saa9h49%2BwmQbOdWcGqiWsHQ2vYen7SFhReSdDTvgVd9CzRHKrkpiAq6WU2YgJf8TchQcbWEAdBOCTuiYEdV5DxTHW0eO1PylPf2QAx`,
                     cookie,
                     algo: {
                         appId: "4abce"
-                    }
+                    },
                 }
             )
             this.assert(!this.haskey(baseInfo, 'code', 1000), "未登录")
@@ -895,9 +894,7 @@ class Main extends Template {
                 await this.wait(1200)
             }
         }
-
         var data = this.haskey(baseInfo, 'data')
-
         if (this.haskey(baseInfo, 'data.level') == 1 && !this.haskey(baseInfo, 'data.joyCoin')) {
             await this.algoCurl({
                     'url': `https://api.m.jd.com/`,
@@ -977,6 +974,63 @@ class Main extends Template {
 
     async algoCurl(p) {
         let cookie = p.cookie
+        let dict = {
+            A: 'K',
+            B: 'L',
+            C: 'M',
+            D: 'N',
+            E: 'O',
+            F: 'P',
+            G: 'Q',
+            H: 'R',
+            I: 'S',
+            J: 'T',
+            K: 'A',
+            L: 'B',
+            M: 'C',
+            N: 'D',
+            O: 'E',
+            P: 'F',
+            Q: 'G',
+            R: 'H',
+            S: 'I',
+            T: 'J',
+            e: 'o',
+            f: 'p',
+            g: 'q',
+            h: 'r',
+            i: 's',
+            j: 't',
+            k: 'u',
+            l: 'v',
+            m: 'w',
+            n: 'x',
+            o: 'e',
+            p: 'f',
+            q: 'g',
+            r: 'h',
+            s: 'i',
+            t: 'j',
+            u: 'k',
+            v: 'l',
+            w: 'm',
+            x: 'n'
+        }
+        let encrypt = {
+            "ciphertype": 5,
+            "cipher": {
+                "ud": new Buffer.from(this.sha1(p.cookie)).toString('base64').split("").map(d => dict[d] || d).join(""),
+                "sv": "CJUkCI4n",
+                "iad": ""
+            },
+            "ts": this.timestamp,
+            "hdid": "JM9F1ywUPwflvMIpYPok0tt5k9kW4ArJEU3lfLhxBqw=",
+            "version": "1.0.3",
+            "appname": "com.360buy.jdmobile",
+            "ridx": -1
+        }
+        p.ua = `jdapp;iPhone;${this.clientVersion};;;M/5.0;appBuild/${this.build};jdSupportDarkMode/0;ef/1;ep/${encodeURIComponent(this.dumps(encrypt))};Mozilla/5.0 (iPhone; CPU iPhone OS 15_1_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;`
+        p.referer = 'https://joypark.jd.com/'
         if (p.curl) {
             var s = await this.curl(p)
         }
