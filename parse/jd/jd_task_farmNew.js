@@ -54,6 +54,9 @@ class Main extends Template {
             console.log("cookie失效,登陆失败")
             return
         }
+        else if (this.haskey(home, 'treeFullStage', 5) && this.turnCount == 0) {
+            this.print('可以兑换商品了', p.user)
+        }
         if (!home.skuName) {
             console.log("没有种树")
             let board = await this.wget({
