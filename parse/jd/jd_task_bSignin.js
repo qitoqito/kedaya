@@ -7,9 +7,9 @@ class Main extends Template {
         this.cron = "6 6,18 * * *"
         this.task = 'local'
         this.import = ['jdAlgo', 'jdUrl']
-        this.hint = {
-            'reward': "微信提现金额"
-        }
+        // this.hint = {
+        //     'reward': "微信提现金额"
+        // }
     }
 
     async prepare() {
@@ -65,7 +65,23 @@ class Main extends Template {
                         case 'BROWSE_PRODUCT':
                             let s = await this.algo.curl({
                                     'url': `https://api.m.jd.com/`,
-                                    form: `functionId=apsDoTask&body={"taskType":"${i.taskType}","taskId":${i.id},"channel":4,"checkVersion":true,"cityId":"","provinceId":"","countyId":"","linkId":"FIz2zkvbepstVFm3uqLOUA","taskInsert":false,"itemId":"${encodeURIComponent(i.taskSourceUrl)}"}&t=1680593355070&appid=activities_platform&client=ios&clientVersion=11.6.3&cthr=1&build=168563&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone13,3&lang=zh_CN&osVersion=15.1.1&partner=&eid=eidId7f9812189s4Ywiz164KTQqoeSyoW1uZwmMItV216n8pCJ26eJPEqZb5n8VkyLjW71hRQ6fhLku8USG3jg%2BHtZ7ecv%2BJ2CWEYpUd99P1GvH7bppT`,
+                                    form: `functionId=apStartTaskTime&body={"taskType":"${i.taskType}","taskId":${i.id},"channel":4,"checkVersion":true,"cityId":"","provinceId":"","countyId":"","linkId":"FIz2zkvbepstVFm3uqLOUA","taskInsert":false,"itemId":"${encodeURIComponent(i.taskSourceUrl)}"}&t=1680593355070&appid=activities_platform&client=ios&clientVersion=11.6.3&cthr=1&build=168563&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone13,3&lang=zh_CN&osVersion=15.1.1&partner=&eid=eidId7f9812189s4Ywiz164KTQqoeSyoW1uZwmMItV216n8pCJ26eJPEqZb5n8VkyLjW71hRQ6fhLku8USG3jg%2BHtZ7ecv%2BJ2CWEYpUd99P1GvH7bppT`,
+                                    cookie,
+                                    algo: {
+                                        'appId': '54ed7',
+                                        version: "4.1",
+                                        type: 'main'
+                                    }
+                                }
+                            )
+                            if (i.timeLimitPeriod) {
+                                console.log("正在等待任务返回")
+                                await this.wait(i.timeLimitPeriod * 1000)
+                            }
+                            await this.wait(1000)
+                            await this.algo.curl({
+                                    'url': `https://api.m.jd.com/`,
+                                    form: `functionId=apStartTaskTime&body={"taskType":"${i.taskType}","taskId":${i.id},"channel":4,"checkVersion":true,"cityId":"","provinceId":"","countyId":"","linkId":"FIz2zkvbepstVFm3uqLOUA","taskInsert":false,"itemId":"${encodeURIComponent(i.taskSourceUrl)}"}&t=1680593355070&appid=activities_platform&client=ios&clientVersion=11.6.3&cthr=1&build=168563&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone13,3&lang=zh_CN&osVersion=15.1.1&partner=&eid=eidId7f9812189s4Ywiz164KTQqoeSyoW1uZwmMItV216n8pCJ26eJPEqZb5n8VkyLjW71hRQ6fhLku8USG3jg%2BHtZ7ecv%2BJ2CWEYpUd99P1GvH7bppT`,
                                     cookie,
                                     algo: {
                                         'appId': '54ed7',
@@ -98,46 +114,50 @@ class Main extends Template {
                 console.log(`任务完成`, i.taskTitle)
             }
         }
-        if (this.profile.reward) {
-            let
-                balance = await this.curl({
+        // if (this.profile.reward) {
+        let
+            balance = await this.curl({
+                    'url': `https://api.m.jd.com/`,
+                    'form': `functionId=BSignInMyBalance&body={"linkId":"FIz2zkvbepstVFm3uqLOUA"}&t=1681800811744&appid=activities_platform&client=ios&clientVersion=11.8.0&cthr=1&uuid=&build=&screen=375*667&networkType=&d_brand=&d_model=&lang=zh_CN&osVersion=&partner=`,
+                    cookie
+                }
+            )
+        let
+            totalAmount = this.haskey(balance, 'data.totalAmount')
+        if (totalAmount) {
+            totalAmount = parseFloat(totalAmount)
+            console.log('现金:', totalAmount)
+            let array = []
+            for (let i of balance.data.wxExchange) {
+                // if (i.amount<=totalAmount && i.status == 1 && i.amount.toString() == this.profile.reward.toString()) {
+                //     array.push(i)
+                // }
+                if (i.amount<=totalAmount && i.status == 1) {
+                    array.push(i)
+                }
+            }
+            for (let i of array.reverse()) {
+                console.log("正在兑换:", i.amount)
+                let reward = await this.algo.curl({
                         'url': `https://api.m.jd.com/`,
-                        'form': `functionId=BSignInMyBalance&body={"linkId":"FIz2zkvbepstVFm3uqLOUA"}&t=1681800811744&appid=activities_platform&client=ios&clientVersion=11.8.0&cthr=1&uuid=&build=&screen=375*667&networkType=&d_brand=&d_model=&lang=zh_CN&osVersion=&partner=`,
-                        cookie
+                        'form': `functionId=bSignInExchange&body={"awardType":${i.exchangeType},"gear":${i.gear},"linkId":"FIz2zkvbepstVFm3uqLOUA"}&t=1681800820879&appid=activities_platform&client=ios&clientVersion=11.8.0&cthr=1&uuid=&build=&screen=375*667&networkType=&d_brand=&d_model=&lang=zh_CN&osVersion=&partner=`,
+                        cookie,
+                        algo: {
+                            appId: "ff179"
+                        }
                     }
                 )
-            let
-                totalAmount = this.haskey(balance, 'data.totalAmount')
-            if (totalAmount) {
-                totalAmount = parseFloat(totalAmount)
-                console.log('现金:', totalAmount)
-                let array = []
-                for (let i of balance.data.wxExchange) {
-                    if (i.amount<=totalAmount && i.status == 1 && i.amount.toString() == this.profile.reward.toString()) {
-                        array.push(i)
-                    }
+                if (this.haskey(reward, 'success')) {
+                    this.print(`提现: ${i.amount} ${reward.data.msg}`, p.user)
                 }
-                for (let i of array.reverse()) {
-                    console.log("正在兑换:", i.amount)
-                    let reward = await this.algo.curl({
-                            'url': `https://api.m.jd.com/`,
-                            'form': `functionId=bSignInExchange&body={"awardType":${i.exchangeType},"gear":${i.gear},"linkId":"FIz2zkvbepstVFm3uqLOUA"}&t=1681800820879&appid=activities_platform&client=ios&clientVersion=11.8.0&cthr=1&uuid=&build=&screen=375*667&networkType=&d_brand=&d_model=&lang=zh_CN&osVersion=&partner=`,
-                            cookie,
-                            algo: {
-                                appId: "ff179"
-                            }
-                        }
-                    )
-                    if (this.haskey(reward, 'success')) {
-                        this.print(`提现: ${i.amount} ${reward.data.msg}`, p.user)
-                    }
-                    else {
-                        console.log(reward)
-                    }
+                else {
+                    console.log(reward)
                 }
             }
         }
     }
+
+    // }
 }
 
 module.exports = Main;
