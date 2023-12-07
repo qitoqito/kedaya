@@ -4,10 +4,11 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东1111视频红包"
-        this.cron = `${this.rand(0, 59)} ${this.rand(0, 21)} 1-22 11 *`
+        this.cron = `${this.rand(0, 59)} ${this.rand(0, 21)} * 12 *`
         this.import = ['jdAlgo', 'jdUrl']
         this.interval = 3000
         this.readme = '只有白号能跑,黑号会火爆或者提款不了'
+        this.turn = 2
     }
 
     async prepare() {
@@ -42,6 +43,7 @@ class Main extends Template {
 
     async main(p) {
         let cookie = p.cookie;
+        // console.log(home)
         let info = await this.algo.curl({
                 'url': `https://api.m.jd.com/videoRedPacketHomePage_info`,
                 'form': `functionId=videoRedPacketHomePage_info&appid=video-redbag-h5&body=${this.dumps(this.code)}&client=wh5&t=1699156906324&clientVersion=12.2.2`,
@@ -49,49 +51,105 @@ class Main extends Template {
                 algo: {appId: 'd51cc'}
             }
         )
-        for (let i of this.haskey(info, 'data')) {
-            if (i.status == 2) {
-                console.log("已完成:", i.assignmentName)
-            }
-            else {
-                console.log("正在运行:", i.assignmentName)
-                if (!i.login) {
-                    return
-                }
-                let accept = await this.algo.curl({
-                        'url': `https://api.m.jd.com/videoRedPacketHomePage_accept`,
-                        'form': `functionId=videoRedPacketHomePage_accept&appid=video-redbag-h5&body={"type":"20","assignmentId":"${i.assignmentId}","itemId":"${i.itemId}"}&client=wh5&t=1699157368652&clientVersion=12.2.2`,
-                        cookie,
-                        algo: {appId: '57a9c'}
-                    }
-                )
-                if (this.haskey(accept, 'success')) {
-                    if (i.waitDuration) {
-                        console.log("等待中:", i.waitDuration)
-                        await this.wait(parseInt(i.waitDuration) * 1000)
-                    }
-                    let done = await this.algo.curl({
-                            'url': `https://api.m.jd.com/videoRedPacketHomePage_done`,
-                            'form': `functionId=videoRedPacketHomePage_done&appid=video-redbag-h5&body={"type":"20","assignmentId":"${i.assignmentId}","itemId":"${i.itemId}"}&client=wh5&t=1699157368652&clientVersion=12.2.2`,
-                            cookie,
-                            algo: {appId: '12bf2'}
-                        }
-                    )
-                    if (this.haskey(done, 'success')) {
-                        console.log(done.data.rewardMsg)
-                    }
-                    else {
-                        console.log(done)
-                    }
+        if (this.haskey(info, 'busiCode', '3')) {
+            console.log('用户未登录')
+            return
+        }
+        else if (this.haskey(info, 'busiCode', '8015')) {
+            console.log('活动太火爆')
+            return
+        }
+        if (this.turnCount == 0) {
+            this.dict[p.user] = [];
+            for (let i of this.haskey(info, 'data')) {
+                if (i.status == 2) {
+                    console.log("已完成:", i.assignmentName)
                 }
                 else {
-                    if (this.haskey(accept, 'busiCode', '8014')) {
-                        console.log('活动太火爆，等会再来吧~')
+                    console.log("正在运行:", i.assignmentName)
+                    if (!i.login) {
                         return
                     }
-                    console.log(accept)
+                    let accept = await this.algo.curl({
+                            'url': `https://api.m.jd.com/videoRedPacketHomePage_accept`,
+                            'form': `functionId=videoRedPacketHomePage_accept&appid=video-redbag-h5&body={"type":"20","assignmentId":"${i.assignmentId}","itemId":"${i.itemId}"}&client=wh5&t=1699157368652&clientVersion=12.2.2`,
+                            cookie,
+                            algo: {appId: '57a9c'}
+                        }
+                    )
+                    if (this.haskey(accept, 'success')) {
+                        if (i.waitDuration) {
+                            console.log("预等待:", i.waitDuration)
+                            // await this.wait(parseInt(i.waitDuration) * 1000)
+                        }
+                        this.dict[p.user].push({
+                            "assignmentId": i.assignmentId, "itemId": i.itemId,
+                            'time': new Date().getTime() / 1000 + parseInt(i.waitDuration),
+                            'title': i.assignmentName
+                        })
+                        await this.wait(1000)
+                        // let done = await this.algo.curl({
+                        //         'url': `https://api.m.jd.com/videoRedPacketHomePage_done`,
+                        //         'form': `functionId=videoRedPacketHomePage_done&appid=video-redbag-h5&body={"type":"20","assignmentId":"${i.assignmentId}","itemId":"${i.itemId}"}&client=wh5&t=1699157368652&clientVersion=12.2.2`,
+                        //         cookie,
+                        //         algo: {appId: '12bf2'}
+                        //     }
+                        // )
+                        // if (this.haskey(done, 'success')) {
+                        //     console.log(done.data.rewardMsg)
+                        // }
+                        // else {
+                        //     console.log(done)
+                        // }
+                    }
+                    else {
+                        if (this.haskey(accept, 'busiCode', '8014')) {
+                            console.log('活动太火爆，等会再来吧~')
+                            return
+                        }
+                        console.log(accept)
+                    }
                 }
             }
+        }
+        else {
+            for (let i of this.dict[p.user]) {
+                let wait = i.time - new Date().getTime() / 1000
+                console.log("正在获取:", i.title)
+                if (wait>0) {
+                    console.log("正在等待:", wait)
+                    await this.wait(wait * 1000)
+                }
+                let done = await this.algo.curl({
+                        'url': `https://api.m.jd.com/videoRedPacketHomePage_done`,
+                        'form': `functionId=videoRedPacketHomePage_done&appid=video-redbag-h5&body={"type":"20","assignmentId":"${i.assignmentId}","itemId":"${i.itemId}"}&client=wh5&t=1699157368652&clientVersion=12.2.2`,
+                        cookie,
+                        algo: {appId: '12bf2'}
+                    }
+                )
+                if (this.haskey(done, 'success')) {
+                    console.log(done.data.rewardMsg)
+                }
+                else {
+                    console.log(done)
+                }
+                await this.wait(1000)
+            }
+        }
+        for (let i of Array(5)) {
+            let coin = await this.curl(this.modules.jdUrl.app('videoHbGoldCoin_done', {
+                    "contentId": "386347879",
+                    "jsLabel": "\/DM3FV\/PEde9BKNudk4NEQ7LYwslHVatolqZKq0h\/nbpuOtrMZKpsSx6AY1fvblB0Dp+W9WGxfkrD\/y8BAJ3iO5UO\/CKNmGetDYZHD+x2E7ElUM0I3rMHO2XhEv5A+ihHfZ9zCMVtC2h+SmLy042QK2NPMlS2busoZYVVI1go5I=",
+                    "playType": "126"
+                }, 'post', cookie)
+            )
+            if (this.haskey(coin, 'success')) {
+                console.log('获得金币:', coin.data.rewardValue)
+            }
+            else {
+                console.log(coin)
+            }
+            await this.wait(4000)
         }
         let exchange = await this.curl({
                 'url': `https://api.m.jd.com/videoRedPacketHomePage_exchangeCash`,
