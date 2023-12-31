@@ -9,6 +9,7 @@ class Main extends Template {
         this.task = 'local'
         this.verify = 1
         this.import = ['jdAlgo', 'jdUrl']
+        this.hint = {'projectId': '红包雨ID'}
     }
 
     async prepare() {
@@ -18,33 +19,7 @@ class Main extends Template {
             'type': 'web',
             "version": "3.0",
         })
-        let body = {
-            cityId: '1231',
-            townId: '56789',
-            provinceId: '16',
-            informationParam: {},
-            sourceId: 1,
-            synVersion: true,
-            countyId: '2345',
-            lat: '0',
-            lng: '0',
-            pageIndex: 1
-        }
-        let s = await this.curl(this.modules.jdUrl.app('smt_index', body, 'post', ''))
-        let activity_id = 1308
-        if (this.haskey(s, 'floatIcon.jump.params.url') && s.floatIcon.jump.params.url.includes("activity_id")) {
-            let q = this.query(s.floatIcon.jump.params.url, '&', 'split')
-            activity_id = q.activity_id
-        }
-        let ar = await this.curl(this.modules.jdUrl.app('arMarketGetActivity', {
-                "preview": "",
-                "jdSdkVersion": "1.0.9",
-                "activity_id": activity_id,
-                "v": "1.0",
-                "platform": "1"
-            })
-        )
-        let projectId = this.match(/id=(\d+)/, this.dumps(ar)) || this.profile.custom || '134794702025154130'
+        let projectId = this.profile.projectId || '119456175536671809'
         for (let cookie of this.cookies.help) {
             let s = await this.algo.curl({
                     'url': `https://api.m.jd.com/api?appid=hongbaoyu&functionId=redRainInitProjectScene&body={"projectId":"${projectId}"}`,
@@ -77,7 +52,7 @@ class Main extends Template {
                 'url': `https://api.m.jd.com/api?appid=hongbaoyu&functionId=redRainInitProjectScene&body={"projectId":"${p.inviter.projectId}"}`,
                 cookie,
                 algo: {
-                    'appId': 'c18e1',
+                    'appId': '16073',
                     'type': 'web',
                     "version": "3.0",
                 }
@@ -99,7 +74,6 @@ class Main extends Template {
                         }
                     }
                 )
-                console.log(s)
                 if (this.haskey(s, 'data.name')) {
                     this.print(`获得: ${s.data.name}`, p.user)
                 }
