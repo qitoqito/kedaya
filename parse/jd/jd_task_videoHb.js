@@ -9,13 +9,14 @@ class Main extends Template {
         this.interval = 3000
         this.readme = '只有白号能跑,黑号会火爆或者提款不了'
         this.turn = 2
+        this.clientVersion = '12.3.1'
     }
 
     async prepare() {
         this.algo = new this.modules.jdAlgo({
-            version: '4.1',
+            version: '4.2',
             type: 'main',
-            appId: '7f9c4'
+            appId: '7f9c4',
         })
         let html = await this.curl({
                 'url': `https://pro.m.jd.com/mall/active/8WYa8CGWvkB5b3EC9TcyAbAobeo/index.html?tttparams=i2c4MeyJnTGF0IjoiMjMuOTM5MTkyIiwidW5fYXJlYSI6IjE2XzEzNDFfMTM0N180NDc1MCIsImRMYXQiOiIiLCJwcnN0YXRlIjoiMCIsImFkZHJlc3NJZCI6Ijc2NTc3NTQ4ODIiLCJsYXQiOiIiLCJwb3NMYXQiOiIyMy45MzkxOTIiLCJwb3NMbmciOiIxMTcuNjExMjMiLCJncHNfYXJlYSI6IjBfMF8wXzAiLCJsbmciOiIiLCJ1ZW1wcyI6IjAtMC0yIiwiZ0xuZyI6IjExNy42MTEyMyIsIm1vZGVsIjoiaVBob25lMTMsMyIsImRMbmciOiIifQ5%3D%3D`,
@@ -46,7 +47,7 @@ class Main extends Template {
         // console.log(home)
         let info = await this.algo.curl({
                 'url': `https://api.m.jd.com/videoRedPacketHomePage_info`,
-                'form': `functionId=videoRedPacketHomePage_info&appid=video-redbag-h5&body=${this.dumps(this.code)}&client=wh5&t=1699156906324&clientVersion=12.2.2`,
+                'form': `functionId=videoRedPacketHomePage_info&appid=video-redbag-h5&body=${this.dumps(this.code)}&client=wh5&t=1699156906324&clientVersion=12.3.1`,
                 cookie,
                 algo: {appId: 'd51cc'}
             }
@@ -60,6 +61,13 @@ class Main extends Template {
             return
         }
         if (this.turnCount == 0) {
+            let sign = await this.algo.curl({
+                    'url': `https://api.m.jd.com/videoHb_sign`,
+                    'form': `functionId=videoHb_sign&appid=video-redbag-h5&body={}&client=wh5&t=1704344655057&clientVersion=12.3.1`,
+                    cookie,
+                    algo: {appId: '2023f'}
+                }
+            )
             this.dict[p.user] = [];
             for (let i of this.haskey(info, 'data')) {
                 if (i.status == 2) {
@@ -72,7 +80,7 @@ class Main extends Template {
                     }
                     let accept = await this.algo.curl({
                             'url': `https://api.m.jd.com/videoRedPacketHomePage_accept`,
-                            'form': `functionId=videoRedPacketHomePage_accept&appid=video-redbag-h5&body={"type":"20","assignmentId":"${i.assignmentId}","itemId":"${i.itemId}"}&client=wh5&t=1699157368652&clientVersion=12.2.2`,
+                            'form': `functionId=videoRedPacketHomePage_accept&appid=video-redbag-h5&body={"type":"20","assignmentId":"${i.assignmentId}","itemId":"${i.itemId}"}&client=wh5&t=1699157368652&clientVersion=12.3.1`,
                             cookie,
                             algo: {appId: '57a9c'}
                         }
@@ -88,19 +96,6 @@ class Main extends Template {
                             'title': i.assignmentName
                         })
                         await this.wait(1000)
-                        // let done = await this.algo.curl({
-                        //         'url': `https://api.m.jd.com/videoRedPacketHomePage_done`,
-                        //         'form': `functionId=videoRedPacketHomePage_done&appid=video-redbag-h5&body={"type":"20","assignmentId":"${i.assignmentId}","itemId":"${i.itemId}"}&client=wh5&t=1699157368652&clientVersion=12.2.2`,
-                        //         cookie,
-                        //         algo: {appId: '12bf2'}
-                        //     }
-                        // )
-                        // if (this.haskey(done, 'success')) {
-                        //     console.log(done.data.rewardMsg)
-                        // }
-                        // else {
-                        //     console.log(done)
-                        // }
                     }
                     else {
                         if (this.haskey(accept, 'busiCode', '8014')) {
@@ -122,7 +117,7 @@ class Main extends Template {
                 }
                 let done = await this.algo.curl({
                         'url': `https://api.m.jd.com/videoRedPacketHomePage_done`,
-                        'form': `functionId=videoRedPacketHomePage_done&appid=video-redbag-h5&body={"type":"20","assignmentId":"${i.assignmentId}","itemId":"${i.itemId}"}&client=wh5&t=1699157368652&clientVersion=12.2.2`,
+                        'form': `functionId=videoRedPacketHomePage_done&appid=video-redbag-h5&body={"type":"20","assignmentId":"${i.assignmentId}","itemId":"${i.itemId}"}&client=wh5&t=1699157368652&clientVersion=12.3.1`,
                         cookie,
                         algo: {appId: '12bf2'}
                     }
@@ -136,24 +131,24 @@ class Main extends Template {
                 await this.wait(1000)
             }
         }
-        for (let i of Array(5)) {
-            let coin = await this.curl(this.modules.jdUrl.app('videoHbGoldCoin_done', {
-                    "contentId": "386347879",
-                    "jsLabel": "\/DM3FV\/PEde9BKNudk4NEQ7LYwslHVatolqZKq0h\/nbpuOtrMZKpsSx6AY1fvblB0Dp+W9WGxfkrD\/y8BAJ3iO5UO\/CKNmGetDYZHD+x2E7ElUM0I3rMHO2XhEv5A+ihHfZ9zCMVtC2h+SmLy042QK2NPMlS2busoZYVVI1go5I=",
-                    "playType": "126"
-                }, 'post', cookie)
-            )
-            if (this.haskey(coin, 'success')) {
-                console.log('获得金币:', coin.data.rewardValue)
-            }
-            else {
-                console.log(coin)
-            }
-            await this.wait(4000)
-        }
+        // for (let i of Array(2)) {
+        //     let coin = await this.curl(this.modules.jdUrl.app('videoHbGoldCoin_done', {
+        //             "contentId": "414303219",
+        //             "jsLabel": "\/DM3FV\/PEde9BKNudk4NEQ7LYwslHVatolqZKq0h\/nbpuOtrMZKpsSx6AY1fvblB0Dp+W9WGxfkrD\/y8BAJ3iO5UO\/CKNmGetDYZHD+x2E7ElUM0I3rMHO2XhEv5A+ihHfZ9zCMVtC2h+SmLy042QK2NPMlS2busoZYVVI1go5I=",
+        //             "playType": "126"
+        //         }, 'post', cookie)
+        //     )
+        //     if (this.haskey(coin, 'success')) {
+        //         console.log('获得金币:', coin.data.rewardValue)
+        //     }
+        //     else {
+        //         console.log(coin)
+        //     }
+        //     await this.wait(5000)
+        // }
         let exchange = await this.curl({
                 'url': `https://api.m.jd.com/videoRedPacketHomePage_exchangeCash`,
-                'form': `functionId=videoRedPacketHomePage_exchangeCash&appid=video-redbag-h5&body={}&client=wh5&t=1699157963924&clientVersion=12.2.2`,
+                'form': `functionId=videoRedPacketHomePage_exchangeCash&appid=video-redbag-h5&body={}&client=wh5&t=1699157963924&clientVersion=12.3.1`,
                 cookie,
                 algo: {appId: "8c80c"}
             }
@@ -163,7 +158,7 @@ class Main extends Template {
         }
         let home = await this.algo.curl({
                 'url': `https://api.m.jd.com/videoHbCw_homePage`,
-                'form': `functionId=videoHbCw_homePage&appid=video-redbag-h5&body=%7B%7D&client=wh5&t=1699156595761&clientVersion=12.2.2`,
+                'form': `functionId=videoHbCw_homePage&appid=video-redbag-h5&body=%7B%7D&client=wh5&t=1699156595761&clientVersion=12.3.1`,
                 cookie,
                 algo: {appId: '7f9c4'}
             }
@@ -172,6 +167,7 @@ class Main extends Template {
             let data = this.haskey(home, 'data')
             let amount = data.cashBalanceFloor.amount
             console.log('现有奖金:', amount)
+
             for (let i of data.cwCardFloor.cards.reverse()) {
                 if (i.topDesc == '已连续来访0天' && i.amount == 0.88) {
                     let init = await this.curl(this.modules.jdUrl.app('videoHb_newCustomerHbLayer', {}, 'post', cookie)
@@ -181,11 +177,11 @@ class Main extends Template {
                         console.log("初始化成功,获得:", init.data.popAlertInfo.hbAmount)
                     }
                 }
-                if (i.cwStatus == 0 && amount>=i.amount) {
-                    console.log("正在提款至京东余额:", i.amount)
+                if (i.cwStatus == 0 ) {
+                    console.log("正在提款至京东余额:", i.amountStr)
                     let cash = await this.algo.curl({
                             'url': `https://api.m.jd.com/videoHbCw_doCw`,
-                            'form': `functionId=videoHbCw_doCw&appid=video-redbag-h5&body={"bizTraceId":"${i.bizTraceId}","amount":${i.amount}}&client=wh5&t=1699156604242&clientVersion=12.2.2`,
+                            'form': `functionId=videoHbCw_doCw&appid=video-redbag-h5&body={"bizTraceId":"${i.bizTraceId}","amount":${i.amountStr}}&client=wh5&t=1699156604242&clientVersion=12.3.1`,
                             cookie,
                             algo: {appId: 'c5b74'}
                         }
@@ -196,6 +192,7 @@ class Main extends Template {
                     else {
                         console.log(cash)
                     }
+                    await this.wait(5000)
                 }
             }
         }
