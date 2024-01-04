@@ -187,7 +187,7 @@ class Main extends Template {
                         }
                     )
                     if (this.haskey(cash, 'success')) {
-                        this.print(`提款成功: ${i.amount}`, p.user)
+                        this.print(`提款成功: ${i.amountStr}`, p.user)
                     }
                     else {
                         console.log(cash)
