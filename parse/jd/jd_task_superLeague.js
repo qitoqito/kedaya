@@ -8,6 +8,10 @@ class Main extends Template {
         this.task = 'local'
         this.import = ['jdAlgo']
         this.delay = 1500
+        this.turn = 2
+        this.hint = {
+            'linkId': '活动id,多个id用|分隔'
+        }
     }
 
     async prepare() {
@@ -15,15 +19,38 @@ class Main extends Template {
             version: '4.1',
             type: "main"
         })
-        this.linkId = this.profile.linkId || 'mS2PkOqrtmfneDMmhJ3dbQ'
+        this.linkId = this.profile.linkId || 'mS2PkOqrtmfneDMmhJ3dbQ|e7zLQiVe1HAgEmDiFhfugA'
+        let linkid = this.linkId.split("|")
+        for (let i of linkid) {
+            this.code.push({linkId: i})
+            this.dict[i] = {
+                code: [], taskId: ''
+            }
+        }
         this.clientVersion = '11.6.3'
+        this.taskId = ''
     }
 
     async main(p) {
+        for (let i of this.code) {
+            p.linkId = i.linkId
+            console.log("活动Id:", p.linkId)
+            await this.doWork(p)
+        }
+    }
+
+    async doWork(p) {
         let cookie = p.cookie;
+        let inviter = ""
+        if (this.dict[p.linkId].code.length>0) {
+            let code = this.dict[p.linkId].code[(p.index + 1) % this.dict[p.linkId].code.length]
+            inviter = code.userCode
+            console.log("正在助力:", code.user)
+        }
+        let taskId = this.dict[p.linkId].taskId || ''
         let home = await this.wget({
             fn: 'superLeagueHome',
-            body: {"linkId": this.linkId, "taskId": "", "inviter": "", "inJdApp": true},
+            body: {"linkId": p.linkId, "taskId": taskId, "inviter": inviter, "inJdApp": true},
             algo: {'appId': 'b7d17'},
             cookie
         })
@@ -33,13 +60,19 @@ class Main extends Template {
         }
         let data = home.data
         let userCode = data.userCode
+        if (this.cookies.help.includes(p.cookie) && this.turnCount == 0) {
+            this.dict[p.linkId].code.push({
+                user: p.user,
+                userCode
+            })
+        }
         let apTask = await this.wget({
             fn: 'apTaskList',
-            body: {"linkId": this.linkId},
+            body: {"linkId": p.linkId},
             algo: {},
             cookie
         })
-        // console.log(apTask)
+        // console.log(apTask.data)
         for (let i of this.haskey(apTask, 'data')) {
             if (i.taskLimitTimes == i.taskDoTimes) {
                 console.log("任务已完成:", i.taskShowTitle)
@@ -52,13 +85,14 @@ class Main extends Template {
                     console.log("正在运行:", i.taskShowTitle)
                     switch (i.taskType) {
                         case 'SHARE_INVITE':
+                            this.dict[p.linkId].taskId = i.id
                             break
                         case 'BROWSE_CHANNEL':
                         case  'BROWSE_PRODUCT' :
                             let detail = await this.wget({
                                 fn: 'apTaskDetail',
                                 body: {
-                                    "linkId": this.linkId,
+                                    "linkId": p.linkId,
                                     "taskType": i.taskType,
                                     "taskId": i.id,
                                     "channel": 4,
@@ -74,7 +108,7 @@ class Main extends Template {
                                 let doTask = await this.wget({
                                     fn: 'apsDoTask',
                                     body: {
-                                        "linkId": this.linkId,
+                                        "linkId": p.linkId,
                                         "taskType": i.taskType,
                                         "taskId": i.id,
                                         "channel": 4,
@@ -94,7 +128,7 @@ class Main extends Template {
                             let doTask = await this.wget({
                                 fn: 'apsDoTask',
                                 body: {
-                                    "linkId": this.linkId,
+                                    "linkId": p.linkId,
                                     "taskType": i.taskType,
                                     "taskId": i.id,
                                     "channel": 4,
@@ -123,7 +157,7 @@ class Main extends Template {
             try {
                 let lottery = await this.wget({
                     fn: 'superLeagueLottery',
-                    body: {"linkId": "mS2PkOqrtmfneDMmhJ3dbQ"},
+                    body: {"linkId": p.linkId},
                     algo: {'appId': '60dc4'},
                     cookie
                 })
@@ -151,7 +185,6 @@ class Main extends Template {
                         console.log('没抽到奖品')
                     }
                     else {
-                        console.log(data)
                         this.print(`抽到类型: ${prizeType} ${data.codeDesc} ${data.prizeDesc}`, p.user)
                     }
                 }
@@ -176,4 +209,5 @@ class Main extends Template {
     }
 }
 
-module.exports = Main;
+module
+    .exports = Main;
