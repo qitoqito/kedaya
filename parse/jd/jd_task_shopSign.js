@@ -63,7 +63,7 @@ class Main extends Template {
                         if (this.haskey(shopInfo, 'result.shopInfo.shopName')) {
                             info.shopName = shopInfo.result.shopInfo.shopName
                         }
-                        await this.cache.set(i, info)
+                        await this.cache.set(i, info, (s.data.endTime - this.timestamp) / 1000)
                         await this.wait(1000)
                     }
                     this.shareCode.push(info)
