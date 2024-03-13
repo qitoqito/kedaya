@@ -6,7 +6,6 @@ class Main extends Template {
         this.title = "京东摇京豆"
         this.cron = "23 0,22 * * *"
         this.task = 'local'
-        this.thread = 3
         this.import = ['jdAlgo']
     }
 
@@ -14,8 +13,8 @@ class Main extends Template {
         this.algo = new this.modules.jdAlgo()
         this.algo.set({
             'appId': 'c04c9',
-            'type': 'app',
-            'fp': '5960318609667564',
+            'type': 'main',
+            'version': '3.1'
         })
     }
 
@@ -25,7 +24,10 @@ class Main extends Template {
                 'url': `https://api.m.jd.com/?appid=sharkBean&functionId=pg_channel_page_data&body=${this.dumps({
                     "paramData": {"token": "dd2fb032-9fa3-493b-8cd0-0d57cd51812d", "device": "APP"},
                 })}`,
-                cookie
+                cookie,
+                algo: {
+                    appId: '28cc6'
+                }
             }
         )
         if (this.haskey(data, 'data.floorInfoList')) {
@@ -73,6 +75,7 @@ class Main extends Template {
                         )
                         console.log("正在执行:", i.title, doTask.success)
                     }
+                    await this.wait(1000)
                 }
             }
             for (let i = 0; i<20; i++) {
@@ -98,6 +101,7 @@ class Main extends Template {
                 else {
                     break
                 }
+                await this.wait(1000)
             }
             if (beanNum) {
                 console.log(`共获得京豆: ${beanNum}`)

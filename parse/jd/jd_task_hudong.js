@@ -8,6 +8,7 @@ class Main extends Template {
         this.task = 'local'
         this.verify = 1
         this.import = ['fs', 'vm']
+        this.filter = 'encryptProjectId'
     }
 
     async prepare() {
@@ -50,67 +51,97 @@ class Main extends Template {
                         referer: "https://u.jd.com/"
                     }
                 )
-                let encryptProjectId = this.match(/\\"encryptProjectId\\":\\"(\w+)\\"/, html)
-                let flrs = this.match(/"paginationFlrs":"([^\"]+)"/g, html)
-                if (!encryptProjectId && flrs) {
-                    let id = this.match(/active\/(\w+)/, url)
-                    let floor = await this.curl({
-                            'url': `https://api.m.jd.com/?client=wh5&clientVersion=1.0.0&functionId=qryH5BabelFloors`,
-                            'form': `body={"activityId":"${id}","pageNum":"-1","innerAnchor":"","groupAnchor":"","innerExtId":"","hideTopFoot":"","hideHeadBar":"","multiTopTabDirect":"","innerLinkBase64":"","innerIndex":"1","focus":"","forceTop":"","addressId":"","posLng":"","posLat":"", "homeCityLng":"","homeCityLat":"","gps_area":"0_0_0_0","headId":"","headArea":"","warehouseId":"","jxppGroupid":"","jxppFreshman":"","dcId":"","babelChannel":"","mitemAddrId":"","geo":{"lng":"","lat":""},"flt":"","paginationParam":"2","paginationFlrs":"${flrs}","transParam":"","siteClient":"apple","siteClientVersion":"11.1.4","matProExt":{}}&osVersion=&d_model=`,
+                if (html.includes("明星送好礼")) {
+                    let d = await this.curl({
+                            'url': `https://api.m.jd.com/?uuid=&client=wh5&area=16_1341_1347_44750&appid=ProductZ4Brand&functionId=showStarGiftInfo&t=1710313719813&body={"source":"star_gift"}`,
+                            cookie: this.cookies.main[0],
+                            referer: "https://u.jd.com/"
                         }
                     )
-                    encryptProjectId = this.match(/\\"encryptProjectId\\":\\"([^\\\\]+)\\"/, this.dumps(floor))
-                }
-                if (encryptProjectId) {
-                    let js = this.matchAll(/src="(.*?\.js)"/g, html).filter(d => d.includes('main.'))
-                    let appid = this.match(/appid\s*:\s*"(\w+)"/, html) || 'babelh5'
-                    let sourceCode = this.profile.sourceCode || 'aceaceqingzhan'
-                    let enc = this.match(/"enc"\s*:\s*"(\w+)"/, html)
-                    this.encParams = enc || "EEB688970D7CEBBE0E4A8E70D9A4CEE845D567BFB30E9D050540C6227BC766DBD057D54D5F798DBEE3B421FFEC3B65FA55B3BCD394F235B29DD14D0E12B5FC82"
-                    if (js) {
-                        for (let a of js) {
-                            let jsContent = await this.curl({
-                                    'url': `https:${a}`,
-                                }
-                            )
-                            let sc = this.match(/"(ace[a-zA-Z]+\d+)"/, jsContent)
-                            if (sc) {
-                                sourceCode = sc
-                            }
-                            let aid = this.match(/appid\s*:\s*"(\w+)"/, jsContent)
-                            if (aid) {
-                                appid = aid
-                            }
-                            if (sc && aid) {
-                                break
-                            }
-                        }
-                    }
-                    let projectId = this.matchAll(/"(encryptProjectI\w+)"\s*:\s*"(\w+)"/g, html)
-                    if (encryptProjectId) {
-                        this.shareCode.push({encryptProjectId, appid, sourceCode, projectId})
+                    let activityId = (this.haskey(d, 'data.result.activityBaseInfo.activityId'))
+                    if (activityId) {
+                        this.shareCode.push({
+                            encryptProjectId: d.data.result.activityBaseInfo.encryptProjectId,
+                            appid: 'ProductZ4Brand',
+                            activityId: d.data.result.activityBaseInfo.activityId
+                        })
                     }
                 }
-                else if (this.match(/businessh5\/([^\/]+)/, html)) {
-                    let js = this.matchAll(/src="(.*?\.js)"/g, html).filter(d => d.includes('app.'))
-                    if (js) {
-                        let jsContent = await this.curl({
-                                'url': `https:${js[0]}`,
+                else {
+                    let encryptProjectId = this.match(/\\"encryptProjectId\\":\\"(\w+)\\"/, html)
+                    let flrs = this.match(/"paginationFlrs":"([^\"]+)"/g, html)
+                    if (!encryptProjectId && flrs) {
+                        let id = this.match(/active\/(\w+)/, url)
+                        let floor = await this.curl({
+                                'url': `https://api.m.jd.com/?client=wh5&clientVersion=1.0.0&functionId=qryH5BabelFloors`,
+                                'form': `body={"activityId":"${id}","pageNum":"-1","innerAnchor":"","groupAnchor":"","innerExtId":"","hideTopFoot":"","hideHeadBar":"","multiTopTabDirect":"","innerLinkBase64":"","innerIndex":"1","focus":"","forceTop":"","addressId":"","posLng":"","posLat":"", "homeCityLng":"","homeCityLat":"","gps_area":"0_0_0_0","headId":"","headArea":"","warehouseId":"","jxppGroupid":"","jxppFreshman":"","dcId":"","babelChannel":"","mitemAddrId":"","geo":{"lng":"","lat":""},"flt":"","paginationParam":"2","paginationFlrs":"${flrs}","transParam":"","siteClient":"apple","siteClientVersion":"11.1.4","matProExt":{}}&osVersion=&d_model=`,
                             }
                         )
-                        let source = this.match(/ActivitySource\s*:\s*"(\w+)"/, jsContent)
-                        let functionId = this.match(/functionId\s*:\s*"(\w+)"/, jsContent)
-                        if (source && functionId) {
-                            let s = await this.curl({
-                                    'url': `https://api.m.jd.com/?appid=ProductZ4Brand&functionId=${functionId}&t=${this.timestamp}&body={"source":"${source}"}`,
+                        encryptProjectId = this.match(/\\"encryptProjectId\\":\\"([^\\\\]+)\\"/, this.dumps(floor))
+                    }
+                    let otherId = this.unique(this.matchAll([/\\"encryptProjectI\w+\\":\\"(\w+)\\"/g, /"encryptProjectI\w+":"(\w+)"/g], html))
+                    if (encryptProjectId || otherId) {
+                        let js = this.matchAll(/src="(.*?\.js)"/g, html).filter(d => d.includes('main.'))
+                        let appid = this.match(/appid\s*:\s*"(\w+)"/, html) || 'babelh5'
+                        let sourceCode = this.profile.sourceCode || 'aceaceqingzhan'
+                        let enc = this.match(/"enc"\s*:\s*"(\w+)"/, html)
+                        this.encParams = enc || "EEB688970D7CEBBE0E4A8E70D9A4CEE845D567BFB30E9D050540C6227BC766DBD057D54D5F798DBEE3B421FFEC3B65FA55B3BCD394F235B29DD14D0E12B5FC82"
+                        if (js) {
+                            for (let a of js) {
+                                let jsContent = await this.curl({
+                                        'url': `https:${a}`,
+                                    }
+                                )
+                                let sc = this.match(/"(ace[a-zA-Z]+\d+)"/, jsContent)
+                                if (sc) {
+                                    sourceCode = sc
+                                }
+                                let aid = this.match(/appid\s*:\s*"(\w+)"/, jsContent)
+                                if (aid) {
+                                    appid = aid
+                                }
+                                if (sc && aid) {
+                                    break
+                                }
+                            }
+                        }
+                        let projectId = this.matchAll(/"(encryptProjectI\w+)"\s*:\s*"(\w+)"/g, html)
+                        if (encryptProjectId) {
+                            this.shareCode.push({encryptProjectId, appid, sourceCode, projectId})
+                        }
+                        let otherProjectId = this.unique(this.matchAll(/\\"encryptProjectI\w+\\":\\"(\w+)\\"/g, html))
+                        for (let kk of otherProjectId || []) {
+                            this.shareCode.push({
+                                encryptProjectId: kk, appid, sourceCode, projectId
+                            })
+                        }
+                        for (let kk of otherId || []) {
+                            this.shareCode.push({
+                                encryptProjectId: kk, appid, sourceCode, projectId
+                            })
+                        }
+                    }
+                    else if (this.match(/businessh5\/([^\/]+)/, html)) {
+                        let js = this.matchAll(/src="(.*?\.js)"/g, html).filter(d => d.includes('app.'))
+                        if (js) {
+                            let jsContent = await this.curl({
+                                    'url': `https:${js[0]}`,
                                 }
                             )
-                            if (this.haskey(s, 'data.result.activityBaseInfo')) {
-                                this.shareCode.push({
-                                    encryptProjectId: s.data.result.activityBaseInfo.encryptProjectId,
-                                    appid: 'ProductZ4Brand',
-                                    activityId: s.data.result.activityBaseInfo.activityId
-                                })
+                            let source = this.match(/ActivitySource\s*:\s*"(\w+)"/, jsContent)
+                            let functionId = this.match(/functionId\s*:\s*"(\w+)"/, jsContent)
+                            if (source && functionId) {
+                                let s = await this.curl({
+                                        'url': `https://api.m.jd.com/?appid=ProductZ4Brand&functionId=${functionId}&t=${this.timestamp}&body={"source":"${source}"}`,
+                                    }
+                                )
+                                if (this.haskey(s, 'data.result.activityBaseInfo')) {
+                                    this.shareCode.push({
+                                        encryptProjectId: s.data.result.activityBaseInfo.encryptProjectId,
+                                        appid: 'ProductZ4Brand',
+                                        activityId: s.data.result.activityBaseInfo.activityId
+                                    })
+                                }
                             }
                         }
                     }
@@ -196,6 +227,22 @@ class Main extends Template {
                                         sourceCode
                                     }
                                 )
+                                if (extraType == 'shoppingActivity') {
+                                    let d = await this.curl({
+                                            'url': `https://api.m.jd.com/client.action?functionId=doInteractiveAssignment`,
+                                            'form': `appid=${appid}&body=${this.dumps(await this.body(
+                                                {
+                                                    encryptProjectId,
+                                                    "encryptAssignmentId": i.encryptAssignmentId,
+                                                    "itemId": j.itemId || j.advId,
+                                                    sourceCode, "actionType": 1,
+                                                }
+                                            ))}&sign=11&t=1653132222710`,
+                                            cookie
+                                        }
+                                    )
+                                    await this.wait((i.ext.waitDuration || 0) * 1000)
+                                }
                                 let s = await this.curl({
                                         'url': `https://api.m.jd.com/client.action?functionId=doInteractiveAssignment`,
                                         'form': `appid=${appid}&body=${this.dumps(body)}&sign=11&t=1653132222710`,
@@ -239,7 +286,7 @@ class Main extends Template {
                 if (!r) {
                     break
                 }
-                else if (['风险等级未通过', "未登录", '兑换积分不足', '场景不匹配'].includes(r.msg)) {
+                else if (['风险等级未通过', "未登录", '兑换积分不足', '场景不匹配', '活动太火爆了'].includes(r.msg)) {
                     console.log(r.msg)
                     break
                 }
@@ -257,7 +304,7 @@ class Main extends Template {
                 }
             }
         }
-        if (p.inviter.projectId) {
+        if (p.inviter.projectId.length>0) {
             for (let i of p.inviter.projectId) {
                 l = await this.curl({
                         'url': `https://api.m.jd.com/client.action?functionId=queryInteractiveInfo`,
@@ -361,7 +408,7 @@ class Main extends Template {
             if (this.haskey(r, 'data.result.rewards')) {
                 for (let g in r.data.result.rewards) {
                     let data = r.data.result.rewards[g]
-                    console.log(data)
+                    this.print(`获得京豆: ${data.beanNum}`, p.user)
                     gifts.push(data.beanNum)
                 }
             }
