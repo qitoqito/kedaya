@@ -21,7 +21,12 @@
     "tunnel": "0.0.6",
     "vm": "^0.1.0",
     "ws": "^7.4.3",
-    "zlib": "^1.0.5"
+    "zlib": "^1.0.5",
+    "user-agents": "^1.1.141",
+    "node-file-cache": "^1.0.2",
+    "moment": "2.29.2",
+    "node-telegram-bot-api": "0.56.0",
+    "socks-proxy-agent": "6.1"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
