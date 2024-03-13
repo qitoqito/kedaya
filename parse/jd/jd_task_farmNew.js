@@ -20,7 +20,7 @@ class Main extends Template {
         this.algo = new this.modules.jdAlgo({
             appId: "c57f6",
             type: 'main',
-            version: "4.2"
+            version: "4.4"
         })
         this._cc = 0
         try {
@@ -194,7 +194,7 @@ class Main extends Template {
                 await this.wait(3000)
             }
         }
-        for (let i of Array(10)) {
+        for (let i of Array(16)) {
             let wheelsLottery = await this.algo.curl({
                     'url': `https://api.m.jd.com/api`,
                     'form': `functionId=wheelsLottery&body={"linkId":"VssYBUKJOen7HZXpC8dRFA"}&t=1698555438657&appid=activities_platform&client=ios&clientVersion=12.1.6&cthr=1&loginType=&build=168909&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone13,3&lang=zh_CN&osVersion=15.1.1&partner=-1`,
@@ -211,7 +211,10 @@ class Main extends Template {
                 }
                 console.log('啥都没有抽到')
             }
-            await this.wait(3000)
+            if (!wheelsLottery) {
+                break
+            }
+            await this.wait(6000)
         }
         let signIn = await this.algo.curl({
                 'url': `https://api.m.jd.com/api`,
