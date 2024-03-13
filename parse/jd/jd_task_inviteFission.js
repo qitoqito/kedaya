@@ -18,11 +18,12 @@ class Main extends Template {
             count: '如需设置主号最多助力人数,请自行设置节点 count=n',
             stop: '抽奖过程中,如果抽到优惠券就停止抽奖'
         }
-        this.verify = 1
+        // this.verify = 1
     }
 
     async prepare() {
         this.linkId = this.custom || '3orGfh1YkwNLksxOcN8zWQ'
+        this.clientVersion = '12.4.2'
         this.algo = new this.modules.jdAlgo()
         console.log("获取助力码中...")
         for (let cookie of this.cookies.help) {
@@ -33,7 +34,7 @@ class Main extends Template {
                     cookie,
                     algo: {
                         type: "main",
-                        version: "4.1",
+                        version: "4.4",
                         appId: '02f8d'
                     },
                 }
@@ -51,7 +52,7 @@ class Main extends Template {
                             cookie,
                             algo: {
                                 type: "main",
-                                version: "4.1",
+                                version: "4.4",
                                 appId: 'eb67b'
                             }
                         }
@@ -98,7 +99,7 @@ class Main extends Template {
                         cookie,
                         algo: {
                             type: "main",
-                            version: "4.1",
+                            version: "4.4",
                             appId: 'c5389'
                         }
                     }
@@ -129,12 +130,12 @@ class Main extends Template {
                     this.complete.push(p.index)
                 }
                 let invite = await this.algo.curl({
-                        'url': `https://api.m.jd.com/?functionId=inviteFissionHome&body={"linkId":"${this.linkId}","inviter":"${p.inviter.inviter}"}&t=1677822607330&appid=activities_platform&client=ios&clientVersion=11.6.3`,
+                        'url': `https://api.m.jd.com/?functionId=inviteFissionHome&body={"linkId":"${this.linkId}","inviter":"${p.inviter.inviter}"}&t=1677822607330&appid=activities_platform&client=ios&clientVersion=12.4.2`,
                         // 'form':``,
                         cookie,
                         algo: {
                             type: "main",
-                            version: "4.1",
+                            version: "4.4",
                             appId: 'eb67b'
                         }
                     }
@@ -144,12 +145,12 @@ class Main extends Template {
         else if (this.turnCount == 1) {
             console.log("正在抽奖...")
             let invite = await this.algo.curl({
-                    'url': `https://api.m.jd.com/?functionId=inviteFissionHome&body={"linkId":"${this.linkId}","inviter":""}&t=1677822607330&appid=activities_platform&client=ios&clientVersion=11.6.3`,
+                    'url': `https://api.m.jd.com/?functionId=inviteFissionHome&body={"linkId":"${this.linkId}","inviter":""}&t=1677822607330&appid=activities_platform&client=ios&clientVersion=12.4.2`,
                     // 'form':``,
                     cookie,
                     algo: {
                         type: "main",
-                        version: "4.1",
+                        version: "4.4",
                         appId: 'eb67b'
                     }
                 }
@@ -167,13 +168,15 @@ class Main extends Template {
             let cash = [0]
             for (let i of Array(prizeNum)) {
                 let draw = await this.algo.curl({
-                        'url': `https://api.m.jd.com/?functionId=inviteFissionDrawPrize&body={%22linkId%22:%22${this.linkId}%22,%22lbs%22:%22null%22}&t=1677826749458&appid=activities_platform&client=ios&clientVersion=11.6.3`,
+                        'url': `https://api.m.jd.com/?functionId=inviteFissionDrawPrize&body={%22linkId%22:%22${this.linkId}%22,%22lbs%22:%22null%22}&t=1677826749458&appid=activities_platform&client=ios&clientVersion=12.4.2`,
                         // 'form':``,
+                        'referer': 'https://pro.m.jd.com/mall/active/3BwUqhLsJYrHP4qgAgDDJGrSVngK/index.html',
                         cookie,
                         algo: {
                             type: "main",
-                            version: "4.1",
-                            appId: 'c02c6'
+                            version: "4.4",
+                            appId: 'c02c6',
+                            //  ua: 'jdapp;iPhone;12.4.2;;;M/5.0;appBuild/169143;jdSupportDarkMode/0;ef/1;ep/%7B%22ciphertype%22%3A5%2C%22cipher%22%3A%7B%22ud%22%3A%22CJKyZJK4DQHuDtCmZWS3YJHtYtZvENY1CWVuCtDuZWPtCWOyZJK2Dm%3D%3D%22%2C%22sv%22%3A%22CJUkDy41%22%2C%22iad%22%3A%22%22%7D%2C%22ts%22%3A1710325397%2C%22hdid%22%3A%22JM9F1ywUPwflvMIpYPok0tt5k9kW4ArJEU3lfLhxBqw%3D%22%2C%22version%22%3A%221.0.3%22%2C%22appname%22%3A%22com.360buy.jdmobile%22%2C%22ridx%22%3A-1%7D;Mozilla/5.0 (iPhone; CPU iPhone OS 15_7_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;'
                         }
                     }
                 )
@@ -197,14 +200,14 @@ class Main extends Template {
         }
         else {
             console.log("正在提现...")
-            for (let _ = 1; _<=4; _++) {
+            for (let _ = 1; _<=5; _++) {
                 let list = await this.algo.curl({
-                        'url': `https://api.m.jd.com/?functionId=superRedBagList&body={"linkId":"${this.linkId}","pageNum":${_},"pageSize":100,"business":"fission"}&t=1677826759113&appid=activities_platform&client=ios&clientVersion=11.6.3`,
+                        'url': `https://api.m.jd.com/?functionId=superRedBagList&body={"linkId":"${this.linkId}","pageNum":${_},"pageSize":100,"business":"fission"}&t=1677826759113&appid=activities_platform&client=ios&clientVersion=12.4.2`,
                         // 'form':``,
                         cookie,
                         algo: {
                             type: "main",
-                            version: "4.1",
+                            version: "4.4",
                             appId: 'f2b1d'
                         }
                     }
@@ -213,11 +216,11 @@ class Main extends Template {
                     if (i.prizeType == 4 && i.state == 0) {
                         let cash = await this.algo.curl({
                                 'url': `https://api.m.jd.com/`,
-                                'form': `functionId=apCashWithDraw&body={"linkId":"${this.linkId}","businessSource":"NONE","base":{"id":${i.id},"business":"fission","poolBaseId":${i.poolBaseId},"prizeGroupId":${i.prizeGroupId},"prizeBaseId":${i.prizeBaseId},"prizeType":${i.prizeType}}}&t=1677826760325&appid=activities_platform&client=ios&clientVersion=11.6.3`,
+                                'form': `functionId=apCashWithDraw&body={"linkId":"${this.linkId}","businessSource":"NONE","base":{"id":${i.id},"business":"fission","poolBaseId":${i.poolBaseId},"prizeGroupId":${i.prizeGroupId},"prizeBaseId":${i.prizeBaseId},"prizeType":${i.prizeType}}}&t=1677826760325&appid=activities_platform&client=ios&clientVersion=12.4.2`,
                                 cookie,
                                 algo: {
                                     type: "main",
-                                    version: "4.1",
+                                    version: "4.4",
                                     appId: '3c023'
                                 }
                             }
@@ -228,7 +231,7 @@ class Main extends Template {
                             console.log("风控账户,不能提现")
                             break
                         }
-                        await this.wait(6000)
+                        await this.wait(2000)
                     }
                     else if (i.prizeType == 4 && i.state == 2) {
                         if (this.profile.change) {
@@ -241,7 +244,24 @@ class Main extends Template {
                             console.log(`转换现金:`, i.amount, this.haskey(change, 'data. prizeDesc'))
                         }
                         else {
-                            console.log('提现失败金额:', i.amount, '如需转换成红包请设置change节点参数')
+                            let cash = await this.algo.curl({
+                                    'url': `https://api.m.jd.com/`,
+                                    'form': `functionId=apCashWithDraw&body={"linkId":"${this.linkId}","businessSource":"NONE","base":{"id":${i.id},"business":"fission","poolBaseId":${i.poolBaseId},"prizeGroupId":${i.prizeGroupId},"prizeBaseId":${i.prizeBaseId},"prizeType":${i.prizeType}}}&t=1677826760325&appid=activities_platform&client=ios&clientVersion=12.4.2`,
+                                    cookie,
+                                    algo: {
+                                        type: "main",
+                                        version: "4.4",
+                                        appId: '3c023'
+                                    }
+                                }
+                            )
+                            console.log(`现金: ${i.amount}  ${this.haskey(cash, 'data.message')}`, p.user)
+                            let message = this.haskey(cash, 'data.message')
+                            if (message.includes('风控')) {
+                                console.log("风控账户,不能提现")
+                                break
+                            }
+                            await this.wait(2000)
                         }
                     }
                 }
