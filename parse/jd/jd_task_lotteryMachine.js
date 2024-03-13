@@ -12,10 +12,10 @@ class Main extends Template {
     async prepare() {
         this.algo = new this.modules.jdAlgo({
             appId: 'd7439',
-            version: '4.1',
+            version: '4.4',
             type: 'main'
         })
-        this.linkId = this.profile.linkId || 'p_HAvgmOZnWOyRb-2ZJkVA'
+        this.linkId = this.profile.linkId || 'BOUsgF1gvgC-CyVMnenNeA'
     }
 
     async main(p) {
@@ -26,6 +26,7 @@ class Main extends Template {
             algo: {'appId': 'd7439'},
             cookie
         })
+        console.log(home)
         if (this.haskey(home, 'data.notLogin')) {
             console.log("账号过期...")
             return
@@ -44,10 +45,26 @@ class Main extends Template {
             else {
                 console.log(`正在运行:`, i.taskTitle, i.taskType)
                 switch (i.taskType) {
+                    case 'SIGN':
+                        let sign = await this.wget({
+                            fn: 'apsDoTask',
+                            body: {
+                                "taskType": "SIGN",
+                                "taskId": i.id,
+                                "channel": 4,
+                                "checkVersion": true,
+                                "linkId": this.linkId,
+                            },
+                            algo: {
+                                appId: '54ed7'
+                            },
+                            cookie
+                        })
                     case 'ORDER_MARK':
                         break
                     case 'BROWSE_CHANNEL':
-                    case  'BROWSE_PRODUCT' :
+                    case  'BROWSE_PRODUCT':
+                    case 'FOLLOW_SHOP':
                         let apTaskDetail = await this.wget({
                             fn: 'apTaskDetail',
                             body: {
@@ -78,7 +95,7 @@ class Main extends Template {
                                     cookie
                                 })
                                 if (this.haskey(doTask, 'success')) {
-                                    console.log("任务完成")
+                                    console.log("任务完成", `[${j}/${i.taskLimitTimes - i.taskDoTimes}]`)
                                 }
                                 else {
                                     console.log("任务失败:", this.haskey(doTask, 'errMsg') || doTask)
@@ -90,7 +107,14 @@ class Main extends Template {
                 }
             }
         }
-        for (let i of Array(10)) {
+          home = await this.wget({
+            fn: 'lotteryMachineHome',
+            body: {"linkId": this.linkId, "taskId": "", "inviter": ""},
+            algo: {'appId': 'd7439'},
+            cookie
+        })
+       let drawNum=this.haskey(home,'data.remainTimes')||0
+        for (let i of Array(drawNum)) {
             try {
                 let lottery = await this.wget({
                     fn: 'lotteryMachineDraw',
@@ -98,6 +122,7 @@ class Main extends Template {
                     algo: {'appId': 'd7439'},
                     cookie
                 })
+
                 if (this.haskey(lottery, 'code', 18002)) {
                     console.log('抽奖机会用完啦')
                     break
@@ -119,7 +144,6 @@ class Main extends Template {
                         console.log('没抽到奖品')
                     }
                     else {
-                        console.log(data)
                         this.print(`抽到类型: ${prizeType} ${data.codeDesc} ${data.prizeDesc}`, p.user)
                     }
                 }
