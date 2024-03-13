@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东全民大乐透"
-        this.cron = `${this.rand(0, 59)} ${this.rand(0, 9)},${this.rand(14, 21)} * * *`
+        this.cron = `${this.rand(0, 59)} ${this.rand(0, 22)} * * *`
         this.task = 'local'
         this.import = ['jdAlgo']
     }
@@ -26,7 +26,6 @@ class Main extends Template {
             algo: {'appId': 'd7439'},
             cookie
         })
-        console.log(home)
         if (this.haskey(home, 'data.notLogin')) {
             console.log("账号过期...")
             return
@@ -107,13 +106,13 @@ class Main extends Template {
                 }
             }
         }
-          home = await this.wget({
+        home = await this.wget({
             fn: 'lotteryMachineHome',
             body: {"linkId": this.linkId, "taskId": "", "inviter": ""},
             algo: {'appId': 'd7439'},
             cookie
         })
-       let drawNum=this.haskey(home,'data.remainTimes')||0
+        let drawNum = this.haskey(home, 'data.remainTimes') || 0
         for (let i of Array(drawNum)) {
             try {
                 let lottery = await this.wget({
@@ -122,7 +121,6 @@ class Main extends Template {
                     algo: {'appId': 'd7439'},
                     cookie
                 })
-
                 if (this.haskey(lottery, 'code', 18002)) {
                     console.log('抽奖机会用完啦')
                     break
