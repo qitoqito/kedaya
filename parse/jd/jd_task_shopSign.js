@@ -9,10 +9,12 @@ class Main extends Template {
         this.verify = 1
         this.model = 'user'
         this.readme = '追加: filename_expand="id1|id2"\n自定义: filename_custom="id1|id2"\n请自行通过其他渠道获取签到ID\n账号通知类似,只推送一个方便查看'
-        this.import = ['jdAlgo']
+        this.import = ['jdAlgo', 'fileCache']
     }
 
     async prepare() {
+        this.cache = this.modules["fileCache"]
+        await this.cache.connect({file: `${this.dirname}/temp/jd_task_shopSign.json`})
         this.algo = new this.modules.jdAlgo({
             type: "main",
             version: "4.4",
@@ -35,21 +37,34 @@ class Main extends Template {
         for (let i of this.unique(array)) {
             if (i.length == 32) {
                 try {
-                    let s = await this.algo.curl({
-                        url: `https://api.m.jd.com/api?appid=interCenter_shopSign&t=${this.timestamp}&loginType=2&functionId=interact_center_shopSign_getActivityInfo&body={"token":"${i}","venderId":""}`,
-                    })
-                    let info = {
-                        'activityId': s.data.id,
-                        'venderId': s.data.venderId,
-                        'token': i,
-                        continuePrizeRuleList: s.data.continuePrizeRuleList
+                    var ss = await this.cache.get(i)
+                    if (ss) {
+                        var info = this.jsonParse(ss)
                     }
-                    let shopInfo = await this.algo.curl({
-                            'url': `https://api.m.jd.com/?functionId=lite_getShopHomeBaseInfo&body={"venderId":"${s.data.venderId}","source":"appshop"}&t=1646398923902&appid=jdlite-shop-app&client=H5`,
+                    else {
+                        console.log("正在获取:", i)
+                        var s = await this.algo.curl({
+                            url: `https://api.m.jd.com/api?appid=interCenter_shopSign&t=${this.timestamp}&loginType=2&functionId=interact_center_shopSign_getActivityInfo&body={"token":"${i}","venderId":""}`,
+                            referer: 'https://h5.m.jd.com/'
+                        })
+                        if (!this.haskey(s, 'data.id')) {
+                            console.log("获取错误:", i)
                         }
-                    )
-                    if (this.haskey(shopInfo, 'result.shopInfo.shopName')) {
-                        info.shopName = shopInfo.result.shopInfo.shopName
+                        var info = {
+                            'activityId': s.data.id,
+                            'venderId': s.data.venderId,
+                            'token': i,
+                            continuePrizeRuleList: s.data.continuePrizeRuleList
+                        }
+                        let shopInfo = await this.algo.curl({
+                                'url': `https://api.m.jd.com/?functionId=lite_getShopHomeBaseInfo&body={"venderId":"${s.data.venderId}","source":"appshop"}&t=1646398923902&appid=jdlite-shop-app&client=H5`,
+                            }
+                        )
+                        if (this.haskey(shopInfo, 'result.shopInfo.shopName')) {
+                            info.shopName = shopInfo.result.shopInfo.shopName
+                        }
+                        await this.cache.set(i, info)
+                        await this.wait(1000)
                     }
                     this.shareCode.push(info)
                     this.plan.valid.push(i)
