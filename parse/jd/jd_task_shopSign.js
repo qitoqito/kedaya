@@ -4,15 +4,20 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东店铺连续签到"
-        this.cron = "33 0,15 * * *"
+        this.cron = `${this.rand(0, 59)} ${this.rand(0, 22)} * * *`
         this.task = 'local'
         this.verify = 1
         this.model = 'user'
-        this.thread = 3
         this.readme = '追加: filename_expand="id1|id2"\n自定义: filename_custom="id1|id2"\n请自行通过其他渠道获取签到ID\n账号通知类似,只推送一个方便查看'
+        this.import = ['jdAlgo']
     }
 
     async prepare() {
+        this.algo = new this.modules.jdAlgo({
+            type: "main",
+            version: "4.4",
+            appId: '4da33'
+        })
         let array = []
         if (this.custom) {
             array = this.getValue('custom')
@@ -29,16 +34,17 @@ class Main extends Template {
         }
         for (let i of this.unique(array)) {
             if (i.length == 32) {
-                let url = `https://api.m.jd.com/api?appid=interCenter_shopSign&t=${this.timestamp}&loginType=2&functionId=interact_center_shopSign_getActivityInfo&body={"token":"${i}","venderId":""}`
                 try {
-                    let s = await this.curl(url)
+                    let s = await this.algo.curl({
+                        url: `https://api.m.jd.com/api?appid=interCenter_shopSign&t=${this.timestamp}&loginType=2&functionId=interact_center_shopSign_getActivityInfo&body={"token":"${i}","venderId":""}`,
+                    })
                     let info = {
                         'activityId': s.data.id,
                         'venderId': s.data.venderId,
                         'token': i,
                         continuePrizeRuleList: s.data.continuePrizeRuleList
                     }
-                    let shopInfo = await this.curl({
+                    let shopInfo = await this.algo.curl({
                             'url': `https://api.m.jd.com/?functionId=lite_getShopHomeBaseInfo&body={"venderId":"${s.data.venderId}","source":"appshop"}&t=1646398923902&appid=jdlite-shop-app&client=H5`,
                         }
                     )
@@ -77,7 +83,7 @@ class Main extends Template {
             }
         }
         let maxDay = this.sum(this.column(p.inviter.continuePrizeRuleList, 'days'))
-        let s = await this.curl({
+        let s = await this.algo.curl({
                 'url': `https://api.m.jd.com/api?appid=interCenter_shopSign&loginType=2&functionId=interact_center_shopSign_getSignRecord&body={"token":"${p.inviter.token}","venderId":${p.inviter.venderId},"activityId":${p.inviter.activityId},"type":56,"actionType":7}&jsonp=jsonp1004`,
                 cookie
             }
@@ -88,7 +94,7 @@ class Main extends Template {
             this.plan.except.push(p.inviter.token)
         }
         else {
-            let signIn = await this.curl({
+            let signIn = await this.algo.curl({
                     'url': `https://api.m.jd.com/api?appid=interCenter_shopSign&loginType=2&functionId=interact_center_shopSign_signCollectGift&body={"token":"${p.inviter.token}","venderId":${p.inviter.venderId},"activityId":${p.inviter.activityId},"type":56,"actionType":7}`,
                     cookie
                 }
