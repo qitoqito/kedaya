@@ -20,7 +20,8 @@ class Main extends Template {
         this.algo = new this.modules.jdAlgo({
             appId: "c57f6",
             type: 'main',
-            version: "4.4"
+            version: "4.4",
+            refere: 'https://h5.m.jd.com/pb/015686010/Bc9WX7MpCW7nW9QjZ5N3fFeJXMH/index.html'
         })
         this._cc = 0
         try {
@@ -37,7 +38,7 @@ class Main extends Template {
             fn: 'farm_home',
             body: {"version": 1},
             algo: {appId: 'c57f6'},
-            cookie,
+            cookie
         })
         if (this.turnCount == 1) {
             if (!this.cookies.help.includes(cookie)) {
@@ -135,6 +136,9 @@ class Main extends Template {
                     if (this.haskey(help, 'data.bizCode', 5004)) {
                         p.finish = 1
                     }
+                    else if (this.haskey(help, 'data.bizCode', -1001)) {
+                        p.finish = 1
+                    }
                     else if (this.haskey(help, 'data.bizCode', 5005)) {
                         this.dict[i].finish = 1
                     }
@@ -194,24 +198,33 @@ class Main extends Template {
                 await this.wait(3000)
             }
         }
+        let error = 0
         for (let i of Array(16)) {
             let wheelsLottery = await this.algo.curl({
                     'url': `https://api.m.jd.com/api`,
                     'form': `functionId=wheelsLottery&body={"linkId":"VssYBUKJOen7HZXpC8dRFA"}&t=1698555438657&appid=activities_platform&client=ios&clientVersion=12.1.6&cthr=1&loginType=&build=168909&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone13,3&lang=zh_CN&osVersion=15.1.1&partner=-1`,
-                    cookie, algo: {'appId': 'bd6c8'},
+                    cookie,
+                    algo: {'appId': 'bd6c8'},
                 }
             )
             if (this.haskey(wheelsLottery, 'data.prizeCode')) {
                 console.log("抽奖获得:", wheelsLottery.data.prizeCode)
+                error = 0
             }
             else {
                 if (this.haskey(wheelsLottery, 'code', 4000)) {
                     console.log('没有抽奖次数')
                     break
                 }
-                console.log('啥都没有抽到')
+                if (!wheelsLottery) {
+                    error++
+                    console.log('可能黑ip了,啥都没有抽到')
+                }
+                else {
+                    console.log('啥都没有抽到')
+                }
             }
-            if (!wheelsLottery) {
+            if (error>3) {
                 break
             }
             await this.wait(6000)
@@ -409,7 +422,7 @@ class Main extends Template {
         let headers = p.headers
         return await this.algo.curl({
                 'url': `https://api.m.jd.com/client.action`,
-                'form': `appid=signed_wh5&client=&clientVersion=1.0.0&screen=375*0&wqDefault=false&t=1698502026732&body=${typeof (p.body) == 'object' ? this.dumps(p.body) : p.body}&functionId=${p.fn}`,
+                'form': `appid=signed_wh5&client=&clientVersion=12.3.4&screen=375*0&wqDefault=false&t=1698502026732&body=${typeof (p.body) == 'object' ? this.dumps(p.body) : p.body}&functionId=${p.fn}`,
                 cookie: p.cookie,
                 algo: p.algo || {},
             }
