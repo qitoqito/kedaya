@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东轻松赚豆"
-        this.cron = `${this.rand(0, 59)} ${this.rand(8, 11)},${this.rand(20, 23)} * * *`
+        this.cron = `${this.rand(0, 59)} ${this.rand(0, 22)} * * *`
         this.task = 'local'
         this.import = ['jdAlgo']
         this.delay = 1000
@@ -12,7 +12,7 @@ class Main extends Template {
 
     async prepare() {
         this.algo = new this.modules.jdAlgo({
-            version: '4.2',
+            version: '4.4',
             type: 'main',
         })
     }
@@ -29,6 +29,9 @@ class Main extends Template {
             }
         )
         let bean = 0
+        if (!this.haskey(l, 'data.floorInfoList')) {
+            console.log("没有获取到数据")
+        }
         for (let i of this.haskey(l, 'data.floorInfoList')) {
             if (i.title == '轻松赚豆') {
                 let token = i.token
@@ -91,12 +94,32 @@ class Main extends Template {
                     }
                 }
             }
+            else if (i.name == '签到活动') {
+                let sign = await this.algo.curl({
+                        'url': `https://api.m.jd.com/`,
+                        'form': `functionId=pg_interact_interface_invoke&appid=jd-bean-task&body={"floorToken":"${i.token}","dataSourceCode":"signIn","argMap":{"currSignCursor":${i.floorData.signActInfo.currSignCursor},"signActId":${i.id}},"riskInformation":{}}`,
+                        cookie,
+                        algo: {
+                            appId: 'a7c04'
+                        }
+                    }
+                )
+                if (this.haskey(sign, 'data.rewardVos')) {
+                    console.log("签到成功")
+                    for (let kk of sign.data.rewardVos) {
+                        if (kk.jingBeanVo) {
+                            console.log('获得京豆:', kk.jingBeanVo.beanNum)
+                            bean += kk.jingBeanVo.beanNum
+                        }
+                    }
+                }
+                else {
+                    console.log(this.haskey(sign, 'message') || sign)
+                }
+            }
         }
         if (bean) {
             this.print(`共获得京豆: ${bean}`, p.user)
-        }
-        else {
-            console.log("任务已完成,或者黑号")
         }
     }
 }
