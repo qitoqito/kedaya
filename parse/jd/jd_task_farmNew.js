@@ -35,7 +35,7 @@ class Main extends Template {
 
     async main(p) {
         let cookie = p.cookie;
-        let stock = parseInt(this.profile.stock || 100)
+        let stock = parseInt(this.profile.stock || 50)
         let farmHome = await this.wget({
             fn: 'farm_home',
             body: {"version": 1},
@@ -101,7 +101,12 @@ class Main extends Template {
         if (!this.dict[p.user]) {
             this.dict[p.user] = {inviteCode}
         }
+        let helpError = 0
         for (let i in this.dict) {
+            if (helpError>3) {
+                console.log("多次助力没有返回数据,可能黑ip,停止助力...")
+                break
+            }
             console.log("正在助力:", i)
             if (p.finish) {
                 console.log("没有助力次数了")
@@ -142,6 +147,9 @@ class Main extends Template {
                     }
                     else if (this.haskey(help, 'data.bizCode', 5005)) {
                         this.dict[i].finish = 1
+                    }
+                    if (!help) {
+                        helpError++
                     }
                 }
                 await this.wait(4000)
