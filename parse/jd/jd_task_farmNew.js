@@ -11,7 +11,8 @@ class Main extends Template {
         this.hint = {
             'tenWater': '1 #每天只做10次浇水任务',
             'stock': "100 #保留水滴数",
-            'cache': "1 #缓存助力code,设置后不会每次运行后都把助力码都写入json"
+            'cache': "1 #缓存助力code,设置后不会每次运行后都把助力码都写入json",
+            'tree': '1 #如果检测到没有种树,自动选择一个商品进行种植'
         }
         this.turn = 2
     }
@@ -34,6 +35,7 @@ class Main extends Template {
 
     async main(p) {
         let cookie = p.cookie;
+        let stock = parseInt(this.profile.stock || 100)
         let farmHome = await this.wget({
             fn: 'farm_home',
             body: {"version": 1},
@@ -68,7 +70,6 @@ class Main extends Template {
             })
             try {
                 let skus = board.data.result.farmTreeLevels[0].farmLevelTrees[0]
-                console.log(skus)
                 console.log("正在种树,选择商品:", skus.skuName)
                 let tree = await this.wget({
                     fn: 'farm_plant_tree',
@@ -170,27 +171,67 @@ class Main extends Template {
                 await this.wait(4000)
             }
         }
-        let luTask = await this.algo.curl({
-                'url': `https://api.m.jd.com/api`,
-                'form': `functionId=apTaskList&body={"linkId":"VssYBUKJOen7HZXpC8dRFA"}&t=1699162457203&appid=activities_platform&client=ios&clientVersion=12.2.2&cthr=1&loginType=&loginWQBiz=wegame&openudid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&build=168923&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone13,3&lang=zh_CN&osVersion=15.1.1&partner=-1`,
-                cookie
-            }
-        )
+        await this.algo.set({referer: 'https://lotterydraw-new.jd.com/?id=VssYBUKJOen7HZXpC8dRFA'})
+        let error = 0
+        let luTask = await this.wget({
+            fn: 'apTaskList',
+            appid: "activities_platform",
+            body: {"linkId": "VssYBUKJOen7HZXpC8dRFA"},
+            algo: {},
+            cookie
+        })
         for (let i of this.haskey(luTask, 'data')) {
             if (i.taskDoTimes == i.taskLimitTimes) {
                 console.log("任务已完成:", i.taskShowTitle)
             }
             else {
                 console.log("正在运行:", i.taskShowTitle)
-                let luDo = await this.algo.curl({
-                        'url': `https://api.m.jd.com/api`,
-                        'form': `functionId=apsDoTask&body={"taskType":"${i.taskType}","taskId":${i.id},"channel":4,"checkVersion":true,"cityId":"1234","provinceId":"12","countyId":"1314","linkId":"VssYBUKJOen7HZXpC8dRFA","itemId":"${encodeURIComponent(i.taskSourceUrl)}"}&t=1699162692631&appid=activities_platform&client=ios&clientVersion=12.2.2&cthr=1&loginType=&loginWQBiz=wegame&build=168923&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone13,3&lang=zh_CN&osVersion=15.1.1&partner=-1`,
-                        cookie,
-                        algo: {appId: '54ed7', version: '3.1'}
-                    }
-                )
+                let luDo = await this.wget({
+                    fn: 'apsDoTask',
+                    appid: "activities_platform",
+                    body: {
+                        "taskType": i.taskType,
+                        "taskId": i.id,
+                        "channel": 4,
+                        "checkVersion": true,
+                        "cityId": "1234",
+                        "provinceId": "12",
+                        "countyId": "1314",
+                        "linkId": "VssYBUKJOen7HZXpC8dRFA",
+                        "itemId": encodeURIComponent(i.taskSourceUrl)
+                    },
+                    algo: {'appId': '54ed7'},
+                    cookie
+                })
                 if (this.haskey(luDo, 'success')) {
-                    console.log("任务完成,抽奖次数+1")
+                    if (error<3) {
+                        console.log("任务完成,正在抽奖...")
+                        let wheelsLottery = await this.wget({
+                            fn: 'wheelsLottery',
+                            appid: "activities_platform",
+                            body: {"linkId": "VssYBUKJOen7HZXpC8dRFA"},
+                            algo: {'appId': 'bd6c8'},
+                            cookie
+                        })
+                        if (this.haskey(wheelsLottery, 'data.prizeCode')) {
+                            console.log("抽奖获得:", wheelsLottery.data.prizeCode)
+                        }
+                        else {
+                            if (this.haskey(wheelsLottery, 'code', 4000)) {
+                                console.log('没有抽奖次数')
+                            }
+                            if (!wheelsLottery) {
+                                console.log('可能黑ip了,啥都没有抽到')
+                            }
+                            else {
+                                console.log('啥都没有抽到')
+                            }
+                        }
+                        await this.wait(3000)
+                    }
+                    else {
+                        console.log("任务完成...")
+                    }
                 }
                 else {
                     console.log("任务失败", luDo)
@@ -198,15 +239,14 @@ class Main extends Template {
                 await this.wait(3000)
             }
         }
-        let error = 0
-        for (let i of Array(16)) {
-            let wheelsLottery = await this.algo.curl({
-                    'url': `https://api.m.jd.com/api`,
-                    'form': `functionId=wheelsLottery&body={"linkId":"VssYBUKJOen7HZXpC8dRFA"}&t=1698555438657&appid=activities_platform&client=ios&clientVersion=12.1.6&cthr=1&loginType=&build=168909&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone13,3&lang=zh_CN&osVersion=15.1.1&partner=-1`,
-                    cookie,
-                    algo: {'appId': 'bd6c8'},
-                }
-            )
+        for (let i of Array(12)) {
+            let wheelsLottery = await this.wget({
+                fn: 'wheelsLottery',
+                appid: "activities_platform",
+                body: {"linkId": "VssYBUKJOen7HZXpC8dRFA"},
+                algo: {'appId': 'bd6c8'},
+                cookie
+            })
             if (this.haskey(wheelsLottery, 'data.prizeCode')) {
                 console.log("抽奖获得:", wheelsLottery.data.prizeCode)
                 error = 0
@@ -224,17 +264,18 @@ class Main extends Template {
                     console.log('啥都没有抽到')
                 }
             }
-            if (error>3) {
+            if (error>2) {
                 break
             }
             await this.wait(6000)
         }
-        let signIn = await this.algo.curl({
-                'url': `https://api.m.jd.com/api`,
-                'form': `functionId=dongDongFarmSignIn&body={"linkId":"LCH-fV7hSnChB-6i5f4ayw"}&t=1698562800159&appid=activities_platform&client=ios&clientVersion=12.2.0`,
-                cookie, algo: {'appId': '65f9d'},
-            }
-        )
+        await this.algo.set({referer: 'https://h5.m.jd.com/pb/015686010/Bc9WX7MpCW7nW9QjZ5N3fFeJXMH/index.html'})
+        let signIn = await this.wget({
+            fn: 'dongDongFarmSignIn', appid: "activities_platform",
+            body: {"linkId": "LCH-fV7hSnChB-6i5f4ayw"},
+            algo: {'appId': '65f9d'},
+            cookie
+        })
         if (this.haskey(signIn, 'success')) {
             console.log('签到成功')
         }
@@ -300,6 +341,23 @@ class Main extends Template {
                                     bottleWater += kk.awardValue
                                 }
                             }
+                            if (bottleWater>stock) {
+                                let water = await this.wget({
+                                    fn: 'farm_water',
+                                    body: {"version": 1, "waterType": 1},
+                                    algo: {'appId': '28981'},
+                                    cookie
+                                })
+                                let bottleWater2 = this.haskey(water, 'data.result.bottleWater')
+                                if (bottleWater2) {
+                                    bottleWater = bottleWater2
+                                    console.log("浇水中,剩余水滴:", bottleWater)
+                                }
+                                else {
+                                    console.log('浇水失败:', this.haskey(water, 'data.bizMsg'))
+                                }
+                                await this.wait(3000)
+                            }
                         }
                         else {
                             console.log("获取失败:", this.haskey(award, 'data.bizMsg'))
@@ -325,6 +383,23 @@ class Main extends Template {
                         if (this.haskey(kk, 'awardType', 1)) {
                             bottleWater += kk.awardValue
                         }
+                    }
+                    if (bottleWater>stock) {
+                        let water = await this.wget({
+                            fn: 'farm_water',
+                            body: {"version": 1, "waterType": 1},
+                            algo: {'appId': '28981'},
+                            cookie
+                        })
+                        let bottleWater2 = this.haskey(water, 'data.result.bottleWater')
+                        if (bottleWater2) {
+                            bottleWater = bottleWater2
+                            console.log("浇水中,剩余水滴:", bottleWater)
+                        }
+                        else {
+                            console.log('浇水失败:', this.haskey(water, 'data.bizMsg'))
+                        }
+                        await this.wait(3000)
                     }
                 }
                 else {
@@ -375,6 +450,23 @@ class Main extends Template {
                                 bottleWater += kk.awardValue
                             }
                         }
+                        if (bottleWater>stock) {
+                            let water = await this.wget({
+                                fn: 'farm_water',
+                                body: {"version": 1, "waterType": 1},
+                                algo: {'appId': '28981'},
+                                cookie
+                            })
+                            let bottleWater2 = this.haskey(water, 'data.result.bottleWater')
+                            if (bottleWater2) {
+                                bottleWater = bottleWater2
+                                console.log("浇水中,剩余水滴:", bottleWater)
+                            }
+                            else {
+                                console.log('浇水失败:', this.haskey(water, 'data.bizMsg'))
+                            }
+                            await this.wait(3000)
+                        }
                     }
                     else {
                         console.log("获取失败:", this.haskey(award, 'data.bizMsg'))
@@ -386,7 +478,6 @@ class Main extends Template {
             console.log("跳过浇水: 检测到配置了tenWater参数,跳过浇水")
         }
         else {
-            let stock = parseInt(this.profile.stock || 0)
             if (stock && stock>=bottleWater) {
                 console.log("跳过浇水: 检测到配置了stock参数,剩余水滴小于保留水滴数")
             }
@@ -394,6 +485,7 @@ class Main extends Template {
                 console.log("剩余水滴:", bottleWater, '保留水滴数:', stock)
                 let count = parseInt((bottleWater - stock) / 10)
                 console.log("剩余可浇水次数:", count)
+                let waterError = 0
                 for (let _ of Array(count)) {
                     let water = await this.wget({
                         fn: 'farm_water',
@@ -404,13 +496,48 @@ class Main extends Template {
                     if (this.haskey(water, 'data.result.bottleWater')) {
                         bottleWater = this.haskey(water, 'data.result.bottleWater')
                         console.log("浇水中,剩余水滴:", bottleWater)
-                        if (bottleWater<10) {
-                            break
-                        }
                     }
                     else {
                         console.log('浇水失败:', this.haskey(water, 'data.bizMsg'))
-                        break
+                        if (this.profile.tree && this.haskey(water, 'data.bizCode', 3)) {
+                            try {
+                                let board = await this.wget({
+                                    fn: 'farm_tree_board',
+                                    body: {"version": 1},
+                                    algo: {},
+                                    cookie
+                                })
+                                let skus = board.data.result.farmTreeLevels[0].farmLevelTrees[0]
+                                console.log("正在种树,选择商品:", skus.skuName)
+                                let tree = await this.wget({
+                                    fn: 'farm_plant_tree',
+                                    body: {"version": 1, "uid": skus.uid},
+                                    algo: {},
+                                    cookie
+                                })
+                                console.log(tree)
+                                if (this.haskey(tree, 'data.success')) {
+                                    farmHome = await this.wget({
+                                        'fn': 'farm_home',
+                                        'body': {"version": 1},
+                                        algo: {appId: 'c57f6'},
+                                        cookie,
+                                    })
+                                    home = this.haskey(farmHome, 'data.result') || {}
+                                }
+                                else {
+                                    console.log("种树失败")
+                                    return
+                                }
+                            } catch (e) {
+                                console.log("种树失败")
+                                return
+                            }
+                        }
+                        waterError++
+                        if (waterError>3) {
+                            break
+                        }
                     }
                     await this.wait(4000)
                 }
@@ -422,7 +549,7 @@ class Main extends Template {
         let headers = p.headers
         return await this.algo.curl({
                 'url': `https://api.m.jd.com/client.action`,
-                'form': `appid=signed_wh5&client=&clientVersion=12.3.4&screen=375*0&wqDefault=false&t=1698502026732&body=${typeof (p.body) == 'object' ? this.dumps(p.body) : p.body}&functionId=${p.fn}`,
+                'form': `appid=${p.appid || "signed_wh5"}&client=ios&clientVersion=12.3.4&screen=375*0&wqDefault=false&t=1698502026732&body=${typeof (p.body) == 'object' ? this.dumps(p.body) : p.body}&functionId=${p.fn}`,
                 cookie: p.cookie,
                 algo: p.algo || {},
             }
