@@ -7,34 +7,37 @@ class Main extends Template {
         this.cron = "6 6 6 6 6"
         this.help = 'main'
         this.task = 'local'
-        this.turn = 3
         this.import = ['jdAlgo']
-        this.delay = 500
+        this.delay = 1000
+        this.turn = 3
         this.model = 'user'
         this.hint = {
             help: "每天最多助力1人,有些黑号提现不了,请自行设置主号",
             change: "部分黑号提现不了,可以将现金转换红包,如需转换,请自行设置节点 change=1",
             delay: "默认500,即每次请求间隔为0.5s,如需修改,请自行设置节点 delay=n",
             count: '如需设置主号最多助力人数,请自行设置节点 count=n',
-            stop: '抽奖过程中,如果抽到优惠券就停止抽奖'
+            // stop: '抽奖过程中,如果抽到优惠券就停止抽奖',
+            reward: '频繁请求奖品页面容易黑ip,如果只想提现当前助力的号,请自行设置 reward=help',
+            page: "请求前面几页'我的奖品'数据,默认获取前5页数据,每页会获取100条奖品数据(app内默认每页20条数据)"
         }
         // this.verify = 1
     }
 
     async prepare() {
         this.linkId = this.custom || '3orGfh1YkwNLksxOcN8zWQ'
-        this.clientVersion = '12.4.2'
-        this.algo = new this.modules.jdAlgo()
+        this.algo = new this.modules.jdAlgo({
+            referer: 'https://pro.m.jd.com/mall/active/3BwUqhLsJYrHP4qgAgDDJGrSVngK/index.html',
+            type: "main",
+            version: "4.4"
+        })
         console.log("获取助力码中...")
         for (let cookie of this.cookies.help) {
             let user = this.userName(cookie)
             let home = await this.algo.curl({
                     'url': `https://api.m.jd.com/`,
-                    'form': `functionId=inviteFissionBeforeHome&body={"linkId":"${this.linkId}","isJdApp":false,"inviter":""}&t=1686444659424&appid=activities_platform&client=ios&clientVersion=1.0.0&build=&screen=375*667&networkType=wifi&d_brand=&d_model=&lang=zh_CN&osVersion=15_7_5&partner=&cthr=1`,
+                    'form': `functionId=inviteFissionBeforeHome&body={"linkId":"${this.linkId}","isJdApp":false,"inviter":""}&t=1686444659424&appid=activities_platform&client=ios&clientVersion=12.3.4&build=&screen=375*667&networkType=wifi&d_brand=&d_model=&lang=zh_CN&osVersion=15_7_5&partner=&cthr=1`,
                     cookie,
                     algo: {
-                        type: "main",
-                        version: "4.4",
                         appId: '02f8d'
                     },
                 }
@@ -47,12 +50,10 @@ class Main extends Template {
                 if (this.profile.count) {
                     let invite = await this.algo.curl({
                             'url': `https://api.m.jd.com/`,
-                            form: `functionId=inviteFissionHome&body={"linkId":"${this.linkId}","inviter":""}&t=1686444659424&appid=activities_platform&client=ios&clientVersion=1.0.0&build=&screen=375*667&networkType=wifi&d_brand=&d_model=&lang=zh_CN&osVersion=15_7_5&partner=&cthr=1`,
+                            form: `functionId=inviteFissionHome&body={"linkId":"${this.linkId}","inviter":""}&t=1686444659424&appid=activities_platform&client=ios&clientVersion=12.3.4&build=&screen=375*667&networkType=wifi&d_brand=&d_model=&lang=zh_CN&osVersion=15_7_5&partner=&cthr=1`,
                             // 'form':``,
                             cookie,
                             algo: {
-                                type: "main",
-                                version: "4.4",
                                 appId: 'eb67b'
                             }
                         }
@@ -94,12 +95,10 @@ class Main extends Template {
                 console.log(p.inviter.inviter)
                 let home = await this.algo.curl({
                         'url': `https://api.m.jd.com/`,
-                        form: `functionId=inviteFissionhelp&body={"linkId":"${this.linkId}","isJdApp":true,"inviter":"${p.inviter.inviter}"}&t=1686444659424&appid=activities_platform&client=ios&clientVersion=1.0.0&build=&screen=375*667&networkType=wifi&d_brand=&d_model=&lang=zh_CN&osVersion=15_7_5&partner=&cthr=1`,
+                        form: `functionId=inviteFissionhelp&body={"linkId":"${this.linkId}","isJdApp":true,"inviter":"${p.inviter.inviter}"}&t=1686444659424&appid=activities_platform&client=ios&clientVersion=12.3.4&build=&screen=375*667&networkType=wifi&d_brand=&d_model=&lang=zh_CN&osVersion=15_7_5&partner=&cthr=1`,
                         // 'form':``,
                         cookie,
                         algo: {
-                            type: "main",
-                            version: "4.4",
                             appId: 'c5389'
                         }
                     }
@@ -130,12 +129,10 @@ class Main extends Template {
                     this.complete.push(p.index)
                 }
                 let invite = await this.algo.curl({
-                        'url': `https://api.m.jd.com/?functionId=inviteFissionHome&body={"linkId":"${this.linkId}","inviter":"${p.inviter.inviter}"}&t=1677822607330&appid=activities_platform&client=ios&clientVersion=12.4.2`,
+                        'url': `https://api.m.jd.com/?functionId=inviteFissionHome&body={"linkId":"${this.linkId}","inviter":"${p.inviter.inviter}"}&t=1677822607330&appid=activities_platform&client=ios&clientVersion=12.3.4`,
                         // 'form':``,
                         cookie,
                         algo: {
-                            type: "main",
-                            version: "4.4",
                             appId: 'eb67b'
                         }
                     }
@@ -145,12 +142,10 @@ class Main extends Template {
         else if (this.turnCount == 1) {
             console.log("正在抽奖...")
             let invite = await this.algo.curl({
-                    'url': `https://api.m.jd.com/?functionId=inviteFissionHome&body={"linkId":"${this.linkId}","inviter":""}&t=1677822607330&appid=activities_platform&client=ios&clientVersion=12.4.2`,
+                    'url': `https://api.m.jd.com/?functionId=inviteFissionHome&body={"linkId":"${this.linkId}","inviter":""}&t=1677822607330&appid=activities_platform&client=ios&clientVersion=12.3.4`,
                     // 'form':``,
                     cookie,
                     algo: {
-                        type: "main",
-                        version: "4.4",
                         appId: 'eb67b'
                     }
                 }
@@ -168,15 +163,10 @@ class Main extends Template {
             let cash = [0]
             for (let i of Array(prizeNum)) {
                 let draw = await this.algo.curl({
-                        'url': `https://api.m.jd.com/?functionId=inviteFissionDrawPrize&body={%22linkId%22:%22${this.linkId}%22,%22lbs%22:%22null%22}&t=1677826749458&appid=activities_platform&client=ios&clientVersion=12.4.2`,
-                        // 'form':``,
-                        'referer': 'https://pro.m.jd.com/mall/active/3BwUqhLsJYrHP4qgAgDDJGrSVngK/index.html',
+                        'url': `https://api.m.jd.com/?functionId=inviteFissionDrawPrize&body={%22linkId%22:%22${this.linkId}%22,%22lbs%22:%22null%22}&t=1677826749458&appid=activities_platform&client=ios&clientVersion=12.3.4`,
                         cookie,
                         algo: {
-                            type: "main",
-                            version: "4.4",
-                            appId: 'c02c6',
-                            //  ua: 'jdapp;iPhone;12.4.2;;;M/5.0;appBuild/169143;jdSupportDarkMode/0;ef/1;ep/%7B%22ciphertype%22%3A5%2C%22cipher%22%3A%7B%22ud%22%3A%22CJKyZJK4DQHuDtCmZWS3YJHtYtZvENY1CWVuCtDuZWPtCWOyZJK2Dm%3D%3D%22%2C%22sv%22%3A%22CJUkDy41%22%2C%22iad%22%3A%22%22%7D%2C%22ts%22%3A1710325397%2C%22hdid%22%3A%22JM9F1ywUPwflvMIpYPok0tt5k9kW4ArJEU3lfLhxBqw%3D%22%2C%22version%22%3A%221.0.3%22%2C%22appname%22%3A%22com.360buy.jdmobile%22%2C%22ridx%22%3A-1%7D;Mozilla/5.0 (iPhone; CPU iPhone OS 15_7_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;'
+                            appId: 'c02c6'
                         }
                     }
                 )
@@ -199,28 +189,34 @@ class Main extends Template {
             }
         }
         else {
+            if (this.profile.reward && this.profile.reward == 'help' && !this.cookies.help.includes(p.cookie)) {
+                console.log("本轮提现只限于主号,跳过运行...")
+                return
+            }
             console.log("正在提现...")
-            for (let _ = 1; _<=5; _++) {
+            let pageNum = parseInt(this.profile.page || 5)
+            for (let _ = 1; _<=pageNum; _++) {
                 let list = await this.algo.curl({
-                        'url': `https://api.m.jd.com/?functionId=superRedBagList&body={"linkId":"${this.linkId}","pageNum":${_},"pageSize":100,"business":"fission"}&t=1677826759113&appid=activities_platform&client=ios&clientVersion=12.4.2`,
-                        // 'form':``,
+                        'url': `https://api.m.jd.com/`,
+                        'form': `functionId=superRedBagList&body={"pageNum":${_},"pageSize":100,"linkId":"${this.linkId}","business":"fission"}&t=1710478841011&appid=activities_platform&client=ios&clientVersion=12.3.4&loginType=2&loginWQBiz=wegame&uuid=-1&build=-1&screen=390*844&networkType=-1&d_brand=-1&d_model=-1&lang=zh_CN&osVersion=-1&partner=-1&cthr=1`,
                         cookie,
                         algo: {
-                            type: "main",
-                            version: "4.4",
                             appId: 'f2b1d'
                         }
                     }
                 )
+                if (!this.haskey(list, 'data.items') || (this.haskey(list, 'data.items') && list.data.items.length<1)) {
+                    console.log(`获取第${_}页时没有数据[${_ * 100 - 99}_${_ * 100}]...`)
+                    break
+                }
+                console.log(`获取第${_}页...`)
                 for (let i of this.haskey(list, 'data.items')) {
                     if (i.prizeType == 4 && i.state == 0) {
                         let cash = await this.algo.curl({
                                 'url': `https://api.m.jd.com/`,
-                                'form': `functionId=apCashWithDraw&body={"linkId":"${this.linkId}","businessSource":"NONE","base":{"id":${i.id},"business":"fission","poolBaseId":${i.poolBaseId},"prizeGroupId":${i.prizeGroupId},"prizeBaseId":${i.prizeBaseId},"prizeType":${i.prizeType}}}&t=1677826760325&appid=activities_platform&client=ios&clientVersion=12.4.2`,
+                                'form': `functionId=apCashWithDraw&body={"linkId":"${this.linkId}","businessSource":"NONE","base":{"id":${i.id},"business":"fission","poolBaseId":${i.poolBaseId},"prizeGroupId":${i.prizeGroupId},"prizeBaseId":${i.prizeBaseId},"prizeType":${i.prizeType}}}&t=1677826760325&appid=activities_platform&client=ios&clientVersion=12.3.4`,
                                 cookie,
                                 algo: {
-                                    type: "main",
-                                    version: "4.4",
                                     appId: '3c023'
                                 }
                             }
@@ -246,11 +242,9 @@ class Main extends Template {
                         else {
                             let cash = await this.algo.curl({
                                     'url': `https://api.m.jd.com/`,
-                                    'form': `functionId=apCashWithDraw&body={"linkId":"${this.linkId}","businessSource":"NONE","base":{"id":${i.id},"business":"fission","poolBaseId":${i.poolBaseId},"prizeGroupId":${i.prizeGroupId},"prizeBaseId":${i.prizeBaseId},"prizeType":${i.prizeType}}}&t=1677826760325&appid=activities_platform&client=ios&clientVersion=12.4.2`,
+                                    'form': `functionId=apCashWithDraw&body={"linkId":"${this.linkId}","businessSource":"NONE","base":{"id":${i.id},"business":"fission","poolBaseId":${i.poolBaseId},"prizeGroupId":${i.prizeGroupId},"prizeBaseId":${i.prizeBaseId},"prizeType":${i.prizeType}}}&t=1677826760325&appid=activities_platform&client=ios&clientVersion=12.3.4`,
                                     cookie,
                                     algo: {
-                                        type: "main",
-                                        version: "4.4",
                                         appId: '3c023'
                                     }
                                 }
@@ -265,7 +259,7 @@ class Main extends Template {
                         }
                     }
                 }
-                await this.wait(1000)
+                await this.wait(6000)
             }
         }
     }
