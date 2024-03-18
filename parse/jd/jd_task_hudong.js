@@ -7,11 +7,13 @@ class Main extends Template {
         this.cron = "6 6 6 6 6"
         this.task = 'local'
         this.verify = 1
-        this.import = ['fs', 'vm']
-        this.filter = 'encryptProjectId'
+        this.import = ['fs', 'vm', 'jdAlgo']
     }
 
     async prepare() {
+        this.algo = new this.modules.jdAlgo({
+            verison: '4.4'
+        })
         try {
             let js = await this.modules.fs.readFileSync(this.dirname + '/static/vendors.683f5a61.js', 'utf-8')
             const fnMock = new Function;
@@ -145,6 +147,20 @@ class Main extends Template {
                             }
                         }
                     }
+                    if (this.shareCode.length<1) {
+                        let config = {appid: 'jdchoujiang_h5'}
+                        let activityCode = this.match(/"activityCode"\s*:\s*"(\w+)"/, html)
+                        let configCode = this.match(/"configCode"\s*:\s*"(\w+)"/, html)
+                        if (activityCode) {
+                            config.activityCode = activityCode
+                        }
+                        else if (configCode) {
+                            config.configCode = configCode
+                        }
+                        if (configCode || activityCode) {
+                            this.shareCode.push(config)
+                        }
+                    }
                 }
             }
         }
@@ -155,9 +171,141 @@ class Main extends Template {
             case "ProductZ4Brand":
                 await this.tewuz(p)
                 break
+            case 'jdchoujiang_h5':
+                await this.choujiang(p)
+                break
             default:
                 await this.hudongz(p)
                 break
+        }
+    }
+
+    async choujiang(p) {
+        let cookie = p.cookie;
+        let activityCode = p.inviter.activityCode
+        let configCode = p.inviter.configCode
+        let gifts = [];
+        if (configCode) {
+            for (let i of Array(30)) {
+                let c = await this.algo.curl({
+                        'url': `https://api.m.jd.com/api?client=&clientVersion=&appid=jdchoujiang_h5&t=1675835436298&functionId=moduleGetActivity&body={"configCode":"${configCode}","eid":"Q55HGKVK7KBUUTZP5QT27F4LSPKRTJ4NME4D5WYT6DQQ4XKZUSSI7HS66IY5AEO57JAZBME26RVD7HSD2SFJMSVTOE","fp":"ec9164c1ef3ccae8cb1308f149f5e860"}&uuid=${this.timestamp}1279309`,
+                        // 'form':``,
+                        cookie,
+                        algo: {
+                            appId: '05b33',
+                        }
+                    }
+                )
+                await this.wait(2000)
+                if (!this.haskey(c, 'data.dailyTask.taskList')) {
+                    break
+                }
+                let dd = 0
+                for (let i of this.haskey(c, 'data.dailyTask.taskList')) {
+                    console.log('正在浏览:', i.item.itemName)
+                    if (i.taskCount == i.finishCount) {
+                        console.log("任务已经完成了...")
+                    }
+                    else {
+                        dd = 1
+                        let d = await this.algo.curl({
+                                'url': `https://api.m.jd.com/api`,
+                                form: `https://api.m.jd.com/api?client=iOS&clientVersion=12.3.4&appid=jdchoujiang_h5&t=1710766913588&functionId=moduleDoTask&body={"groupType":${i.groupType},"configCode":"${configCode}","itemId":"${i.item.itemId}","eid":"C3HUEKC6G2V5WV6SOXJV5E4J2ILKIIHLPARTU7DKUSMS72ICFUVMMF7ZVZXDON6VLTUCVU2GNZ2RZRMVIDXGF2FBMU","fp":"57d2787cc682b0560998e9f5eacec300"}`,
+                                cookie,
+                                algo: {
+                                    appId: 'bbfbd',
+                                }
+                            }
+                        )
+                        if (this.haskey(d, 'success') && i.rewardQuantity) {
+                            gifts.push(`获得京豆: ${i.rewardQuantity}`)
+                            console.log(`获得京豆: ${i.rewardQuantity}`)
+                        }
+                        else {
+                            console.log(d)
+                        }
+                        if (this.match(/火爆|登陆|登录/, (this.haskey(d, 'errorMessage') || ''))) {
+                            dd = 0
+                            break
+                        }
+                        await this.wait(2000)
+                    }
+                }
+                if (dd == 0) {
+                    break
+                }
+            }
+        }
+        else if (activityCode) {
+            let a = await this.algo.curl({
+                    'url': `https://api.m.jd.com/api?client=iOS&clientVersion=12.3.4&appid=jdchoujiang_h5&t=1675835435363&functionId=lotteryDrawGet&body={"configCode":"${activityCode}","unionCardCode":""}&openid=-1&build=168500&osVersion=15.1.1&networkType=wifi&partner=&d_brand=iPhone&d_model=iPhone13,3&configCode=${activityCode}&unionCardCode=`,
+                    cookie,
+                    algo: {
+                        appId: '8b04a',
+                    }
+                }
+            )
+            let data = this.haskey(a, 'data')
+            if (data) {
+                for (let i of this.haskey(data, 'taskConfig')) {
+                    if (i.hasFinish) {
+                        console.log("任务已经完成:", i.taskName)
+                    }
+                    else {
+                        console.log("正在运行:", i.taskName)
+                        for (let j of this.haskey(i, 'taskItemList')) {
+                            let d = await this.curl({
+                                    'url': `https://api.m.jd.com/api`,
+                                    form: `client=iOS&clientVersion=12.3.4&appid=jdchoujiang_h5&t=1675838594588&functionId=lotteryDrawDoTask&body={"configCode":"${activityCode}","taskType":${i.taskType},"itemId":"${j.itemId}","taskId":${i.id},"babelChannel":""}&openid=-1&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&build=168500&osVersion=15.1.1&networkType=wifi&partner=&d_brand=iPhone&d_model=iPhone13,3`,
+                                    cookie,
+                                    algo: {
+                                        appId: '7a2b4',
+                                    }
+                                }
+                            )
+                            console.log('正在浏览:', j.itemName, d.success)
+                            if (this.haskey(d, 'errorMessage').includes('火爆') || this.haskey(d, 'errorMessage').includes('登陆') || this.haskey(d, 'errorMessage').includes('登录')) {
+                                break
+                            }
+                            if (i.viewTime) {
+                                await this.wait(parseInt(i.viewTime) * 1000)
+                            }
+                            let r = await this.curl({
+                                    'url': `https://api.m.jd.com/api`,
+                                    form: `client=iOS&clientVersion=12.3.4&appid=jdchoujiang_h5&t=1675838614020&functionId=lotteryDrawGetReward&body={"configCode":"${activityCode}","taskType":${i.taskType},"itemId":"${j.itemId}","taskId":${i.id},"babelChannel":""}&openid=-1&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&build=168500&osVersion=15.1.1&networkType=wifi&partner=&d_brand=iPhone&d_model=iPhone13,3`,
+                                    // 'form':``,
+                                    cookie,
+                                    algo: {
+                                        appId: '68877',
+                                    }
+                                }
+                            )
+                            console.log(r)
+                        }
+                    }
+                }
+            }
+            for (let i of Array(20)) {
+                let join = await this.algo.curl({
+                        'url': `https://api.m.jd.com/api?client=iOS&clientVersion=12.3.4&appid=jdchoujiang_h5&t=1675839283161&functionId=lotteryDrawJoin&body={"configCode":"${activityCode}"}&openid=-1&build=168500&osVersion=15.1.1&networkType=wifi&partner=&d_brand=iPhone&d_model=iPhone13,3&configCode=43746816730e4e5c98055ec4d62ca2cd`,
+                        cookie,
+                        algo: {
+                            appId: '56f82',
+                        }
+                    }
+                )
+                if (!this.haskey(join, 'success')) {
+                    break
+                }
+                console.log('抽奖获得:', join.data.rewardName)
+                if (join.data.rewardName) {
+                    gifts.push(join.data.rewardName)
+                }
+                await this.wait(2000)
+            }
+        }
+        if (gifts.length>0) {
+            this.notices(gifts.join("\n"), p.user)
         }
     }
 
@@ -408,7 +556,7 @@ class Main extends Template {
             if (this.haskey(r, 'data.result.rewards')) {
                 for (let g in r.data.result.rewards) {
                     let data = r.data.result.rewards[g]
-                    this.print(`获得京豆: ${data.beanNum}`, p.user)
+                    console.log(`获得京豆: ${data.beanNum}`)
                     gifts.push(data.beanNum)
                 }
             }
