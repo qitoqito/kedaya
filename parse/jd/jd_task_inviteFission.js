@@ -197,7 +197,7 @@ class Main extends Template {
             let pageNum = parseInt(this.profile.page || 5)
             for (let _ = 1; _<=pageNum; _++) {
                 let list = await this.algo.curl({
-                        'url': `https://api.m.jd.com/`,
+                        'url': `http://api.m.jd.com/`,
                         'form': `functionId=superRedBagList&body={"pageNum":${_},"pageSize":100,"linkId":"${this.linkId}","business":"fission"}&t=1710478841011&appid=activities_platform&client=ios&clientVersion=12.3.4&loginType=2&loginWQBiz=wegame&uuid=-1&build=-1&screen=390*844&networkType=-1&d_brand=-1&d_model=-1&lang=zh_CN&osVersion=-1&partner=-1&cthr=1`,
                         cookie,
                         algo: {
