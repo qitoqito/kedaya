@@ -238,6 +238,7 @@ class Main extends Template {
                         await this.wait(3000)
                     }
                     else {
+                        bd6c8
                         console.log("任务完成...")
                     }
                 }
@@ -247,7 +248,16 @@ class Main extends Template {
                 await this.wait(3000)
             }
         }
-        for (let i of Array(12)) {
+        let wheelsHome = await this.wget({
+            fn: 'wheelsHome',
+            appid: "activities_platform",
+            body: {"linkId": "VssYBUKJOen7HZXpC8dRFA", "inviteActId": "", "inviterEncryptPin": ""},
+            algo: {'appId': 'c06b7'},
+            cookie
+        })
+        let lotteryChances = this.haskey(wheelsHome, 'data.lotteryChances') || 0;
+        console.log("当前可以抽奖次数:", lotteryChances)
+        for (let i of Array(lotteryChances)) {
             let wheelsLottery = await this.wget({
                 fn: 'wheelsLottery',
                 appid: "activities_platform",
