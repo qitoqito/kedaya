@@ -7,13 +7,14 @@ class Main extends Template {
         this.cron = `${this.rand(0, 59)} ${this.rand(0, 22)} * * *`
         this.task = 'local'
         this.import = ['jdAlgo']
-        this.delay = 1000
+        this.delay = 2000
     }
 
     async prepare() {
         this.algo = new this.modules.jdAlgo({
             version: '4.4',
             type: 'main',
+            referer: 'https://jdbeantask-pro.pf.jd.com/'
         })
     }
 
@@ -24,7 +25,7 @@ class Main extends Template {
                 'form': `functionId=pg_channel_page_data&appid=jd-bean-task&body={"paramData":{"token":"2752f370-f499-44cd-b024-7c8e881cf7fe","channel":"","upstreamChannel":"","launchChannel":"APP"},"argMap":{"source":"JBean","ubb_loc":"app.myjbean.my-put.yz-my-put","ubb_info":"eyJwIjoiYnRwIn0%3D%0A"},"riskInformation":{}}`,
                 cookie,
                 algo: {
-                    appId: '4646c'
+                    appId: '4646c',
                 }
             }
         )
@@ -43,7 +44,7 @@ class Main extends Template {
                                 if (jj.title == '限时挑战') {
                                     let token2 = jj.token
                                     let id2 = jj.floorData.getHomeTaskInfo.beanShortTasks[0].taskEncId
-                                    let q = await this.curl({
+                                    let q = await this.algo.curl({
                                             'url': `https://api.m.jd.com/`,
                                             'form': `functionId=pg_interact_interface_invoke&appid=jd-bean-task&body={"floorToken":"${token2}","dataSourceCode":"taskReceive","argMap":{"channel":"","launchChannel":"APP","taskEncId":"${id2}"}}`,
                                             cookie,
@@ -56,7 +57,7 @@ class Main extends Template {
                                 }
                             }
                         }
-                        let z = await this.curl({
+                        let z = await this.algo.curl({
                                 'url': `https://api.m.jd.com/`,
                                 'form': `functionId=pg_interact_interface_invoke&appid=jd-bean-task&body={"floorToken":"${token}","dataSourceCode":"taskReceive","argMap":{"launchChannel":"APP","channel":"","taskEncId":"${j.taskEncId}"}}`,
                                 cookie,
