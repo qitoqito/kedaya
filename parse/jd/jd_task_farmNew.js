@@ -21,7 +21,7 @@ class Main extends Template {
         this.algo = new this.modules.jdAlgo({
             appId: "c57f6",
             type: 'main',
-            version: "4.4",
+            version: "4.2",
             refere: 'https://h5.m.jd.com/pb/015686010/Bc9WX7MpCW7nW9QjZ5N3fFeJXMH/index.html'
         })
         this._cc = 0
@@ -35,7 +35,7 @@ class Main extends Template {
 
     async main(p) {
         let cookie = p.cookie;
-        let stock = parseInt(this.profile.stock || 50)
+        let stock = parseInt(this.profile.stock || 20)
         let farmHome = await this.wget({
             fn: 'farm_home',
             body: {"version": 1},
@@ -249,13 +249,17 @@ class Main extends Template {
             }
         }
         let wheelsHome = await this.wget({
+            url: `http://api.m.jd.com/client.action`,
             fn: 'wheelsHome',
             appid: "activities_platform",
             body: {"linkId": "VssYBUKJOen7HZXpC8dRFA", "inviteActId": "", "inviterEncryptPin": ""},
-            algo: {'appId': 'c06b7'},
+            algo: {'appId': 'c06b7', version: "4.4"},
             cookie
         })
         let lotteryChances = this.haskey(wheelsHome, 'data.lotteryChances') || 0;
+        if (!wheelsHome) {
+            console.log("没有获取到wheelsHome数据")
+        }
         console.log("当前可以抽奖次数:", lotteryChances)
         for (let i of Array(lotteryChances)) {
             let wheelsLottery = await this.wget({
@@ -300,6 +304,7 @@ class Main extends Template {
         else {
             console.log(this.haskey(signIn, 'errMsg') || '签到失败')
         }
+        await this.algo.set({version: '4.2'})
         let taskList = await this.wget({
             fn: 'farm_task_list',
             body: {"version": 1, "channel": 0},
@@ -565,8 +570,9 @@ class Main extends Template {
 
     async wget(p) {
         let headers = p.headers
+        let url = p.url || `https://api.m.jd.com/client.action`
         return await this.algo.curl({
-                'url': `https://api.m.jd.com/client.action`,
+                url,
                 'form': `appid=${p.appid || "signed_wh5"}&client=ios&clientVersion=12.3.4&screen=375*0&wqDefault=false&t=1698502026732&body=${typeof (p.body) == 'object' ? this.dumps(p.body) : p.body}&functionId=${p.fn}`,
                 cookie: p.cookie,
                 algo: p.algo || {},
