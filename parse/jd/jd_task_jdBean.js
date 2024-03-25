@@ -7,7 +7,8 @@ class Main extends Template {
         this.cron = `${this.rand(0, 59)} ${this.rand(0, 22)} * * *`
         this.task = 'local'
         this.import = ['jdAlgo']
-        this.delay = 2000
+        this.delay = 5000
+        this.interval = 10000
     }
 
     async prepare() {
@@ -22,13 +23,14 @@ class Main extends Template {
         let cookie = p.cookie;
         let l = await this.algo.curl({
                 'url': `https://api.m.jd.com/`,
-                'form': `functionId=pg_channel_page_data&appid=jd-bean-task&body={"paramData":{"token":"2752f370-f499-44cd-b024-7c8e881cf7fe","channel":"","upstreamChannel":"","launchChannel":"APP"},"argMap":{"source":"JBean","ubb_loc":"app.myjbean.my-put.yz-my-put","ubb_info":"eyJwIjoiYnRwIn0%3D%0A"},"riskInformation":{}}`,
+                'form': `functionId=pg_channel_page_data&appid=jd-bean-task&body={"paramData":{"token":"2752f370-f499-44cd-b024-7c8e881cf7fe","channel":"","upstreamChannel":"","launchChannel":"APP"},"argMap":{"source":"JBean","ubb_loc":"app.myjbean.my-put.yz-my-put","ubb_info":"eyJwIjoiYnRwIn0%3D%0A"},"riskInformation":{}}&client=apple&clientVersion=12.3.1`,
                 cookie,
                 algo: {
                     appId: '4646c',
                 }
             }
         )
+        // console.log(l)
         let bean = 0
         if (!this.haskey(l, 'data.floorInfoList')) {
             console.log("没有获取到数据")
@@ -46,7 +48,7 @@ class Main extends Template {
                                     let id2 = jj.floorData.getHomeTaskInfo.beanShortTasks[0].taskEncId
                                     let q = await this.algo.curl({
                                             'url': `https://api.m.jd.com/`,
-                                            'form': `functionId=pg_interact_interface_invoke&appid=jd-bean-task&body={"floorToken":"${token2}","dataSourceCode":"taskReceive","argMap":{"channel":"","launchChannel":"APP","taskEncId":"${id2}"}}`,
+                                            'form': `functionId=pg_interact_interface_invoke&appid=jd-bean-task&body={"floorToken":"${token2}","dataSourceCode":"taskReceive","argMap":{"channel":"","launchChannel":"APP","taskEncId":"${id2}"}}&client=apple&clientVersion=12.3.1`,
                                             cookie,
                                             algo: {
                                                 appId: 'a7c04'
@@ -59,32 +61,35 @@ class Main extends Template {
                         }
                         let z = await this.algo.curl({
                                 'url': `https://api.m.jd.com/`,
-                                'form': `functionId=pg_interact_interface_invoke&appid=jd-bean-task&body={"floorToken":"${token}","dataSourceCode":"taskReceive","argMap":{"launchChannel":"APP","channel":"","taskEncId":"${j.taskEncId}"}}`,
+                                'form': `functionId=pg_interact_interface_invoke&appid=jd-bean-task&body={"floorToken":"${token}","dataSourceCode":"taskReceive","argMap":{"launchChannel":"APP","channel":"","taskEncId":"${j.taskEncId}"}}&client=apple&clientVersion=12.3.1`,
                                 cookie,
                                 algo: {
                                     appId: 'a7c04'
                                 }
                             }
                         )
+                        // console.log(z)
                         let id = this.haskey(j, 'browseInfoVO.browsePageVOS.0.id') || 0
                         let y = await this.algo.curl({
                                 'url': `https://api.m.jd.com/`,
-                                'form': `functionId=pg_interact_interface_invoke&appid=jd-bean-task&body={"floorToken":"${token}","dataSourceCode":"taskFinish","argMap":{"launchChannel":"APP","channel":"","taskEncId":"${j.taskEncId}","extParamsStr":{"browseTrxId":${id}}}}`,
+                                'form': `functionId=pg_interact_interface_invoke&appid=jd-bean-task&body={"floorToken":"${token}","dataSourceCode":"taskFinish","argMap":{"launchChannel":"APP","channel":"","taskEncId":"${j.taskEncId}","extParamsStr":{"browseTrxId":${id}}}}&client=apple&clientVersion=12.3.1`,
                                 cookie,
                                 algo: {
                                     appId: 'a7c04'
                                 }
                             }
                         )
+                        // console.log(y)
                         let d = await this.algo.curl({
                                 'url': `https://api.m.jd.com/`,
-                                'form': `functionId=pg_interact_interface_invoke&appid=jd-bean-task&body={"floorToken":"${token}","dataSourceCode":"taskReward","argMap":{"launchChannel":"APP","channel":"","taskEncId":"${j.taskEncId}"}}`,
+                                'form': `functionId=pg_interact_interface_invoke&appid=jd-bean-task&body={"floorToken":"${token}","dataSourceCode":"taskReward","argMap":{"launchChannel":"APP","channel":"","taskEncId":"${j.taskEncId}"}}&client=apple&clientVersion=12.3.1`,
                                 cookie,
                                 algo: {
                                     appId: "a7c04"
                                 }
                             }
                         )
+                        // console.log(d)
                         if (this.haskey(d, 'data.beanInfo.beanNum')) {
                             console.log('获得京豆:', d.data.beanInfo.beanNum)
                             bean += d.data.beanInfo.beanNum
@@ -98,7 +103,7 @@ class Main extends Template {
             else if (i.name == '签到活动') {
                 let sign = await this.algo.curl({
                         'url': `https://api.m.jd.com/`,
-                        'form': `functionId=pg_interact_interface_invoke&appid=jd-bean-task&body={"floorToken":"${i.token}","dataSourceCode":"signIn","argMap":{"currSignCursor":${i.floorData.signActInfo.currSignCursor},"signActId":${i.id}},"riskInformation":{}}`,
+                        'form': `functionId=pg_interact_interface_invoke&appid=jd-bean-task&body={"floorToken":"${i.token}","dataSourceCode":"signIn","argMap":{"currSignCursor":${i.floorData.signActInfo.currSignCursor},"signActId":${i.id}},"riskInformation":{}}&client=apple&clientVersion=12.3.1`,
                         cookie,
                         algo: {
                             appId: 'a7c04'
