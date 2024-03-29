@@ -59,7 +59,7 @@ class Main extends Template {
             }
         }
         if (doTask>0) {
-            await this.wait(5000)
+            await this.wait(10000)
             for (let i of this.haskey(home, 'data.scanTaskList')) {
                 if (i.status == 2) {
                 }
