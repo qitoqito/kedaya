@@ -9,7 +9,8 @@ class Main extends Template {
         this.import = ['jdAlgo']
         this.delay = 1000
         this.hint = {
-            openid: `微信抓包京东cookie里的open_id字段`
+            openid: `微信抓包京东cookie里的open_id字段`,
+            reward: `1 #有此值时,才会积分兑换京豆`
         }
         this.readme = "此活动需要微信登录京东获取账号open_id才能运行\n涉及隐私,不内置openid,请自行抓包获取,只需获取一个,尽量使用小号,然后填写字段: openid=xxxxx"
     }
@@ -87,7 +88,7 @@ class Main extends Template {
             console.log(this.haskey(sign, 'message') || sign)
         }
         for (let i of this.haskey(home, "data.exchangeTaskList")) {
-            if (i.rewardName.includes("京豆")) {
+            if (i.rewardName.includes("京豆") && this.profile.reward) {
                 let count = parseInt(i["rewardName"].replace("京豆", ""))
                 let point = i["point"]
                 if (count == point) {
