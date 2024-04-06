@@ -35,7 +35,7 @@ class Main extends Template {
         let l = await this.algo.curl({
                 'url': `http://api.m.jd.com/`,
                 'form': `functionId=pg_channel_page_data&appid=jd-bean-task&body={"paramData":{"token":"2752f370-f499-44cd-b024-7c8e881cf7fe","channel":"","upstreamChannel":"","launchChannel":"APP"},"argMap":{"source":"JBean","ubb_loc":"app.myjbean.my-put.yz-my-put","ubb_info":"eyJwIjoiYnRwIn0%3D"},"riskInformation":{}}`,
-                cookie,
+                cookie:p.cookie,
                 algo: {
                     appId: '4646c'
                 }
@@ -207,7 +207,7 @@ class Main extends Template {
         let cookie = p.cookie
         let ts = new Date().getTime().toString()
         let token = this.md5(ts + "5YT%aC89$22OI@pQ")
-        let pin = this.userPin(cookie) 
+        let pin = this.userPin(cookie)
         let json = {
             "pin_sid": "",
             "report_ts": ts,
