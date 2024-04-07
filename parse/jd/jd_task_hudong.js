@@ -53,13 +53,15 @@ class Main extends Template {
                         referer: "https://u.jd.com/"
                     }
                 )
+                // console.log(html)
                 if (html.includes("明星送好礼")) {
                     let d = await this.curl({
                             'url': `https://api.m.jd.com/?uuid=&client=wh5&area=16_1341_1347_44750&appid=ProductZ4Brand&functionId=showStarGiftInfo&t=1710313719813&body={"source":"star_gift"}`,
-                            cookie: this.cookies.main[0],
+                            // cookie: this.cookies.main[1],
                             referer: "https://u.jd.com/"
                         }
                     )
+                    // console.log(d)
                     let activityId = (this.haskey(d, 'data.result.activityBaseInfo.activityId'))
                     if (activityId) {
                         this.shareCode.push({
@@ -112,6 +114,7 @@ class Main extends Template {
                             this.shareCode.push({encryptProjectId, appid, sourceCode, projectId})
                         }
                         let otherProjectId = this.unique(this.matchAll(/\\"encryptProjectI\w+\\":\\"(\w+)\\"/g, html))
+
                         for (let kk of otherProjectId || []) {
                             this.shareCode.push({
                                 encryptProjectId: kk, appid, sourceCode, projectId
@@ -164,6 +167,7 @@ class Main extends Template {
                 }
             }
         }
+         this.shareCode = Object.values(this.column(this.shareCode, {}, 'encryptProjectId'));
     }
 
     async main(p) {
@@ -178,6 +182,8 @@ class Main extends Template {
                 await this.hudongz(p)
                 break
         }
+
+
     }
 
     async choujiang(p) {
@@ -185,6 +191,7 @@ class Main extends Template {
         let activityCode = p.inviter.activityCode
         let configCode = p.inviter.configCode
         let gifts = [];
+
         if (configCode) {
             for (let i of Array(30)) {
                 let c = await this.algo.curl({
@@ -236,7 +243,7 @@ class Main extends Template {
                 }
             }
         }
-        else if (activityCode) {
+        if (activityCode) {
             let a = await this.algo.curl({
                     'url': `https://api.m.jd.com/api?client=iOS&clientVersion=12.3.4&appid=jdchoujiang_h5&t=1675835435363&functionId=lotteryDrawGet&body={"configCode":"${activityCode}","unionCardCode":""}&openid=-1&build=168500&osVersion=15.1.1&networkType=wifi&partner=&d_brand=iPhone&d_model=iPhone13,3&configCode=${activityCode}&unionCardCode=`,
                     cookie,
