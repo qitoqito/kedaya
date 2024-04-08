@@ -36,6 +36,10 @@ class Main extends Template {
                     "encryptProjectId": "48mbNna587mvUybMYiVacWbLV2kY",
                     "encryptAssignmentId": "3MbhW1z98MGVgxKCxMwCtgXXCcTz"
                 },
+                "挑好物逛京东": {
+                    "encryptProjectId": "T8pSkvaZ1jCoBzD8PGHZyfHQStT",
+                    "encryptAssignmentId": "ip7cU7PDB5pE5jjFAfuunxVHtoW"
+                }
             }
         }
     }
@@ -68,7 +72,7 @@ class Main extends Template {
                     if (this.haskey(b, 'rewardsInfo.successRewards')) {
                         for (let kk in b.rewardsInfo.successRewards) {
                             for (let kkk of b.rewardsInfo.successRewards[kk]) {
-                                let text = `${kkk.rewardName}x${kkk.quantity}`
+                                let text = `${kkk.rewardName}: ${kkk.quantity}`
                                 console.log(text)
                                 gifts.push(text)
                             }
