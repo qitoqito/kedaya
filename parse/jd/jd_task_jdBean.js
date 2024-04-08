@@ -35,7 +35,7 @@ class Main extends Template {
         let l = await this.algo.curl({
                 'url': `http://api.m.jd.com/`,
                 'form': `functionId=pg_channel_page_data&appid=jd-bean-task&body={"paramData":{"token":"2752f370-f499-44cd-b024-7c8e881cf7fe","channel":"","upstreamChannel":"","launchChannel":"APP"},"argMap":{"source":"JBean","ubb_loc":"app.myjbean.my-put.yz-my-put","ubb_info":"eyJwIjoiYnRwIn0%3D"},"riskInformation":{}}`,
-                cookie:p.cookie,
+                cookie: p.cookie,
                 algo: {
                     appId: '4646c'
                 }
@@ -83,78 +83,82 @@ class Main extends Template {
                             continue
                         }
                         else {
-                            let z = await this.wget({
-                                    body: {
-                                        "floorToken": token,
-                                        "dataSourceCode": "taskReceive",
-                                        "argMap": {"launchChannel": "APP", "channel": "", "taskEncId": j.taskEncId}
-                                    },
-                                    cookie,
-                                    algo: {
-                                        appId: 'a7c04'
-                                    }
-                                }
-                            )
-                            await this.report(
-                                {
-                                    cookie,
-                                    "event_id": "NewVip_JBeanTask_RelaxTaskButton",
-                                    "psn": "102e084dd630eb7a4cb6e8651ed23deac1a2e067|1482",
-                                    "psq": "1",
-                                    "page_id": "NewVip_JBeanTask",
-                                    "page_name": "https://jdbeantask-pro.pf.jd.com/",
-                                    "page_param": "source=JBean&ubb_loc=app.myjbean.my-put.yz-my-put&ubb_info=eyJwIjoiYnRwIn0%3D",
-                                    "json_param": `{\"taskid\":\"${j.taskId}\",\"button_sort\":\"0\"}`,
-                                }
-                            )
-                            let id = this.haskey(j, 'browseInfoVO.browsePageVOS.0.id') || 0
-                            let y = await this.wget({
-                                    body: {
-                                        "floorToken": token,
-                                        "dataSourceCode": "taskFinish",
-                                        "argMap": {
-                                            "launchChannel": "APP",
-                                            "channel": "",
-                                            "taskEncId": j.taskEncId,
-                                            "extParamsStr": {"browseTrxId": id}
+                            let num = j.name == '浏览京享值联名信用卡' ? 5 : 1
+                            for (let _ of Array(num)) {
+                                let z = await this.wget({
+                                        body: {
+                                            "floorToken": token,
+                                            "dataSourceCode": "taskReceive",
+                                            "argMap": {"launchChannel": "APP", "channel": "", "taskEncId": j.taskEncId}
+                                        },
+                                        cookie,
+                                        algo: {
+                                            appId: 'a7c04'
                                         }
-                                    },
-                                    cookie,
-                                    algo: {
-                                        appId: 'a7c04'
                                     }
-                                }
-                            )
-                            // console.log(y)
-                            let d = await this.wget({
-                                    body: {
-                                        "floorToken": token,
-                                        "dataSourceCode": "taskReward",
-                                        "argMap": {"launchChannel": "APP", "channel": "", "taskEncId": j.taskEncId}
-                                    },
-                                    cookie,
-                                    algo: {
-                                        appId: "a7c04"
-                                    },
-                                    taskId: j.taskId
-                                }
-                            )
-                            await this.report(
-                                {
-                                    cookie,
-                                    "event_id": "NewVip_JBeanTask_RelaxTaskButton",
-                                    "psq": "1",
-                                    "page_param": "source=JBean&ubb_loc=app.myjbean.my-put.yz-my-put&ubb_info=eyJwIjoiYnRwIn0%3D",
-                                    "json_param": `{\"taskid\":\"${j.taskId}\",\"button_sort\":\"1\"}`,
-                                }
-                            )
-                            // console.log(d)
-                            if (this.haskey(d, 'data.beanInfo.beanNum')) {
-                                console.log('获得京豆:', d.data.beanInfo.beanNum)
-                                bean += d.data.beanInfo.beanNum
-                            }
-                            else {
+                                )
+                                await this.report(
+                                    {
+                                        cookie,
+                                        "event_id": "NewVip_JBeanTask_RelaxTaskButton",
+                                        "psn": "102e084dd630eb7a4cb6e8651ed23deac1a2e067|1482",
+                                        "psq": "1",
+                                        "page_id": "NewVip_JBeanTask",
+                                        "page_name": "https://jdbeantask-pro.pf.jd.com/",
+                                        "page_param": "source=JBean&ubb_loc=app.myjbean.my-put.yz-my-put&ubb_info=eyJwIjoiYnRwIn0%3D",
+                                        "json_param": `{\"taskid\":\"${j.taskId}\",\"button_sort\":\"0\"}`,
+                                    }
+                                )
+                                let id = this.haskey(j, 'browseInfoVO.browsePageVOS.0.id') || 0
+                                let y = await this.wget({
+                                        body: {
+                                            "floorToken": token,
+                                            "dataSourceCode": "taskFinish",
+                                            "argMap": {
+                                                "launchChannel": "APP",
+                                                "channel": "",
+                                                "taskEncId": j.taskEncId,
+                                                "extParamsStr": {"browseTrxId": id}
+                                            }
+                                        },
+                                        cookie,
+                                        algo: {
+                                            appId: 'a7c04'
+                                        }
+                                    }
+                                )
+                                // console.log(y)
+                                let d = await this.wget({
+                                        body: {
+                                            "floorToken": token,
+                                            "dataSourceCode": "taskReward",
+                                            "argMap": {"launchChannel": "APP", "channel": "", "taskEncId": j.taskEncId}
+                                        },
+                                        cookie,
+                                        algo: {
+                                            appId: "a7c04"
+                                        },
+                                        taskId: j.taskId
+                                    }
+                                )
+                                await this.report(
+                                    {
+                                        cookie,
+                                        "event_id": "NewVip_JBeanTask_RelaxTaskButton",
+                                        "psq": "1",
+                                        "page_param": "source=JBean&ubb_loc=app.myjbean.my-put.yz-my-put&ubb_info=eyJwIjoiYnRwIn0%3D",
+                                        "json_param": `{\"taskid\":\"${j.taskId}\",\"button_sort\":\"1\"}`,
+                                    }
+                                )
                                 console.log(d)
+                                if (this.haskey(d, 'data.beanInfo.beanNum')) {
+                                    console.log('获得京豆:', d.data.beanInfo.beanNum)
+                                    bean += d.data.beanInfo.beanNum
+                                }
+                                else {
+                                    console.log(d)
+                                    break
+                                }
                             }
                         }
                     }
