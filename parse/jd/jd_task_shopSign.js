@@ -44,8 +44,8 @@ class Main extends Template {
                     else {
                         console.log("正在获取:", i)
                         var s = await this.algo.curl({
-                            url: `https://api.m.jd.com/api?appid=interCenter_shopSign&t=${this.timestamp}&loginType=2&functionId=interact_center_shopSign_getActivityInfo&body={"token":"${i}","venderId":""}`,
-                            referer: 'https://h5.m.jd.com/'
+                            url: `http://api.m.jd.com/api?appid=interCenter_shopSign&t=${this.timestamp}&loginType=2&functionId=interact_center_shopSign_getActivityInfo&body={"token":"${i}","venderId":""}`,
+                            referer: 'http://h5.m.jd.com/'
                         })
                         if (!this.haskey(s, 'data.id')) {
                             console.log("获取错误:", i)
@@ -57,7 +57,7 @@ class Main extends Template {
                             continuePrizeRuleList: s.data.continuePrizeRuleList
                         }
                         let shopInfo = await this.algo.curl({
-                                'url': `https://api.m.jd.com/?functionId=lite_getShopHomeBaseInfo&body={"venderId":"${s.data.venderId}","source":"appshop"}&t=1646398923902&appid=jdlite-shop-app&client=H5`,
+                                'url': `http://api.m.jd.com/?functionId=lite_getShopHomeBaseInfo&body={"venderId":"${s.data.venderId}","source":"appshop"}&t=1646398923902&appid=jdlite-shop-app&client=H5`,
                             }
                         )
                         if (this.haskey(shopInfo, 'result.shopInfo.shopName')) {
@@ -99,18 +99,18 @@ class Main extends Template {
         }
         let maxDay = this.sum(this.column(p.inviter.continuePrizeRuleList, 'days'))
         let s = await this.algo.curl({
-                'url': `https://api.m.jd.com/api?appid=interCenter_shopSign&loginType=2&functionId=interact_center_shopSign_getSignRecord&body={"token":"${p.inviter.token}","venderId":${p.inviter.venderId},"activityId":${p.inviter.activityId},"type":56,"actionType":7}&jsonp=jsonp1004`,
+                'url': `http://api.m.jd.com/api?appid=interCenter_shopSign&loginType=2&functionId=interact_center_shopSign_getSignRecord&body={"token":"${p.inviter.token}","venderId":${p.inviter.venderId},"activityId":${p.inviter.activityId},"type":56,"actionType":7}&jsonp=jsonp1004`,
                 cookie
             }
         )
         let days = this.haskey(s, 'data.days')
         if (days>=maxDay) {
-            console.log(`签到已满${maxDay}天,跳出签到`, p.inviter.token, `https://shop.m.jd.com/?venderId=${p.inviter.venderId}`)
+            console.log(`签到已满${maxDay}天,跳出签到`, p.inviter.token, `http://shop.m.jd.com/?venderId=${p.inviter.venderId}`)
             this.plan.except.push(p.inviter.token)
         }
         else {
             let signIn = await this.algo.curl({
-                    'url': `https://api.m.jd.com/api?appid=interCenter_shopSign&loginType=2&functionId=interact_center_shopSign_signCollectGift&body={"token":"${p.inviter.token}","venderId":${p.inviter.venderId},"activityId":${p.inviter.activityId},"type":56,"actionType":7}`,
+                    'url': `http://api.m.jd.com/api?appid=interCenter_shopSign&loginType=2&functionId=interact_center_shopSign_signCollectGift&body={"token":"${p.inviter.token}","venderId":${p.inviter.venderId},"activityId":${p.inviter.activityId},"type":56,"actionType":7}`,
                     cookie
                 }
             )
