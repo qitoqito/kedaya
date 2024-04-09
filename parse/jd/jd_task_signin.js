@@ -39,6 +39,10 @@ class Main extends Template {
                 "挑好物逛京东": {
                     "encryptProjectId": "T8pSkvaZ1jCoBzD8PGHZyfHQStT",
                     "encryptAssignmentId": "ip7cU7PDB5pE5jjFAfuunxVHtoW"
+                },
+                "轻松低价买好书": {
+                    "encryptProjectId": "Coqy5btDg9MArEk392YfTwfyTSE",
+                    "encryptAssignmentId": "3WHpkArLYMdsBdJjSScvfxM7k2hF",
                 }
             }
         }
