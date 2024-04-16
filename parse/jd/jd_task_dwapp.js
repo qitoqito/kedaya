@@ -6,7 +6,7 @@ class Main extends Template {
         this.title = "京东充值金"
         this.cron = `${this.rand(0, 59)} ${this.rand(0, 22)} * * *`
         this.task = 'local'
-        this.interval = 6000
+        this.interval = 20000
     }
 
     async prepare() {
@@ -21,7 +21,7 @@ class Main extends Template {
             }
         )
         let cash = 0
-        for (let i of this.haskey(list, 'data')) {
+        for (let i of this.haskey(list, 'data') || []) {
             if (i.viewStatus == 3 || i.viewStatus == 1) {
                 console.log("任务完成:", i.name)
             }
@@ -69,6 +69,19 @@ class Main extends Template {
         if (this.haskey(sign, 'data.signInfo.signNum')) {
             cash += sign.data.signInfo.signNum
             totalNum = sign.data.totalNum
+        }
+        else {
+            if (sign) {
+                if (sign.code == 302) {
+                    console.log('签到过了...')
+                }
+                else {
+                    console.log(sign)
+                }
+            }
+            else {
+                console.log("没有获取到数据...")
+            }
         }
         if (cash>0) {
             if (totalNum) {
