@@ -4,6 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东充值金"
+        this.cron = `${this.rand(0, 59)} ${this.rand(0, 22)} * * *`
         this.task = 'local'
         this.interval = 6000
     }
