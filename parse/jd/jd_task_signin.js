@@ -41,8 +41,8 @@ class Main extends Template {
                     "encryptAssignmentId": "ip7cU7PDB5pE5jjFAfuunxVHtoW"
                 },
                 "轻松低价买好书": {
-                    "encryptProjectId": "Coqy5btDg9MArEk392YfTwfyTSE",
-                    "encryptAssignmentId": "3WHpkArLYMdsBdJjSScvfxM7k2hF",
+                    "encryptProjectId":"CwdQJ13q9zXq9L2RaBEDFeNKYz4",
+                    "encryptAssignmentId":"2vixB6omGiBMEjAWhwhwWDsRWKhu"
                 }
             }
         }
