@@ -36,13 +36,18 @@ class Main extends Template {
                     "encryptProjectId": "48mbNna587mvUybMYiVacWbLV2kY",
                     "encryptAssignmentId": "3MbhW1z98MGVgxKCxMwCtgXXCcTz"
                 },
-                "挑好物逛京东": {
-                    "encryptProjectId": "T8pSkvaZ1jCoBzD8PGHZyfHQStT",
-                    "encryptAssignmentId": "ip7cU7PDB5pE5jjFAfuunxVHtoW"
-                },
+                // "挑好物逛京东": {
+                //     "encryptProjectId": "T8pSkvaZ1jCoBzD8PGHZyfHQStT",
+                //     "encryptAssignmentId": "ip7cU7PDB5pE5jjFAfuunxVHtoW"
+                // },
                 "轻松低价买好书": {
-                    "encryptProjectId":"CwdQJ13q9zXq9L2RaBEDFeNKYz4",
-                    "encryptAssignmentId":"2vixB6omGiBMEjAWhwhwWDsRWKhu"
+                    "encryptProjectId": "CwdQJ13q9zXq9L2RaBEDFeNKYz4",
+                    "encryptAssignmentId": "2vixB6omGiBMEjAWhwhwWDsRWKhu"
+                },
+                "服饰美妆": {
+                    "encryptProjectId": "oRnJWzu84htA5EMrgQohdtjUp8b",
+                    "encryptAssignmentId": "gm9yNeFrcD9KLtZAV1gZQfNX3ux",
+                    "sourceCode": "ace20230504MZPD"
                 }
             }
         }
@@ -69,8 +74,11 @@ class Main extends Template {
                     let dd = this.dict[i][j]
                     let b = await this.algo.curl({
                             'url': `https://api.m.jd.com/client.action?functionId=doInteractiveAssignment`,
-                            form: `appid=babelh5&body={"sourceCode":"acetttsign","encryptProjectId":"${dd.encryptProjectId}","encryptAssignmentId":"${dd.encryptAssignmentId}","completionFlag":true,"itemId":"1","extParam":{"forceBot":"1","businessData":{},"signStr":"-1","sceneid":"babel_4RYbb8NtVAegmT35SuM2N3KKYLWt"},"activity_id":"4RYbb8NtVAegmT35SuM2N3KKYLWt","template_id":"00035605","floor_id":"101674850","enc":"082F6E6EB76A8CBEE15FCF7E92519D4A0C14A052EDB9C9248A0F4121699403D36C35C158EFB65C32311DCE62FF076E717D80B5322FC0FC3B1D3CA22644BC685E"}&sign=11&t=1710422476977`,
-                            cookie
+                            form: `appid=babelh5&body={"sourceCode":"${dd.sourceCode || 'acetttsign'}","encryptProjectId":"${dd.encryptProjectId}","encryptAssignmentId":"${dd.encryptAssignmentId}","completionFlag":true,"itemId":"1","extParam":{"forceBot":"1","businessData":{},"signStr":"-1","sceneid":"babel_4RYbb8NtVAegmT35SuM2N3KKYLWt"},"activity_id":"4RYbb8NtVAegmT35SuM2N3KKYLWt","template_id":"00035605","floor_id":"101674850","enc":"082F6E6EB76A8CBEE15FCF7E92519D4A0C14A052EDB9C9248A0F4121699403D36C35C158EFB65C32311DCE62FF076E717D80B5322FC0FC3B1D3CA22644BC685E"}&sign=11&t=1710422476977`,
+                            cookie,
+                            algo: {
+                                appId: 'e2224'
+                            }
                         }
                     )
                     if (this.haskey(b, 'rewardsInfo.successRewards')) {
@@ -98,5 +106,5 @@ class Main extends Template {
     }
 }
 
-module
-    .exports = Main;
+module.exports = Main;
+
