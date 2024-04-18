@@ -4,11 +4,11 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东新春吉市"
-        this.cron = `${this.rand(0, 59)} ${this.rand(0, 9)},${this.rand(14, 21)} * * *`
+        this.cron = `${this.rand(0, 59)} ${this.rand(0, 21)} * * *`
         this.task = 'local'
         this.import = ['jdAlgo']
         this.delay = 1500
-        this.turn = 2
+        // this.turn = 2
         this.hint = {
             'linkId': '活动id,多个id用|分隔'
         }
@@ -16,10 +16,11 @@ class Main extends Template {
 
     async prepare() {
         this.algo = new this.modules.jdAlgo({
-            version: '4.1',
-            type: "main"
+            version: '4.4',
+            type: "main",
+            referer:'https://prodev.m.jd.com/mall/active/PeDrj2LZQdhcLv8f2UiSCmW7RPF/index.html'
         })
-        this.linkId = this.profile.linkId || 'mS2PkOqrtmfneDMmhJ3dbQ|e7zLQiVe1HAgEmDiFhfugA'
+        this.linkId = this.profile.linkId || 'BP6qJ6Fb6wNHVu8BKb66rA'
         let linkid = this.linkId.split("|")
         for (let i of linkid) {
             this.code.push({linkId: i})
@@ -27,7 +28,7 @@ class Main extends Template {
                 code: [], taskId: ''
             }
         }
-        this.clientVersion = '11.6.3'
+        this.clientVersion = '12.3.1'
         this.taskId = ''
     }
 
