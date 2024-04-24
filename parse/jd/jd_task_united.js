@@ -6,11 +6,12 @@ class Main extends Template {
         this.title = "京东大牌集合任务"
         this.cron = "6 6 6 6 6"
         this.task = 'local'
-        this.import = ['fs', 'jdUrl', 'jdObf', 'fileCache']
+        this.import = ['fs', 'jdUrl', 'jdObf', 'fileCache', 'jdSign']
         this.verify = 1
     }
 
     async prepare() {
+        this.sign = new this.modules.jdSign()
         this.fileExpire = this.haskey(this.fileCache, 'isvObfuscator_expire') || 1800
         this.fileSalt = this.haskey(this.fileCache, 'isvObfuscator_salt') || "abcdefg"
         this.cache = this.modules["fileCache"]
@@ -199,10 +200,21 @@ class Main extends Template {
         } catch (e) {
         }
         if (!isvObfuscator) {
-            var isvObfuscator = await this.curl(this.modules.jdObf.app('isvObfuscator', {
-                "url": `https://lzdz1-isv.isvjcloud.com`,
-                "id": ""
-            }, 'post', p.cookie))
+            var isvObfuscator = await this.sign.jdCurl({
+                    'url': `https://api.m.jd.com/client.action`,
+                    'form': `body=${this.dumps({
+                        "url": `https://lzdz1-isv.isvjcloud.com`,
+                        "id": ""
+                    })}&build=169063&client=apple&clientVersion=12.3.4&functionId=isvObfuscator`,
+                    cookie: p.cookie
+                }
+            )
+            if (!this.haskey(isvObfuscator, 'token')) {
+                isvObfuscator = await this.curl(this.modules.jdObf.app('isvObfuscator', {
+                    "url": `https://lzdz1-isv.isvjcloud.com`,
+                    "id": ""
+                }, 'post', p.cookie))
+            }
             if (this.haskey(isvObfuscator, 'token') && this.cache.set) {
                 await this.cache.set(cacheKey, isvObfuscator, parseInt(this.fileExpire))
                 console.log("写入isvToken缓存成功...")
