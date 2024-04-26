@@ -65,7 +65,7 @@ class Main extends Template {
                 cookie
             }
         )
-        // console.log(sign)
+        console.log(sign)
         let totalNum = 0
         if (this.haskey(sign, 'data.signInfo.signNum')) {
             cash += sign.data.signInfo.signNum
