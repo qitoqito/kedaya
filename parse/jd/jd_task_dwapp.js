@@ -60,11 +60,12 @@ class Main extends Template {
             }
         }
         let sign = await this.curl({
-                'url': `https://api.m.jd.com/api?functionId=DATAWALLET_USER_SIGN`,
+                'url': `http://api.m.jd.com/api?functionId=DATAWALLET_USER_SIGN`,
                 form: `appid=h5-sep&body=${this.dumps(await this.cmd5x())}&client=m&clientVersion=6.0.0`,
                 cookie
             }
         )
+        // console.log(sign)
         let totalNum = 0
         if (this.haskey(sign, 'data.signInfo.signNum')) {
             cash += sign.data.signInfo.signNum
