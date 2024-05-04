@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东种豆得豆"
-        this.cron = "12 */3 * * *"
+        this.cron = `${this.rand(0, 59)} */8 * * *`
         this.task = 'local'
         this.turn = 2
         this.interval = 6000
@@ -12,7 +12,10 @@ class Main extends Template {
     }
 
     async prepare() {
-        this.algo = new this.modules['jdAlgo']()
+        this.algo = new this.modules['jdAlgo']({
+            type: 'main',
+            version: '3.1'
+        })
         try {
             let txt = this.modules.fs.readFileSync(`${this.dirname}/invite/jd_task_plantBean.json`).toString()
             this.code = this.loads(txt)
@@ -28,12 +31,10 @@ class Main extends Template {
         let lists = this.column(this.code, 'plantUuid')
         if (this.turnCount == 0) {
             var index = await this.algo.curl({
-                    'url': `https://api.m.jd.com/client.action?functionId=plantBeanIndex&appid=signed_wh5&body={"monitor_source":"plant_m_plant_index","monitor_refer":"","version":"9.2.4.3"}&client=apple&clientVersion=12.0.8&networkType=wifi&osVersion=15.1.1&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&partner=&d_brand=iPhone&d_model=iPhone13,3&screen=844*390&openudid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&adid=&uemps=0-2-999&ext={%22prstate%22:%220%22}&jsonp=jsonp_1691800684968_12756`,
+                    'url': `https://api.m.jd.com/client.action?functionId=plantBeanIndex&appid=signed_wh5&body={"monitor_source":"plant_m_plant_index","monitor_refer":"","version":"9.2.4.3"}&client=apple&clientVersion=12.3.1&networkType=wifi&osVersion=15.1.1&partner=&d_brand=iPhone&d_model=iPhone13,3&screen=844*390&adid=&uemps=0-2-999&ext={%22prstate%22:%220%22}`,
                     cookie,
                     algo: {
                         'appId': 'd246a',
-                        'type': 'web',
-                        'version': '3.1'
                     }
                 }
             )
@@ -61,7 +62,7 @@ class Main extends Template {
                 if (r.awardState == 5) {
                     let reward = await this.curl({
                             'url': `https://api.m.jd.com/client.action?functionId=receivedBean`,
-                            'form': `body={"monitor_refer":"receivedBean","monitor_source":"plant_app_plant_index","roundId":"${r.roundId}","version":"9.2.4.0"}&client=apple&clientVersion=10.0.4&&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&appid=signed_wh5&partner=&d_brand=iPhone&d_model=iPhone13%2C3&clientVersion=12.0.8&osVersion=15.1.1&client=apple&screen=844*390`,
+                            'form': `body={"monitor_refer":"receivedBean","monitor_source":"plant_app_plant_index","roundId":"${r.roundId}","version":"9.2.4.0"}&client=apple&clientVersion=12.3.1&&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&appid=signed_wh5&partner=&d_brand=iPhone&d_model=iPhone13%2C3&clientVersion=15.1.1&osVersion=15.1.1&client=apple&screen=844*390`,
                             cookie
                         }
                     )
@@ -73,7 +74,7 @@ class Main extends Template {
                 else if (r.roundState == 2) {
                     let re = await this.curl({
                             'url': `https://api.m.jd.com/client.action?functionId=receiveNutrients`,
-                            'form': `body={"monitor_refer":"plant_receiveNutrients","monitor_source":"plant_app_plant_index","roundId":"${r.roundId}","version":"9.2.4.0"}&client=apple&clientVersion=10.0.4&&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&appid=signed_wh5&partner=&d_brand=iPhone&d_model=iPhone13%2C3&clientVersion=12.0.8&osVersion=15.1.1&client=apple&screen=844*390`,
+                            'form': `body={"monitor_refer":"plant_receiveNutrients","monitor_source":"plant_app_plant_index","roundId":"${r.roundId}","version":"9.2.4.0"}&client=apple&clientVersion=12.3.1&&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&appid=signed_wh5&partner=&d_brand=iPhone&d_model=iPhone13%2C3&clientVersion=15.1.1&osVersion=15.1.1&client=apple&screen=844*390`,
                             cookie
                         }
                     )
@@ -81,7 +82,7 @@ class Main extends Template {
                         console.log(`获取${j.name}: ${j.nutrNum}`)
                         let culture = await this.algo.curl({
                                 'url': `https://api.m.jd.com/client.action?functionId=cultureBean`,
-                                'form': `body={"monitor_refer":"plant_index","monitor_source":"plant_app_plant_index","roundId":"${r.roundId}","nutrientsType":"${j.nutrientsType}","version":"9.2.4.0"}&client=apple&clientVersion=10.0.4&&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&appid=signed_wh5&partner=&d_brand=iPhone&d_model=iPhone13%2C3&clientVersion=12.0.8&osVersion=15.1.1&client=apple&screen=844*390`,
+                                'form': `body={"monitor_refer":"plant_index","monitor_source":"plant_app_plant_index","roundId":"${r.roundId}","nutrientsType":"${j.nutrientsType}","version":"9.2.4.0"}&client=apple&clientVersion=12.3.1&&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&appid=signed_wh5&partner=&d_brand=iPhone&d_model=iPhone13%2C3&clientVersion=15.1.1&osVersion=15.1.1&client=apple&screen=844*390`,
                                 cookie, algo: {
                                     appId: '6a216'
                                 }
@@ -143,7 +144,6 @@ class Main extends Template {
                             let sign = await this.curl({
                                     'url': `https://wq.jd.com/tjjdsignin/SignedInfo?channel=jx_zdddsq&_t=1663080425215&&_stk=_t%2Cchannel&_=1663080425642&sceneval=2&g_login_type=1&g_ty=ajax&appCode=msc588d6d5`,
                                     algo: {
-                                        version: "3.1",
                                         appId: '0f6ed',
                                         type: "pingou"
                                     },
@@ -156,7 +156,6 @@ class Main extends Template {
                                     // 'form':``,
                                     cookie,
                                     algo: {
-                                        version: "3.1",
                                         appId: '0f6ed',
                                         type: "pingou"
                                     }
@@ -242,7 +241,7 @@ class Main extends Template {
                             break
                         case 10:
                             let channel = await this.curl({
-                                    'url': `https://api.m.jd.com/client.action?functionId=plantChannelTaskList&body=%7B%7D&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&appid=signed_wh5&partner=&d_brand=iPhone&d_model=iPhone13%2C3&clientVersion=12.0.8&osVersion=15.1.1&client=apple&screen=844*390`,
+                                    'url': `https://api.m.jd.com/client.action?functionId=plantChannelTaskList&body=%7B%7D&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&appid=signed_wh5&partner=&d_brand=iPhone&d_model=iPhone13%2C3&clientVersion=15.1.1&osVersion=15.1.1&client=apple&screen=844*390`,
                                     // 'form':``,
                                     cookie
                                 }
@@ -251,7 +250,7 @@ class Main extends Template {
                             for (let n of list) {
                                 if (n.taskState == '2') {
                                     let plantChannelNutrientsTask = await this.algo.curl({
-                                            'url': `https://api.m.jd.com/client.action?functionId=plantChannelNutrientsTask&body={"channelTaskId":"${n.channelTaskId}","channelId":"${n.channelId}"}&uuid=16496899654652091525278.275.1651079578494&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&appid=signed_wh5&partner=&d_brand=iPhone&d_model=iPhone13%2C3&clientVersion=12.0.8&osVersion=15.1.1&client=apple&screen=844*390`,
+                                            'url': `https://api.m.jd.com/client.action?functionId=plantChannelNutrientsTask&body={"channelTaskId":"${n.channelTaskId}","channelId":"${n.channelId}"}&uuid=16496899654652091525278.275.1651079578494&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&appid=signed_wh5&partner=&d_brand=iPhone&d_model=iPhone13%2C3&clientVersion=15.1.1&osVersion=15.1.1&client=apple&screen=844*390`,
                                             // 'form':``,
                                             cookie,
                                             algo: {
@@ -273,7 +272,7 @@ class Main extends Template {
                             let shopTaskList =
                                 await this.curl({
                                         'url': `https://api.m.jd.com/client.action?functionId=shopTaskList`,
-                                        'form': `body={"monitor_refer": "plant_receiveNutrients"}&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&appid=signed_wh5&partner=&d_brand=iPhone&d_model=iPhone13%2C3&clientVersion=12.0.8&osVersion=15.1.1&client=apple&screen=844*390`,
+                                        'form': `body={"monitor_refer": "plant_receiveNutrients"}&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&appid=signed_wh5&partner=&d_brand=iPhone&d_model=iPhone13%2C3&clientVersion=15.1.1&osVersion=15.1.1&client=apple&screen=844*390`,
                                         cookie
                                     }
                                 )
@@ -282,7 +281,7 @@ class Main extends Template {
                                 if (k.taskState == '2') {
                                     let shopNutrientsTask = await this.algo.curl({
                                             'url': `https://api.m.jd.com/client.action?functionId=shopNutrientsTask`,
-                                            'form': `body={"monitor_refer":"plant_shopNutrientsTask","version":"9.2.4.0","shopId":"${k.shopId}","shopTaskId":"${k.shopTaskId}"}&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&appid=signed_wh5&partner=&d_brand=iPhone&d_model=iPhone13%2C3&clientVersion=12.0.8&osVersion=15.1.1&client=apple&screen=844*390`,
+                                            'form': `body={"monitor_refer":"plant_shopNutrientsTask","version":"9.2.4.0","shopId":"${k.shopId}","shopTaskId":"${k.shopTaskId}"}&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&appid=signed_wh5&partner=&d_brand=iPhone&d_model=iPhone13%2C3&clientVersion=15.1.1&osVersion=15.1.1&client=apple&screen=844*390`,
                                             cookie,
                                             algo: {
                                                 appId: "19c88"
@@ -305,7 +304,7 @@ class Main extends Template {
                             let productTaskList =
                                 await this.algo.curl({
                                         'url': `https://api.m.jd.com/client.action?functionId=productTaskList`,
-                                        'form': `body={"monitor_source":"plant_app_plant_index","monitor_refer":"plant_productTaskList","version":"9.2.4.0"}&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&appid=signed_wh5&partner=&d_brand=iPhone&d_model=iPhone13%2C3&clientVersion=12.0.8&osVersion=15.1.1&client=apple&screen=844*390`,
+                                        'form': `body={"monitor_source":"plant_app_plant_index","monitor_refer":"plant_productTaskList","version":"9.2.4.0"}&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&appid=signed_wh5&partner=&d_brand=iPhone&d_model=iPhone13%2C3&clientVersion=15.1.1&osVersion=15.1.1&client=apple&screen=844*390`,
                                         cookie,
                                         algo: {appId: '7351b'}
                                     }
@@ -315,7 +314,7 @@ class Main extends Template {
                                 // console.log(z[0])
                                 let productNutrientsTask = await this.algo.curl({
                                         'url': `https://api.m.jd.com/client.action?functionId=productNutrientsTask`,
-                                        'form': `body={"monitor_refer":"plant_productNutrientsTask","monitor_source":"plant_app_plant_index","productTaskId":"${z[0].productTaskId}","skuId":"${z[0].skuId}","version":"9.2.4.0"}&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&appid=signed_wh5&partner=&d_brand=iPhone&d_model=iPhone13%2C3&clientVersion=12.0.8&osVersion=15.1.1&client=apple&screen=844*390`,
+                                        'form': `body={"monitor_refer":"plant_productNutrientsTask","monitor_source":"plant_app_plant_index","productTaskId":"${z[0].productTaskId}","skuId":"${z[0].skuId}","version":"9.2.4.0"}&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&appid=signed_wh5&partner=&d_brand=iPhone&d_model=iPhone13%2C3&clientVersion=15.1.1&osVersion=15.1.1&client=apple&screen=844*390`,
                                         cookie,
                                         algo: {
                                             appId: 'a4e2d'
@@ -329,7 +328,7 @@ class Main extends Template {
                         default:
                             let s = await this.algo.curl({
                                     'url': `https://api.m.jd.com/client.action?functionId=receiveNutrientsTask`,
-                                    'form': `body={"monitor_refer":"plant_receiveNutrientsTask","monitor_source":"plant_app_plant_index","awardType":"${i.taskType}","version":"9.2.4.1"}&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&appid=signed_wh5&partner=&d_brand=iPhone&d_model=iPhone13%2C3&clientVersion=12.0.8&osVersion=15.1.1&client=apple&screen=844*390`,
+                                    'form': `body={"monitor_refer":"plant_receiveNutrientsTask","monitor_source":"plant_app_plant_index","awardType":"${i.taskType}","version":"9.2.4.1"}&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&appid=signed_wh5&partner=&d_brand=iPhone&d_model=iPhone13%2C3&clientVersion=15.1.1&osVersion=15.1.1&client=apple&screen=844*390`,
                                     cookie,
                                     alog: {appId: 'd22ac'}
                                 }
@@ -337,7 +336,7 @@ class Main extends Template {
                             await this.wait(2000)
                             let ss = await this.algo.curl({
                                     'url': `https://api.m.jd.com/client.action?functionId=receiveNutrientsTask`,
-                                    'form': `body={"monitor_refer":"plant_receiveNutrientsTask","monitor_source":"plant_app_plant_index","awardType":"${i.taskType}","version":"9.2.4.1"}&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&appid=signed_wh5&partner=&d_brand=iPhone&d_model=iPhone13%2C3&clientVersion=12.0.8&osVersion=15.1.1&client=apple&screen=844*390`,
+                                    'form': `body={"monitor_refer":"plant_receiveNutrientsTask","monitor_source":"plant_app_plant_index","awardType":"${i.taskType}","version":"9.2.4.1"}&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&appid=signed_wh5&partner=&d_brand=iPhone&d_model=iPhone13%2C3&clientVersion=15.1.1&osVersion=15.1.1&client=apple&screen=844*390`,
                                     cookie,
                                     alog: {appId: 'd22ac'}
                                 }
@@ -350,7 +349,7 @@ class Main extends Template {
             }
             let friendList = await this.curl({
                     'url': `https://api.m.jd.com/client.action?functionId=plantFriendList`,
-                    'form': `body={"version":"9.2.4.1","monitor_refer":"plantFriendList","monitor_source":"plant_app_plant_index","pageNum":"1"}&client=apple&clientVersion=10.0.4&&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&appid=signed_wh5&partner=&d_brand=iPhone&d_model=iPhone13%2C3&clientVersion=12.0.8&osVersion=15.1.1&client=apple&screen=844*390`,
+                    'form': `body={"version":"9.2.4.1","monitor_refer":"plantFriendList","monitor_source":"plant_app_plant_index","pageNum":"1"}&client=apple&clientVersion=12.3.1&&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&appid=signed_wh5&partner=&d_brand=iPhone&d_model=iPhone13%2C3&clientVersion=15.1.1&osVersion=15.1.1&client=apple&screen=844*390`,
                     cookie
                 }
             )
@@ -358,12 +357,10 @@ class Main extends Template {
                 if (i.nutrCount) {
                     let collectUserNutr = await this.algo.curl({
                             'url': `https://api.m.jd.com/client.action?functionId=collectUserNutr`,
-                            'form': `body={"monitor_refer":"collectUserNutr","monitor_source":"plant_app_plant_index","roundId":"${roundId}","paradiseUuid":"${i.paradiseUuid}","version":"9.2.4.1"}&client=apple&clientVersion=10.0.4&&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&appid=signed_wh5&partner=&d_brand=iPhone&d_model=iPhone13%2C3&clientVersion=12.0.8&osVersion=15.1.1&client=apple&screen=844*390`,
+                            'form': `body={"monitor_refer":"collectUserNutr","monitor_source":"plant_app_plant_index","roundId":"${roundId}","paradiseUuid":"${i.paradiseUuid}","version":"9.2.4.1"}&client=apple&clientVersion=12.3.1&&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&appid=signed_wh5&partner=&d_brand=iPhone&d_model=iPhone13%2C3&clientVersion=15.1.1&osVersion=15.1.1&client=apple&screen=844*390`,
                             cookie,
                             algo: {
                                 'appId': '14357',
-                                'type': 'web',
-                                'version': '3.1'
                             }
                         }
                     )
@@ -390,12 +387,10 @@ class Main extends Template {
                     console.log(`正在助力: ${k.user}`)
                     let index = await this.algo.curl({
                             'url': `https://api.m.jd.com/client.action?functionId=plantBeanIndex`,
-                            'form': `body={"plantUuid":"${uuid}","monitor_source":"plant_m_plant_index","monitor_refer":"","version":"9.2.4.1"}&client=apple&clientVersion=10.0.4&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&appid=signed_wh5&partner=&d_brand=iPhone&d_model=iPhone13%2C3&clientVersion=12.0.8&osVersion=15.1.1&client=apple&screen=844*390`,
+                            'form': `body={"plantUuid":"${uuid}","monitor_source":"plant_m_plant_index","monitor_refer":"","version":"9.2.4.1"}&client=apple&clientVersion=12.3.1&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&appid=signed_wh5&partner=&d_brand=iPhone&d_model=iPhone13%2C3&clientVersion=15.1.1&osVersion=15.1.1&client=apple&screen=844*390`,
                             cookie,
                             algo: {
                                 'appId': 'd246a',
-                                'type': 'web',
-                                'version': '3.1'
                             }
                         }
                     )
