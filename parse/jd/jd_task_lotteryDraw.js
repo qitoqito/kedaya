@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东京豆抽奖"
-        this.cron = "51 5,23 * * *"
+        this.cron = "6 6 6 6 6"
         this.task = 'local'
         this.import = ['jdAlgo']
     }
@@ -12,8 +12,8 @@ class Main extends Template {
     async prepare() {
         this.algo = new this.modules.jdAlgo({
             appId: "169f1",
-            type: 'app',
-            fp: "7442853010941133",
+            type: 'main',
+            version: "4.7"
         })
     }
 
