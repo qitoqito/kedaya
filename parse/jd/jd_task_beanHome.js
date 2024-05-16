@@ -4,20 +4,21 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东领京豆"
-        this.cron = "19 3,19 * * *"
+          this.cron = `${this.rand(0, 59)} ${this.rand(0, 22)} * * *`
         this.help = 'main'
         this.task = 'local'
         this.import = ['jdAlgo']
     }
 
     async prepare() {
-        this.algo = new this.modules['jdAlgo']()
+        this.algo = new this.modules.jdAlgo({
+            version: '4.7',
+            type: 'main'
+        })
         let feeds = await this.algo.curl({
                 'url': `https://api.m.jd.com/client.action?functionId=homeFeedsList&body={"page":1,"appid":"fd4bb","needSecurity":true,"bizId":"active","pageId":"JingDou_SceneHome"}&appid=signed_wh5&client=apple&clientVersion=11.8.2&networkType=wifi&osVersion=11.4&screen=320*504&uuid=434e858e755c9b1ec6e6d6abc0348d9b6d985300&openudid=434e858e755c9b1ec6e6d6abc0348d9b6d985300&d_model=iPhone8,4`,
                 algo: {
                     appId: "fd4bb",
-                    type: 'main',
-                    version: '4.4'
                 }
             }
         )
@@ -256,15 +257,14 @@ class Main extends Template {
                 break
             }
         }
-        let signBeanAct = await this.curl({
+        let signBeanAct = await this.algo.curl({
                 'url': "https://api.m.jd.com/",
-                'form': `appid=signed_wh5_ihub&functionId=signBeanAct&body=%7B%7D&t=1710227661464&clientVersion=12.4.2&client=apple`,
+                'form': `functionId=signBeanAct&body={}&appid=signed_wh5_ihub&client=apple&screen=414*896&networkType=wifi&openudid=60f0226f67be77007d7dc5817801e282dda1211e&uuid=60f0226f67be77007d7dc5817801e282dda1211e&clientVersion=12.3.5&d_model=0-2-999&osVersion=15.6.1`,
                 cookie,
                 algo: {
-                    version: "4.4",
                     appId: '9d49c',
-                    type: 'main',
-                }
+                    // type: 'main',
+                },
             }
         )
         if (this.haskey(signBeanAct, 'data.dailyAward.beanAward.beanCount')) {
