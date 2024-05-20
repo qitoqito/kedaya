@@ -14,8 +14,9 @@ class Main extends Template {
     }
 
     async prepare() {
-        if (this.profile.activeId) {
-            for (let i of this.profile.activeId.split("|")) {
+        let custom = this.profile.activeId || this.profile.custom
+        if (custom) {
+            for (let i of custom.split("|")) {
                 for (let cookie of this.cookies['help']) {
                     let o = await this.curl({
                             'url': `https://api.m.jd.com/superFission/openGroup?g_ty=ls&g_tk=1226062469`,
