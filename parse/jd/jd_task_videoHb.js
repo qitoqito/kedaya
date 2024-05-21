@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东视频红包"
-        this.cron = `${this.rand(0, 59)} ${this.rand(8, 11)},${this.rand(20, 23)} * * *`
+        this.cron = `${this.rand(0, 59)} ${this.rand(0,22)} * * *`
         this.import = ['jdAlgo', 'jdUrl']
         this.interval = 3000
         this.readme = '只有白号能跑,黑号会火爆或者提款不了'
