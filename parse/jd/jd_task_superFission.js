@@ -11,6 +11,7 @@ class Main extends Template {
         }
         this.verify = 1
         this.delay = 100
+        this.filter = 'group_id'
     }
 
     async prepare() {
