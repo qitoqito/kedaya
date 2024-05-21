@@ -33,23 +33,21 @@ class Main extends Template {
 
     async main(p) {
         let cookie = p.cookie;
-        if (this.activityId) {
-            let s = await this.curl({
-                    'url': `https://api.m.jd.com/client.action?functionId=chatReward_doReward&appid=wechat_activity&client=h5&body={"activityId":"${p.inviter.activityId}"}`,
-                    cookie
-                }
-            )
-            let reward = await this.algo.curl({
-                    'url': `https://api.m.jd.com/client.action?functionId=chatReward_mainPage&appid=wechat_activity&client=h5&body={"activityId":"${p.inviter.activityId}"}`,
-                    cookie
-                }
-            )
-            if (this.haskey(reward, 'data.rewardInfo.rewardValue')) {
-                this.print(`红包: ${reward.data.rewardInfo.rewardValue}元`, p.user)
+        let s = await this.curl({
+                'url': `https://api.m.jd.com/client.action?functionId=chatReward_doReward&appid=wechat_activity&client=h5&body={"activityId":"${p.inviter.activityId}"}`,
+                cookie
             }
-            else {
-                console.log("什么也没有")
+        )
+        let reward = await this.algo.curl({
+                'url': `https://api.m.jd.com/client.action?functionId=chatReward_mainPage&appid=wechat_activity&client=h5&body={"activityId":"${p.inviter.activityId}"}`,
+                cookie
             }
+        )
+        if (this.haskey(reward, 'data.rewardInfo.rewardValue')) {
+            this.print(`红包: ${reward.data.rewardInfo.rewardValue}元`, p.user)
+        }
+        else {
+            console.log("什么也没有")
         }
     }
 }
