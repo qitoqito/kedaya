@@ -4,17 +4,16 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东视频红包"
-        this.cron = `${this.rand(0, 59)} ${this.rand(0,22)} * * *`
+        this.cron = `${this.rand(0, 59)} ${this.rand(0, 22)} * * *`
         this.import = ['jdAlgo', 'jdUrl']
         this.interval = 3000
         this.readme = '只有白号能跑,黑号会火爆或者提款不了'
         this.turn = 2
-        this.clientVersion = '12.3.1'
     }
 
     async prepare() {
         this.algo = new this.modules.jdAlgo({
-            version: '4.2',
+            version: '4.7',
             type: 'main',
             appId: '7f9c4',
         })
@@ -44,7 +43,6 @@ class Main extends Template {
 
     async main(p) {
         let cookie = p.cookie;
-        // console.log(home)
         let info = await this.algo.curl({
                 'url': `https://api.m.jd.com/videoRedPacketHomePage_info`,
                 'form': `functionId=videoRedPacketHomePage_info&appid=video-redbag-h5&body=${this.dumps(this.code)}&client=wh5&t=1699156906324&clientVersion=12.3.1`,
@@ -131,21 +129,51 @@ class Main extends Template {
                 await this.wait(1000)
             }
         }
-        // for (let i of Array(2)) {
-        //     let coin = await this.curl(this.modules.jdUrl.app('videoHbGoldCoin_done', {
-        //             "contentId": "414303219",
-        //             "jsLabel": "\/DM3FV\/PEde9BKNudk4NEQ7LYwslHVatolqZKq0h\/nbpuOtrMZKpsSx6AY1fvblB0Dp+W9WGxfkrD\/y8BAJ3iO5UO\/CKNmGetDYZHD+x2E7ElUM0I3rMHO2XhEv5A+ihHfZ9zCMVtC2h+SmLy042QK2NPMlS2busoZYVVI1go5I=",
-        //             "playType": "126"
-        //         }, 'post', cookie)
-        //     )
-        //     if (this.haskey(coin, 'success')) {
-        //         console.log('获得金币:', coin.data.rewardValue)
-        //     }
-        //     else {
-        //         console.log(coin)
-        //     }
-        //     await this.wait(5000)
-        // }
+        let detail = await this.curl(this.modules.jdUrl.app('video_videoDetail', {
+                "style": "",
+                "skuId": "",
+                "qaActivityId": "",
+                "referpageid": "",
+                "playtype": "163",
+                "channel": "",
+                "projectid": "",
+                "emojisChangeStatus": 0,
+                "extParam": "",
+                "id": "",
+                "subjectId": "",
+                "offset": "",
+                "logid": "",
+                "bodyMap": "",
+                "modeid": "1",
+                "rec_broker": "",
+                "monitorSource": "videodetailApp",
+                "adid": "",
+                "topVideo": "",
+                "key": ""
+            }, 'post', cookie)
+        )
+        if (this.haskey(detail, 'list.0.id')) {
+            var lists = this.column(detail.list, 'id')
+        }
+        else {
+            var lists = ['459815659', '426164598', '434398951', '460396407', '455441743']
+        }
+        console.log("视频ID:", lists)
+        for (let i of lists.slice(0, 5)) {
+            let coin = await this.curl(this.modules.jdUrl.app('videoHbGoldCoin_done', {
+                    "contentId": i,
+                    "jsLabel": "\/DM3FV\/PEde9BKNudk4NEQ7LYwslHVatolqZKq0h\/nbpuOtrMZKpsSx6AY1fvblB0Dp+W9WGxfkrD\/y8BAJ3iO5UO\/CKNmGetDYZHD+x2E7ElUM0I3rMHO2XhEv5A+ihHfZ9zCMVtC2h+SmLy042QK2NPMlS2busoZYVVI1go5I=",
+                    "playType": "126"
+                }, 'post', cookie)
+            )
+            if (this.haskey(coin, 'success')) {
+                console.log('获得金币:', coin.data.rewardValue)
+            }
+            else {
+                console.log(coin)
+            }
+            await this.wait(5000)
+        }
         let exchange = await this.curl({
                 'url': `https://api.m.jd.com/videoRedPacketHomePage_exchangeCash`,
                 'form': `functionId=videoRedPacketHomePage_exchangeCash&appid=video-redbag-h5&body={}&client=wh5&t=1699157963924&clientVersion=12.3.1`,
@@ -167,7 +195,6 @@ class Main extends Template {
             let data = this.haskey(home, 'data')
             let amount = data.cashBalanceFloor.amount
             console.log('现有奖金:', amount)
-
             for (let i of data.cwCardFloor.cards.reverse()) {
                 if (i.topDesc == '已连续来访0天' && i.amount == 0.88) {
                     let init = await this.curl(this.modules.jdUrl.app('videoHb_newCustomerHbLayer', {}, 'post', cookie)
@@ -177,7 +204,7 @@ class Main extends Template {
                         console.log("初始化成功,获得:", init.data.popAlertInfo.hbAmount)
                     }
                 }
-                if (i.cwStatus == 0 ) {
+                if (i.cwStatus == 0) {
                     console.log("正在提款至京东余额:", i.amountStr)
                     let cash = await this.algo.curl({
                             'url': `https://api.m.jd.com/videoHbCw_doCw`,
