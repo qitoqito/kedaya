@@ -20,8 +20,6 @@
 	node main.js jd_task_test [-help n -custom x -limit x]
 
 # 初始化
-
-	为避免第三方滥用,请自行添加环境变量 QITOQITO
 	QITOQITO_PLATFORM=按照所使用面板正确填写 qinglong|jtask|jd 其中一个 [青龙面板:qinglong, v3系列:jtask, 衍生面板:jd],
 	QITOQITO_SYNC=1 当有此变量时,面板定时会与项目定时同步,如需自行修改,请勿添加该字段
 	QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的入口文件
@@ -64,7 +62,21 @@
     
     # 衍生面板
     45 * * * * bash -c "rm -rf kedaya && git clone  https://github.com/qitoqito/kedaya.git  && cp -a kedaya/. ./scripts && jd qitoCreat now"
-	
+    
+# 京东SIGN
+    如果环境变量中,已经部署过 JD_SIGN_API, JD_SIGN_KRAPI 可以跳过以下步骤
+
+```
+docker run -dit \
+  --name official \
+  --restart always \
+  --hostname official \
+  -p 9527:80 \
+  qninq/signapi:latest
+  
+添加环境变量 QITOQITO_JDSIGN=http://ip:9527/jd/sign
+```
+   
 	 
 # 通知字段
 
