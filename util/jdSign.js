@@ -27,9 +27,16 @@ class jdSign {
                 var form = spl[1]
             }
             if (this.access == 1) {
+                let q = process.communal.query(form, '&', 'split')
+                let sortKeys = ['appid', 'body', 'client', "clientVersion", 'functionId'];
+                let st = sortKeys.filter(d => q[d]).map(i => `${i}=${q[i]}`).join('&')
+                if (p.url.includes("functionId=") && !form.includes("functionId=")) {
+                    let functionId = process.communal.match(/(functionId=\w+)/, p.url)
+                    st += `&${functionId}`
+                }
                 let cs1 = await process.communal.curl({
                         'url': this.signUrl,
-                        'form': form
+                        'form': st
                     }
                 )
                 if (process.communal.haskey(cs1, 'data.sign')) {
