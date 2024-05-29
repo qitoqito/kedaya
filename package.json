@@ -14,6 +14,7 @@
     "png-js": "^1.0.0",
     "qrcode-terminal": "^0.12.0",
     "readline-sync": "^1.4.10",
+    "axios": "1.7.2",
     "request": "2.88.2",
     "secp256k1": "^5.0.0",
     "stream": "0.0.2",
