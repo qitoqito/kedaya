@@ -8,6 +8,7 @@ class Main extends Template {
         this.task = 'local'
         this.import = ['jdAlgo']
         this.interval = 1500
+        this.delay = 1000
         this.hint = {
             turnNum: '翻倍奖票数,默认10'
         }
@@ -16,7 +17,8 @@ class Main extends Template {
     async prepare() {
         this.algo = new this.modules.jdAlgo({
             version: "4.7",
-            type: "main"
+            type: "main",
+            referer: 'https://pro.m.jd.com/mall/active/3fcyrvLZALNPWCEDRvaZJVrzek8v/index.html'
         })
     }
 
@@ -33,8 +35,13 @@ class Main extends Template {
         )
         // console.log(home.data.result)
         let result = this.haskey(home, 'data.result')
+        // console.log(result)
         if (!result) {
             console.log("没有获取到数据...")
+            return
+        }
+        else if (!result.isLogin) {
+            console.log("未登录...")
             return
         }
         if (this.haskey(result, 'signBoard.status', 1)) {
@@ -59,7 +66,7 @@ class Main extends Template {
                     'form': `functionId=wanyiwan_do_task&appid=signed_wh5&body={"itemId":"${this.haskey(i, 'taskDetail.0.itemId') || 0}","taskType":${i.taskType},"assignmentId":"${i.encryptAssignmentId}","actionType":1,"version":1}&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168960&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=12.3.1`,
                     cookie,
                     algo: {
-                        appId: 'd12dd'
+                        appId: '89db2'
                     }
                 }
             )
@@ -72,18 +79,19 @@ class Main extends Template {
                     'form': `functionId=wanyiwan_do_task&appid=signed_wh5&body={"itemId":"${this.haskey(i, 'taskDetail.0.itemId') || 0}","taskType":${i.taskType},"assignmentId":"${i.encryptAssignmentId}","actionType":0,"version":1}&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168960&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=12.3.1`,
                     cookie,
                     algo: {
-                        appId: 'd12dd'
+                        appId: '89db2'
                     }
                 }
             )
             // console.log(r.data)
-            let a = await this.algo.curl({
+            let a = await this.curl({
                     'url': `https://api.m.jd.com/client.action`,
                     'form': `functionId=wanyiwan_task_receive_award&appid=signed_wh5&body={"taskType":${i.taskType},"assignmentId":"${i.encryptAssignmentId}","version":1}&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168960&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=12.3.1`,
                     cookie,
                     algo: {
-                        appId: 'd12dd'
-                    }
+                        appId: '89db2'
+                    },
+                    referer: 'https://pro.m.jd.com/mall/active/3fcyrvLZALNPWCEDRvaZJVrzek8v/index.html'
                 }
             )
             console.log(a.data)
@@ -123,6 +131,23 @@ class Main extends Template {
                 }
             )
             console.log("结束翻倍...", this.haskey(rec, 'data.rewardValue'))
+        }
+        for (let i of Array(10)) {
+            let draw = await this.algo.curl({
+                    'url': `https://api.m.jd.com/api`,
+                    'form': `functionId=superRedBagDraw&body={"linkId":"aE-1vg6_no2csxgXFuv3Kg"}&t=1716014275661&appid=activity_platform_se&client=ios&clientVersion=13.0.0&loginType=2&loginWQBiz=wegame`,
+                    cookie,
+                    algo: {
+                        appId: '89cfe'
+                    }
+                }
+            )
+            if (this.haskey(draw, 'code', 20005)) {
+                console.log('场次已过期')
+                break
+            }
+            console.log(this.dumps(draw.data.prizeDrawVo))
+            await this.wait(2000)
         }
     }
 }
