@@ -36,12 +36,17 @@ class Main extends Template {
     async main(p) {
         let cookie = p.cookie;
         let stock = parseInt(this.profile.stock || 20)
-        let farmHome = await this.wget({
-            fn: 'farm_home',
-            body: {"version": 1},
-            algo: {appId: 'c57f6'},
-            cookie
-        })
+        for (let i of Array(3)) {
+            var farmHome = await this.wget({
+                fn: 'farm_home',
+                body: {"version": 3},
+                algo: {appId: 'c57f6'},
+                cookie
+            })
+            if (this.haskey(farmHome, 'data.result')) {
+                break
+            }
+        }
         if (this.turnCount == 1) {
             if (!this.cookies.help.includes(cookie)) {
                 console.log("本轮运行助力水滴获取,当前账号不是被助力账号,此次将跳过运行")
@@ -64,7 +69,7 @@ class Main extends Template {
             console.log("没有种树")
             let board = await this.wget({
                 fn: 'farm_tree_board',
-                body: {"version": 1},
+                body: {"version": 3},
                 algo: {},
                 cookie
             })
@@ -73,14 +78,14 @@ class Main extends Template {
                 console.log("正在种树,选择商品:", skus.skuName)
                 let tree = await this.wget({
                     fn: 'farm_plant_tree',
-                    body: {"version": 1, "uid": skus.uid},
+                    body: {"version": 3, "uid": skus.uid},
                     algo: {},
                     cookie
                 })
                 if (this.haskey(tree, 'data.success')) {
                     farmHome = await this.wget({
                         'fn': 'farm_home',
-                        'body': {"version": 1},
+                        'body': {"version": 3},
                         algo: {appId: 'c57f6'},
                         cookie,
                     })
@@ -122,7 +127,7 @@ class Main extends Template {
                 let help = await this.wget({
                     fn: 'farm_assist',
                     body: {
-                        "version": 1,
+                        "version": 3,
                         "inviteCode": this.dict[i].inviteCode,
                         "shareChannel": "ttt7",
                         "assistChannel": ""
@@ -157,7 +162,7 @@ class Main extends Template {
         }
         let helpInfo = await this.wget({
             fn: 'farm_assist_init_info',
-            body: {"version": 1},
+            body: {"version": 3},
             algo: {},
             cookie
         })
@@ -165,7 +170,7 @@ class Main extends Template {
             if (i.stageStaus == 2) {
                 let award = await this.wget({
                     fn: 'farm_assist_receive_award',
-                    body: {"version": 1},
+                    body: {"version": 3},
                     algo: {'appId': 'c4332'},
                     cookie
                 })
@@ -235,7 +240,7 @@ class Main extends Template {
                                 console.log('啥都没有抽到')
                             }
                         }
-                        await this.wait(3000)
+                        await this.wait(6000)
                     }
                     else {
                         bd6c8
@@ -248,12 +253,13 @@ class Main extends Template {
                 await this.wait(3000)
             }
         }
+        await this.algo.set({version: '4.7'})
         let wheelsHome = await this.wget({
             url: `http://api.m.jd.com/client.action`,
             fn: 'wheelsHome',
             appid: "activities_platform",
             body: {"linkId": "VssYBUKJOen7HZXpC8dRFA", "inviteActId": "", "inviterEncryptPin": ""},
-            algo: {'appId': 'c06b7', version: "4.4"},
+            algo: {'appId': 'c06b7',},
             cookie
         })
         let lotteryChances = this.haskey(wheelsHome, 'data.lotteryChances') || 0;
@@ -307,7 +313,7 @@ class Main extends Template {
         await this.algo.set({version: '4.2'})
         let taskList = await this.wget({
             fn: 'farm_task_list',
-            body: {"version": 1, "channel": 0},
+            body: {"version": 3, "channel": 0},
             algo: {},
             cookie
         })
@@ -327,7 +333,7 @@ class Main extends Template {
                 else {
                     let detail = await this.wget({
                         fn: 'farm_task_detail',
-                        body: {"version": 1, "taskType": i.taskType, "taskId": i.taskId, "channel": 0},
+                        body: {"version": 3, "taskType": i.taskType, "taskId": i.taskId, "channel": 0},
                         algo: {},
                         cookie
                     })
@@ -340,7 +346,7 @@ class Main extends Template {
                     let doWork = await this.wget({
                         fn: 'farm_do_task',
                         body: {
-                            "version": 1,
+                            "version": 3,
                             "taskType": i.taskType,
                             "taskId": i.taskId,
                             "taskInsert": kk.taskInsert || false,
@@ -353,7 +359,7 @@ class Main extends Template {
                     if (this.haskey(doWork, 'data.success')) {
                         let award = await this.wget({
                             fn: 'farm_task_receive_award',
-                            body: {"version": 1, "taskType": i.taskType, "taskId": i.taskId, "channel": 0},
+                            body: {"version": 3, "taskType": i.taskType, "taskId": i.taskId, "channel": 0},
                             algo: {'appId': '33e0f'},
                             cookie
                         })
@@ -367,7 +373,7 @@ class Main extends Template {
                             if (bottleWater>stock) {
                                 let water = await this.wget({
                                     fn: 'farm_water',
-                                    body: {"version": 1, "waterType": 1},
+                                    body: {"version": 3, "waterType": 1, "babelChannel": "ttt7", "lbsSwitch": false},
                                     algo: {'appId': '28981'},
                                     cookie
                                 })
@@ -396,7 +402,7 @@ class Main extends Template {
                 console.log("获取任务奖励:", i.mainTitle)
                 let award = await this.wget({
                     fn: 'farm_task_receive_award',
-                    body: {"version": 1, "taskType": i.taskType, "taskId": i.taskId, "channel": 0},
+                    body: {"version": 3, "taskType": i.taskType, "taskId": i.taskId, "channel": 0},
                     algo: {'appId': '33e0f'},
                     cookie
                 })
@@ -410,7 +416,7 @@ class Main extends Template {
                     if (bottleWater>stock) {
                         let water = await this.wget({
                             fn: 'farm_water',
-                            body: {"version": 1, "waterType": 1},
+                            body: {"version": 3, "waterType": 1, "babelChannel": "ttt7", "lbsSwitch": false},
                             algo: {'appId': '28981'},
                             cookie
                         })
@@ -441,7 +447,7 @@ class Main extends Template {
                     for (let _ of Array(i.taskLimitTimes - i.taskDoTimes)) {
                         let water = await this.wget({
                             fn: 'farm_water',
-                            body: {"version": 1, "waterType": 1},
+                            body: {"version": 3, "waterType": 1, "babelChannel": "ttt7", "lbsSwitch": false},
                             algo: {'appId': '28981'},
                             cookie
                         })
@@ -462,7 +468,7 @@ class Main extends Template {
                     }
                     let award = await this.wget({
                         fn: 'farm_task_receive_award',
-                        body: {"version": 1, "taskType": i.taskType, "taskId": i.taskId, "channel": 0},
+                        body: {"version": 3, "taskType": i.taskType, "taskId": i.taskId, "channel": 0},
                         algo: {'appId': '33e0f'},
                         cookie
                     })
@@ -476,7 +482,7 @@ class Main extends Template {
                         if (bottleWater>stock) {
                             let water = await this.wget({
                                 fn: 'farm_water',
-                                body: {"version": 1, "waterType": 1},
+                                body: {"version": 3, "waterType": 1, "babelChannel": "ttt7", "lbsSwitch": false},
                                 algo: {'appId': '28981'},
                                 cookie
                             })
@@ -512,13 +518,17 @@ class Main extends Template {
                 for (let _ of Array(count)) {
                     let water = await this.wget({
                         fn: 'farm_water',
-                        body: {"version": 1, "waterType": 1},
+                        body: {"version": 3, "waterType": 1, "babelChannel": "ttt7", "lbsSwitch": false},
                         algo: {'appId': '28981'},
                         cookie
                     })
                     if (this.haskey(water, 'data.result.bottleWater')) {
                         bottleWater = this.haskey(water, 'data.result.bottleWater')
                         console.log("浇水中,剩余水滴:", bottleWater)
+                        waterError = waterError - 2
+                        if (waterError<0) {
+                            waterError = 0
+                        }
                     }
                     else {
                         console.log('浇水失败:', this.haskey(water, 'data.bizMsg'))
@@ -526,7 +536,7 @@ class Main extends Template {
                             try {
                                 let board = await this.wget({
                                     fn: 'farm_tree_board',
-                                    body: {"version": 1},
+                                    body: {"version": 3},
                                     algo: {},
                                     cookie
                                 })
@@ -534,7 +544,7 @@ class Main extends Template {
                                 console.log("正在种树,选择商品:", skus.skuName)
                                 let tree = await this.wget({
                                     fn: 'farm_plant_tree',
-                                    body: {"version": 1, "uid": skus.uid},
+                                    body: {"version": 3, "uid": skus.uid},
                                     algo: {},
                                     cookie
                                 })
@@ -542,7 +552,7 @@ class Main extends Template {
                                 if (this.haskey(tree, 'data.success')) {
                                     farmHome = await this.wget({
                                         'fn': 'farm_home',
-                                        'body': {"version": 1},
+                                        'body': {"version": 3},
                                         algo: {appId: 'c57f6'},
                                         cookie,
                                     })
@@ -573,9 +583,13 @@ class Main extends Template {
         let url = p.url || `https://api.m.jd.com/client.action`
         return await this.algo.curl({
                 url,
-                'form': `appid=${p.appid || "signed_wh5"}&client=ios&clientVersion=12.3.4&screen=375*0&wqDefault=false&t=1698502026732&body=${typeof (p.body) == 'object' ? this.dumps(p.body) : p.body}&functionId=${p.fn}`,
+                'form': `appid=${p.appid || "signed_wh5"}&client=apple&clientVersion=12.3.1&screen=375*0&wqDefault=false&t=1698502026732&body=${typeof (p.body) == 'object' ? this.dumps(p.body) : p.body}&functionId=${p.fn}`,
                 cookie: p.cookie,
                 algo: p.algo || {},
+                headers: {
+                    referer: p.referer || 'https://h5.m.jd.com/',
+                    'x-referer-page': 'https://h5.m.jd.com/pb/015686010/Bc9WX7MpCW7nW9QjZ5N3fFeJXMH/index.html'
+                }
             }
         )
     }
