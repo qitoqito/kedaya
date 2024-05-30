@@ -57,7 +57,12 @@ class Main extends Template {
                 this.code.push(unionShareId)
             }
         }
-        console.log("当前助力码:", this.code)
+        if (this.code.length>0) {
+            console.log("当前助力码:", this.code)
+        }
+        else {
+            this.jump = 1
+        }
     }
 
     async main(p) {
