@@ -15,7 +15,7 @@ class Main extends Template {
         let cookie = p.cookie
         let pin = this.userPin(cookie)
         let dict = this.userDict[pin]
-        let s = await this.curl({
+        let s = await this.curl1({
                 'url': `https://plogin.m.jd.com/cgi-bin/ml/islogin`,
                 // 'form':``,
                 cookie
@@ -151,7 +151,7 @@ class Main extends Template {
                         let auth = JSON.parse(json)
                         let authorization = `Bearer ${auth.token}`
                         let url = command;
-                        let c = await this.curl({
+                        let c = await this.curl1({
                             url: `${url}/api/envs?searchValue=JD_COOKIE&t=1643903429215`,
                             authorization,
                             'headers': {
@@ -160,7 +160,7 @@ class Main extends Template {
                             }
                         })
                         if (c.code == 401) {
-                            let login = await this.curl({
+                            let login = await this.curl1({
                                 'url': `${url}/api/user/login?t=1639363615601`,
                                 json: {
                                     "username": auth.username,
@@ -174,7 +174,7 @@ class Main extends Template {
                             if (login.code == 200) {
                                 let token = login.data.token
                                 authorization = `Bearer ${login.data.token}`
-                                c = await this.curl({
+                                c = await this.curl1({
                                     url: `${url}/api/envs?searchValue=JD_COOKIE&t=1643903429215`,
                                     authorization,
                                     'headers': {
@@ -203,7 +203,7 @@ class Main extends Template {
                                     "value": this.dict[pin],
                                     '_id': i,
                                 }
-                                let u = await this.curl({
+                                let u = await this.curl1({
                                     url: `${url}/api/envs?t=1643903429215`,
                                     authorization,
                                     json: body,
