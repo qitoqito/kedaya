@@ -84,8 +84,9 @@ class Main extends Template {
                 }
             }
         }
-        await this.shareId()
+        await this.shareId() 
         for (let unionShareId of this.code.slice(0, 4)) {
+            cookie = p.cookie
             if (this.dict.d) {
                 var url = `https://u.jd.com/${this.dict.d}?s=${unionShareId}`
             }
@@ -288,7 +289,7 @@ class Main extends Template {
         let c2 = this.code.slice(2)
         c2.push(this.random(this.unionShareId, 1)[0])
         c2 = this.random(c2, c2.length + 1)
-        this.code = [...c1, ...c2]
+        this.code = this.unique([...c1, ...c2])
     }
 }
 
