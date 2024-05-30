@@ -19,5 +19,7 @@ module.exports = {
                 }
         }
     },
-    verifyUrl: 'https://api.m.jd.com/client.action?functionId=queryMaterialProducts&client=wh5'
+    verifyUrl: 'https://api.m.jd.com/client.action?functionId=queryMaterialProducts&client=wh5',
+    unionId: 'kbDf60q',
+    unionShareId: ['FLp5i']
 }
