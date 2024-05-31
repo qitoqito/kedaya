@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东东东农场"
-        this.cron = "33 0,11,17,22 * * *"
+        this.cron = `${this.rand(0, 59)} ${this.rand(0, 10)},${this.rand(12, 22)} * * *`
         // this.thread = 2
         this.task = 'local'
         this.import = ['fs', 'jdAlgo']
@@ -562,7 +562,6 @@ cache=1                          # 缓存助力code
                     algo: {
                         type: "wechat",
                         appId: "235ec",
-                        version: "3.0"
                     },
                     referer: "https://servicewechat.com/wx91d27dbf599dff74/672/page-frame.html",
                     ua: "Mozilla/5.0 (iPhone; CPU iPhone OS 15_1_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.29(0x18001d38) NetType/WIFI Language/zh_CN"
