@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东领京豆"
-          this.cron = `${this.rand(0, 59)} ${this.rand(0, 22)} * * *`
+        this.cron = `${this.rand(0, 59)} ${this.rand(0, 22)} * * *`
         this.help = 'main'
         this.task = 'local'
         this.import = ['jdAlgo']
@@ -15,23 +15,25 @@ class Main extends Template {
             version: '4.7',
             type: 'main'
         })
-        let feeds = await this.algo.curl({
-                'url': `https://api.m.jd.com/client.action?functionId=homeFeedsList&body={"page":1,"appid":"fd4bb","needSecurity":true,"bizId":"active","pageId":"JingDou_SceneHome"}&appid=signed_wh5&client=apple&clientVersion=11.8.2&networkType=wifi&osVersion=11.4&screen=320*504&uuid=434e858e755c9b1ec6e6d6abc0348d9b6d985300&openudid=434e858e755c9b1ec6e6d6abc0348d9b6d985300&d_model=iPhone8,4`,
-                algo: {
-                    appId: "fd4bb",
-                }
-            }
-        )
-        this.feeds = []
-        if (this.haskey(feeds, 'data.feedsList')) {
-            this.feeds = (this.column(feeds.data.feedsList, 'skuId'))
-        }
+        // let feeds = await this.algo.curl({
+        //         'url': `https://api.m.jd.com/client.action?functionId=homeFeedsList&body={"page":1,"appid":"fd4bb","needSecurity":true,"bizId":"active","pageId":"JingDou_SceneHome"}&appid=signed_wh5&client=apple&clientVersion=11.8.2&networkType=wifi&osVersion=11.4&screen=320*504&uuid=434e858e755c9b1ec6e6d6abc0348d9b6d985300&openudid=434e858e755c9b1ec6e6d6abc0348d9b6d985300&d_model=iPhone8,4`,
+        //         algo: {
+        //             appId: "fd4bb",
+        //             type: '4.7'
+        //         }
+        //     }
+        // )
+        // this.feeds = []
+        // if (this.haskey(feeds, 'data.feedsList')) {
+        //     this.feeds = (this.column(feeds.data.feedsList, 'skuId'))
+        // }
     }
 
     async main(p) {
         let cookie = p.cookie;
         let gifts = []
         let uuid = this.md5(cookie)
+        this.feeds = Array(8).fill(0).map(d => this.rand(10000000, 20000000).toString())
         if (this.feeds) {
             for (let i of this.feeds) {
                 console.log(`正在浏览任务`)
@@ -41,6 +43,7 @@ class Main extends Template {
                         cookie
                     }
                 )
+                // console.log(task)
                 if (!this.haskey(task, 'data')) {
                     console.log(this.haskey(task, 'errorMessage'))
                     break
