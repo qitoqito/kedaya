@@ -18,6 +18,10 @@ class jdSign {
     }
 
     async jdCurl(p) {
+        p.headers = {
+            'user-agent': 'JD4iPhone/168960%20(iPhone;%20iOS;%20Scale/3.00);jdmall;iphone;version/12.3.1;build/168960;network/wifi;screen/1170x2532;os/15.1.1',
+            referer: 'https://cjhy-isv.isvjcloud.com/'
+        }
         if (this.access) {
             if (p.form) {
                 var form = p.form
