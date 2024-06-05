@@ -149,7 +149,12 @@ class Main extends Template {
                 cookie
             }
         )
-        console.log(receive.data)
+        if (this.haskey(receive, 'data.result.value')) {
+            this.print(`红包: ${receive.data.result.value}`, p.user)
+        }
+        else {
+            console.log(this.haskey(receive, 'data.bizMsg') || receive)
+        }
     }
 }
 
