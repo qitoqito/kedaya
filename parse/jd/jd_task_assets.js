@@ -15,23 +15,19 @@ class Main extends Template {
     }
 
     async main(p) {
+        await this.getSm(p)
         await this.getScore(p)
+        await this.getSm(p)
         await this.getRedpacket(p)
         await this.getJingtie(p)
         await this.getBean(p)
-        await this.getXibean(p)
-        await this.getCash(p)
-        await this.getMs(p)
-        await this.getEarn(p)
-        await this.getCoin(p)
-        // await this.getEgg(p)
-        // await this.getCattle(p)
-        await this.getPet(p)
-        await this.getFarm(p)
         let t = []
         for (let i in this.dict[p.user]) {
             let data = this.dict[p.user][i]
             switch (i) {
+                case 'card':
+                    t.push(`🦁 京超市卡: ${data || 0}元`)
+                    break
                 case 'score':
                     t.push(`🐵 有京享值: ${data || 0}分`)
                     break
@@ -87,7 +83,7 @@ class Main extends Template {
                     t.push(`🐨 东东农场: ${data.goods}, 完成: ${data.complete}/${data.exchange}, 还需浇水: ${(data.exchange - data.complete) / 10}次, 进度: ${data.percent}%`)
                     break
                 default:
-                    console.log(i)
+                    // console.log(i)
                     break
             }
         }
@@ -431,6 +427,18 @@ class Main extends Template {
             bean.all = this.haskey(b, 'others.jingBeanBalance.jingBeanCount')
             this.dict[p.user].bean = bean
         } catch (e) {
+        }
+    }
+
+    async getSm(p) {
+        let s = await this.curl({
+                'url': `https://api.m.jd.com/`,
+                'form': `appid=JDC_APP_H5&loginType=2&loginWQBiz=ECard&body=&functionId=smt_exCard_supermarket&client=m&isLoading=true`,
+                cookie: p.cookie
+            }
+        )
+        if (this.haskey(s, 'exCardVos.balance')) {
+            this.dict[p.user].card = s.exCardVos.balance
         }
     }
 
