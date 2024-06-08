@@ -6,7 +6,7 @@ class Main extends Template {
         this.title = "京东整合签到"
         this.cron = `${this.rand(0, 59)} ${this.rand(0, 2)} * * *`
         this.task = 'local'
-        this.import = ['jdAlgo']
+        this.import = ['jdAlgo', 'jdFinger']
     }
 
     async prepare() {
@@ -36,13 +36,13 @@ class Main extends Template {
                     "encryptProjectId": "48mbNna587mvUybMYiVacWbLV2kY",
                     "encryptAssignmentId": "3MbhW1z98MGVgxKCxMwCtgXXCcTz"
                 },
-                // "挑好物逛京东": {
-                //     "encryptProjectId": "T8pSkvaZ1jCoBzD8PGHZyfHQStT",
-                //     "encryptAssignmentId": "ip7cU7PDB5pE5jjFAfuunxVHtoW"
-                // },
+                "折叠礼遇记": {
+                    "encryptProjectId": "SYKGrr9V5hmxRCVrBQbWK6MFPSM",
+                    "encryptAssignmentId": "HpqxPoee6MkPnznnQYMR61bMnDe"
+                },
                 "轻松低价买好书": {
-                    "encryptProjectId": "4YSibVtC5xFNmuBwhLauBkC1Djhu",
-                    "encryptAssignmentId": "2RDhRC67WChBk7MuFyEdGxMp9HSX"
+                    "encryptProjectId": "4DwxF3pQ2czkBVv9LYM1cqVT8DdR",
+                    "encryptAssignmentId": "3CgKGfhtZrXH9bDWraPb2CGaDgFY"
                 },
                 "服饰美妆": {
                     "encryptProjectId": "oRnJWzu84htA5EMrgQohdtjUp8b",
@@ -100,6 +100,31 @@ class Main extends Template {
                 }
             }
         }
+        let ua = `jdapp;iPhone;12.3.5;;;M/5.0;appBuild/169076;jdSupportDarkMode/0;ef/1;ep/%7B%22ciphertype%22%3A5%2C%22cipher%22%3A%7B%22ud%22%3A%22DtLwCNSyDwY2D2TvDzcmCNduD2HtDJqnDzqmCWUyENTuZQOnCtOnZG%3D%3D%22%2C%22sv%22%3A%22CJUkDs4n%22%2C%22iad%22%3A%22%22%7D%2C%22ts%22%3A1717828905%2C%22hdid%22%3A%22JM9F1ywUPwflvMIpYPok0tt5k9kW4ArJEU3lfLhxBqw%3D%22%2C%22version%22%3A%221.0.3%22%2C%22appname%22%3A%22com.360buy.jdmobile%22%2C%22ridx%22%3A-1%7D;Mozilla/5.0 (iPhone; CPU iPhone OS 15_6_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;`
+        let array = this.modules.jdFinger(
+            {
+                'useragent': ua,
+                cookie
+            })
+        let f = await this.curl({
+            'url': `https://gia.jd.com/fcf.html?a=${array.a}`,
+            'form': `d=${array.d}`,
+            cookie
+        })
+        let eid = this.match(/"eid"\s*:\s*"([^\"]+)"/, f)
+        let sign = await this.curl({
+                'url': `https://sendbeans.jd.com/api/turncard/chat/sign?turnTableId=1544&shopId=1000017162&fp=${this.md5(p.cookie)}&eid=${eid}`,
+                referer: 'https://sendbeans.jd.com/jump/index/',
+                ua,
+                cookie: p.cookie
+            }
+        )
+        if (this.haskey(sign, 'data.jdBeanQuantity')) {
+            gifts.push(`京豆: ${sign.data.jdBeanQuantity}`)
+        }
+        else {
+            console.log(this.haskey(sign, 'errorMessage') || sign)
+        }
         if (gifts.length) {
             this.notices(gifts.join("\n"), p.user)
         }
@@ -107,4 +132,3 @@ class Main extends Template {
 }
 
 module.exports = Main;
-
