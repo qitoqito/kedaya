@@ -69,7 +69,7 @@ class Main extends Template {
             }
             else {
                 console.log("正在运行:", i.title)
-                let d = await this.wget({
+                let d = await this.curl({
                         'url': `https://api.m.jd.com/client.action`,
                         'form': `functionId=wanyiwan_do_task&appid=signed_wh5&body={"itemId":"${this.haskey(i, 'taskDetail.0.itemId') || 0}","taskType":${i.taskType},"assignmentId":"${i.encryptAssignmentId}","actionType":1,"version":1}&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168960&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=1.0.0`,
                         cookie,
@@ -82,7 +82,7 @@ class Main extends Template {
                 if (i.limitTime) {
                     await this.wait(i.limitTime * 1000)
                 }
-                let r = await this.wget({
+                let r = await this.curl({
                         'url': `https://api.m.jd.com/client.action`,
                         'form': `functionId=wanyiwan_do_task&appid=signed_wh5&body={"itemId":"${this.haskey(i, 'taskDetail.0.itemId') || 0}","taskType":${i.taskType},"assignmentId":"${i.encryptAssignmentId}","actionType":0,"version":1}&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168960&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=1.0.0`,
                         cookie,
