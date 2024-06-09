@@ -17,7 +17,7 @@ class Main extends Template {
             delay: "默认500,即每次请求间隔为0.5s,如需修改,请自行设置节点 delay=n",
             count: '如需设置主号最多助力人数,请自行设置节点 count=n',
             reward: '频繁请求奖品页面容易黑ip,如果只想提现当前助力的号,请自行设置 reward=help',
-            page: "请求前面几页'我的奖品'数据,默认获取前2页数据,每页会获取100条奖品数据(app内默认每页20条数据)"
+            page: "请求前面几页'我的奖品'数据,默认获取前2页数据,每页会获取100条微信现金数据(app内默认每页20条数据)"
         }
         // this.verify = 1
     }
@@ -198,9 +198,9 @@ class Main extends Template {
             if (this.dict[p.user]['end']) {
                 return
             }
-            let pageNum = parseInt(this.profile.page || 5)
+            let pageNum = parseInt(this.profile.page || 2)
             let end = 0
-            for (let _ = 1; _<=2; _++) {
+            for (let _ = 1; _<=pageNum; _++) {
                 let kk = this.md5(`${_}`)
                 let kkk = 1
                 if (this.dict[p.user]['pages'][kk]) {
