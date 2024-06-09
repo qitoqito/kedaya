@@ -208,7 +208,7 @@ class Main extends Template {
                     kkk = 0
                 }
                 else {
-                    var list = await this.curl({
+                    var list = await this.algo.curl({
                         'url': `http://api.m.jd.com/`,
                         'form': `appid=activities_platform&body={"pageNum":${_},"pageSize":100,"linkId":"${this.linkId}","associateLinkId":"","business":"fission","prizeTypeLists":[7]}&client=ios&clientVersion=12.3.4&functionId=superRedBagList&t=1717201688210&osVersion=13.5.1&build=169143&rfs=0000&h5st=null`,
                         cookie,
