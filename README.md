@@ -20,9 +20,12 @@
 	node main.js jd_task_test [-help n -custom x -limit x]
 
 # 初始化
+
 	QITOQITO_PLATFORM=按照所使用面板正确填写 qinglong|jtask|jd 其中一个 [青龙面板:qinglong, v3系列:jtask, 衍生面板:jd],
 	QITOQITO_SYNC=1 当有此变量时,面板定时会与项目定时同步,如需自行修改,请勿添加该字段
 	QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的入口文件
+	
+	初始安装请确保nodejs安装了axios request crypto-js模块
 
 # 环境变量
 	# COOKIE
