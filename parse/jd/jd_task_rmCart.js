@@ -8,6 +8,7 @@ class Main extends Template {
         this.task = 'local'
         this.readme = "购物车删除,慎用脚本"
         this.import = ['jdAlgo']
+        this.delay = 1200
         this.interval = 8000
         this.hint = {
             whiteList: '保留关键词,关键词1|关键词2',

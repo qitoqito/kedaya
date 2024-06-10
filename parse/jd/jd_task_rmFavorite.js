@@ -8,10 +8,19 @@ class Main extends Template {
         this.task = 'local'
         this.import = ['jdAlgo']
         this.readme = '有频率限制,不要一次删除太多'
+        this.delay = 1200
+        this.interval = 8000
+        this.hint = {
+            whiteList: '保留关键词,关键词1|关键词2',
+            blackList: '只删除关键词,关键词1|关键词2'
+        }
     }
 
     async prepare() {
-        this.algo = new this.modules.jdAlgo()
+        this.algo = new this.modules.jdAlgo({
+            type: 'main',
+            version: '4.7'
+        })
     }
 
     async main(p) {
@@ -25,7 +34,6 @@ class Main extends Template {
                     cookie,
                     algo: {
                         appId: "c420a",
-                        version: "3.1",
                         type: "main"
                     }
                 }
@@ -51,7 +59,7 @@ class Main extends Template {
                     // console.log(this.column(s.data, 'commTitle').join("|"))
                     if (data.length>0) {
                         console.log(`正在删除:`, this.column(data, 'commTitle').join("|"))
-                        let rm = await this.curl({
+                        let rm = await this.algo.curl({
                                 'url': `https://api.m.jd.com/api?functionId=batchCancelFavorite&body={"skus":"${this.column(data, 'commId').join(",")}"}&appid=follow_for_concert&client=pc`,
                                 cookie
                             }
