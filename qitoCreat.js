@@ -12,6 +12,8 @@ QITOQITO_SYNC=1 当有此变量时,本地禁止运行的脚本会跟随仓库同
 QITOQITO_DISABLE=1 当有此变量时,本地可运行的脚本会跟随仓库同步禁用
 
 QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的入口文件
+
+初始安装如果卡在"正在处理定时任务"后没有出现定时任务,nodejs请先安装axios axios crypto-js
         `)
 !(async () => {
     var env = {}
