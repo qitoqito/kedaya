@@ -10,17 +10,17 @@ class Main extends Template {
         this.interval = 8000
         this.hint = {
             whiteList: '保留关键词,关键词1|关键词2',
-            blackList: '只删除关键词,关键词1|关键词2'
+            blackList: '只删除关键词,关键词1|关键词2',
+            page: '删除页数,每页20条数据,默认3'
         }
     }
 
     async main(p) {
         let cookie = p.cookie;
-        let count = parseInt(this.profile.count || 20)
         let page = 1
-        for (let i = 0; i<count / 20; i++) {
+        for (let i = 0; i<parseInt(this.profile.page || 3); i++) {
             let s = await this.curl({
-                    'url': `https://wq.jd.com/fav/shop/QueryShopFavList?cp=${page}&pageSize=20&lastlogintime=1681810631&_=1681810636733&g_login_type=0&appCode=msd95910c4&callback=jsonpCBKA&g_tk=646642342&g_ty=ls`,
+                    'url': `https://wq.jd.com/fav/shop/QueryShopFavList?cp=1&pageSize=20&lastlogintime=1681810631&_=1681810636733&g_login_type=0&appCode=msd95910c4&callback=jsonpCBKA&g_tk=646642342&g_ty=ls`,
                     cookie
                 }
             )
