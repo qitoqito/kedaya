@@ -174,7 +174,7 @@ class Main extends Template {
                 }
                 // console.log(this.dumps(draw.data.prizeDrawVo))
                 if (this.haskey(draw, 'data.prizeDrawVo.prizeDesc')) {
-                    console.log(`获得: ${draw.data.prizeDrawVo.prizeDesc} ${draw.data.prizeDrawVo.amount}`)
+                    this.print(`获得: ${draw.data.prizeDrawVo.prizeDesc} ${draw.data.prizeDrawVo.amount}`, p.user)
                 }
                 else {
                     console.log("什么也没有抽到")
