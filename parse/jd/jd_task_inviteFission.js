@@ -45,7 +45,7 @@ class Main extends Template {
             if (inviter) {
                 console.log(user, ':', home.data.inviter)
                 let count = 0,
-                    finish = 0, vo = 0
+                    finish = 0, vo = 0, amount = 0
                 let invite = await this.algo.curl({
                     'url': `https://api.m.jd.com/`,
                     form: `functionId=inviteFissionHome&body={"linkId":"${this.linkId}","inviter":""}&t=1686444659424&appid=activities_platform&client=ios&clientVersion=12.3.4&build=&screen=375*667&networkType=wifi&d_brand=&d_model=&lang=zh_CN&osVersion=15_7_5&partner=&cthr=1`,
@@ -56,6 +56,7 @@ class Main extends Template {
                     }
                 })
                 if (this.haskey(invite, 'data.cashVo.totalAmount')) {
+                    amount = invite.data.cashVo.totalAmount
                     vo = 1
                 }
                 if (this.profile.count) {
@@ -75,8 +76,11 @@ class Main extends Template {
                     inviter,
                     count,
                     finish,
-                    min: parseInt(countDownTime / 60000), vo
+                    min: parseInt(countDownTime / 60000)
                 })
+                this.dict[this.linkId] = {
+                    vo, amount: parseInt(amount)
+                }
             }
         }
     }
@@ -99,7 +103,6 @@ class Main extends Template {
                 console.log("不能助力自己...")
             }
             else {
-                console.log(p.inviter.inviter)
                 let home = await this.algo.curl({
                     'url': `https://api.m.jd.com/`,
                     form: `functionId=inviteFissionhelp&body={"linkId":"${this.linkId}","isJdApp":true,"inviter":"${p.inviter.inviter}"}&t=1686444659424&appid=activities_platform&client=ios&clientVersion=12.3.4&build=&screen=375*667&networkType=wifi&d_brand=&d_model=&lang=zh_CN&osVersion=15_7_5&partner=&cthr=1`,
@@ -185,13 +188,20 @@ class Main extends Template {
                 else if (prizeType == 4) {
                     cash.push(this.haskey(draw, 'data.prizeValue'))
                 }
-                if (p.inviter.vo) {
-                    let record = await this.algo.curl({
-                        "url": `https://api.m.jd.com/api?functionId=inviteFissionHelpRecord&body={"linkId":"${this.linkId}","isJdApp":true,"inviter":""}&t=1697030383443&appid=activities_platform&client=ios&clientVersion=12.3.4&x-api-eid-token=jdd03LPCWT6AZWSJUIFJ6ZEX2DULDQHOXRDWH6W56TXIMNP23GIKXEVA4DAHU6FITJZJXXZ5BDTKATB34CAEUC3ZGUQDJZMAAAAMLD2Q4E7IAAAAACJKEFO7FM6MS7UX&uuid=0721inviteFissionReceive076da75ec3ea8e5f481e6d68bb4b7420c38d&build=168898&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone13,3&lang=zh_CN&osVersion=15.1.1&partner=-1&cthr=1`,
-                        cookie,
-                        "algo": {"appId": "eb67b"},
-                    })
-                    console.log(this.haskey(record, 'data.recordVos'))
+                if (this.dict[this.linkId].vo) {
+                    let receive = await this.algo.curl({
+                            'url': "https://api.m.jd.com/",
+                            'form': `functionId=inviteFissionReceive&body={"linkId":"${this.linkId}"}&t=1690444205217&appid=activities_platform&client=ios&clientVersion=12.3.4&uuid=861150c6d426f3ce8179e70c6da1b6fe3a6293ef&build=1410&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone13,3&lang=zh_CN&osVersion=15.1.1&partner=-1&cthr=1`,
+                            cookie,
+                            algo: {
+                                "appId": "b8469",
+                            }
+                        }
+                    )
+                    console.log(`获取奖励中: ${this.haskey(receive, 'data.amount')}`)
+                    if (this.haskey(receive, 'data.amount') && parseInt(receive.data.amount)>=this.dict[this.linkId].amount) {
+
+                    }
                 }
                 await this.wait(1000)
             }
@@ -300,20 +310,6 @@ class Main extends Template {
             }
             if (end == 0) {
                 this.dict[p.user]['end']
-            }
-            if (this.turnCount<4) {
-                if (p.inviter.vo) {
-                    let receive = await this.algo.curl({
-                            'url': "https://api.m.jd.com/",
-                            'form': `functionId=inviteFissionReceive&body={"linkId":"${this.linkId}"}&t=1690444205217&appid=activities_platform&client=ios&clientVersion=12.3.4&uuid=861150c6d426f3ce8179e70c6da1b6fe3a6293ef&build=1410&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone13,3&lang=zh_CN&osVersion=15.1.1&partner=-1&cthr=1`,
-                            cookie,
-                            algo: {
-                                "appId": "b8469",
-                            }
-                        }
-                    )
-                    console.log(`获取奖励中: ${this.haskey(receive, 'data.amount')}`)
-                }
             }
         }
     }
