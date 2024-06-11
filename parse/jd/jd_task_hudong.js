@@ -336,6 +336,7 @@ class Main extends Template {
                 algo: {},
                 cookie
             })
+            let apDoLimitTimeTask = 0
             for (let i of this.haskey(apTask, 'data')) {
                 if (i.taskLimitTimes == i.taskDoTimes) {
                     console.log("任务已完成:", i.taskShowTitle)
@@ -360,6 +361,9 @@ class Main extends Template {
                 else {
                     if (i.taskType != 'ORDER_MARK') {
                         undo = 1
+                    }
+                    if (apDoLimitTimeTask) {
+                        break
                     }
                     console.log(`正在运行:`, i.taskTitle, i.taskType)
                     switch (i.taskType) {
@@ -413,6 +417,10 @@ class Main extends Template {
                                             algo: {'appId': '54ed7'},
                                             cookie
                                         })
+                                        if (this.haskey(doTask, 'errMsg', '参数校验失败')) {
+                                            apDoLimitTimeTask = 1
+                                            break
+                                        }
                                         if (this.haskey(doTask, 'success')) {
                                             console.log("任务完成", `[${parseInt(j) + 1}/${i.taskLimitTimes - i.taskDoTimes}]`)
                                         }
@@ -424,6 +432,55 @@ class Main extends Template {
                                 }
                             }
                             break
+                    }
+                }
+            }
+            if (apDoLimitTimeTask) {
+                for (let i of this.haskey(apTask, 'data')) {
+                    if (i.taskDoTimes != i.taskLimitTimes) {
+                        switch (i.taskType) {
+                            case 'BROWSE_CHANNEL':
+                            case 'BROWSE_PRODUCT' :
+                                let t = await this.algo.curl({
+                                        'url': `https://api.m.jd.com/api?functionId=apTaskDetail`,
+                                        'form': `functionId=apTaskDetail&body={"taskType":"${i.taskType}","taskId":${i.id},"channel":4,"checkVersion":true,"linkId":"${p.inviter.linkId}"}&t=1718107819042&appid=activities_platform&client=ios&clientVersion=12.1.0&loginType=2&loginWQBiz=wegame&`,
+                                        cookie
+                                    }
+                                )
+                                for (let __ of this.haskey(t, 'data.taskItemList')) {
+                                    let d = await this.algo.curl({
+                                            'url': `https://api.m.jd.com/api`,
+                                            'form': `functionId=apStartTaskTime&body={"linkId":"${p.inviter.linkId}","taskId":${i.id},"itemId":"${encodeURIComponent(__.itemId)}","channel":4}&t=1714297539245&appid=activities_platform&client=ios&clientVersion=6.15.2&loginType=2&loginWQBiz=wegame&build=1515&screen=320*568&networkType=wifi&d_brand=iPhone&d_model=iPhone8,4&lang=zh_CN&osVersion=15.8&partner=-1&cthr=1`,
+                                            cookie
+                                        }
+                                    )
+                                    console.log("正在运行:", i.taskType, this.haskey(d, 'success'))
+                                    if (i.timeLimitPeriod) {
+                                        console.log("等待:", i.timeLimitPeriod
+                                        )
+                                        await this.wait(i.timeLimitPeriod * 1001)
+                                    }
+                                    else if ((this.haskey(i, 'configBaseList.0.awardTitle') || '').includes("秒")) {
+                                        let ts = parseInt(this.match(/(\d+)秒/, this.haskey(i, 'configBaseList.0.awardTitle')))
+                                        console.log("等待:", ts)
+                                        await this.wait(ts * 1001)
+                                    }
+                                    let r = await this.algo.curl({
+                                            'url': `https://api.m.jd.com/api`,
+                                            'form': `functionId=apDoLimitTimeTask&body={"linkId":"${p.inviter.linkId}"}&t=1714297546880&appid=activities_platform&client=ios&clientVersion=6.15.2&loginType=2&loginWQBiz=wegame&build=1515&screen=320*568&networkType=wifi&d_brand=iPhone&d_model=iPhone8,4&lang=zh_CN&osVersion=15.8&partner=-1&cthr=1`,
+                                            cookie,
+                                            algo: {
+                                                appId: 'ebecc'
+                                            }
+                                        }
+                                    )
+                                    console.log("返回结果...", this.haskey(r, 'success'))
+                                }
+                                break
+                        }
+                    }
+                    else {
+                        console.log(`任务完成`, i.taskTitle)
                     }
                 }
             }
