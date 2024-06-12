@@ -6,8 +6,11 @@ class Main extends Template {
         this.title = "京东京享红包"
         this.cron = `${this.rand(0, 59)} ${this.rand(0, 22)} * * *`
         this.help = '3'
-        this.import = ['jdAlgo']
+        this.import = ['jdAlgo', 'logBill']
         this.delay = 500
+        this.hint = {
+            shareUrl: "分享链接"
+        }
     }
 
     async prepare() {
@@ -39,6 +42,9 @@ class Main extends Template {
         )
         cookie = `${cookie};${scheme.cookie}`
         let linkUrl = this.match(/"url":"([^\"]+)"/, decodeURIComponent(scheme.location))
+        await this.curl({
+            url: linkUrl
+        })
         let actId = this.match(/active\/(\w+)/, linkUrl)
         let unionActId = this.match(/unionActId=(\d+)/, linkUrl)
         let d = this.match(/com\/(\w+)/, url)
@@ -84,7 +90,7 @@ class Main extends Template {
                 }
             }
         }
-        await this.shareId() 
+        await this.shareId()
         for (let unionShareId of this.code.slice(0, 4)) {
             cookie = p.cookie
             if (this.dict.d) {
@@ -116,6 +122,9 @@ class Main extends Template {
             )
             cookie = `${cookie};${scheme.cookie}`
             let linkUrl = this.match(/"url":"([^\"]+)"/, decodeURIComponent(scheme.location))
+            await this.curl({
+                url: linkUrl
+            })
             let actId = this.match(/active\/(\w+)/, linkUrl)
             let unionActId = this.match(/unionActId=(\d+)/, linkUrl)
             let d = this.match(/com\/(\w+)/, url)
