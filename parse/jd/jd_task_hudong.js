@@ -48,7 +48,7 @@ class Main extends Template {
                 try {
                     let conf = {};
                     let html = await this.curl({
-                            url,
+                            url: `${url}?utm_medium=tuiguang&tttparams=zZ1qguleyJnTGF0IjozOS45NjEwNTQsInVuX2FyZWEiOiIxXzI4MDBfNTU4MzhfMCIsImRMYXQiOiIiLCJwcnN0YXRlIjoiMCIsImFkZHJlc3NJZCI6IjUzODg3NDg3NyIsImxhdCI6IiIsInBvc0xhdCI6MzkuOTYxMDU0LCJwb3NMbmciOjExNi4zMjIwNjEsImdwc19hcmVhIjoiMF8wXzBfMCIsImxuZyI6IiIsInVlbXBzIjoiMC0wLTAiLCJnTG5nIjoxMTYuMzIyMDYxLCJtb2RlbCI6ImlQaG9uZTEzLDMiLCJkTG5nIjoiIn70=&utm_source=kong&cu=true`,
                             cookie: this.cookies.main[0],
                             referer: "http://u.jd.com/",
                             delay: 1,
@@ -275,6 +275,7 @@ class Main extends Template {
     }
 
     async main(p) {
+        console.log("当前运行ID:", p.inviter.id)
         await this.algo.set({
             version: '4.4',
             type: "main",
