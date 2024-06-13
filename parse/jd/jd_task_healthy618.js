@@ -7,7 +7,7 @@ class Main extends Template {
         this.cron = "6 6 6 6 6"
         this.task = 'local'
         this.delay = 1500
-        this.import = ['jdAlgo', 'fileCache', 'jdSign']
+        this.import = ['jdAlgo', 'fileCache', 'jdSign', 'jdObf']
         this.hint = {
             openCard: '1,开卡'
         }
