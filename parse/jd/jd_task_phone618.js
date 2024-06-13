@@ -116,7 +116,7 @@ class Main extends Template {
                 console.log(`获得幸运值:`, end.add_star)
             }
             if (this.haskey(end, 'prize.prize_info.quota')) {
-                this.print(`京豆: ${end.prize.prize_info.quota}`, p.user)
+                this.print(`${end.prize.prize_name}: ${end.prize.prize_info.quota}`, p.user)
             }
             await this.wait(1000)
         }
