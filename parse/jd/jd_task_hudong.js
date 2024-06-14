@@ -117,7 +117,8 @@ class Main extends Template {
                                                         form: `appid=activities_platform&body={"linkId":"${lid}","taskId":"","inviter":""}&client=ios&clientVersion=12.3.4&functionId=inviteFissionBeforeHome&t=1718017177605&osVersion=16.2.1&build=169143&rfs=0000`,
                                                         algo: {
                                                             appId: '02f8d'
-                                                        }
+                                                        },
+                                                        delay: 1
                                                     }
                                                 )
                                                 if (this.haskey(pl, 'data')) {
@@ -130,6 +131,43 @@ class Main extends Template {
                                                 }
                                             }
                                         }
+                                    }
+                                    else if (jsContent.includes("superLeagu")) {
+                                        let linkId3 = this.matchAll(/"linkId"\s*:\s*"([^\"]+)"/g, html)
+                                        if (linkId3) {
+                                            for (let aaa of this.unique(linkId3)) {
+                                                let bbb = await this.algo.curl({
+                                                        'url': `https://api.m.jd.com/api?functionId=superLeagueHome`,
+                                                        'form': `functionId=superLeagueHome&body={"linkId":"${aaa}","taskId":"","inviter":"","inJdApp":false}&t=1718355904494&appid=activities_platform&client=android&clientVersion=1.0.0`,
+                                                        algo: {'appId': 'b7d17'},
+                                                        delay: 1
+                                                    }
+                                                )
+                                                if (this.haskey(bbb, 'data')) {
+                                                    let ccc = await this.algo.curl({
+                                                            'url': `http://api.m.jd.com/client.action`,
+                                                            'form': `appid=activities_platform&body={"linkId":"${aaa}"}&client=ios&clientVersion=12.3.4&functionId=apTaskList&t=1718358493910&osVersion=13.4.1&build=169143&rfs=0000`,
+                                                            delay: 1,
+                                                            algo: {
+                                                                appId: 'b7d17'
+                                                            }
+                                                        }
+                                                    )
+                                                    if (this.haskey(ccc, 'data.0')) {
+                                                        this.shareCode.push({
+                                                            linkId: aaa,
+                                                            id: linkId,
+                                                            type: 'superLeague'
+                                                        })
+                                                        this.dict[aaa] = {
+                                                            code: [], taskId: ''
+                                                        }
+                                                        break
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        break
                                     }
                                 }
                             }
@@ -724,6 +762,7 @@ class Main extends Template {
             cookie
         })
         // console.log(apTask.data)
+        let apDoLimitTimeTask = 0
         for (let i of this.haskey(apTask, 'data')) {
             if (i.taskLimitTimes == i.taskDoTimes) {
                 console.log("任务已完成:", i.taskShowTitle)
@@ -733,10 +772,15 @@ class Main extends Template {
             }
             else {
                 for (let j of Array(i.taskLimitTimes - i.taskDoTimes)) {
+                    if (apDoLimitTimeTask) {
+                        break
+                    }
                     console.log("正在运行:", i.taskShowTitle)
                     switch (i.taskType) {
                         case 'SHARE_INVITE':
                             this.dict[p.inviter.linkId].taskId = i.id
+                            break
+                        case 'ORDER_MARK':
                             break
                         case 'BROWSE_CHANNEL':
                         case  'BROWSE_PRODUCT' :
@@ -772,6 +816,10 @@ class Main extends Template {
                                     algo: {'appId': '54ed7'},
                                     cookie
                                 })
+                                if (this.haskey(doTask, 'code', 2018)) {
+                                    apDoLimitTimeTask = 1
+                                    break
+                                }
                                 console.log(this.haskey(doTask, 'success'))
                             }
                             break
@@ -802,6 +850,10 @@ class Main extends Template {
                                 cookie
                             })
                             console.log(i.taskType)
+                            if (this.haskey(doTask, 'code') && [2018, 10].includes(doTask.code)) {
+                                apDoLimitTimeTask = 1
+                                break
+                            }
                             if (this.haskey(doTask, 'success')) {
                                 console.log("任务完成")
                             }
@@ -810,6 +862,73 @@ class Main extends Template {
                             }
                             break
                     }
+                }
+            }
+        }
+        if (apDoLimitTimeTask) {
+            for (let i of this.haskey(apTask, 'data')) {
+                if (i.taskDoTimes != i.taskLimitTimes) {
+                    switch (i.taskType) {
+                        case 'ORDER_MARK':
+                            // console.log('666')
+                            break
+                        case 'FOLLOW_SHOP':
+                        case 'BROWSE_CHANNEL':
+                        case 'BROWSE_PRODUCT' :
+                            let t = await this.algo.curl({
+                                    'url': `https://api.m.jd.com/api?functionId=apTaskDetail`,
+                                    'form': `functionId=apTaskDetail&body={"taskType":"${i.taskType}","taskId":${i.id},"channel":4,"checkVersion":true,"linkId":"${p.inviter.linkId}"}&t=1718107819042&appid=activities_platform&client=ios&clientVersion=12.1.0&loginType=2&loginWQBiz=wegame&`,
+                                    cookie
+                                }
+                            )
+                            for (let __ of this.haskey(t, 'data.taskItemList')) {
+                                if (i.taskType == 'FOLLOW_SHOP') {
+                                    let toT = await this.algo.curl({
+                                            'url': `https://api.m.jd.com/api`,
+                                            'form': `functionId=apsDoTask&body={"taskType":"${i.taskType}","taskId":${i.id},"channel":4,"checkVersion":true,"linkId":"${p.inviter.linkId}","taskInsert":false,"resourceType":null,"itemId":"${encodeURIComponent(__.itemId)}"}&t=1718357853363&appid=activities_platform&client=ios&clientVersion=12.1.0&loginType=2&loginWQBiz=wegame`,
+                                            cookie,
+                                            algo: {
+                                                appId: '54ed7'
+                                            }
+                                        }
+                                    )
+                                    console.log("返回结果...", this.haskey(toT, 'success'))
+                                }
+                                else {
+                                    let d = await this.algo.curl({
+                                            'url': `https://api.m.jd.com/api`,
+                                            'form': `functionId=apStartTaskTime&body={"linkId":"${p.inviter.linkId}","taskId":${i.id},"itemId":"${encodeURIComponent(__.itemId)}","channel":4}&t=1714297539245&appid=activities_platform&client=ios&clientVersion=6.15.2&loginType=2&loginWQBiz=wegame&build=1515&screen=320*568&networkType=wifi&d_brand=iPhone&d_model=iPhone8,4&lang=zh_CN&osVersion=15.8&partner=-1&cthr=1`,
+                                            cookie
+                                        }
+                                    )
+                                    console.log("正在运行:", i.taskType, this.haskey(d, 'success'))
+                                    if (i.timeLimitPeriod) {
+                                        console.log("等待:", i.timeLimitPeriod
+                                        )
+                                        await this.wait(i.timeLimitPeriod * 1001)
+                                    }
+                                    else if ((this.haskey(i, 'configBaseList.0.awardTitle') || '').includes("秒")) {
+                                        let ts = parseInt(this.match(/(\d+)秒/, this.haskey(i, 'configBaseList.0.awardTitle')))
+                                        console.log("等待:", ts)
+                                        await this.wait(ts * 1001)
+                                    }
+                                    let r = await this.algo.curl({
+                                            'url': `https://api.m.jd.com/api`,
+                                            'form': `functionId=apDoLimitTimeTask&body={"linkId":"${p.inviter.linkId}"}&t=1714297546880&appid=activities_platform&client=ios&clientVersion=6.15.2&loginType=2&loginWQBiz=wegame&build=1515&screen=320*568&networkType=wifi&d_brand=iPhone&d_model=iPhone8,4&lang=zh_CN&osVersion=15.8&partner=-1&cthr=1`,
+                                            cookie,
+                                            algo: {
+                                                appId: 'ebecc'
+                                            }
+                                        }
+                                    )
+                                    console.log("返回结果...", this.haskey(r, 'success'))
+                                }
+                            }
+                            break
+                    }
+                }
+                else {
+                    console.log(`任务完成`, i.taskTitle)
                 }
             }
         }
