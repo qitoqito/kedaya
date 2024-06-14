@@ -274,6 +274,18 @@ class Main extends Template {
         if (end == 0) {
             this.dict[p.user]['end']
         }
+        let home = await this.algo.curl({
+                'url': `https://api.m.jd.com/client.action`,
+                'form': `functionId=wanyiwan_home&appid=signed_wh5&body=%7B%22outsite%22%3A0%2C%22firstCall%22%3A1%2C%22version%22%3A1%2C%22lbsSwitch%22%3Atrue%7D&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168960&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=1.0.0&partner=`,
+                cookie,
+                algo: {
+                    appId: 'c81ad'
+                }
+            }
+        )
+        if (this.haskey(home, 'data.result.score')) {
+            this.print(`我的奖票: ${home.data.result.score}`, p.user)
+        }
     }
 
     async wget(p) {
