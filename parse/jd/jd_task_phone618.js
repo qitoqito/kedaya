@@ -120,14 +120,14 @@ class Main extends Template {
             }
             await this.wait(1000)
         }
-        for (let _ of Array(5)) {
+        for (let _ of Array(20)) {
             info = await this.curl({
                     'url': `https://xinrui-isv.isvjcloud.com/phone-618-api/get_user_info?`,
                     headers
                 }
             )
             let star = this.haskey(info, 'star')
-            if (star) {
+            if (star>99) {
                 console.log("幸运值:", star)
                 for (let i of Array(Math.floor(parseInt(star) / 100))) {
                     console.log("幸运值抽奖中...")
