@@ -66,7 +66,7 @@ class Main extends Template {
         let gifts = []
         console.log("正在签到: 医药馆")
         let a = await this.algo.curl({
-                'url': `https://api.m.jd.com/api`,
+                'url': `http://api.m.jd.com/api`,
                 'form': `appid=laputa&functionId=jdh_laputa_handleSoaRequest&body={"methodName":"handleBeanInfo2595","functionId":"sign","osName":"feedProduct","appId":"807635028594484682708c54f69b1217","version":"1","deviceNo":"9abbe1bd-252f-40f8-a42f-ba4be28244f7","handleType":"sign","encryptProjectId":"3vRVP84ukngNhNYVDQTXuQQzJjit","encryptAssignmentIds":["3LbDQhTDsr5n7wL4XPyubMvEuUR3"],"deviceType":1,"lng":0,"lat":0,"itemId":"1"}`,
                 cookie
             }
@@ -81,7 +81,7 @@ class Main extends Template {
                     console.log(`正在签到: ${j}`)
                     let dd = this.dict[i][j]
                     let b = await this.algo.curl({
-                            'url': `https://api.m.jd.com/client.action?functionId=doInteractiveAssignment`,
+                            'url': `http://api.m.jd.com/client.action?functionId=doInteractiveAssignment`,
                             form: `appid=babelh5&body={"sourceCode":"${dd.sourceCode || 'acetttsign'}","encryptProjectId":"${dd.encryptProjectId}","encryptAssignmentId":"${dd.encryptAssignmentId}","completionFlag":true,"itemId":"1","extParam":{"forceBot":"1","businessData":{},"signStr":"-1","sceneid":"babel_4RYbb8NtVAegmT35SuM2N3KKYLWt"},"activity_id":"4RYbb8NtVAegmT35SuM2N3KKYLWt","template_id":"00035605","floor_id":"101674850","enc":"082F6E6EB76A8CBEE15FCF7E92519D4A0C14A052EDB9C9248A0F4121699403D36C35C158EFB65C32311DCE62FF076E717D80B5322FC0FC3B1D3CA22644BC685E"}&sign=11&t=1710422476977`,
                             cookie,
                             algo: {
