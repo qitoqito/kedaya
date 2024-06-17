@@ -290,7 +290,6 @@ class Main extends Template {
                                         delay: 1,
                                         algo: {
                                             appId: "d7439",
-                                            version: "4.7"
                                         }
                                     }
                                 )
@@ -315,7 +314,7 @@ class Main extends Template {
     async main(p) {
         console.log("当前运行ID:", p.inviter.id)
         await this.algo.set({
-            version: '4.4',
+            version: '4.7',
             type: "main",
             referer: `https://prodev.m.jd.com/mall/active/${p.inviter.id}/index.html`
         })
@@ -739,7 +738,7 @@ class Main extends Template {
         let home = await this.wget({
             fn: 'superLeagueHome',
             body: {"linkId": p.inviter.linkId, "taskId": taskId, "inviter": inviter, "inJdApp": true},
-            algo: {'appId': 'b7d17', version: '4.4'},
+            algo: {'appId': 'b7d17'},
             cookie
         })
         if (this.haskey(home, 'data.notLogin')) {
@@ -1183,7 +1182,6 @@ class Main extends Template {
                 cookie,
                 algo: {
                     appId: '35fa0',
-                    version: '4.7'
                 }
             }
         )
@@ -1204,7 +1202,6 @@ class Main extends Template {
                     'form': `functionId=queryInteractiveInfo&appid=${appid}&body={"encryptProjectId":"${encryptProjectId}","ext":{"rewardEncryptAssignmentId":null,"needNum":50},"sourceCode":"${sourceCode}"}&sign=11&t=1646206781226`,
                     cookie,
                     algo: {
-                        version: "4.7",
                         appId: '81adb'
                     }
                 }
