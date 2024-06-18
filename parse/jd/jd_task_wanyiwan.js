@@ -27,6 +27,7 @@ class Main extends Template {
 
     async main(p) {
         let cookie = p.cookie;
+        let oldScore = 0;
         if (this.turnCount == 0) {
             this.dict[p.user] = {"pages": {}, "cash": []}
             let home = await this.algo.curl({
@@ -48,6 +49,9 @@ class Main extends Template {
             else if (!result.isLogin) {
                 console.log("未登录...")
                 return
+            }
+            if (this.haskey(home, 'data.result.score')) {
+                oldScore = result.score
             }
             if (this.haskey(result, 'signBoard.status', 1)) {
                 console.log("已签到...")
@@ -284,7 +288,7 @@ class Main extends Template {
             }
         )
         if (this.haskey(home, 'data.result.score')) {
-            this.print(`我的奖票: ${home.data.result.score}`, p.user)
+            this.print(`我的奖票: ${home.data.result.score} 与上次相比: ${home.data.result.score - oldScore}`, p.user)
         }
     }
 
