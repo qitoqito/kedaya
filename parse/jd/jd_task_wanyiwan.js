@@ -19,28 +19,27 @@ class Main extends Template {
         this.algo = new this.modules.jdAlgo({
             version: "4.7",
             type: "main",
-            // headers: {
-            //     referer: 'https://pro.m.jd.com/mall/active/3fcyrvLZALNPWCEDRvaZJVrzek8v/index.html',
-            // }
+            headers: {
+                referer: 'https://pro.m.jd.com/mall/active/3fcyrvLZALNPWCEDRvaZJVrzek8v/index.html',
+            }
         })
     }
 
     async main(p) {
         let cookie = p.cookie;
+        let oldScore = 0;
         if (this.turnCount == 0) {
             this.dict[p.user] = {"pages": {}, "cash": []}
             let home = await this.algo.curl({
                     'url': `https://api.m.jd.com/client.action`,
-                    'form': `functionId=wanyiwan_home&appid=signed_wh5&body=%7B%22outsite%22%3A0%2C%22firstCall%22%3A1%2C%22version%22%3A1%2C%22lbsSwitch%22%3Atrue%7D&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168960&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=1.0.0&partner=`,
+                    'form': `functionId=wanyiwan_home&appid=signed_wh5&body={"outsite":0,"firstCall":1,"version":1,"lbsSwitch":false}&rfs=0000&openudid=5a44015a5e835b3dcb903c9a6b9d66573473c14d&screen=390*844&build=168858&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=12.1.0`,
                     cookie,
                     algo: {
                         appId: 'c81ad'
                     }
                 }
             )
-            // console.log(home.data.result)
             let result = this.haskey(home, 'data.result')
-            // console.log(result)
             if (!result) {
                 console.log("没有获取到数据...")
                 return
@@ -49,6 +48,8 @@ class Main extends Template {
                 console.log("未登录...")
                 return
             }
+            oldScore = this.haskey(home, 'data.result.score') || 0
+            console.log("当前奖票:", oldScore)
             if (this.haskey(result, 'signBoard.status', 1)) {
                 console.log("已签到...")
             }
@@ -267,9 +268,6 @@ class Main extends Template {
                     }
                 }
             }
-            if (kkk) {
-                await this.wait(15000)
-            }
         }
         if (end == 0) {
             this.dict[p.user]['end']
@@ -283,8 +281,15 @@ class Main extends Template {
                 }
             }
         )
-        if (this.haskey(home, 'data.result.score')) {
-            this.print(`我的奖票: ${home.data.result.score}`, p.user)
+        let score = this.haskey(home, 'data.result.score') || 0
+        if (score) {
+            this.print(`当前奖票: ${score}`, p.user)
+            if (oldScore) {
+                let diff = score - oldScore
+                if (diff) {
+                    this.print(`${diff>0 ? '增加' : "损失"}奖票: ${diff}`, p.user)
+                }
+            }
         }
     }
 
