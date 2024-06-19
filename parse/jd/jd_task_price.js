@@ -7,6 +7,7 @@ class Main extends Template {
         this.cron = "38 */10 * * *"
         this.import = ['jdAlgo']
         this.task = 'local'
+        this.interval = 5000
     }
 
     async prepare() {
@@ -20,53 +21,18 @@ class Main extends Template {
 
     async main(p) {
         let cookie = p.cookie
-        let body = {
-            sid: "",
-            type: "25",
-            forcebot: "",
-        }
-        let s = {}
-        for (let i = 0; i<3; i++) {
-            let t = new Date().getTime()
-            let s = await this.algo.curl({
-                    'url': `https://api.m.jd.com/api`,
-                    "form": `appid=siteppM&functionId=siteppM_skuOnceApply&forcebot=&t=${t}&body=${this.dumps({
-                        sid: "",
-                        type: "25",
-                        forcebot: "",
-                    })}`,
-                    cookie,
-                    ua: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:100.0) Gecko/20100101 Firefox/100.0',
-                    "referer": "https://msitepp-fm.jd.com/",
-                }
-            )
-            console.log(s)
-            if (s.flag == true) {
-                break
+        let s = await this.curl({
+                'url': `https://api.m.jd.com/`,
+                'form': `functionId=mlproprice_skuOnceApply_jsf&appid=price_protection&loginType=2&body={"onceBatchId":"","couponConfirmFlag":null,"type":"25"}&client=apple&clientVersion=&x-api-eid-token=jdd03C3HUEKC6G2V5WV6SOXJV5E4J2ILKIIHLPARTU7DKUSMS72ICFUVMMF7ZVZXDON6VLTUCVU2GNZ2RZRMVIDXGF2FBMUAAAAMQFQIBMFAAAAAACIQ46Z6H2VWO6MX&h5st=&t=1718726274981`,
+                cookie
             }
-            else if (s.responseMessage == '10分钟内只能申请一次' || s.responseMessage == '不要频繁点我，稍等一下再试吧') {
-                console.log(s.responseMessage)
-                return
-            }
-        }
-        console.log("等待25s,获取保价订单中");
-        await this.wait(25000)
-        let p2 = {
-            'url': `https://api.m.jd.com/api?appid=siteppM&functionId=siteppM_appliedSuccAmount&forcebot=&t=${this.timestamp}`,
-            'form': 'body={"sid":"","type":"25","forcebot":"","num":15}',
-            cookie: p.cookie
-        }
-        let s2 = await this.curl(p2)
-        console.log(p.user, s2)
-        let text
-        if (s2.flag) {
-            text = `本次保价金额: ${s2.succAmount}`
-            this.notices(text, p.user)
+        )
+        if (this.haskey(s, 'data.succAmount')) {
+            console.log(`保价: ${s.data.succAmount}`, p.user)
         }
         else {
-            text = "本次无保价订单"
+            console.log(this.haskey(s, 'data.onceApplyNoSuccessTips') || s)
         }
-        console.log(p.user, text)
     }
 }
 
