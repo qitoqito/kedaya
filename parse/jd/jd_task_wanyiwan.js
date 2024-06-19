@@ -19,9 +19,9 @@ class Main extends Template {
         this.algo = new this.modules.jdAlgo({
             version: "4.7",
             type: "main",
-            headers: {
-                referer: 'https://pro.m.jd.com/mall/active/3fcyrvLZALNPWCEDRvaZJVrzek8v/index.html',
-            }
+            // headers: {
+            //     referer: 'https://pro.m.jd.com/mall/active/3fcyrvLZALNPWCEDRvaZJVrzek8v/index.html',
+            // }
         })
     }
 
@@ -32,7 +32,7 @@ class Main extends Template {
             this.dict[p.user] = {"pages": {}, "cash": []}
             let home = await this.algo.curl({
                     'url': `https://api.m.jd.com/client.action`,
-                    'form': `functionId=wanyiwan_home&appid=signed_wh5&body={"outsite":0,"firstCall":1,"version":1,"lbsSwitch":false}&rfs=0000&openudid=5a44015a5e835b3dcb903c9a6b9d66573473c14d&screen=390*844&build=168858&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=13.1.0`,
+                    'form': `functionId=wanyiwan_home&appid=signed_wh5&body={"outsite":0,"firstCall":1,"version":1,"lbsSwitch":false}&rfs=0000&openudid=5a44015a5e835b3dcb903c9a6b9d66573473c14d&screen=390*844&build=168858&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=12.1.0`,
                     cookie,
                     algo: {
                         appId: 'c81ad'
@@ -56,7 +56,7 @@ class Main extends Template {
             else {
                 let sign = await this.wget({
                         'url': `https://api.m.jd.com/client.action`,
-                        'form': `functionId=wanyiwan_sign&appid=signed_wh5&body={"version":1}&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168960&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=13.1.0`,
+                        'form': `functionId=wanyiwan_sign&appid=signed_wh5&body={"version":1}&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168960&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=1.0.0`,
                         cookie,
                         algo: {
                             appId: 'd12dd'
@@ -74,7 +74,7 @@ class Main extends Template {
                     console.log("正在运行:", i.title)
                     let d = await this.curl({
                             'url': `https://api.m.jd.com/client.action`,
-                            'form': `functionId=wanyiwan_do_task&appid=signed_wh5&body={"itemId":"${this.haskey(i, 'taskDetail.0.itemId') || 0}","taskType":${i.taskType},"assignmentId":"${i.encryptAssignmentId}","actionType":1,"version":1}&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168960&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=13.1.0`,
+                            'form': `functionId=wanyiwan_do_task&appid=signed_wh5&body={"itemId":"${this.haskey(i, 'taskDetail.0.itemId') || 0}","taskType":${i.taskType},"assignmentId":"${i.encryptAssignmentId}","actionType":1,"version":1}&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168960&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=1.0.0`,
                             cookie,
                             algo: {
                                 appId: '89db2'
@@ -87,7 +87,7 @@ class Main extends Template {
                     }
                     let r = await this.curl({
                             'url': `https://api.m.jd.com/client.action`,
-                            'form': `functionId=wanyiwan_do_task&appid=signed_wh5&body={"itemId":"${this.haskey(i, 'taskDetail.0.itemId') || 0}","taskType":${i.taskType},"assignmentId":"${i.encryptAssignmentId}","actionType":0,"version":1}&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168960&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=13.1.0`,
+                            'form': `functionId=wanyiwan_do_task&appid=signed_wh5&body={"itemId":"${this.haskey(i, 'taskDetail.0.itemId') || 0}","taskType":${i.taskType},"assignmentId":"${i.encryptAssignmentId}","actionType":0,"version":1}&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168960&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=1.0.0`,
                             cookie,
                             algo: {
                                 appId: '89db2'
@@ -97,7 +97,7 @@ class Main extends Template {
                     // console.log(r.data)
                     let a = await this.curl({
                             'url': `https://api.m.jd.com/client.action`,
-                            'form': `functionId=wanyiwan_task_receive_award&appid=signed_wh5&body={"taskType":${i.taskType},"assignmentId":"${i.encryptAssignmentId}","version":1}&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168960&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=13.1.0`,
+                            'form': `functionId=wanyiwan_task_receive_award&appid=signed_wh5&body={"taskType":${i.taskType},"assignmentId":"${i.encryptAssignmentId}","version":1}&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168960&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=1.0.0`,
                             cookie,
                             algo: {
                                 appId: 'd12dd'
@@ -110,7 +110,7 @@ class Main extends Template {
             }
             let turn = await this.algo.curl({
                     'url': `https://api.m.jd.com/client.action`,
-                    'form': `functionId=turnHappyHome&body={"linkId":"CDv-TaCmVcD0sxAI_HE2RQ","turnNum":"10"}&t=1715954317613&appid=activities_platform&client=ios&clientVersion=13.1.0`,
+                    'form': `functionId=turnHappyHome&body={"linkId":"CDv-TaCmVcD0sxAI_HE2RQ","turnNum":"10"}&t=1715954317613&appid=activities_platform&client=ios&clientVersion=1.0.0`,
                     cookie,
                     algo: {
                         appId: '614f1'
@@ -122,6 +122,9 @@ class Main extends Template {
             }
             else {
                 let num = this.profile.turnNum || 10
+                if (oldScore && num>oldScore) {
+                    num = oldScore
+                }
                 console.log("开始翻倍,使用奖票数量:", num)
                 let count = this.profile.turnDouble || 1
                 let ok = 1
@@ -142,11 +145,15 @@ class Main extends Template {
                         ok = 0
                         break
                     }
+                    else if (this.haskey(double, 'code', 220001)) {
+                        console.log("今日参与已达上限...")
+                        break
+                    }
                 }
                 if (ok) {
                     let rec = await this.algo.curl({
                             'url': `https://api.m.jd.com/client.action`,
-                            'form': `functionId=turnHappyReceive&body={"linkId":"CDv-TaCmVcD0sxAI_HE2RQ"}&t=1715954317613&appid=activities_platform&client=ios&clientVersion=13.1.0`,
+                            'form': `functionId=turnHappyReceive&body={"linkId":"CDv-TaCmVcD0sxAI_HE2RQ"}&t=1715954317613&appid=activities_platform&client=ios&clientVersion=12.1.0`,
                             cookie,
                             algo: {
                                 appId: '25fac'
@@ -163,7 +170,8 @@ class Main extends Template {
                         cookie,
                         algo: {
                             appId: '89cfe'
-                        }
+                        },
+                        referer: 'https://pro.m.jd.com/mall/active/3fcyrvLZALNPWCEDRvaZJVrzek8v/index.html',
                     }
                 )
                 if (this.haskey(draw, 'code', 20005)) {
@@ -194,7 +202,7 @@ class Main extends Template {
             else {
                 var list = await this.algo.curl({
                     'url': `http://api.m.jd.com/`,
-                    'form': `appid=activities_platform&body={"pageNum":${_},"pageSize":100,"linkId":"aE-1vg6_no2csxgXFuv3Kg","associateLinkId":"","business":"superRedEnvelope","prizeTypeLists":[7]}&client=ios&clientVersion=13.1.0&functionId=superRedBagList&t=1717201688210&osVersion=13.5.1&build=169143&rfs=0000&h5st=null`,
+                    'form': `appid=activities_platform&body={"pageNum":${_},"pageSize":100,"linkId":"aE-1vg6_no2csxgXFuv3Kg","associateLinkId":"","business":"superRedEnvelope","prizeTypeLists":[7]}&client=ios&clientVersion=12.3.4&functionId=superRedBagList&t=1717201688210&osVersion=13.5.1&build=169143&rfs=0000&h5st=null`,
                     cookie,
                     algo: {
                         appId: 'f2b1d'
@@ -214,7 +222,7 @@ class Main extends Template {
                 if (i.prizeType == 4 && i.state == 0) {
                     let cash = await this.algo.curl({
                         'url': `https://api.m.jd.com/`,
-                        'form': `functionId=apCashWithDraw&body={"linkId":"aE-1vg6_no2csxgXFuv3Kg","businessSource":"NONE","base":{"id":${i.id},"business":"superRedEnvelope","poolBaseId":${i.poolBaseId},"prizeGroupId":${i.prizeGroupId},"prizeBaseId":${i.prizeBaseId},"prizeType":${i.prizeType}}}&t=1677826760325&appid=activities_platform&client=ios&clientVersion=13.1.0`,
+                        'form': `functionId=apCashWithDraw&body={"linkId":"aE-1vg6_no2csxgXFuv3Kg","businessSource":"NONE","base":{"id":${i.id},"business":"superRedEnvelope","poolBaseId":${i.poolBaseId},"prizeGroupId":${i.prizeGroupId},"prizeBaseId":${i.prizeBaseId},"prizeType":${i.prizeType}}}&t=1677826760325&appid=activities_platform&client=ios&clientVersion=12.3.4`,
                         cookie,
                         algo: {
                             appId: '3c023'
@@ -235,7 +243,7 @@ class Main extends Template {
                     if (this.profile.change) {
                         let change = await this.curl({
                             'url': `https://api.m.jd.com/`,
-                            'form': `functionId=apRecompenseDrawPrize&body={"linkId":"aE-1vg6_no2csxgXFuv3Kg","drawRecordId":${i.id},"business":"fission","poolId":${i.poolBaseId},"prizeGroupId":${i.prizeGroupId},"prizeId":${i.prizeBaseId}}&t=1677828892054&appid=activities_platform&client=ios&clientVersion=13.1.0&cthr=1&uuid=31dbd03adc234a4f7b53d2ab98fe45e442ef8c23&build=168548&screen=375*667&networkType=wifi&d_brand=iPhone&d_model=iPhone8,1&lang=zh_CN&osVersion=13.7&partner=&eid=eidI9f3b812081s9gBRFzHVvSLKFyLkI3gRVC4AUR0pS4q%2FTLWhDlWOgSf3sd8Pw8GQF2mt5nHCd%2BUPdaH%2BNFDpcnMR8V4l92V0jkRYYg32WNMM5UbBj`,
+                            'form': `functionId=apRecompenseDrawPrize&body={"linkId":"aE-1vg6_no2csxgXFuv3Kg","drawRecordId":${i.id},"business":"fission","poolId":${i.poolBaseId},"prizeGroupId":${i.prizeGroupId},"prizeId":${i.prizeBaseId}}&t=1677828892054&appid=activities_platform&client=ios&clientVersion=11.6.2&cthr=1&uuid=31dbd03adc234a4f7b53d2ab98fe45e442ef8c23&build=168548&screen=375*667&networkType=wifi&d_brand=iPhone&d_model=iPhone8,1&lang=zh_CN&osVersion=13.7&partner=&eid=eidI9f3b812081s9gBRFzHVvSLKFyLkI3gRVC4AUR0pS4q%2FTLWhDlWOgSf3sd8Pw8GQF2mt5nHCd%2BUPdaH%2BNFDpcnMR8V4l92V0jkRYYg32WNMM5UbBj`,
                             cookie
                         })
                         console.log(`转换现金:`, i.amount, this.haskey(change, 'data. prizeDesc'))
@@ -248,7 +256,7 @@ class Main extends Template {
                             end = 1
                             let cash = await this.algo.curl({
                                 'url': `https://api.m.jd.com/`,
-                                'form': `functionId=apCashWithDraw&body={"linkId":"aE-1vg6_no2csxgXFuv3Kg","businessSource":"NONE","base":{"id":${i.id},"business":"superRedEnvelope","poolBaseId":${i.poolBaseId},"prizeGroupId":${i.prizeGroupId},"prizeBaseId":${i.prizeBaseId},"prizeType":${i.prizeType}}}&t=1677826760325&appid=activities_platform&client=ios&clientVersion=13.1.0`,
+                                'form': `functionId=apCashWithDraw&body={"linkId":"aE-1vg6_no2csxgXFuv3Kg","businessSource":"NONE","base":{"id":${i.id},"business":"superRedEnvelope","poolBaseId":${i.poolBaseId},"prizeGroupId":${i.prizeGroupId},"prizeBaseId":${i.prizeBaseId},"prizeType":${i.prizeType}}}&t=1677826760325&appid=activities_platform&client=ios&clientVersion=12.3.4`,
                                 cookie,
                                 algo: {
                                     appId: '3c023'
@@ -274,7 +282,7 @@ class Main extends Template {
         }
         let home = await this.algo.curl({
                 'url': `https://api.m.jd.com/client.action`,
-                'form': `functionId=wanyiwan_home&appid=signed_wh5&body=%7B%22outsite%22%3A0%2C%22firstCall%22%3A1%2C%22version%22%3A1%2C%22lbsSwitch%22%3Atrue%7D&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168960&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=13.1.0&partner=`,
+                'form': `functionId=wanyiwan_home&appid=signed_wh5&body=%7B%22outsite%22%3A0%2C%22firstCall%22%3A1%2C%22version%22%3A1%2C%22lbsSwitch%22%3Atrue%7D&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168960&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=1.0.0&partner=`,
                 cookie,
                 algo: {
                     appId: 'c81ad'
