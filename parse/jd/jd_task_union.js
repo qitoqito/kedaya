@@ -18,50 +18,55 @@ class Main extends Template {
             referer: 'https://pro.m.jd.com/mall/active/3Rztcv2tMwdpFqWiqaAUzBAToowC/index.html',
             version: "4.7"
         })
-        let cookie = ''
-        let url = this.profile.shareUrl || `https://u.jd.com/${this.unionId}`
-        let jda = await this.curl({
-                'url': url,
-                'response': `all`,
-                redirect: 'follow',
-                headers: {
-                    'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_1_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.28(0x18001c2e) NetType/WIFI Language/zh_CN',
-                    referer: 'https://servicewechat.com/wx91d27dbf599dff74/752/page-frame.html'
-                }
-            }
-        )
-        let jdaUrl = this.match([/hrl\s*='([^\']+)'/, /hrl\s*="([^\"]+)"/], jda.content)
-        cookie = `${cookie};${jda.cookie}`
-        let scheme = await this.curl({
-                'url': jdaUrl,
-                maxRedirects: 0,
-                scheme: 'openapp',
-                'response': `all`,
-                cookie,
-            }
-        )
-        cookie = `${cookie};${scheme.cookie}`
-        let linkUrl = this.match(/"url":"([^\"]+)"/, decodeURIComponent(scheme.location))
-        await this.curl({
-            url: linkUrl
-        })
-        let actId = this.match(/active\/(\w+)/, linkUrl)
-        let unionActId = this.match(/unionActId=(\d+)/, linkUrl)
-        let d = this.match(/com\/(\w+)/, url)
-        this.dict = {
-            actId, unionActId, d
-        }
-        for (let i of this.cookies.help) {
-            let shareUnion = await this.algo.curl({
-                    'url': `https://api.m.jd.com/api?functionId=shareUnionCoupon&appid=u_hongbao&_=1716943673297&loginType=2&body={"unionActId":"${unionActId}","actId":"${actId}","platform":4,"unionShareId":"","d":"${d}","supportPic":2}&client=apple&clientVersion=12.3.1&osVersion=15.1.1&screen=390*844&d_brand=iPhone&d_model=iPhone&lang=zh-CN&networkType=wifi&openudid=`,
-                    cookie: `${i};${cookie}`,
-                    appId: 'c10dc'
+        try {
+            this.assert(0, "双十一再见...")
+            let cookie = ''
+            let url = this.profile.shareUrl || `https://u.jd.com/${this.unionId}`
+            let jda = await this.curl({
+                    'url': url,
+                    'response': `all`,
+                    redirect: 'follow',
+                    headers: {
+                        'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_1_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.28(0x18001c2e) NetType/WIFI Language/zh_CN',
+                        referer: 'https://servicewechat.com/wx91d27dbf599dff74/752/page-frame.html'
+                    }
                 }
             )
-            if (this.haskey(shareUnion, 'data.shareUrl')) {
-                let unionShareId = this.match(/s=(\w+)/, shareUnion.data.shareUrl)
-                this.code.push(unionShareId)
+            let jdaUrl = this.match([/hrl\s*='([^\']+)'/, /hrl\s*="([^\"]+)"/], jda.content)
+            cookie = `${cookie};${jda.cookie}`
+            let scheme = await this.curl({
+                    'url': jdaUrl,
+                    maxRedirects: 0,
+                    scheme: 'openapp',
+                    'response': `all`,
+                    cookie,
+                }
+            )
+            cookie = `${cookie};${scheme.cookie}`
+            let linkUrl = this.match(/"url":"([^\"]+)"/, decodeURIComponent(scheme.location))
+            await this.curl({
+                url: linkUrl
+            })
+            let actId = this.match(/active\/(\w+)/, linkUrl)
+            let unionActId = this.match(/unionActId=(\d+)/, linkUrl)
+            let d = this.match(/com\/(\w+)/, url)
+            this.dict = {
+                actId, unionActId, d
             }
+            for (let i of this.cookies.help) {
+                let shareUnion = await this.algo.curl({
+                        'url': `https://api.m.jd.com/api?functionId=shareUnionCoupon&appid=u_hongbao&_=1716943673297&loginType=2&body={"unionActId":"${unionActId}","actId":"${actId}","platform":4,"unionShareId":"","d":"${d}","supportPic":2}&client=apple&clientVersion=12.3.1&osVersion=15.1.1&screen=390*844&d_brand=iPhone&d_model=iPhone&lang=zh-CN&networkType=wifi&openudid=`,
+                        cookie: `${i};${cookie}`,
+                        appId: 'c10dc'
+                    }
+                )
+                if (this.haskey(shareUnion, 'data.shareUrl')) {
+                    let unionShareId = this.match(/s=(\w+)/, shareUnion.data.shareUrl)
+                    this.code.push(unionShareId)
+                }
+            }
+        } catch (e) {
+            // console.log(e.message)
         }
         if (this.code.length>0) {
             console.log("当前助力码:", this.code)
