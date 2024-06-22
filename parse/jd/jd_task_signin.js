@@ -4,7 +4,7 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东整合签到"
-        this.cron = `${this.rand(0, 59)} ${this.rand(0, 2)} * * *`
+        this.cron = `${this.rand(0, 59)} 0 * * *`
         this.task = 'local'
         this.import = ['jdAlgo', 'logBill']
     }
@@ -107,6 +107,9 @@ class Main extends Template {
                     await this.wait(1000)
                 }
             }
+        }
+        if (gifts.length) {
+            this.notices(gifts.join("\n"), p.user)
         }
     }
 }
