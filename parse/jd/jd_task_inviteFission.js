@@ -187,6 +187,15 @@ class Main extends Template {
                 }
                 else if (prizeType == 4) {
                     cash.push(this.haskey(draw, 'data.prizeValue'))
+                    let cs = await this.algo.curl({
+                        'url': `https://api.m.jd.com/`,
+                        'form': `functionId=apCashWithDraw&body={"linkId":"${this.linkId}","businessSource":"NONE","base":{"id":${draw.data.id},"business":"fission","poolBaseId":${draw.data.poolBaseId},"prizeGroupId":${draw.data.prizeGroupId},"prizeBaseId":${draw.data.prizeBaseId},"prizeType":${draw.data.prizeType}}}&t=1677826760325&appid=activities_platform&client=ios&clientVersion=13.1.0`,
+                        cookie,
+                        algo: {
+                            appId: '3c023'
+                        }
+                    })
+                    console.log(`现金: ${draw.data.amount}  ${this.haskey(cs, 'data.message')}`)
                 }
                 if (this.dict[this.linkId].vo) {
                     let receive = await this.algo.curl({
