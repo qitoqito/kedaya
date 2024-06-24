@@ -1,5 +1,4 @@
 const Template = require('../../template');
-
 class Main extends Template {
     constructor() {
         super()
@@ -7,16 +6,13 @@ class Main extends Template {
         this.import = ['fs', 'node-telegram-bot-api']
         this.jump = 1
     }
-
     async prepare() {
-        if (this.custom) {
+        if (this.profile.custom) {
             await this.tg()
-        }
-        else {
+        } else {
             await this.tgMsg()
         }
     }
-
     async tgMsg() {
         let dir = this.modules.fs.readdirSync(`${this.dirname}/parse/jd`);
         let scripts = []
@@ -35,8 +31,7 @@ class Main extends Template {
                         type: this['QITOQITO_MAP'][i].split("_")[0]
                     }
                 }
-            }
-            else {
+            } else {
                 for (let k of this['QITOQITO_MAP'].replace(/\&/g, "\|").split("|")) {
                     let a = k.split("=")
                     for (let i of a[0].split(',')) {
@@ -56,13 +51,13 @@ class Main extends Template {
                 var SocksProxyAgent = require('socks-proxy-agent');
                 var agent = new SocksProxyAgent(this.profile.BOT_PROXY.toLowerCase());
                 request.agent = agent
-            }
-            else {
+            } else {
                 request.proxy = this.profile.BOT_PROXY
             }
         }
         this.bot = new this.TelegramBot(this.profile.BOT_TOKEN, {
-            polling: true, request,
+            polling: true,
+            request,
         });
         this.bot.on('text', async (msg) => {
             let timestamp = parseInt(new Date().getTime() / 1000)
@@ -115,26 +110,22 @@ class Main extends Template {
                 if (this.match(new RegExp(`(^${custom})`), text) && !this.match(/task\s*\w+/, text)) {
                     let command = this.match(new RegExp(`(^${custom})`), text)
                     // if (text.split(0, command.length) == command) {
-                        text = `task jd_task_${command} -custom ${reText || text.replace(command, '')}`
+                    text = `task jd_task_${command} -custom ${reText || text.replace(command, '')}`
                     // }
-                }
-                else if (this.match(new RegExp(`(^${script}$)`), text) && !this.match(/task\s*\w+/, text)) {
+                } else if (this.match(new RegExp(`(^${script}$)`), text) && !this.match(/task\s*\w+/, text)) {
                     let command = this.match(new RegExp(`(^${script})`), text)
                     // if (text.split(0, command.length) == command) {
-                        text = `task jd_task_${command}`
+                    text = `task jd_task_${command}`
                     // }
-                }
-                else if (this.match(new RegExp(`(^${scripts.join("|")}$)`), text) && !this.match(/task\s*\w+/, text)) {
+                } else if (this.match(new RegExp(`(^${scripts.join("|")}$)`), text) && !this.match(/task\s*\w+/, text)) {
                     let command = this.match(new RegExp(`(^${scripts.join("|")})`), text)
                     // if (text.split(0, command.length) == command) {
-                        text = `task jd_task_${command} -custom ${reText || text.replace(command, '')}`
+                    text = `task jd_task_${command} -custom ${reText || text.replace(command, '')}`
                     // }
-                }
-                else if (this.dict.map && this.match(new RegExp(`(^${Object.keys(this.dict.map).join("|")})`), text) && !this.match(/task\s*\w+/, text)) {
+                } else if (this.dict.map && this.match(new RegExp(`(^${Object.keys(this.dict.map).join("|")})`), text) && !this.match(/task\s*\w+/, text)) {
                     let command = this.match(new RegExp(`(^${Object.keys(this.dict.map).join("|")})`), text)
                     text = `task ${this.dict.map[command].map} -custom ${reText || text.replace(command, '')}`
-                }
-                else if (this.match(/^ini\s*-\w+/, text)) {
+                } else if (this.match(/^ini\s*-\w+/, text)) {
                     text = text.replace("ini", 'task jd_task_ini')
                 }
                 let filename = this.match(/task\s*(\w+)\s*/, text)
@@ -166,15 +157,12 @@ class Main extends Template {
                                 }
                             }
                             await kedaya.init(pp)
-                        } catch (e) {
-                        }
-                    } catch (e) {
-                    }
+                        } catch (e) {}
+                    } catch (e) {}
                 }
             }
         })
     }
-
     async tg() {
         this.locationId = {}
         this.ban = 0
@@ -183,8 +171,7 @@ class Main extends Template {
             if (k.length) {
                 if (k[1].includes(',')) {
                     this.dict[k[0]] = k[1].split(',').map(d => d.trim())
-                }
-                else {
+                } else {
                     this.dict[k[0]] = k[1]
                 }
             }
@@ -193,15 +180,26 @@ class Main extends Template {
         this.TelegramBot = this.modules['node-telegram-bot-api']
         if (this['QITOQITO_MAP']) {
             let change = {}
-            for (let k of this['QITOQITO_MAP'].replace(/\&/g, "\|").split("|")) {
-                let a = k.split("=")
-                for (let i of a[0].split(',')) {
-                    change[i] = {
-                        map: a[1],
-                        type: a[1].split("_")[0]
+            try {
+                if (typeof this['QITOQITO_MAP'] == 'object') {
+                    for (let i in this['QITOQITO_MAP']) {
+                        change[i] = {
+                            map: this['QITOQITO_MAP'][i],
+                            type: this['QITOQITO_MAP'][i].split("_")[0]
+                        }
+                    }
+                } else {
+                    for (let k of this['QITOQITO_MAP'].replace(/\&/g, "\|").split("|")) {
+                        let a = k.split("=")
+                        for (let i of a[0].split(',')) {
+                            change[i] = {
+                                map: a[1],
+                                type: a[1].split("_")[0]
+                            }
+                        }
                     }
                 }
-            }
+            } catch (ee) {}
             this.dict.map = change
         }
         let request = {}
@@ -210,13 +208,13 @@ class Main extends Template {
                 var SocksProxyAgent = require('socks-proxy-agent');
                 var agent = new SocksProxyAgent(this.proxy.toLowerCase());
                 request.agent = agent
-            }
-            else {
+            } else {
                 request.proxy = this.proxy
             }
         }
         this.bot = new this.TelegramBot(this.dict.token, {
-            polling: true, request,
+            polling: true,
+            request,
         });
         let isActive = 0
         this.bot.on('text', async (msg) => {
@@ -230,7 +228,7 @@ class Main extends Template {
             let group = ['group', 'supergroup'].includes(msg.chat.type)
             let id = from.id
             let admin = this.dict.root.includes(id.toString())
-            let ban = 0  // 禁言
+            let ban = 0 // 禁言
             let groupTask = 0 // 是否允许群组成员运行
             var reText
             if (this.haskey(msg, 'reply_to_message')) {
@@ -240,7 +238,7 @@ class Main extends Template {
             if (group) {
                 this.dict[chatId] = this.dict[chatId] || {}
                 console.log(this.dict[chatId])
-                if (this.dict[chatId].ban && timestamp<this.dict[chatId].ban) {
+                if (this.dict[chatId].ban && timestamp < this.dict[chatId].ban) {
                     ban = 1
                     console.log(`禁言中: ${this.dict[chatId].ban - timestamp}秒后解封`)
                 }
@@ -250,8 +248,7 @@ class Main extends Template {
                 console.log(`禁言了,之后的信息不做处理`)
                 this.sendMessage(chat.id, `我先去小黑屋${banTime}秒,等我回来`, '', 16666);
                 this.dict[chatId].ban = timestamp + parseInt(banTime)
-            }
-            else if (this.match(/^unban$/, text) && admin && group) {
+            } else if (this.match(/^unban$/, text) && admin && group) {
                 let st = this.dict[chatId].ban ? "我从小黑屋回来了哦" : "我没在小黑屋哦"
                 this.dict[chatId].ban = 0
                 ban = 0
@@ -261,16 +258,13 @@ class Main extends Template {
                 if (this.match(new RegExp(`(^${this.dict.custom.join("|")})`), text) && !this.match(/task\s*\w+/, text)) {
                     let command = this.match(new RegExp(`(^${this.dict.custom.join("|")})`), text)
                     text = `task jd_task_${command} -custom ${reText || text.replace(command, '')}`
-                }
-                else if (this.match(new RegExp(`(^${this.dict.scripts.join("|")}$)`), text) && !this.match(/task\s*\w+/, text)) {
+                } else if (this.match(new RegExp(`(^${this.dict.scripts.join("|")}$)`), text) && !this.match(/task\s*\w+/, text)) {
                     let command = this.match(new RegExp(`(^${this.dict.scripts.join("|")})`), text)
                     text = `task jd_task_${command}`
-                }
-                else if (this.dict.map && this.match(new RegExp(`(^${Object.keys(this.dict.map).join("|")})`), text) && !this.match(/task\s*\w+/, text)) {
+                } else if (this.dict.map && this.match(new RegExp(`(^${Object.keys(this.dict.map).join("|")})`), text) && !this.match(/task\s*\w+/, text)) {
                     let command = this.match(new RegExp(`(^${Object.keys(this.dict.map).join("|")})`), text)
                     text = `task ${this.dict.map[command].map} -custom ${reText || text.replace(command, '')}`
-                }
-                else if (this.match(/^ini\s*-\w+/, text)) {
+                } else if (this.match(/^ini\s*-\w+/, text)) {
                     text = text.replace("ini", 'task jd_task_ini')
                 }
                 let filename = this.match(/task\s*(\w+)\s*/, text)
@@ -302,13 +296,11 @@ class Main extends Template {
                         let echo = `执行命令: ${kedaya.title}\n执行脚本: ${filename}\n执行参数: ${split[1]}`
                         this.sendMessage(chatId, echo, '', 16666)
                         await kedaya.init(params)
-                    } catch (e) {
-                    }
+                    } catch (e) {}
                 }
             }
         })
     }
-
     async sendMessage(id, echo, params = {}, timeout = 0) {
         this.bot.sendMessage(id, echo, params || {}).then(async (res) => {
             if (timeout) {
@@ -319,5 +311,4 @@ class Main extends Template {
         });
     }
 }
-
 module.exports = Main;
