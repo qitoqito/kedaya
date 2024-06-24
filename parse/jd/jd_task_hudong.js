@@ -262,6 +262,22 @@ class Main extends Template {
                             }
                             if (configCode) {
                                 config.configCode = configCode
+                                if (!activityCode) {
+                                    let subId = (this.match(/\\\"suburl\\\":\\\"\/\/pro.m.jd.com\/mall\/active\/(\w+)\/index.html\\\"/, html))
+                                    if (subId) {
+                                        let subHtml = await this.curl({
+                                                url: `https://prodev.m.jd.com/mall/active/${subId}/index.html?utm_medium=tuiguang&tttparams=zZ1qguleyJnTGF0IjozOS45NjEwNTQsInVuX2FyZWEiOiIxXzI4MDBfNTU4MzhfMCIsImRMYXQiOiIiLCJwcnN0YXRlIjoiMCIsImFkZHJlc3NJZCI6IjUzODg3NDg3NyIsImxhdCI6IiIsInBvc0xhdCI6MzkuOTYxMDU0LCJwb3NMbmciOjExNi4zMjIwNjEsImdwc19hcmVhIjoiMF8wXzBfMCIsImxuZyI6IiIsInVlbXBzIjoiMC0wLTAiLCJnTG5nIjoxMTYuMzIyMDYxLCJtb2RlbCI6ImlQaG9uZTEzLDMiLCJkTG5nIjoiIn70=&utm_source=kong&cu=true`,
+                                                cookie: this.cookies.main[0],
+                                                referer: "http://u.jd.com/",
+                                                delay: 1,
+                                            }
+                                        )
+                                        activityCode = this.match(/"activityCode"\s*:\s*"(\w+)"/, subHtml)
+                                        if (activityCode) {
+                                            config.activityCode = activityCode
+                                        }
+                                    }
+                                }
                             }
                             if (configCode || activityCode) {
                                 config.id = linkId
@@ -565,6 +581,15 @@ class Main extends Template {
             }
             if (prizeType == 4) {
                 cash.push(this.haskey(draw, 'data.prizeValue'))
+                let cs = await this.algo.curl({
+                    'url': `https://api.m.jd.com/`,
+                    'form': `functionId=apCashWithDraw&body={"linkId":"${p.inviter.linkId}","businessSource":"NONE","base":{"id":${draw.data.id},"business":"fission","poolBaseId":${draw.data.poolBaseId},"prizeGroupId":${draw.data.prizeGroupId},"prizeBaseId":${draw.data.prizeBaseId},"prizeType":${draw.data.prizeType}}}&t=1677826760325&appid=activities_platform&client=ios&clientVersion=13.1.0`,
+                    cookie,
+                    algo: {
+                        appId: '3c023'
+                    }
+                })
+                console.log(`现金: ${draw.data.amount}  ${this.haskey(cs, 'data.message')}`)
             }
             await this.wait(1000)
         }
@@ -1110,7 +1135,6 @@ class Main extends Template {
                                 )
                                 console.log("正在开卡:", j.itemName, this.haskey(jo, 'message') || jo)
                             }
-                            console.log(j.result)
                             if (j.result == 2) {
                                 continue
                             }
@@ -1159,7 +1183,9 @@ class Main extends Template {
                 }
                 // console.log(join)
                 if (join.data.rewardName) {
-                    gifts.push(join.data.rewardName)
+                    if (!join.data.rewardName.includes("谢谢")) {
+                        gifts.push(join.data.rewardName)
+                    }
                     console.log('抽奖获得:', join.data.rewardName)
                 }
                 else {
@@ -1320,7 +1346,7 @@ class Main extends Template {
                                                 cookie
                                             }
                                         )
-                                        console.log(d)
+                                        // console.log(d)
                                         await this.wait((i.ext.waitDuration || 0) * 1000 + 500)
                                     }
                                     let s = await this.curl({
