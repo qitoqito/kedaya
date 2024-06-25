@@ -6,14 +6,13 @@ class Main extends Template {
         this.title = "京东玩一玩"
         this.cron = `${this.rand(0, 59)} ${this.rand(0, 22)} * * *`
         this.task = 'local'
-        this.import = ['jdAlgo', 'fs']
+        this.import = ['jdAlgo']
         this.interval = 3000
         this.delay = 1000
         this.hint = {
             turnNum: '翻倍奖票数,默认10',
             turnDouble: '翻倍奖票次数,默认1'
         }
-        this.model = 'shuffle'
     }
 
     async prepare() {
@@ -24,12 +23,6 @@ class Main extends Template {
             //     referer: 'https://pro.m.jd.com/mall/active/3fcyrvLZALNPWCEDRvaZJVrzek8v/index.html',
             // }
         })
-        try {
-            let txt = this.modules.fs.readFileSync(`${this.dirname}/invite/jd_task_wanyiwan.json`).toString()
-            this.shareCode = this.loads(txt)
-            this.code = this.loads(txt)
-        } catch (e) {
-        }
     }
 
     async main(p) {
@@ -57,22 +50,6 @@ class Main extends Template {
             }
             oldScore = this.haskey(home, 'data.result.score') || 0
             console.log("当前奖票:", oldScore)
-            if (p.inviter) {
-                console.log("正在助力:", p.inviter.user)
-                let assist = await this.algo.curl({
-                        'url': `https://api.m.jd.com/client.action`,
-                        'form': `functionId=wanyiwan_assist&appid=signed_wh5&body={"inviteCode":"${p.inviter.itemId}","version":1}&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168960&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=1.0.0&partner=`,
-                        cookie,
-                        algo: {
-                            appId: 'ba505'
-                        },
-                        headers: {
-                            referer: 'https://pro.m.jd.com/mall/active/3fcyrvLZALNPWCEDRvaZJVrzek8v/index.html',
-                        }
-                    }
-                )
-                console.log(this.haskey(assist, 'data.bizMsg') || assist)
-            }
             if (this.haskey(result, 'signBoard.status', 1)) {
                 console.log("已签到...")
             }
@@ -92,30 +69,6 @@ class Main extends Template {
                 if (i.title.includes('下单')) {
                 }
                 else if (i.title.includes('助力')) {
-                    if (this.cookies.help.includes(p.cookie) && this.haskey(i, 'taskDetail.0.itemId')) {
-                        this.code.push({
-                            user: this.userPin(cookie),
-                            itemId: i.taskDetail[0].itemId
-                        })
-                    }
-                    for (let _ of Array(i.finishTimes)) {
-                        let a = await this.algo.curl({
-                                'url': `https://api.m.jd.com/client.action`,
-                                'form': `functionId=wanyiwan_task_receive_award&appid=signed_wh5&body={"taskType":${i.taskType},"assignmentId":"${i.encryptAssignmentId}","version":1}&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168960&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=12.1.0`,
-                                cookie,
-                                algo: {
-                                    appId: 'd12dd'
-                                },
-                            }
-                        )
-                        if (this.haskey(a, 'data.bizCode', -7004)) {
-                            break
-                        }
-                        else {
-                            console.log("助力奖励:", this.haskey(a, 'data.result') || a)
-                            await this.wait(1000)
-                        }
-                    }
                 }
                 else {
                     console.log("正在运行:", i.title)
@@ -350,17 +303,6 @@ class Main extends Template {
 
     async wget(p) {
         return await this.algo.curl(p)
-    }
-
-    async extra() {
-        let dict = {}
-        for (let i of this.code) {
-            dict[i.user] = i
-        }
-        await this.modules.fs.writeFile(`${this.dirname}/invite/jd_task_wanyiwan.json`, this.dumps(Object.values(dict)), (error) => {
-            if (error) return console.log("写入化失败" + error.message);
-            console.log("wanyiwan写入成功");
-        })
     }
 }
 
