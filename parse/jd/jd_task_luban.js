@@ -35,7 +35,7 @@ class Main extends Template {
             }
         }
         this.algo = new this.modules.jdAlgo({
-            version: "4.4",
+            version: "4.7",
             type: 'main'
         })
     }
@@ -90,7 +90,7 @@ class Main extends Template {
                             console.log(`等待${i.ext.waitDuration}秒`)
                             await this.wait(i.ext.waitDuration * 1000)
                         }
-                        let r = await this.curl({
+                        let r = await this.algo.curl({
                                 'url': `https://api.m.jd.com/?functionId=luban_executeWorkflow`,
                                 'form': `functionId=luban_executeWorkflow&appid=newtry&body={"workflowId":"${uuid}","action":0,"encAid":"${i.encryptAssignmentId}","itemId":"${j.itemId}","completionFlag":true}`,
                                 cookie,
