@@ -6,7 +6,7 @@ class Main extends Template {
         this.title = "京东超市汪贝"
         this.cron = `${this.rand(0, 59)} ${this.rand(0, 22)} * * *`
         this.task = 'local'
-        this.import = ['jdAlgo', 'fs']
+        this.import = ['jdAlgo', 'fs', 'logBill']
         this.interval = 2000
         this.help = 'main'
         this.hint = {
@@ -16,7 +16,7 @@ class Main extends Template {
 
     async prepare() {
         this.algo = new this.modules.jdAlgo({
-            version: "4.4",
+            version: "4.7",
             type: 'main'
         })
         try {
