@@ -4,13 +4,13 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东互动整合"
-        this.cron = `${this.rand(0, 59)} ${this.rand(0, 22)} * * *`
+        this.cron = `${this.rand(0, 59)} ${this.rand(0, 20)} * * *`
         this.task = 'local'
         this.help = 'main'
         this.verify = 1
-        this.import = ['jdAlgo', 'jdSign', 'logBill']
+        this.import = ['jdAlgo', 'logBill']
         this.interval = 5000
-        this.delay = 1200
+        this.delay = 600
         this.hint = {
             custom: '活动id,id2|id2',
             openCard: '1,开卡'
@@ -19,8 +19,8 @@ class Main extends Template {
     }
 
     async prepare() {
+        this.appIds = this.random(this.hdIds.split("|"), 100)
         this.clientVersion = '12.3.4'
-        this.sign = new this.modules.jdSign()
         this.algo = new this.modules.jdAlgo({
             verison: '4.7'
         })
@@ -50,15 +50,15 @@ class Main extends Template {
                     let html = await this.curl({
                             url: `${url}?utm_medium=tuiguang&tttparams=zZ1qguleyJnTGF0IjozOS45NjEwNTQsInVuX2FyZWEiOiIxXzI4MDBfNTU4MzhfMCIsImRMYXQiOiIiLCJwcnN0YXRlIjoiMCIsImFkZHJlc3NJZCI6IjUzODg3NDg3NyIsImxhdCI6IiIsInBvc0xhdCI6MzkuOTYxMDU0LCJwb3NMbmciOjExNi4zMjIwNjEsImdwc19hcmVhIjoiMF8wXzBfMCIsImxuZyI6IiIsInVlbXBzIjoiMC0wLTAiLCJnTG5nIjoxMTYuMzIyMDYxLCJtb2RlbCI6ImlQaG9uZTEzLDMiLCJkTG5nIjoiIn70=&utm_source=kong&cu=true`,
                             cookie: this.cookies.main[0],
-                            referer: "http://u.jd.com/",
+                            referer: "https://u.jd.com/",
                             delay: 1,
                         }
                     )
                     let linkId = this.match(/active\/(\w+)/, url)
                     if (html.includes("明星送好礼")) {
                         let d = await this.curl({
-                                'url': `http://api.m.jd.com/?uuid=&client=wh5&appid=ProductZ4Brand&functionId=showStarGiftInfo&t=1710313719813&body={"source":"star_gift"}`,
-                                referer: "http://u.jd.com/", delay: 1,
+                                'url': `https://api.m.jd.com/?uuid=&client=wh5&appid=ProductZ4Brand&functionId=showStarGiftInfo&t=1710313719813&body={"source":"star_gift"}`,
+                                referer: "https://u.jd.com/", delay: 1,
                             }
                         )
                         let activityId = (this.haskey(d, 'data.result.activityBaseInfo.activityId'))
@@ -84,7 +84,7 @@ class Main extends Template {
                                 var paginationParam = 2
                             }
                             let floor = await this.algo.curl({
-                                    'url': `http://api.m.jd.com/?client=wh5&clientVersion=${this.clientVersion}&functionId=qryH5BabelFloors`,
+                                    'url': `https://api.m.jd.com/?client=wh5&clientVersion=${this.clientVersion}&functionId=qryH5BabelFloors`,
                                     'form': `body={"activityId":"${id}","pageNum":"-1","innerAnchor":"","groupAnchor":"","innerExtId":"","hideTopFoot":"","hideHeadBar":"","multiTopTabDirect":"","innerLinkBase64":"","innerIndex":"1","focus":"","forceTop":"","addressId":"","posLng":"","posLat":"", "homeCityLng":"","homeCityLat":"","gps_area":"0_0_0_0","headId":"","headArea":"","warehouseId":"","jxppGroupid":"","jxppFreshman":"","dcId":"","babelChannel":"","mitemAddrId":"","geo":{"lng":"","lat":""},"flt":"","paginationParam":"${paginationParam}","paginationFlrs":"${flrs}","transParam":"","siteClient":"apple","siteClientVersion":"${this.clientVersion}","matProExt":{}}&osVersion=&d_model=`,
                                     cookie: this.cookies.all[0],
                                     algo: {
@@ -113,7 +113,7 @@ class Main extends Template {
                                         if (lids) {
                                             for (let lid of this.unique(lids)) {
                                                 let pl = await this.algo.curl({
-                                                        'url': `http://api.m.jd.com/api`,
+                                                        'url': `https://api.m.jd.com/api`,
                                                         form: `appid=activities_platform&body={"linkId":"${lid}","taskId":"","inviter":""}&client=ios&clientVersion=12.3.4&functionId=inviteFissionBeforeHome&t=1718017177605&osVersion=16.2.1&build=169143&rfs=0000`,
                                                         algo: {
                                                             appId: '02f8d'
@@ -145,7 +145,7 @@ class Main extends Template {
                                                 )
                                                 if (this.haskey(bbb, 'data')) {
                                                     let ccc = await this.algo.curl({
-                                                            'url': `http://api.m.jd.com/client.action`,
+                                                            'url': `https://api.m.jd.com/client.action`,
                                                             'form': `appid=activities_platform&body={"linkId":"${aaa}"}&client=ios&clientVersion=12.3.4&functionId=apTaskList&t=1718358493910&osVersion=13.4.1&build=169143&rfs=0000`,
                                                             delay: 1,
                                                             algo: {
@@ -238,7 +238,7 @@ class Main extends Template {
                                 let functionId = this.match(/functionId\s*:\s*"(\w+)"/, jsContent)
                                 if (source && functionId) {
                                     let s = await this.curl({
-                                            'url': `http://api.m.jd.com/?appid=ProductZ4Brand&functionId=${functionId}&t=${this.timestamp}&body={"source":"${source}"}`,
+                                            'url': `https://api.m.jd.com/?appid=ProductZ4Brand&functionId=${functionId}&t=${this.timestamp}&body={"source":"${source}"}`,
                                             delay: 1,
                                         }
                                     )
@@ -268,7 +268,7 @@ class Main extends Template {
                                         let subHtml = await this.curl({
                                                 url: `https://prodev.m.jd.com/mall/active/${subId}/index.html?utm_medium=tuiguang&tttparams=zZ1qguleyJnTGF0IjozOS45NjEwNTQsInVuX2FyZWEiOiIxXzI4MDBfNTU4MzhfMCIsImRMYXQiOiIiLCJwcnN0YXRlIjoiMCIsImFkZHJlc3NJZCI6IjUzODg3NDg3NyIsImxhdCI6IiIsInBvc0xhdCI6MzkuOTYxMDU0LCJwb3NMbmciOjExNi4zMjIwNjEsImdwc19hcmVhIjoiMF8wXzBfMCIsImxuZyI6IiIsInVlbXBzIjoiMC0wLTAiLCJnTG5nIjoxMTYuMzIyMDYxLCJtb2RlbCI6ImlQaG9uZTEzLDMiLCJkTG5nIjoiIn70=&utm_source=kong&cu=true`,
                                                 cookie: this.cookies.main[0],
-                                                referer: "http://u.jd.com/",
+                                                referer: "https://u.jd.com/",
                                                 delay: 1,
                                             }
                                         )
@@ -301,7 +301,7 @@ class Main extends Template {
                             }
                             else if (linkId2) {
                                 let lottery = await this.algo.curl({
-                                        'url': `http://api.m.jd.com/api`,
+                                        'url': `https://api.m.jd.com/api`,
                                         'form': `functionId=lotteryMachineHome&body={"linkId":"${linkId2}","taskId":"","inviter":""}&t=1713449252402&appid=activities_platform&client=ios&clientVersion=${this.clientVersion}&uuid=de21c6604748f97dd3977153e51a47f4efdb9a47&build=168960&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&lang=zh_CN&osVersion=15.1.1&partner=-1&cthr=1`,
                                         delay: 1,
                                         algo: {
@@ -365,7 +365,7 @@ class Main extends Template {
 
     async wget(p) {
         return await this.algo.curl({
-                'url': `http://api.m.jd.com/client.action`,
+                'url': `https://api.m.jd.com/client.action`,
                 'form': `functionId=${p.fn}&body=${typeof (p.body) == 'object' ? this.dumps(p.body) : p.body}&t=1698649904893&appid=${p.appid || 'activities_platform'}&client=ios&clientVersion=${this.clientVersion}&build=168909&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone13,3&lang=zh_CN&osVersion=15.1.1&partner=-1&cthr=1`,
                 cookie: p.cookie,
                 algo: p.algo || {},
@@ -1020,7 +1020,7 @@ class Main extends Template {
             var c
             for (let i of Array(30)) {
                 c = await this.algo.curl({
-                        'url': `http://api.m.jd.com/api?client=ios&clientVersion=${this.clientVersion}&appid=jdchoujiang_h5&t=1675835436298&functionId=moduleGetActivity&body={"configCode":"${configCode}","eid":"Q55HGKVK7KBUUTZP5QT27F4LSPKRTJ4NME4D5WYT6DQQ4XKZUSSI7HS66IY5AEO57JAZBME26RVD7HSD2SFJMSVTOE","fp":"ec9164c1ef3ccae8cb1308f149f5e860","friendPin":"${friendPin}"}&uuid=${this.timestamp}1279309`,
+                        'url': `https://api.m.jd.com/api?client=ios&clientVersion=${this.clientVersion}&appid=jdchoujiang_h5&t=1675835436298&functionId=moduleGetActivity&body={"configCode":"${configCode}","eid":"Q55HGKVK7KBUUTZP5QT27F4LSPKRTJ4NME4D5WYT6DQQ4XKZUSSI7HS66IY5AEO57JAZBME26RVD7HSD2SFJMSVTOE","fp":"ec9164c1ef3ccae8cb1308f149f5e860","friendPin":"${friendPin}"}&uuid=${this.timestamp}1279309`,
                         // 'form':``,
                         cookie,
                         algo: {
@@ -1041,8 +1041,8 @@ class Main extends Template {
                     else {
                         dd = 1
                         let d = await this.algo.curl({
-                                'url': `http://api.m.jd.com/api`,
-                                form: `http://api.m.jd.com/api?client=ios&clientVersion=${this.clientVersion}&appid=jdchoujiang_h5&t=1710766913588&functionId=moduleDoTask&body={"groupType":${i.groupType},"configCode":"${configCode}","itemId":"${i.item.itemId}","eid":"C3HUEKC6G2V5WV6SOXJV5E4J2ILKIIHLPARTU7DKUSMS72ICFUVMMF7ZVZXDON6VLTUCVU2GNZ2RZRMVIDXGF2FBMU","fp":"57d2787cc682b0560998e9f5eacec300"}`,
+                                'url': `https://api.m.jd.com/api`,
+                                form: `https://api.m.jd.com/api?client=ios&clientVersion=${this.clientVersion}&appid=jdchoujiang_h5&t=1710766913588&functionId=moduleDoTask&body={"groupType":${i.groupType},"configCode":"${configCode}","itemId":"${i.item.itemId}","eid":"C3HUEKC6G2V5WV6SOXJV5E4J2ILKIIHLPARTU7DKUSMS72ICFUVMMF7ZVZXDON6VLTUCVU2GNZ2RZRMVIDXGF2FBMU","fp":"57d2787cc682b0560998e9f5eacec300"}`,
                                 cookie,
                                 algo: {
                                     appId: 'bbfbd',
@@ -1081,8 +1081,8 @@ class Main extends Template {
                         )
                         console.log("正在开卡:", i.cardName, this.haskey(jo, 'message') || jo)
                         let d = await this.algo.curl({
-                                'url': `http://api.m.jd.com/api`,
-                                form: `http://api.m.jd.com/api?client=ios&clientVersion=${this.clientVersion}&appid=jdchoujiang_h5&t=1710766913588&functionId=moduleGetReward&body={"groupType":7,"configCode":"${configCode}","itemId":"${i.cardId}","eid":"C3HUEKC6G2V5WV6SOXJV5E4J2ILKIIHLPARTU7DKUSMS72ICFUVMMF7ZVZXDON6VLTUCVU2GNZ2RZRMVIDXGF2FBMU","fp":"57d2787cc682b0560998e9f5eacec300"}`,
+                                'url': `https://api.m.jd.com/api`,
+                                form: `https://api.m.jd.com/api?client=ios&clientVersion=${this.clientVersion}&appid=jdchoujiang_h5&t=1710766913588&functionId=moduleGetReward&body={"groupType":7,"configCode":"${configCode}","itemId":"${i.cardId}","eid":"C3HUEKC6G2V5WV6SOXJV5E4J2ILKIIHLPARTU7DKUSMS72ICFUVMMF7ZVZXDON6VLTUCVU2GNZ2RZRMVIDXGF2FBMU","fp":"57d2787cc682b0560998e9f5eacec300"}`,
                                 cookie,
                                 algo: {
                                     appId: 'bbfbd',
@@ -1103,7 +1103,7 @@ class Main extends Template {
         }
         if (activityCode) {
             let a = await this.algo.curl({
-                    'url': `http://api.m.jd.com/api?client=ios&clientVersion=${this.clientVersion}&appid=jdchoujiang_h5&t=1675835435363&functionId=lotteryDrawGet&body={"configCode":"${activityCode}","unionCardCode":""}&openid=-1&build=168500&osVersion=15.1.1&networkType=wifi&partner=&d_brand=iPhone&d_model=iPhone13,3&configCode=${activityCode}&unionCardCode=`,
+                    'url': `https://api.m.jd.com/api?client=ios&clientVersion=${this.clientVersion}&appid=jdchoujiang_h5&t=1675835435363&functionId=lotteryDrawGet&body={"configCode":"${activityCode}","unionCardCode":""}&openid=-1&build=168500&osVersion=15.1.1&networkType=wifi&partner=&d_brand=iPhone&d_model=iPhone13,3&configCode=${activityCode}&unionCardCode=`,
                     cookie,
                     algo: {
                         appId: '8b04a',
@@ -1139,7 +1139,7 @@ class Main extends Template {
                                 continue
                             }
                             let d = await this.curl({
-                                    'url': `http://api.m.jd.com/api`,
+                                    'url': `https://api.m.jd.com/api`,
                                     form: `client=ios&clientVersion=${this.clientVersion}&appid=jdchoujiang_h5&t=1675838594588&functionId=lotteryDrawDoTask&body={"configCode":"${activityCode}","taskType":${i.taskType},"itemId":"${j.itemId}","taskId":${i.id},"babelChannel":""}&openid=-1&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&build=168500&osVersion=15.1.1&networkType=wifi&partner=&d_brand=iPhone&d_model=iPhone13,3`,
                                     cookie,
                                     algo: {
@@ -1155,7 +1155,7 @@ class Main extends Template {
                                 await this.wait(parseInt(i.viewTime) * 1000)
                             }
                             let r = await this.curl({
-                                    'url': `http://api.m.jd.com/api`,
+                                    'url': `https://api.m.jd.com/api`,
                                     form: `client=ios&clientVersion=${this.clientVersion}&appid=jdchoujiang_h5&t=1675838614020&functionId=lotteryDrawGetReward&body={"configCode":"${activityCode}","taskType":${i.taskType},"itemId":"${j.itemId}","taskId":${i.id},"babelChannel":""}&openid=-1&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&build=168500&osVersion=15.1.1&networkType=wifi&partner=&d_brand=iPhone&d_model=iPhone13,3`,
                                     // 'form':``,
                                     cookie,
@@ -1171,7 +1171,7 @@ class Main extends Template {
             }
             for (let i of Array(30)) {
                 let join = await this.algo.curl({
-                        'url': `http://api.m.jd.com/api?client=ios&clientVersion=${this.clientVersion}&appid=jdchoujiang_h5&t=1675839283161&functionId=lotteryDrawJoin&body={"configCode":"${activityCode}"}&openid=-1&build=168500&osVersion=15.1.1&networkType=wifi&partner=&d_brand=iPhone&d_model=iPhone13,3&configCode=${activityCode}`,
+                        'url': `https://api.m.jd.com/api?client=ios&clientVersion=${this.clientVersion}&appid=jdchoujiang_h5&t=1675839283161&functionId=lotteryDrawJoin&body={"configCode":"${activityCode}"}&openid=-1&build=168500&osVersion=15.1.1&networkType=wifi&partner=&d_brand=iPhone&d_model=iPhone13,3&configCode=${activityCode}`,
                         cookie,
                         algo: {
                             appId: '56f82',
@@ -1235,7 +1235,7 @@ class Main extends Template {
         let appids = this.unique(['signed_wh5', appid,])
         for (let appid of appids) {
             var l = await this.algo.curl({
-                    'url': `http://api.m.jd.com/client.action`,
+                    'url': `https://api.m.jd.com/client.action`,
                     'form': `functionId=queryInteractiveInfo&appid=${appid}&body={"encryptProjectId":"${encryptProjectId}","ext":{"rewardEncryptAssignmentId":null,"needNum":50},"sourceCode":"${sourceCode}"}&sign=11&t=1646206781226`,
                     cookie,
                     algo: {
@@ -1274,11 +1274,14 @@ class Main extends Template {
                 else {
                     console.log(`正在运行: ${i.assignmentName}`)
                     let extraType = i.ext.extraType
+                    if (appid == 'babelh5') {
+                        appid = this.appIds[p.index % this.appIds.length]
+                    }
                     if (this.haskey(i, `ext.${i.ext.extraType}`)) {
                         let extra = i.ext[extraType]
                         if (extraType == 'sign1') {
                             let sign = await this.curl({
-                                    'url': `http://api.m.jd.com/client.action?functionId=doInteractiveAssignment`,
+                                    'url': `https://api.m.jd.com/client.action?functionId=doInteractiveAssignment`,
                                     'form': `appid=${appid}&body=${this.dumps(await this.logBody(
                                         {
                                             "encryptProjectId": encryptProjectId,
@@ -1301,7 +1304,7 @@ class Main extends Template {
                             for (let o of Array(i.assignmentTimesLimit)) {
                                 for (let k of Array(0)) {
                                     let assist = await this.curl({
-                                            'url': `http://api.m.jd.com/client.action?functionId=doInteractiveAssignment`,
+                                            'url': `https://api.m.jd.com/client.action?functionId=doInteractiveAssignment`,
                                             'form': `appid=${appid}&body=${this.dumps(await this.logBody(
                                                 {
                                                     "encryptProjectId": encryptProjectId,
@@ -1333,7 +1336,7 @@ class Main extends Template {
                                 for (let j of extra.slice(0, i.assignmentTimesLimit)) {
                                     if (['shoppingActivity', 'productsInfo', 'browseShop'].includes(extraType)) {
                                         let d = await this.curl({
-                                                'url': `http://api.m.jd.com/client.action?functionId=doInteractiveAssignment`,
+                                                'url': `https://api.m.jd.com/client.action?functionId=doInteractiveAssignment`,
                                                 'form': `appid=${appid}&body=${this.dumps(await this.logBody(
                                                     {
                                                         encryptProjectId,
@@ -1350,7 +1353,7 @@ class Main extends Template {
                                         await this.wait((i.ext.waitDuration || 0) * 1000 + 500)
                                     }
                                     let s = await this.curl({
-                                            'url': `http://api.m.jd.com/client.action?functionId=doInteractiveAssignment`,
+                                            'url': `https://api.m.jd.com/client.action?functionId=doInteractiveAssignment`,
                                             'form': `appid=${appid}&body=${this.dumps(await this.logBody(
                                                 {
                                                     encryptProjectId,
@@ -1397,7 +1400,7 @@ class Main extends Template {
                     }
                 )
                 let r = await this.curl({
-                        'url': `http://api.m.jd.com/client.action?functionId=doInteractiveAssignment`,
+                        'url': `https://api.m.jd.com/client.action?functionId=doInteractiveAssignment`,
                         'form': `appid=${appid}&body=${this.dumps(body)}&sign=11&t=1646207845798`,
                         cookie
                     }
@@ -1426,7 +1429,7 @@ class Main extends Template {
         if (p.inviter.projectId.length>0) {
             for (let i of p.inviter.projectId) {
                 l = await this.curl({
-                        'url': `http://api.m.jd.com/client.action?functionId=queryInteractiveInfo`,
+                        'url': `https://api.m.jd.com/client.action?functionId=queryInteractiveInfo`,
                         'form': `appid=${appid}&body={"encryptProjectId":"${i[1]}","ext":{"rewardEncryptAssignmentId":null,"needNum":50},"sourceCode":"${sourceCode}"}&sign=11&t=1646206781226`,
                         cookie
                     }
@@ -1434,7 +1437,7 @@ class Main extends Template {
                 if (this.haskey(l, 'assignmentList') && l.assignmentList.length == 1) {
                     for (let kk of Array(10)) {
                         let r = await this.curl({
-                                'url': `http://api.m.jd.com/client.action?uuid=60f0226f67be77007d7dc5817801e282dda1211e&client=wh5&clientVersion=${this.clientVersion}&osVersion=15.6.1&networkType=wifi&ext=%7B%22prstate%22:%220%22%7D&appid=${appid}&functionId=doInteractiveAssignment&body={"geo":{"lng":"","lat":""},"mcChannel":0,"encryptProjectId":"${i[1]}","encryptAssignmentId":"${l.assignmentList[0].encryptAssignmentId}","sourceCode":"${sourceCode}","itemId":"","actionType":"","completionFlag":true,"ext":{"exchangeNum":1}}`,
+                                'url': `https://api.m.jd.com/client.action?uuid=60f0226f67be77007d7dc5817801e282dda1211e&client=wh5&clientVersion=${this.clientVersion}&osVersion=15.6.1&networkType=wifi&ext=%7B%22prstate%22:%220%22%7D&appid=${appid}&functionId=doInteractiveAssignment&body={"geo":{"lng":"","lat":""},"mcChannel":0,"encryptProjectId":"${i[1]}","encryptAssignmentId":"${l.assignmentList[0].encryptAssignmentId}","sourceCode":"${sourceCode}","itemId":"","actionType":"","completionFlag":true,"ext":{"exchangeNum":1}}`,
                                 cookie,
                                 form: "",
                             }
@@ -1471,7 +1474,7 @@ class Main extends Template {
     async tewuz(p) {
         let cookie = p.cookie;
         let list = await this.curl({
-                'url': `http://api.m.jd.com/?uuid=&client=wh5&appid=ProductZ4Brand&functionId=superBrandTaskList&t=1649852207375&body={"source":"star_gift","activityId":${p.inviter.activityId}}`,
+                'url': `https://api.m.jd.com/?uuid=&client=wh5&appid=ProductZ4Brand&functionId=superBrandTaskList&t=1649852207375&body={"source":"star_gift","activityId":${p.inviter.activityId}}`,
                 cookie
             }
         )
@@ -1509,7 +1512,7 @@ class Main extends Template {
                             console.log("正在开卡:", this.haskey(jo, 'message') || jo)
                         }
                         let s = await this.curl({
-                                url: `http://api.m.jd.com/?uuid=&client=wh5&appid=ProductZ4Brand&functionId=superBrandDoTask&t=${this.timestamp}&body={"source":"star_gift","activityId":${p.inviter.activityId},"encryptProjectId":"${p.inviter.encryptProjectId}","encryptAssignmentId":"${i.encryptAssignmentId}","assignmentType":1,"itemId":"${j.advId || j.itemId}","actionType":1}`,
+                                url: `https://api.m.jd.com/?uuid=&client=wh5&appid=ProductZ4Brand&functionId=superBrandDoTask&t=${this.timestamp}&body={"source":"star_gift","activityId":${p.inviter.activityId},"encryptProjectId":"${p.inviter.encryptProjectId}","encryptAssignmentId":"${i.encryptAssignmentId}","assignmentType":1,"itemId":"${j.advId || j.itemId}","actionType":1}`,
                                 cookie
                             }
                         )
@@ -1517,7 +1520,7 @@ class Main extends Template {
                             console.log(`等待: ${i.ext.waitDuration}s`)
                             await this.wait(i.ext.waitDuration * 1000)
                             s = await this.curl({
-                                    url: `http://api.m.jd.com/?uuid=&client=wh5&appid=ProductZ4Brand&functionId=superBrandDoTask&t=${this.timestamp}&body={"source":"star_gift","activityId":${p.inviter.activityId},"encryptProjectId":"${p.inviter.encryptProjectId}","encryptAssignmentId":"${i.encryptAssignmentId}","assignmentType":1,"itemId":"${j.advId || j.itemId}","actionType":0}`,
+                                    url: `https://api.m.jd.com/?uuid=&client=wh5&appid=ProductZ4Brand&functionId=superBrandDoTask&t=${this.timestamp}&body={"source":"star_gift","activityId":${p.inviter.activityId},"encryptProjectId":"${p.inviter.encryptProjectId}","encryptAssignmentId":"${i.encryptAssignmentId}","assignmentType":1,"itemId":"${j.advId || j.itemId}","actionType":0}`,
                                     cookie
                                 }
                             )
@@ -1537,7 +1540,7 @@ class Main extends Template {
         }
         if (lotteryId) {
             let r = await this.curl({
-                    'url': `http://api.m.jd.com/?uuid=&client=wh5&appid=ProductZ4Brand&functionId=superBrandTaskLottery&t=${this.timestamp}&body={"source":"star_gift","activityId":${p.inviter.activityId},"encryptProjectId":"${p.inviter.encryptProjectId}"}`,
+                    'url': `https://api.m.jd.com/?uuid=&client=wh5&appid=ProductZ4Brand&functionId=superBrandTaskLottery&t=${this.timestamp}&body={"source":"star_gift","activityId":${p.inviter.activityId},"encryptProjectId":"${p.inviter.encryptProjectId}"}`,
                     cookie
                 }
             )
