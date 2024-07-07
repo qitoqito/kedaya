@@ -7,15 +7,22 @@ class Main extends Template {
         this.cron = `${this.rand(0, 59)} 0 * * *`
         this.task = 'local'
         this.import = ['jdAlgo', 'logBill']
+        this.interval = 5000
     }
 
     async prepare() {
+        this.nn = 0
+        this.appIds = this.random(this.hdIds.split("|"), 100)
         this.algo = new this.modules.jdAlgo({
-            version: '4.4',
+            version: '4.7',
             type: 'main'
         })
         this.dict = {
             'doInteractiveAssignment': {
+                "京东五金城": {
+                    "encryptProjectId": "cLL8ubm28wZ2kSs4YEq4rf61tFa",
+                    "encryptAssignmentId": "2aZUnxTZKBb8pYQQtiEqGYELvvB4"
+                },
                 '五金城': {
                     "encryptProjectId": "237YgcQ2GCm64t7vfP528Run4P4q",
                     "encryptAssignmentId": "3WRvrfo6qq8BTRQzLJSRgyBGaRr3",
@@ -24,10 +31,10 @@ class Main extends Template {
                     "encryptProjectId": "Yw2VALxCy4TAP3HHR774oWxc35T",
                     "encryptAssignmentId": "28PunYRnW3s9CBvJSUUcvdUzkf9r"
                 },
-                // "母婴馆": {
-                //     "encryptProjectId": "S2PFi6Npq9yRgDHRjegZpGRCrVu",
-                //     "encryptAssignmentId": "4DRn3vqrhUxF6cH1qtotLWHM9sLM"
-                // },
+                "延保服务": {
+                    "encryptProjectId": "8kqApcAMRc8WBeyNoUyM9VKi3p1",
+                    "encryptAssignmentId": "2rE6VD7F6kuDWgndtpaaYXMcBgas"
+                },
                 '拍拍二手': {
                     "encryptProjectId": "3xxdfoHPKSyuwryhhEX8en1ZAT6A",
                     "encryptAssignmentId": "csYHwSFWAjtcuxyYXpZYSecsH6P"
@@ -37,8 +44,8 @@ class Main extends Template {
                     "encryptAssignmentId": "3MbhW1z98MGVgxKCxMwCtgXXCcTz"
                 },
                 "折叠礼遇记": {
-                    "encryptProjectId": "SYKGrr9V5hmxRCVrBQbWK6MFPSM",
-                    "encryptAssignmentId": "HpqxPoee6MkPnznnQYMR61bMnDe"
+                    "encryptProjectId": "4S2AbgQzWsZRaPieo6H87H9QdBTe",
+                    "encryptAssignmentId": "4AkNcU2XKqbEAdptFV9arNrPqxQL"
                 },
                 "轻松低价买好书": {
                     "encryptProjectId": "4DwxF3pQ2czkBVv9LYM1cqVT8DdR",
@@ -56,6 +63,10 @@ class Main extends Template {
                 "京东电器": {
                     "encryptProjectId": "3ynRTVVTYz8QbESaXbu8i3XC3TLo",
                     "encryptAssignmentId": "2pv61FSzJ9QZTiQ3r5HSigG87aAM"
+                },
+                "京东图书": {
+                    "encryptProjectId": "2F4zGe7fb9ArEfiSoRVdhy7suUUn",
+                    "encryptAssignmentId": "3fxqLRqowvZ6ohXHU48DghJb2Ljq"
                 }
             }
         }
@@ -64,9 +75,8 @@ class Main extends Template {
     async main(p) {
         let cookie = p.cookie;
         let gifts = []
-        console.log("正在签到: 医药馆")
         let a = await this.algo.curl({
-                'url': `http://api.m.jd.com/api`,
+                'url': `https://api.m.jd.com/api`,
                 'form': `appid=laputa&functionId=jdh_laputa_handleSoaRequest&body={"methodName":"handleBeanInfo2595","functionId":"sign","osName":"feedProduct","appId":"807635028594484682708c54f69b1217","version":"1","deviceNo":"9abbe1bd-252f-40f8-a42f-ba4be28244f7","handleType":"sign","encryptProjectId":"3vRVP84ukngNhNYVDQTXuQQzJjit","encryptAssignmentIds":["3LbDQhTDsr5n7wL4XPyubMvEuUR3"],"deviceType":1,"lng":0,"lat":0,"itemId":"1"}`,
                 cookie
             }
@@ -80,9 +90,17 @@ class Main extends Template {
                 for (let j in this.dict[i]) {
                     console.log(`正在签到: ${j}`)
                     let dd = this.dict[i][j]
+                    let appid = this.appIds[this.nn % this.appIds.length]
+                    this.nn++
                     let b = await this.algo.curl({
-                            'url': `http://api.m.jd.com/client.action?functionId=doInteractiveAssignment`,
-                            form: `appid=babelh5&body={"sourceCode":"${dd.sourceCode || 'acetttsign'}","encryptProjectId":"${dd.encryptProjectId}","encryptAssignmentId":"${dd.encryptAssignmentId}","completionFlag":true,"itemId":"1","extParam":{"forceBot":"1","businessData":{},"signStr":"-1","sceneid":"babel_4RYbb8NtVAegmT35SuM2N3KKYLWt"},"activity_id":"4RYbb8NtVAegmT35SuM2N3KKYLWt","template_id":"00035605","floor_id":"101674850","enc":"082F6E6EB76A8CBEE15FCF7E92519D4A0C14A052EDB9C9248A0F4121699403D36C35C158EFB65C32311DCE62FF076E717D80B5322FC0FC3B1D3CA22644BC685E"}&sign=11&t=1710422476977`,
+                            'url': `https://api.m.jd.com/client.action`,
+                            form: `functionId=doInteractiveAssignment&appid=${appid}&body=${this.dumps(await this.logBody({
+                                "sourceCode": dd.sourceCode || 'acetttsign',
+                                "encryptProjectId": dd.encryptProjectId,
+                                "encryptAssignmentId": dd.encryptAssignmentId,
+                                "completionFlag": true,
+                                "itemId": "1",
+                            }))}&sign=11&t=1710422476977`,
                             cookie,
                             algo: {
                                 appId: 'e2224'
@@ -104,7 +122,7 @@ class Main extends Template {
                             break
                         }
                     }
-                    await this.wait(1000)
+                    await this.wait(5000)
                 }
             }
         }
