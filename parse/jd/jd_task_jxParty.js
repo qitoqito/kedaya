@@ -14,6 +14,7 @@ class Main extends Template {
             type: 'main',
             version: '4.7',
         })
+        this.jump = 1
     }
 
     async main(p) {

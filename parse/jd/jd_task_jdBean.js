@@ -14,10 +14,11 @@ class Main extends Template {
     async prepare() {
         this.clientVersion = "12.3.1"
         this.algo = new this.modules.jdAlgo({
-            version: '4.4',
+            version: '4.7',
             type: 'app',
             referer: 'https://jdbeantask-pro.pf.jd.com/',
         })
+        this.jump = 1
     }
 
     async main(p) {
