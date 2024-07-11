@@ -4,12 +4,15 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东店铺连续签到"
-        this.cron = `${this.rand(0, 59)} ${this.rand(0, 22)} * * *`
+        this.cron = `${this.rand(0, 59)} ${this.rand(0, 1)} * * *`
         this.task = 'local'
         this.verify = 1
         this.model = 'user'
-        this.readme = '追加: filename_expand="id1|id2"\n自定义: filename_custom="id1|id2"\n请自行通过其他渠道获取签到ID\n账号通知类似,只推送一个方便查看'
         this.import = ['jdAlgo', 'fileCache']
+        this.delay = 500
+        this.hint = {
+            token: "token1|token2"
+        }
     }
 
     async prepare() {
@@ -17,11 +20,14 @@ class Main extends Template {
         await this.cache.connect({file: `${this.dirname}/temp/jd_task_shopSign.json`})
         this.algo = new this.modules.jdAlgo({
             type: "main",
-            version: "4.4",
+            version: "4.7",
             appId: '4da33'
         })
         let array = []
-        if (this.custom) {
+        if (this.profile.token) {
+            array = this.profile.token.split("|")
+        }
+        else if (this.custom) {
             array = this.getValue('custom')
         }
         else if (this.expand) {
@@ -44,8 +50,8 @@ class Main extends Template {
                     else {
                         console.log("正在获取:", i)
                         var s = await this.algo.curl({
-                            url: `http://api.m.jd.com/api?appid=interCenter_shopSign&t=${this.timestamp}&loginType=2&functionId=interact_center_shopSign_getActivityInfo&body={"token":"${i}","venderId":""}`,
-                            referer: 'http://h5.m.jd.com/'
+                            url: `https://api.m.jd.com/api?appid=interCenter_shopSign&t=${this.timestamp}&loginType=2&functionId=interact_center_shopSign_getActivityInfo&body={"token":"${i}","venderId":""}`,
+                            referer: 'https://h5.m.jd.com/'
                         })
                         if (!this.haskey(s, 'data.id')) {
                             console.log("获取错误:", i)
@@ -57,7 +63,7 @@ class Main extends Template {
                             continuePrizeRuleList: s.data.continuePrizeRuleList
                         }
                         let shopInfo = await this.algo.curl({
-                                'url': `http://api.m.jd.com/?functionId=lite_getShopHomeBaseInfo&body={"venderId":"${s.data.venderId}","source":"appshop"}&t=1646398923902&appid=jdlite-shop-app&client=H5`,
+                                'url': `https://api.m.jd.com/?functionId=lite_getShopHomeBaseInfo&body={"venderId":"${s.data.venderId}","source":"appshop"}&t=1646398923902&appid=jdlite-shop-app&client=H5`,
                             }
                         )
                         if (this.haskey(shopInfo, 'result.shopInfo.shopName')) {
@@ -99,18 +105,18 @@ class Main extends Template {
         }
         let maxDay = this.sum(this.column(p.inviter.continuePrizeRuleList, 'days'))
         let s = await this.algo.curl({
-                'url': `http://api.m.jd.com/api?appid=interCenter_shopSign&loginType=2&functionId=interact_center_shopSign_getSignRecord&body={"token":"${p.inviter.token}","venderId":${p.inviter.venderId},"activityId":${p.inviter.activityId},"type":56,"actionType":7}&jsonp=jsonp1004`,
+                'url': `https://api.m.jd.com/api?appid=interCenter_shopSign&loginType=2&functionId=interact_center_shopSign_getSignRecord&body={"token":"${p.inviter.token}","venderId":${p.inviter.venderId},"activityId":${p.inviter.activityId},"type":56,"actionType":7}&jsonp=jsonp1004`,
                 cookie
             }
         )
         let days = this.haskey(s, 'data.days')
         if (days>=maxDay) {
-            console.log(`签到已满${maxDay}天,跳出签到`, p.inviter.token, `http://shop.m.jd.com/?venderId=${p.inviter.venderId}`)
+            console.log(`签到已满${maxDay}天,跳出签到`, p.inviter.token, `https://shop.m.jd.com/?venderId=${p.inviter.venderId}`)
             this.plan.except.push(p.inviter.token)
         }
         else {
             let signIn = await this.algo.curl({
-                    'url': `http://api.m.jd.com/api?appid=interCenter_shopSign&loginType=2&functionId=interact_center_shopSign_signCollectGift&body={"token":"${p.inviter.token}","venderId":${p.inviter.venderId},"activityId":${p.inviter.activityId},"type":56,"actionType":7}`,
+                    'url': `https://api.m.jd.com/api?appid=interCenter_shopSign&loginType=2&functionId=interact_center_shopSign_signCollectGift&body={"token":"${p.inviter.token}","venderId":${p.inviter.venderId},"activityId":${p.inviter.activityId},"type":56,"actionType":7}`,
                     cookie
                 }
             )
