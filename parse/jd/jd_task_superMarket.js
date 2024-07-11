@@ -29,15 +29,17 @@ class Main extends Template {
     async main(p) {
         let cookie = p.cookie;
         let data = {}
-        for (let o of Array(5)) {
+        for (let o of Array(3)) {
             var html = await this.curl({
                     'url': `https://pro.m.jd.com/mall/active/3nh7HzSjYemGqAHSbktTrf8rrH8M/index.html?stath=20&navh=44&babelChannel=ttt1&tttparams=zZ1qguleyJnTGF0IjozOS45NjEwNTQsInVuX2FyZWEiOiIxXzI4MDBfNTU4MzhfMCIsImRMYXQiOiIiLCJwcnN0YXRlIjoiMCIsImFkZHJlc3NJZCI6IjUzODg3NDg3NyIsImxhdCI6IiIsInBvc0xhdCI6MzkuOTYxMDU0LCJwb3NMbmciOjExNi4zMjIwNjEsImdwc19hcmVhIjoiMF8wXzBfMCIsImxuZyI6IiIsInVlbXBzIjoiMC0wLTAiLCJnTG5nIjoxMTYuMzIyMDYxLCJtb2RlbCI6ImlQaG9uZTEzLDMiLCJkTG5nIjoiIn70=`,
                     cookie,
                     referer: 'https://pro.m.jd.com/mall/active/3nh7HzSjYemGqAHSbktTrf8rrH8M/index.html?stath=20&navh=44&babelChannel=ttt1&tttparams=zZ1qguleyJnTGF0IjozOS45NjEwNTQsInVuX2FyZWEiOiIxXzI4MDBfNTU4MzhfMCIsImRMYXQiOiIiLCJwcnN0YXRlIjoiMCIsImFkZHJlc3NJZCI6IjUzODg3NDg3NyIsImxhdCI6IiIsInBvc0xhdCI6MzkuOTYxMDU0LCJwb3NMbmciOjExNi4zMjIwNjEsImdwc19hcmVhIjoiMF8wXzBfMCIsImxuZyI6IiIsInVlbXBzIjoiMC0wLTAiLCJnTG5nIjoxMTYuMzIyMDYxLCJtb2RlbCI6ImlQaG9uZTEzLDMiLCJkTG5nIjoiIn70='
                 }
             )
+
             try {
-                data = (this.loads(this.match(/__api_data__\s*=\s*(.*?)\s*;\s*\n*window/, html)))
+                data = this.jsonParse(this.match([/__react_data__\s*=\s*(.*?)\s*;\n+/,/__api_data__\s*=\s*(.*?)\s*;\s*\n*window/], html))
+
             } catch (e) {
                 await this.wait(500)
             }
@@ -65,6 +67,9 @@ class Main extends Template {
             else {
                 console.log(this.haskey(sign, 'message') || sign)
             }
+        }
+        if (this.haskey(data,'activityData.floorList')) {
+            data=data.activityData 
         }
         for (let ii in data) {
             if (ii == 'floorList') {
