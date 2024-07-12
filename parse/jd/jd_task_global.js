@@ -20,10 +20,12 @@ class Main extends Template {
     async main(p) {
         let cookie = p.cookie;
         let salt = this.globalSalt
-        let enc1 = this.md5("apple" + this.userPin(p.cookie) + "taskRun" + salt)
-        let enc2 = this.md5("apple" + this.userPin(p.cookie) + "receiveReward" + salt)
-        let enc3 = this.md5("apple" + this.userPin(p.cookie) + "signInWithPrize" + salt)
-        let enc4 = this.md5("apple" + this.userPin(p.cookie) + "globalTask" + salt)
+        let pin = this.userPin(p.cookie)
+        let enc1 = this.md5("apple" + pin + "taskRun" + salt)
+        let enc2 = this.md5("apple" + pin + "receiveReward" + salt)
+        let enc3 = this.md5("apple" + pin + "signInWithPrize" + salt)
+        let token = `${new Date().getTime()}1`
+        let enc4 = this.md5("apple" + pin + "globalTask" + salt + token)
         let layout = await this.sign.jdCurl({
                 'url': `https://api.m.jd.com/client.action?functionId=queryLayout`,
                 'form': `avifSupport=1&body={"beginTime":"","applicationId":"11"}&build=169370&client=apple&clientVersion=13.1.0&d_brand=apple`,
@@ -67,25 +69,57 @@ class Main extends Template {
         else {
             console.log('签到:', this.haskey(sign, 'result.signInText') || sign)
         }
-        if (taskId) {
-            let list = await this.sign.jdCurl({
-                    'url': `https://api.m.jd.com/client.action?functionId=globalMainList`,
-                    'form': `avifSupport=0&body={"floorId":"83596864"}&build=169381&client=apple&clientVersion=13.1.1`,
-                    cookie
-                }
-            )
-            for (let i of this.haskey(list, 'result.datas')) {
-                // console.log(this.dumps(i))
-                let s = await this.sign.jdCurl({
-                        'url': `https://api.m.jd.com/client.action?functionId=globalTask`,
-                        'form': `avifSupport=0&body={"styleVersion":"1112876","timestamp":"${enc4}","taskId":"${i.taskId}","skuId":"","type":"${i.type}","floorId":"83596753"}&build=169381&client=apple&clientVersion=13.1.1`,
-                        cookie
+        // if (taskId) {
+        let list = await this.sign.jdCurl({
+                'url': `https://api.m.jd.com/client.action?functionId=globalMainList`,
+                'form': `avifSupport=0&body={"floorId":"83596864"}&build=169381&client=apple&clientVersion=13.1.1`,
+                cookie
+            }
+        )
+        for (let i of this.haskey(list, 'result.datas')) {
+            if (i.status == '1') {
+                console.log("任务已完成:", i.name)
+            }
+            else {
+                for (let j of this.haskey(i, 'items')) {
+                    if (j.status == '1') {
+                        console.log("任务已完成:", j.name)
                     }
-                )
-                console.log(s)
-                await this.wait(1000)
+                    else {
+                        console.log("正在浏览:", j.name)
+                        for (let _ of Array(j.totalTimes - j.currentTimes)) {
+                            if (j.name.includes("商品")) {
+                                var s = await this.sign.jdCurl({
+                                        'url': `https://api.m.jd.com/client.action?functionId=globalTask`,
+                                        'form': `avifSupport=0&body={"timestamp":"${enc4}","taskId":"${j.taskId}","type":"${j.type}","token":"${token}","floorId":"83596864","skuId":"${this.rand(3333333, 3336666)}"}&build=169381&client=apple&clientVersion=13.1.1`,
+                                        cookie
+                                    }
+                                )
+                            }
+                            else {
+                                var s = await this.sign.jdCurl({
+                                        'url': `https://api.m.jd.com/client.action?functionId=globalTask`,
+                                        'form': `avifSupport=0&body={"timestamp":"${enc4}","taskId":"${j.taskId}","type":"${j.type}","token":"${token}","floorId":"83596864"}&build=169381&client=apple&clientVersion=13.1.1`,
+                                        cookie
+                                    }
+                                )
+                            }
+                            console.log("正在完成:", this.haskey(s, 'result.currentTimes'))
+                            let msg = this.haskey(s, 'result.msg') || ''
+                            if (msg.includes('京豆')) {
+                                this.print(msg, p.user)
+                            }
+                            if (this.haskey(s, 'code', '-1')) {
+                                console.log(s.errorMsg)
+                                break
+                            }
+                            await this.wait(1000)
+                        }
+                    }
+                }
             }
         }
+        // }
         for (let i of Array(8)) {
             let t = await this.sign.jdCurl({
                     'url': `https://api.m.jd.com/client.action?functionId=taskRun`,
