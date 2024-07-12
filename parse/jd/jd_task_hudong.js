@@ -8,7 +8,7 @@ class Main extends Template {
         this.task = 'local'
         this.help = 'main'
         this.verify = 1
-        this.import = ['jdAlgo', 'logBill']
+        this.import = ['jdAlgo', 'jdSign', 'logBill']
         this.interval = 5000
         this.delay = 600
         this.hint = {
@@ -21,6 +21,7 @@ class Main extends Template {
     async prepare() {
         this.appIds = this.random(this.hdIds.split("|"), 100)
         this.clientVersion = '12.3.4'
+        this.sign = new this.modules.jdSign()
         this.algo = new this.modules.jdAlgo({
             verison: '4.7'
         })
