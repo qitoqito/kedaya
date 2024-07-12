@@ -289,7 +289,9 @@ class Main extends Template {
                         if (this.dumps(conf) == '{}') {
                             let superLeague = this.match(/(super-league)/, html)
                             let linkId2 = this.match(/"linkId"\s*:\s*"([^\"]+)"/, html)
-                            if (linkId2 && superLeague) {
+                            if ((this.column(this.shareCode, 'linkId') || []).includes(linkId2)) {
+                            }
+                            else if (linkId2 && superLeague) {
                                 conf = {
                                     linkId: linkId2,
                                     id: linkId,
@@ -808,7 +810,7 @@ class Main extends Template {
                         case 'ORDER_MARK':
                             break
                         case 'BROWSE_CHANNEL':
-                        case  'BROWSE_PRODUCT' :
+                        case  'BROWSE_PRODUCT':
                             let detail = await this.wget({
                                 fn: 'apTaskDetail',
                                 body: {
@@ -851,11 +853,46 @@ class Main extends Template {
                         case "FOLLOW_CHANNEL":
                             let follow = await this.sign.jdCurl({
                                     'url': `https://api.m.jd.com/client.action?functionId=isUserFollow`,
-                                    'form': `avifSupport=0&body={"themeId":"CA102114594160842529","informationParam":{"isRvc":"0","fp":"-1","eid":"","shshshfp":"-1","userAgent":"-1","referUrl":"-1","shshshfpa":"-1"},"businessId":"1"}&build=168960&client=apple&clientVersion=${this.clientVersion}&d_brand=apple&d_model=iPhone13%2C3&ef=1&eid=eidI8c408121c5s5ns4u15pCS%2B%2B29Cd1tdpKZJ7OMGYT8pF2poCkgcMOLnSSdSJOJ2wG8TZNi1U/3J8EjdpGMOHyKboyGs8dtPzG3moWo8dfwuTu4xdX&ep=%7B%22ciphertype%22%3A5%2C%22cipher%22%3A%7B%22screen%22%3A%22CJO3CMeyDJCy%22%2C%22osVersion%22%3A%22CJUkCI4n%22%2C%22openudid%22%3A%22ZQUyCWC2DtK0DzG4Ztu3ZQGzEJc3CJUzZJUnYJG3ZtHvZwHsEWO0Dm%3D%3D%22%2C%22area%22%3A%22CJZpCJC0CV8nCzG3XzG0DzUm%22%2C%22uuid%22%3A%22ZQUyCWC2DtK0DzG4Ztu3ZQGzEJc3CJUzZJUnYJG3ZtHvZwHsEWO0Dm%3D%3D%22%7D%2C%22ts%22%3A1716338552%2C%22hdid%22%3A%22JM9F1ywUPwflvMIpYPok0tt5k9kW4ArJEU3lfLhxBqw%3D%22%2C%22version%22%3A%221.0.3%22%2C%22appname%22%3A%22com.360buy.jdmobile%22%2C%22ridx%22%3A-1%7D&ext=%7B%22prstate%22%3A%220%22%2C%22pvcStu%22%3A%221%22%7D&isBackground=N&joycious=134&lang=zh_CN&lmt=0&networkType=wifi&networklibtype=JDNetworkBaseAF&partner=apple&rfs=0000&scope=11&sign=7e85c60739e21c41409299453ac11379&st=1716340173570&sv=122&uemps=0-0-0&uts=0f31TVRjBSsqndu4/jgUPz6uymy50MQJjqHszqulSSehdF1LcomYrHjW8qaTLKtcp1YdIugHaNXZqIywvd7Fo2gQtAFyXKVR%2BCA3y0St3mpKQbyGwPRNyWKhr3tQdJukzjY8g5e3EGSdTGLYxAflamyEC291dbXKxJm2s5jjGkq%2B/XvIicBf/voDq98Np7ABRdD087/joFv7cw14F3DlmQ%3D%3D&x-api-eid-token=jdd01VUA6S6QL3FYR4FGYKCA7NKY7XRWWSPF2DYDIFHLQNENB26DB3DYF7VDW5L7GBW27KMOGR7OTVTCGDEHOJCDY4SQGFHWN2DR6INGDERA01234567`,
+                                    'form': `avifSupport=0&body={"themeId":"CA102114594160842529","informationParam":{"isRvc":"0","fp":"-1","eid":"","shshshfp":"-1","userAgent":"-1","referUrl":"-1","shshshfpa":"-1"},"businessId":"1"}&build=168960&client=apple&clientVersion=${this.clientVersion}`,
                                     cookie
                                 }
                             )
                             console.log(this.haskey(follow, 'themeText') || follow)
+                            let detail2 = await this.wget({
+                                fn: 'apTaskDetail',
+                                body: {
+                                    "linkId": p.inviter.linkId,
+                                    "taskType": i.taskType,
+                                    "taskId": i.id,
+                                    "channel": 4,
+                                    "checkVersion": true,
+                                    "cityId": "",
+                                    "provinceId": "",
+                                    "countyId": "",
+                                },
+                                algo: {'appId': '54ed7'},
+                                cookie
+                            })
+                            if (this.haskey(detail2, 'data.taskItemList')) {
+                                let doTask = await this.wget({
+                                    fn: 'apsDoTask',
+                                    body: {
+                                        "linkId": p.inviter.linkId,
+                                        "taskType": i.taskType,
+                                        "taskId": i.id,
+                                        "checkVersion": true,
+                                        "taskInsert": false,
+                                        "itemId": detail2.data.taskItemList[0].itemName
+                                    },
+                                    algo: {'appId': '54ed7'},
+                                    cookie
+                                })
+                                if (this.haskey(doTask, 'code', 2018)) {
+                                    apDoLimitTimeTask = 1
+                                    break
+                                }
+                                console.log(this.haskey(doTask, 'success'))
+                            }
                             break
                         default:
                             let doTask = await this.wget({
