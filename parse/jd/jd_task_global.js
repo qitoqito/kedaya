@@ -7,6 +7,8 @@ class Main extends Template {
         this.cron = `${this.rand(0, 59)} ${this.rand(0, 22)} * * *`
         this.readme = `此活动需要验证sign,需要自己docker部署sign算法\n然后添加全局变量:QITOQITO_JDSIGN=sign路径`
         this.import = ['jdSign']
+        this.delay = 1000
+        this.interval = 5000
     }
 
     async prepare() {
@@ -14,6 +16,30 @@ class Main extends Template {
         if (!this.sign.access) {
             console.log(`此活动需要验证sign,需要自己docker部署sign算法\n然后添加全局变量:QITOQITO_JDSIGN=signUrl路径\n如果已经部署过 JD_SIGN_API, JD_SIGN_KRAPI 应该能正常使用`)
             this.jump = 1
+        }
+        let awardId = 83596858
+        let taskId = null
+        let signId = 83596856
+        let layout = await this.sign.jdCurl({
+                'url': `https://api.m.jd.com/client.action?functionId=queryLayout`,
+                'form': `avifSupport=1&body={"beginTime":"","applicationId":"11"}&build=169370&client=apple&clientVersion=13.1.0&d_brand=apple`,
+            }
+        )
+        for (let i of this.haskey(layout, 'result.navigationPage.tabPage.floors')) {
+            if (i.floorType == "BROWSE_AWARDS_WIDGET") {
+                awardId = i.floorId
+            }
+            if (i.floorType == "TASK_FLOAT") {
+                taskId = i.floorId
+            }
+            if (i.floorType == "SIGN_IN_GAME_WIDGET") {
+                signId = i.floorId
+            }
+        }
+        this.dict = {
+            awardId,
+            taskId,
+            signId
         }
     }
 
@@ -26,26 +52,9 @@ class Main extends Template {
         let enc3 = this.md5("apple" + pin + "signInWithPrize" + salt)
         let token = `${new Date().getTime()}1`
         let enc4 = this.md5("apple" + pin + "globalTask" + salt + token)
-        let layout = await this.sign.jdCurl({
-                'url': `https://api.m.jd.com/client.action?functionId=queryLayout`,
-                'form': `avifSupport=1&body={"beginTime":"","applicationId":"11"}&build=169370&client=apple&clientVersion=13.1.0&d_brand=apple`,
-                cookie
-            }
-        )
-        // console.log(this.dumps(layout))
-        let awardId = 83596858
-        let taskId = null
-        for (let i of this.haskey(layout, 'result.navigationPage.tabPage.floors')) {
-            if (i.floorType == "BROWSE_AWARDS_WIDGET") {
-                awardId = i.floorId
-            }
-            if (i.floorType == "TASK_FLOAT") {
-                taskId = i.floorId
-            }
-        }
         let sign = await this.sign.jdCurl({
                 'url': `https://api.m.jd.com/client.action?functionId=signInWithPrize`,
-                'form': `body={"floorId":"83596522","timestamp":"${enc3}"}&build=169063&client=apple&clientVersion=12.3.4&&functionId=signInWithPrize`,
+                'form': `body={"floorId":"${this.dict.signId}","timestamp":"${enc3}"}&build=169063&client=apple&clientVersion=12.3.4&&functionId=signInWithPrize`,
                 cookie
             }
         )
@@ -58,7 +67,7 @@ class Main extends Template {
             )
             sign = await this.sign.jdCurl({
                     'url': `https://api.m.jd.com/client.action?functionId=signInWithPrize`,
-                    'form': `body={"floorId":"83596522","timestamp":"${enc3}"}&build=169063&client=apple&clientVersion=12.3.4&&functionId=signInWithPrize`,
+                    'form': `body={"floorId":"${this.dict.signId}","timestamp":"${enc3}"}&build=169063&client=apple&clientVersion=12.3.4&&functionId=signInWithPrize`,
                     cookie
                 }
             )
@@ -113,7 +122,7 @@ class Main extends Template {
                                 console.log(s.errorMsg)
                                 break
                             }
-                            await this.wait(1000)
+                            await this.wait(3000)
                         }
                     }
                 }
@@ -123,7 +132,7 @@ class Main extends Template {
         for (let i of Array(8)) {
             let t = await this.sign.jdCurl({
                     'url': `https://api.m.jd.com/client.action?functionId=taskRun`,
-                    'form': `body={"floatId":"${awardId}","timestamp":"${enc1}"}&build=169063&client=apple&clientVersion=12.3.4&functionId=taskRun`,
+                    'form': `body={"floatId":"${this.dict.awardId}","timestamp":"${enc1}"}&build=169063&client=apple&clientVersion=12.3.4&functionId=taskRun`,
                     cookie
                 }
             )
@@ -132,7 +141,7 @@ class Main extends Template {
                 await this.wait(2000)
                 let r = await this.sign.jdCurl({
                         'url': `https://api.m.jd.com/client.action?functionId=receiveReward`,
-                        'form': `body={"floatId":"${awardId}","timestamp":"${enc2}"}&build=169063&client=apple&clientVersion=12.3.4&functionId=receiveReward`,
+                        'form': `body={"floatId":"${this.dict.awardId}","timestamp":"${enc2}"}&build=169063&client=apple&clientVersion=12.3.4&functionId=receiveReward`,
                         cookie
                     }
                 )
