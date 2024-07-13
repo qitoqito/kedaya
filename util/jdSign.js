@@ -59,7 +59,13 @@ class jdSign {
             }
             else if (this.access == 2) {
                 var dict = process.communal.query(form, '&', 'split')
-                dict.fn = dict.functionId
+                if (dict.functionId) {
+                    dict.fn = dict.functionId
+                }
+                else if (p.url.includes("functionId=")) {
+                    let functionId = process.communal.match(/functionId=(\w+)/, p.url)
+                    dict.fn = functionId
+                }
                 let cs2 = await this.curl({
                         'url': this.signUrl,
                         json: dict
@@ -108,7 +114,7 @@ class jdSign {
         }
         return new Promise(resolve => {
             request(params, async (err, resp, data) => {
-                try {
+                try { 
                     data = process.communal.jsonParse(data)
                 } catch (e) {
                     // console.log(e, resp)
