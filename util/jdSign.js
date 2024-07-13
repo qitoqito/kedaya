@@ -1,4 +1,5 @@
 let CryptoJS = require('crypto-js');
+let request = require("request")
 
 class jdSign {
     constructor(params = {}) {
@@ -40,7 +41,7 @@ class jdSign {
                     let functionId = process.communal.match(/(functionId=\w+)/, p.url)
                     st += `&${functionId}`
                 }
-                let cs1 = await process.communal.curl({
+                let cs1 = await this.curl({
                         'url': this.signUrl,
                         'form': st
                     }
@@ -59,7 +60,7 @@ class jdSign {
             else if (this.access == 2) {
                 var dict = process.communal.query(form, '&', 'split')
                 dict.fn = dict.functionId
-                let cs2 = await process.communal.curl({
+                let cs2 = await this.curl({
                         'url': this.signUrl,
                         json: dict
                     }
@@ -78,6 +79,44 @@ class jdSign {
         else {
             return {}
         }
+    }
+
+    async curl(params) {
+        if (typeof (params) != 'object') {
+            params = {
+                'url': params
+            }
+        }
+        let method = params.method || ''
+        if (params.hasOwnProperty('authorization')) {
+            params.headers.authorization = params.authorization
+        }
+        if (params.hasOwnProperty('form')) {
+            params.method = 'POST'
+        }
+        if (params.hasOwnProperty('json')) {
+            params.method = 'POST'
+        }
+        if (params.hasOwnProperty('body')) {
+            if (typeof (params.body) == 'object') {
+                params.body = JSON.stringify(params.body)
+            }
+            params.method = 'POST'
+        }
+        if (method) {
+            params.method = method.toUpperCase()
+        }
+        return new Promise(resolve => {
+            request(params, async (err, resp, data) => {
+                try {
+                    data = process.communal.jsonParse(data)
+                } catch (e) {
+                    // console.log(e, resp)
+                } finally {
+                    resolve(data);
+                }
+            })
+        })
     }
 }
 
