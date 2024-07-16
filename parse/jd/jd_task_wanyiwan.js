@@ -214,6 +214,35 @@ class Main extends Template {
                 }
             }
         }
+        if (new Date().getHours()>18) {
+            for (let i of Array(10)) {
+                let draw = await this.algo.curl({
+                        'url': `https://api.m.jd.com/api`,
+                        'form': `functionId=superRedBagDraw&body={"linkId":"aE-1vg6_no2csxgXFuv3Kg"}&t=1716014275661&appid=activity_platform_se&client=ios&clientVersion=13.1.0&loginType=2&loginWQBiz=wegame`,
+                        cookie,
+                        algo: {
+                            appId: '89cfe'
+                        },
+                        referer: 'https://pro.m.jd.com/mall/active/3fcyrvLZALNPWCEDRvaZJVrzek8v/index.html',
+                    }
+                )
+                if (this.haskey(draw, 'code', 20005)) {
+                    console.log('场次已过期')
+                    break
+                }
+                else if (!draw.data.shakeLeftTime) {
+                    break
+                }
+                // console.log(this.dumps(draw.data.prizeDrawVo))
+                if (this.haskey(draw, 'data.prizeDrawVo.prizeDesc')) {
+                    this.print(`获得: ${draw.data.prizeDrawVo.prizeDesc} ${draw.data.prizeDrawVo.amount}`, p.user)
+                }
+                else {
+                    console.log("什么也没有抽到")
+                }
+                await this.wait(2000)
+            }
+        }
         let home = await this.algo.curl({
                 'url': `https://api.m.jd.com/client.action`,
                 'form': `functionId=wanyiwan_home&appid=signed_wh5&body=%7B%22outsite%22%3A0%2C%22firstCall%22%3A1%2C%22version%22%3A1%2C%22lbsSwitch%22%3Atrue%7D&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168960&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=1.0.0&partner=`,
