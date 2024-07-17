@@ -57,6 +57,7 @@ class Main extends Template {
             }
             oldScore = this.haskey(home, 'data.result.score') || 0
             console.log("当前奖票:", oldScore)
+            let status = 1
             if (p.inviter && p.inviter.user) {
                 console.log("正在助力:", p.inviter.user)
                 let assist = await this.algo.curl({
@@ -86,19 +87,67 @@ class Main extends Template {
                         }
                     }
                 )
+                if (this.haskey(sign, 'data.bizCode', -10001)) {
+                    this.print("签到失败 疑似黑号", p.user)
+                    status = 0
+                }
                 console.log("签到中...", this.haskey(sign, 'data.result'))
             }
-            for (let i of result.taskBoard) {
-                if (i.title.includes('下单')) {
-                }
-                else if (i.title.includes('助力')) {
-                    if (this.cookies.help.includes(p.cookie) && this.haskey(i, 'taskDetail.0.itemId')) {
-                        this.code.push({
-                            user: this.userPin(cookie),
-                            itemId: i.taskDetail[0].itemId
-                        })
+            if (status>0) {
+                for (let i of result.taskBoard) {
+                    if (i.title.includes('下单')) {
                     }
-                    for (let _ of Array(i.finishTimes)) {
+                    else if (i.title.includes('助力')) {
+                        if (this.cookies.help.includes(p.cookie) && this.haskey(i, 'taskDetail.0.itemId')) {
+                            this.code.push({
+                                user: this.userPin(cookie),
+                                itemId: i.taskDetail[0].itemId
+                            })
+                        }
+                        for (let _ of Array(i.finishTimes)) {
+                            let a = await this.algo.curl({
+                                    'url': `https://api.m.jd.com/client.action`,
+                                    'form': `functionId=wanyiwan_task_receive_award&appid=signed_wh5&body={"taskType":${i.taskType},"assignmentId":"${i.encryptAssignmentId}","version":1}&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168960&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=12.1.0`,
+                                    cookie,
+                                    algo: {
+                                        appId: 'd12dd'
+                                    },
+                                }
+                            )
+                            if (this.haskey(a, 'data.bizCode', -7004)) {
+                                break
+                            }
+                            else {
+                                console.log("助力奖励:", this.haskey(a, 'data.result') || a)
+                                await this.wait(1000)
+                            }
+                        }
+                    }
+                    else {
+                        console.log("正在运行:", i.title)
+                        let d = await this.algo.curl({
+                                'url': `https://api.m.jd.com/client.action`,
+                                'form': `functionId=wanyiwan_do_task&appid=signed_wh5&body={"itemId":"${this.haskey(i, 'taskDetail.0.itemId') || 0}","taskType":${i.taskType},"assignmentId":"${i.encryptAssignmentId}","actionType":1,"version":1}&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168960&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=12.1.0`,
+                                cookie,
+                                algo: {
+                                    appId: '89db2'
+                                }
+                            }
+                        )
+                        // console.log(d.data)
+                        if (i.limitTime) {
+                            await this.wait(i.limitTime * 1000)
+                        }
+                        let r = await this.algo.curl({
+                                'url': `https://api.m.jd.com/client.action`,
+                                'form': `functionId=wanyiwan_do_task&appid=signed_wh5&body={"itemId":"${this.haskey(i, 'taskDetail.0.itemId') || 0}","taskType":${i.taskType},"assignmentId":"${i.encryptAssignmentId}","actionType":0,"version":1}&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168858&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=12.1.0`,
+                                cookie,
+                                algo: {
+                                    appId: '89db2'
+                                }
+                            }
+                        )
+                        // console.log(r.data)
                         let a = await this.algo.curl({
                                 'url': `https://api.m.jd.com/client.action`,
                                 'form': `functionId=wanyiwan_task_receive_award&appid=signed_wh5&body={"taskType":${i.taskType},"assignmentId":"${i.encryptAssignmentId}","version":1}&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168960&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=12.1.0`,
@@ -106,111 +155,69 @@ class Main extends Template {
                                 algo: {
                                     appId: 'd12dd'
                                 },
+                                // referer: 'https://pro.m.jd.com/mall/active/3fcyrvLZALNPWCEDRvaZJVrzek8v/index.html'
                             }
                         )
-                        if (this.haskey(a, 'data.bizCode', -7004)) {
-                            break
-                        }
-                        else {
-                            console.log("助力奖励:", this.haskey(a, 'data.result') || a)
-                            await this.wait(1000)
+                        console.log(a.data)
+                    }
+                }
+                let turn = await this.algo.curl({
+                        'url': `https://api.m.jd.com/client.action`,
+                        'form': `functionId=turnHappyHome&body={"linkId":"CDv-TaCmVcD0sxAI_HE2RQ","turnNum":"10"}&t=1715954317613&appid=activities_platform&client=ios&clientVersion=1.0.0`,
+                        cookie,
+                        algo: {
+                            appId: '614f1'
                         }
                     }
+                )
+                if (this.haskey(turn, 'data.leftTime')) {
+                    console.log("剩余翻倍时间:", parseInt(turn.data.leftTime / 1000))
+                }
+                else if (this.haskey(turn, 'data.joinTimes', 10)) {
+                    console.log("翻倍次数上限")
                 }
                 else {
-                    console.log("正在运行:", i.title)
-                    let d = await this.algo.curl({
-                            'url': `https://api.m.jd.com/client.action`,
-                            'form': `functionId=wanyiwan_do_task&appid=signed_wh5&body={"itemId":"${this.haskey(i, 'taskDetail.0.itemId') || 0}","taskType":${i.taskType},"assignmentId":"${i.encryptAssignmentId}","actionType":1,"version":1}&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168960&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=12.1.0`,
-                            cookie,
-                            algo: {
-                                appId: '89db2'
-                            }
-                        }
-                    )
-                    // console.log(d.data)
-                    if (i.limitTime) {
-                        await this.wait(i.limitTime * 1000)
+                    let num = this.profile.turnNum || 10
+                    if (oldScore && num>oldScore) {
+                        num = oldScore
                     }
-                    let r = await this.algo.curl({
-                            'url': `https://api.m.jd.com/client.action`,
-                            'form': `functionId=wanyiwan_do_task&appid=signed_wh5&body={"itemId":"${this.haskey(i, 'taskDetail.0.itemId') || 0}","taskType":${i.taskType},"assignmentId":"${i.encryptAssignmentId}","actionType":0,"version":1}&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168858&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=12.1.0`,
-                            cookie,
-                            algo: {
-                                appId: '89db2'
+                    console.log("开始翻倍,使用奖票数量:", num)
+                    let count = this.profile.turnDouble || 1
+                    let ok = 1
+                    for (let _ = 1; _<=count; _++) {
+                        var turnNum = (_ == 1) ? num : "-1"
+                        let double = await this.algo.curl({
+                                'url': `https://api.m.jd.com/client.action`,
+                                'form': `functionId=turnHappyDouble&body={"linkId":"CDv-TaCmVcD0sxAI_HE2RQ","turnNum":"${turnNum}"}&t=1715954317613&appid=activities_platform&client=ios&clientVersion=13.1.0`,
+                                cookie,
+                                algo: {
+                                    appId: '614f1'
+                                }
                             }
+                        )
+                        console.log("翻倍中...", this.haskey(double, 'data.rewardValue'))
+                        if (this.haskey(double, 'data.rewardState', 3)) {
+                            console.log("翻倍失败...")
+                            ok = 0
+                            break
                         }
-                    )
-                    // console.log(r.data)
-                    let a = await this.algo.curl({
-                            'url': `https://api.m.jd.com/client.action`,
-                            'form': `functionId=wanyiwan_task_receive_award&appid=signed_wh5&body={"taskType":${i.taskType},"assignmentId":"${i.encryptAssignmentId}","version":1}&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168960&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=12.1.0`,
-                            cookie,
-                            algo: {
-                                appId: 'd12dd'
-                            },
-                            // referer: 'https://pro.m.jd.com/mall/active/3fcyrvLZALNPWCEDRvaZJVrzek8v/index.html'
+                        else if (this.haskey(double, 'code', 220001)) {
+                            console.log("今日参与已达上限...")
+                            break
                         }
-                    )
-                    console.log(a.data)
-                }
-            }
-            let turn = await this.algo.curl({
-                    'url': `https://api.m.jd.com/client.action`,
-                    'form': `functionId=turnHappyHome&body={"linkId":"CDv-TaCmVcD0sxAI_HE2RQ","turnNum":"10"}&t=1715954317613&appid=activities_platform&client=ios&clientVersion=1.0.0`,
-                    cookie,
-                    algo: {
-                        appId: '614f1'
                     }
-                }
-            )
-            if (this.haskey(turn, 'data.leftTime')) {
-                console.log("剩余翻倍时间:", parseInt(turn.data.leftTime / 1000))
-            }
-            else if (this.haskey(turn, 'data.joinTimes', 10)) {
-                console.log("翻倍次数上限")
-            }
-            else {
-                let num = this.profile.turnNum || 10
-                if (oldScore && num>oldScore) {
-                    num = oldScore
-                }
-                console.log("开始翻倍,使用奖票数量:", num)
-                let count = this.profile.turnDouble || 1
-                let ok = 1
-                for (let _ = 1; _<=count; _++) {
-                    var turnNum = (_ == 1) ? num : "-1"
-                    let double = await this.algo.curl({
-                            'url': `https://api.m.jd.com/client.action`,
-                            'form': `functionId=turnHappyDouble&body={"linkId":"CDv-TaCmVcD0sxAI_HE2RQ","turnNum":"${turnNum}"}&t=1715954317613&appid=activities_platform&client=ios&clientVersion=13.1.0`,
-                            cookie,
-                            algo: {
-                                appId: '614f1'
+                    if (ok) {
+                        let rec = await this.algo.curl({
+                                'url': `https://api.m.jd.com/client.action`,
+                                'form': `functionId=turnHappyReceive&body={"linkId":"CDv-TaCmVcD0sxAI_HE2RQ"}&t=1715954317613&appid=activities_platform&client=ios&clientVersion=12.1.0`,
+                                cookie,
+                                algo: {
+                                    appId: '25fac'
+                                }
                             }
-                        }
-                    )
-                    console.log("翻倍中...", this.haskey(double, 'data.rewardValue'))
-                    if (this.haskey(double, 'data.rewardState', 3)) {
-                        console.log("翻倍失败...")
-                        ok = 0
-                        break
+                        )
+                        console.log("结束翻倍...", this.haskey(rec, 'data.rewardValue'))
                     }
-                    else if (this.haskey(double, 'code', 220001)) {
-                        console.log("今日参与已达上限...")
-                        break
-                    }
-                }
-                if (ok) {
-                    let rec = await this.algo.curl({
-                            'url': `https://api.m.jd.com/client.action`,
-                            'form': `functionId=turnHappyReceive&body={"linkId":"CDv-TaCmVcD0sxAI_HE2RQ"}&t=1715954317613&appid=activities_platform&client=ios&clientVersion=12.1.0`,
-                            cookie,
-                            algo: {
-                                appId: '25fac'
-                            }
-                        }
-                    )
-                    console.log("结束翻倍...", this.haskey(rec, 'data.rewardValue'))
                 }
             }
         }
