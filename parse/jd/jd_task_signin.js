@@ -19,10 +19,6 @@ class Main extends Template {
         })
         this.dict = {
             'doInteractiveAssignment': {
-                "京东五金城": {
-                    "encryptProjectId": "cLL8ubm28wZ2kSs4YEq4rf61tFa",
-                    "encryptAssignmentId": "2aZUnxTZKBb8pYQQtiEqGYELvvB4"
-                },
                 '五金城': {
                     "encryptProjectId": "237YgcQ2GCm64t7vfP528Run4P4q",
                     "encryptAssignmentId": "3WRvrfo6qq8BTRQzLJSRgyBGaRr3",
@@ -56,10 +52,10 @@ class Main extends Template {
                     "encryptAssignmentId": "gm9yNeFrcD9KLtZAV1gZQfNX3ux",
                     "sourceCode": "ace20230504MZPD"
                 },
-                "机车装备管": {
-                    "encryptProjectId": "2KFZNTJxMgZyFRaTHnDJk14qtsPL",
-                    "encryptAssignmentId": "2Yb6YbUd11jj1DGP2Y9dhqCfW5AD"
-                },
+                // "机车装备管": {
+                //     "encryptProjectId": "2KFZNTJxMgZyFRaTHnDJk14qtsPL",
+                //     "encryptAssignmentId": "2Yb6YbUd11jj1DGP2Y9dhqCfW5AD"
+                // },
                 "京东电器": {
                     "encryptProjectId": "3ynRTVVTYz8QbESaXbu8i3XC3TLo",
                     "encryptAssignmentId": "2pv61FSzJ9QZTiQ3r5HSigG87aAM"
@@ -67,6 +63,10 @@ class Main extends Template {
                 "京东图书": {
                     "encryptProjectId": "2F4zGe7fb9ArEfiSoRVdhy7suUUn",
                     "encryptAssignmentId": "3fxqLRqowvZ6ohXHU48DghJb2Ljq"
+                },
+                "小魔方": {
+                    "encryptProjectId": "3b3eCQtp6QpSP7SASCPQMbW3Y6Ff",
+                    "encryptAssignmentId": "2adXGHCEQyKuvG2K7rQffGkGKNjv"
                 }
             }
         }
@@ -133,3 +133,4 @@ class Main extends Template {
 }
 
 module.exports = Main;
+
