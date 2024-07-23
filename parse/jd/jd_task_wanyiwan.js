@@ -279,7 +279,8 @@ class Main extends Template {
         let month = (now.getMonth() + 1).toString().padStart(2, '0');
         let day = now.getDate().toString().padStart(2, '0');
         let ymd = `${year}-${month}-${day}`;
-        let report = (this.haskey(record, 'data.result.pointsRecords') || []).filter(d => d.sendTime == ymd).filter(d => d.pointName == '1002')
+        let ymd2 = `${year}.${month}.${day}`;
+        let report = (this.haskey(record, 'data.result.pointsRecords') || []).filter(d => d.sendTime == ymd || d.sendTime == ymd2).filter(d => d.pointName == '1002')
         let use = report.filter(d => d.operateType == '3')
         let suc = report.filter(d => d.operateType == '1')
         let x = this.sum(use.map(d => d.pointValue)) || 0;
