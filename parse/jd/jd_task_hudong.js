@@ -422,7 +422,8 @@ class Main extends Template {
                     if (apDoLimitTimeTask) {
                         break
                     }
-                    console.log(`正在运行:`, i.taskTitle, i.taskType)
+                    console.log(`正在运行:`, i.taskShowTitle || i.taskTitle, i.taskType
+                    )
                     switch (i.taskType) {
                         case 'SIGN':
                             let sign = await this.wget({
@@ -474,7 +475,12 @@ class Main extends Template {
                                             algo: {'appId': '54ed7'},
                                             cookie
                                         })
+                                        // console.log(doTask)
                                         if (this.haskey(doTask, 'errMsg', '参数校验失败')) {
+                                            apDoLimitTimeTask = 1
+                                            break
+                                        }
+                                        if (this.haskey(doTask, 'code', 2018)) {
                                             apDoLimitTimeTask = 1
                                             break
                                         }
@@ -511,7 +517,7 @@ class Main extends Template {
                                             cookie
                                         }
                                     )
-                                    console.log("正在运行:", i.taskType, this.haskey(d, 'success'))
+                                    console.log("正在运行:", i.taskShowTitle || i.taskTitle, i.taskType, this.haskey(d, 'success'))
                                     if (i.timeLimitPeriod) {
                                         console.log("等待:", i.timeLimitPeriod
                                         )
