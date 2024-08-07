@@ -6,7 +6,7 @@ class Main extends Template {
         this.title = "京东玩一玩"
         this.cron = `${this.rand(0, 59)} */2 * * *`
         this.task = 'local'
-        this.import = ['jdAlgo', 'fs']
+        this.import = ['jdAlgo', 'fs', 'cacheFile']
         this.interval = 3000
         this.delay = 500
         this.hint = {
@@ -23,6 +23,9 @@ class Main extends Template {
             // headers: {
             //     referer: 'https://pro.m.jd.com/mall/active/3fcyrvLZALNPWCEDRvaZJVrzek8v/index.html',
             // }
+        })
+        this.cache = new this.modules.cacheFile({
+            name: 'jd_task_wanyiwan'
         })
         try {
             let txt = this.modules.fs.readFileSync(`${this.dirname}/invite/jd_task_wanyiwan.json`).toString()
@@ -287,6 +290,7 @@ class Main extends Template {
         let y = this.sum(suc.map(d => d.pointValue)) || 0
         let z = y - x
         this.print(`当前奖票: ${score} \n翻倍次数: ${use.length}, 消耗奖票: ${x}, 获得奖票: ${y}, ${z>0 ? '增加' : "损失"}奖票: ${z} \n盈亏占比: ${suc.length}/${use.length - suc.length}`, p.user)
+        this.cache.set(p.user, score)
     }
 
     async wget(p) {
