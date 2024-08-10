@@ -7,9 +7,13 @@ class Main extends Template {
         this.cron = `${this.rand(0, 59)} ${this.rand(0, 22)} * * *`
         this.task = 'local'
         this.interval = 20000
+        this.import = ['jdAlgo']
     }
 
     async prepare() {
+        this.algo = new this.modules.jdAlgo({
+            version: '4.7'
+        })
     }
 
     async main(p) {
@@ -59,10 +63,14 @@ class Main extends Template {
                 await this.wait(1000)
             }
         }
-        let sign = await this.curl({
-                'url': `http://api.m.jd.com/api?functionId=DATAWALLET_USER_SIGN`,
+        let sign = await this.algo.curl({
+                'url': `https://api.m.jd.com/api?functionId=DATAWALLET_USER_SIGN`,
                 form: `appid=h5-sep&body=${this.dumps(await this.cmd5x())}&client=m&clientVersion=6.0.0`,
-                cookie
+                cookie,
+                algo: {
+                    appId: '60d0e'
+                },
+                referer: 'https://mypoint.jd.com/'
             }
         )
         console.log(sign)
