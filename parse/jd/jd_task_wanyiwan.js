@@ -20,9 +20,9 @@ class Main extends Template {
         this.algo = new this.modules.jdAlgo({
             version: "4.7",
             type: "main",
-            // headers: {
-            //     referer: 'https://pro.m.jd.com/mall/active/3fcyrvLZALNPWCEDRvaZJVrzek8v/index.html',
-            // }
+            headers: {
+                referer: 'https://pro.m.jd.com/mall/active/3fcyrvLZALNPWCEDRvaZJVrzek8v/index.html',
+            }
         })
         this.cache = new this.modules.cacheFile({
             name: 'jd_task_wanyiwan'
@@ -40,15 +40,23 @@ class Main extends Template {
         let oldScore = 0;
         if (this.turnCount == 0) {
             this.dict[p.user] = {"pages": {}, "cash": []}
-            let home = await this.algo.curl({
-                    'url': `https://api.m.jd.com/client.action`,
-                    'form': `functionId=wanyiwan_home&appid=signed_wh5&body={"outsite":0,"firstCall":1,"version":1,"lbsSwitch":false}&rfs=0000&openudid=5a44015a5e835b3dcb903c9a6b9d66573473c14d&screen=390*844&build=168858&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=12.1.0`,
-                    cookie,
-                    algo: {
-                        appId: 'c81ad'
+            for (let i of Array(3)) {
+                var home = await this.algo.curl({
+                        'url': `https://api.m.jd.com/client.action`,
+                        'form': `functionId=wanyiwan_home&appid=signed_wh5&body={"outsite":0,"firstCall":1,"version":3,"lbsSwitch":false,"babelChannel":"ttt4"}&rfs=0000&openudid=674ce0d97511f5ed054c3dc0af093b3b245ab68d&screen=390*844&build=169480&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=13.2.2`,
+                        cookie,
+                        algo: {
+                            appId: 'c81ad'
+                        }
                     }
+                )
+                if (this.haskey(home, 'data.result')) {
+                    break
                 }
-            )
+                else {
+                    await this.wait(1000)
+                }
+            }
             let result = this.haskey(home, 'data.result')
             if (!result) {
                 console.log("没有获取到数据...")
@@ -191,7 +199,7 @@ class Main extends Template {
                         var turnNum = (_ == 1) ? num : "-1"
                         let double = await this.algo.curl({
                                 'url': `https://api.m.jd.com/client.action`,
-                                'form': `functionId=turnHappyDouble&body={"linkId":"CDv-TaCmVcD0sxAI_HE2RQ","turnNum":"${turnNum}"}&t=1715954317613&appid=activities_platform&client=ios&clientVersion=13.1.0`,
+                                'form': `functionId=turnHappyDouble&body={"linkId":"CDv-TaCmVcD0sxAI_HE2RQ","turnNum":"${turnNum}"}&t=1715954317613&appid=activities_platform&client=ios&clientVersion=13.2.2`,
                                 cookie,
                                 algo: {
                                     appId: '614f1'
@@ -208,6 +216,7 @@ class Main extends Template {
                             console.log("今日参与已达上限...")
                             break
                         }
+                        await this.wait(3000)
                     }
                     if (ok) {
                         let rec = await this.algo.curl({
@@ -228,7 +237,7 @@ class Main extends Template {
             for (let i of Array(10)) {
                 let draw = await this.algo.curl({
                         'url': `https://api.m.jd.com/api`,
-                        'form': `functionId=superRedBagDraw&body={"linkId":"aE-1vg6_no2csxgXFuv3Kg"}&t=1716014275661&appid=activity_platform_se&client=ios&clientVersion=13.1.0&loginType=2&loginWQBiz=wegame`,
+                        'form': `functionId=superRedBagDraw&body={"linkId":"aE-1vg6_no2csxgXFuv3Kg"}&t=1716014275661&appid=activity_platform_se&client=ios&clientVersion=13.2.2&loginType=2&loginWQBiz=wegame`,
                         cookie,
                         algo: {
                             appId: '89cfe'
@@ -253,15 +262,23 @@ class Main extends Template {
                 await this.wait(2000)
             }
         }
-        let home = await this.algo.curl({
-                'url': `https://api.m.jd.com/client.action`,
-                'form': `functionId=wanyiwan_home&appid=signed_wh5&body=%7B%22outsite%22%3A0%2C%22firstCall%22%3A1%2C%22version%22%3A1%2C%22lbsSwitch%22%3Atrue%7D&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168960&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=1.0.0&partner=`,
-                cookie,
-                algo: {
-                    appId: 'c81ad'
+        for (let i of Array(3)) {
+            var home = await this.algo.curl({
+                    'url': `https://api.m.jd.com/client.action`,
+                    'form': `functionId=wanyiwan_home&appid=signed_wh5&body={"outsite":0,"firstCall":1,"version":3,"lbsSwitch":false,"babelChannel":"ttt4"}&rfs=0000&openudid=674ce0d97511f5ed054c3dc0af093b3b245ab68d&screen=390*844&build=169480&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=13.2.2`,
+                    cookie,
+                    algo: {
+                        appId: 'c81ad'
+                    }
                 }
+            )
+            if (this.haskey(home, 'data.result')) {
+                break
             }
-        )
+            else {
+                await this.wait(1000)
+            }
+        }
         let score = this.haskey(home, 'data.result.score') || 0
         if (score) {
             if (oldScore) {
@@ -290,9 +307,12 @@ class Main extends Template {
         let y = this.sum(suc.map(d => d.pointValue)) || 0
         let z = y - x
         this.print(`当前奖票: ${score} \n翻倍次数: ${use.length}, 消耗奖票: ${x}, 获得奖票: ${y}, ${z>0 ? '增加' : "损失"}奖票: ${z} \n盈亏占比: ${suc.length}/${use.length - suc.length}`, p.user)
-        this.cache.set(p.user, score)
+        if (score) {
+            this.cache.set(p.user, score)
+        }
     }
 
+    //
     async wget(p) {
         return await this.algo.curl(p)
     }
