@@ -14,6 +14,8 @@ class Main extends Template {
             turnDouble: '翻倍奖票次数,默认1'
         }
         this.model = 'shuffle'
+        this.help = "3"
+        this.readme = "默认缓存三个助力在invite/jd_task_wanyiwan.json里 如要修改,可先删除该文件等下次运行重新生成指定pin的助力或者直接编辑该文件"
     }
 
     async prepare() {
@@ -174,7 +176,7 @@ class Main extends Template {
                 }
                 let turn = await this.algo.curl({
                         'url': `https://api.m.jd.com/client.action`,
-                        'form': `functionId=turnHappyHome&body={"linkId":"CDv-TaCmVcD0sxAI_HE2RQ","turnNum":"10"}&t=1715954317613&appid=activities_platform&client=ios&clientVersion=13.2.2`,
+                        'form': `functionId=turnHappyHome&body={"linkId":"CDv-TaCmVcD0sxAI_HE2RQ","turnNum":"10"}&t=1715954317613&appid=activities_platform&client=apple&clientVersion=13.2.2`,
                         cookie,
                         algo: {
                             appId: '614f1'
@@ -184,7 +186,7 @@ class Main extends Template {
                 if (this.haskey(turn, 'data.leftTime')) {
                     console.log("剩余翻倍时间:", parseInt(turn.data.leftTime / 1000))
                 }
-                else if (this.haskey(turn, 'data.joinTimes', 10)) {
+                else if (this.haskey(turn, 'reachDayLimit')) {
                     console.log("翻倍次数上限")
                 }
                 else {
@@ -199,7 +201,7 @@ class Main extends Template {
                         var turnNum = (_ == 1) ? num : "-1"
                         let double = await this.algo.curl({
                                 'url': `https://api.m.jd.com/client.action`,
-                                'form': `functionId=turnHappyDouble&body={"linkId":"CDv-TaCmVcD0sxAI_HE2RQ","turnNum":"${turnNum}"}&t=1715954317613&appid=activities_platform&client=ios&clientVersion=13.2.2`,
+                                'form': `functionId=turnHappyDouble&body={"linkId":"CDv-TaCmVcD0sxAI_HE2RQ","turnNum":"${turnNum}"}&t=1715954317613&appid=activities_platform&client=apple&clientVersion=13.2.2`,
                                 cookie,
                                 algo: {
                                     appId: '614f1'
@@ -221,7 +223,7 @@ class Main extends Template {
                     if (ok) {
                         let rec = await this.algo.curl({
                                 'url': `https://api.m.jd.com/client.action`,
-                                'form': `functionId=turnHappyReceive&body={"linkId":"CDv-TaCmVcD0sxAI_HE2RQ"}&t=1715954317613&appid=activities_platform&client=ios&clientVersion=13.2.2`,
+                                'form': `functionId=turnHappyReceive&body={"linkId":"CDv-TaCmVcD0sxAI_HE2RQ"}&t=1715954317613&appid=activities_platform&client=apple&clientVersion=13.2.2`,
                                 cookie,
                                 algo: {
                                     appId: '25fac'
@@ -237,7 +239,7 @@ class Main extends Template {
             for (let i of Array(10)) {
                 let draw = await this.algo.curl({
                         'url': `https://api.m.jd.com/api`,
-                        'form': `functionId=superRedBagDraw&body={"linkId":"aE-1vg6_no2csxgXFuv3Kg"}&t=1716014275661&appid=activity_platform_se&client=ios&clientVersion=13.2.2&loginType=2&loginWQBiz=wegame`,
+                        'form': `functionId=superRedBagDraw&body={"linkId":"aE-1vg6_no2csxgXFuv3Kg"}&t=1716014275661&appid=activity_platform_se&client=apple&clientVersion=13.2.2&loginType=2&loginWQBiz=wegame`,
                         cookie,
                         algo: {
                             appId: '89cfe'
