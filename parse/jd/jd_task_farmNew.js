@@ -66,7 +66,7 @@ class Main extends Template {
         else if (this.haskey(home, 'treeFullStage', 5) && this.turnCount == 0) {
             this.print('可以兑换商品了', p.user)
         }
-        if (!home.skuName) {
+        if (!home.skuName && this.profile.tree) {
             console.log("没有种树")
             let board = await this.wget({
                 fn: 'farm_tree_board',
@@ -75,7 +75,7 @@ class Main extends Template {
                 cookie
             })
             try {
-                let skus = board.data.result.farmTreeLevels[0].farmLevelTrees[0]
+                let skus = board.data.result.farmTreeLevels[2].farmLevelTrees[0]
                 console.log("正在种树,选择商品:", skus.skuName)
                 let tree = await this.wget({
                     fn: 'farm_plant_tree',
