@@ -4,23 +4,21 @@ class Main extends Template {
     constructor() {
         super()
         this.title = "京东汪汪庄园"
-        this.cron = `${this.rand(0, 59)} ${this.rand(4, 7)},${this.rand(16, 19)} * * *`
+        this.cron = `${this.rand(0, 59)} ${this.rand(0, 10)},${this.rand(14, 21)} * * *`
+        this.help = 2
         this.task = 'local'
         this.import = ['jdAlgo', 'fs']
-        this.delay = 1200
+        this.delay = 600
         this.interval = 3000
-        this.hint = {
-            merge: '1 # 执行购买与合成任务',
-        }
     }
 
     async prepare() {
-        this.linkId = "99DZNpaCTAv8f4TuKXr0Ew"
-        this.clientVersion = "11.6.3"
+        this.linkId = this.profile.linkId || "99DZNpaCTAv8f4TuKXr0Ew"
+        this.clientVersion = "13.0.1"
         this.build = "1247"
         this.algo = new this.modules.jdAlgo({
             type: "main",
-            version: "3.1"
+            version: "4.7"
         })
         this.inviteIds = []
         let fcode = []
@@ -33,169 +31,9 @@ class Main extends Template {
 
     async main(p) {
         let cookie = p.cookie;
-        var self = this
-        await this.algoCurl({
-                'url': `https://api.m.jd.com/?functionId=checkUserIndulge&body=%7B%7D&t=${new Date().getTime()}&appid=activities_platform&null`,
-                // 'form':``,
-                cookie,
-                delay: 10,
-                referer: `https://joypark.jd.com/?activityId=${this.linkId}&channel=icon&lng=0.000000&lat=0.000000&sid=dc8d6ccdfed85985dd094567d15ba06w`,
-                curl: 1
-            }
-        )
-        await this.algoCurl({
-                'url': `functionId=gameHeartbeat&body={"businessCode":1,"linkId":"${this.linkId}"}&t=${new Date().getTime()}&appid=activities_platform&client=ios&clientVersion=${this.clientVersion}&cthr=1&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&build=${this.build}&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone13,3&lang=zh_CN&osVersion=15.1.1&partner=&eid=eidId7f9812189s4Ywiz164KTQqoeSyoW1uZwmMItV216n8pCJ26eJPEqZb5n8VkyLjW71hRQ6fhLku8USG3jg%2BHtZ7ecv%2BJ2CWEYpUd99P1GvH7bppT`,
-                cookie,
-                delay: 10,
-                curl: 1
-            }
-        )
-        await this.curl({
-                'url': `https://httpfereport.jd.com/log`,
-                'body': encodeURIComponent(this.dumps({
-                    "params": [{
-                        "logType": "_trackPagePerformance",
-                        "appId": "166",
-                        "flag": 1,
-                        "onloadTime": 2421,
-                        "dnsTime": 0,
-                        "tcpTime": 167,
-                        "requestTime": 120,
-                        "domResolveTime": 80,
-                        "whiteScreenTime": 634,
-                        "domReadyTime": 2337,
-                        "resolution": {"availHeight": 568, "availWidth": 320, "clientHeight": 504, "clientWidth": 320},
-                        "defaultErrorMsg": "",
-                        "currentUrl": `https://joypark.jd.com/?activityId=${this.linkId}&channel=icon&lng=0.000000&lat=0.000000&sid=dc8d6ccdfed85985dd094567d15ba06w`,
-                        "identity": "f9172f82-d30f-484b-c828-49620f293ea3",
-                        "deviceInfo": {
-                            "environment": "other",
-                            "network": "unknown",
-                            "appVersion": "other",
-                            "deviceType": "ios",
-                            "osVersion": "ios 11_4",
-                            "deviceModel": "iphone",
-                            "deviceBrand": "iPhone"
-                        }
-                    }]
-                })),
-                cookie,
-                delay: 10,
-                headers: {
-                    ...this.options.headers, ...{
-                        'Host':
-                            'httpfereport.jd.com',
-                        'accept':
-                            '*/*',
-                        'content-type':
-                            'text/plain;charset=UTF-8',
-                        'origin':
-                            'https://joypark.jd.com',
-                        'accept-language':
-                            'zh-CN,zh-Hans;q=0.9',
-                        'referer': 'https://joypark.jd.com/'
-                    }
-                }
-            }
-        )
-        await this.curl({
-                'url': `https://httpfereport.jd.com/log`,
-                'body': encodeURIComponent(this.dumps({
-                    "params": [{
-                        "logType": "_trackPerformance",
-                        "apiName": "GameJoyParkTime",
-                        "apiTime": 2600,
-                        "resolution": {"availHeight": 844, "availWidth": 390, "clientHeight": 753, "clientWidth": 390},
-                        "defaultErrorMsg": "",
-                        "currentUrl": `https://joypark.jd.com/?activityId=${this.linkId}&channel=icon&lng=0.000000&lat=0.000000&sid=dc8d6ccdfed85985dd094567d15ba06w`,
-                        "appId": "166",
-                        "identity": "6e4a0d9d-bdbf-4246-c442-2202bd988c38",
-                        "deviceInfo": {
-                            "environment": "other",
-                            "network": "unknown",
-                            "appVersion": "other",
-                            "deviceType": "ios",
-                            "osVersion": "ios 15_1_1",
-                            "deviceModel": "iphone",
-                            "deviceBrand": "iPhone"
-                        }
-                    }]
-                })),
-                cookie,
-                delay: 10,
-                headers: {
-                    ...this.options.headers, ...{
-                        'Host':
-                            'httpfereport.jd.com',
-                        'accept':
-                            '*/*',
-                        'content-type':
-                            'text/plain;charset=UTF-8',
-                        'origin':
-                            'https://joypark.jd.com',
-                        'accept-language':
-                            'zh-CN,zh-Hans;q=0.9',
-                        'referer': 'https://joypark.jd.com/'
-                    }
-                }
-            }
-        )
-        let reports = setInterval(async function f() {
-            console.log(`正在上报游戏信息...`)
-            let report = await self.curl({
-                    'url': `functionId=gameHeartbeat&body={"businessCode":1,"linkId":"${this.linkId}"}&t=${new Date().getTime()}&appid=activities_platform&client=ios&clientVersion=${this.clientVersion}&cthr=1&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&build=${this.build}&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone13,3&lang=zh_CN&osVersion=15.1.1&partner=&eid=eidId7f9812189s4Ywiz164KTQqoeSyoW1uZwmMItV216n8pCJ26eJPEqZb5n8VkyLjW71hRQ6fhLku8USG3jg%2BHtZ7ecv%2BJ2CWEYpUd99P1GvH7bppT`,
-                    cookie,
-                    delay: 10,
-                    headrs: self.options.headers,
-                    curl: 1
-                }
-            )
-        }, 10000)
         try {
             this.dict[p.user] = {}
             await this.baseInfo(p)
-            await this.curl({
-                    'url': `https://httpfereport.jd.com/log`,
-                    'body': encodeURIComponent(this.dumps({
-                        "params": [{
-                            "logType": "_trackPerformance",
-                            "apiName": "GameJoyParkTime",
-                            "apiTime": 2600,
-                            "resolution": {"availHeight": 844, "availWidth": 390, "clientHeight": 753, "clientWidth": 390},
-                            "defaultErrorMsg": "",
-                            "currentUrl": `https://joypark.jd.com/?activityId=${this.linkId}&channel=icon&lng=0.000000&lat=0.000000&sid=dc8d6ccdfed85985dd094567d15ba06w`,
-                            "appId": "166",
-                            "identity": "6e4a0d9d-bdbf-4246-c442-2202bd988c38",
-                            "deviceInfo": {
-                                "environment": "other",
-                                "network": "unknown",
-                                "appVersion": "other",
-                                "deviceType": "ios",
-                                "osVersion": "ios 15_1_1",
-                                "deviceModel": "iphone",
-                                "deviceBrand": "iPhone"
-                            }
-                        }]
-                    })),
-                    cookie,
-                    delay: 10,
-                    headers: {
-                        ...this.options.headers, ...{
-                            'Host':
-                                'httpfereport.jd.com',
-                            'accept':
-                                '*/*',
-                            'content-type':
-                                'text/plain;charset=UTF-8',
-                            'origin':
-                                'https://joypark.jd.com',
-                            'accept-language':
-                                'zh-CN,zh-Hans;q=0.9',
-                            'referer': 'https://joypark.jd.com/'
-                        }
-                    }
-                }
-            )
             await this.joyList(p)
             console.log("获取数据中...", this.dict[p.user])
             await this.shopList(p)
@@ -337,40 +175,6 @@ class Main extends Template {
                     console.log(`任务完成`, i.taskTitle)
                 }
             }
-            await this.algoCurl({
-                    'url': `https://api.m.jd.com/api`,
-                    'form': `client=&clientVersion=&appid=jdchoujiang_h5&t=1681482311702&functionId=petEnterRoom&body={"invitePin":"","reqSource":"h5"}&uuid=1681258208485425422542`,
-                    cookie,
-                    algo: {appId: "2bba1"}
-                }
-            )
-            await this.algoCurl({
-                    'url': `https://api.m.jd.com/api?client=&clientVersion=&appid=jdchoujiang_h5&t=1681482311708&functionId=getNoticePop&body={"reqSource":"h5"}&uuid=1681258208485425422542`,
-                    cookie,
-                    algo: {
-                        appId: "8c9de"
-                    }
-                }
-            )
-            await this.algoCurl({
-                    'url': `https://api.m.jd.com/api`,
-                    form: `client=&clientVersion=&appid=jdchoujiang_h5&t=1681482311705&functionId=petGetPetTaskConfig&body={"reqSource":"h5"}&uuid=1681258208485425422542`,
-                    cookie,
-                    algo: {
-                        appId: "922a5"
-                    }
-                }
-            )
-            await this.algoCurl({
-                    'url': `https://api.m.jd.com/api`,
-                    form: `client=iOS&clientVersion=10.2.2&appid=jdchoujiang_h5&t=1681482311751&functionId=getIosDegrades&body={"rfs":"0000","build":"${this.build}","partner":"","clientVersion":"${this.clientVersion}","reqSource":"h5"}&uuid=0721076da75ec3ea8e5f481e6d68bb4b7420c38d&build=167863&osVersion=15.1.1&networkType=wifi&partner=&d_brand=iPhone&d_model=iPhone13,3`,
-                    // 'form':``,
-                    cookie,
-                    algo: {
-                        appId: "74d27"
-                    }
-                }
-            )
             await this.two(p)
             for (let __ of Array(2)) {
                 let list = await this.algoCurl({
@@ -422,50 +226,69 @@ class Main extends Template {
                     console.log('移动狗子去工作...', this.haskey(move, 'success'))
                 }
             }
+            let cashPrize = await this.algoCurl({
+                    'url': `https://api.m.jd.com/?functionId=gameMyCashPrize&body={"linkId":"${this.linkId}","pageNum":1,"pageSize":10}&t=${new Date().getTime()}&appid=activities_platform&client=ios&clientVersion=${this.clientVersion}&build=${this.build}&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone13,3&lang=zh_CN&osVersion=11.4&partner=&eid=eidIb24b812115s9jUHzkyfNSICH4T313nxTSY1B9QqDr0IUV8vdzISUvNGSXxO%2BeCNY01V69ImKsiy4ptOddRzE0E%2F950ionHyQBWNiEguhXNM%2B%2BD5v`,
+                    // 'form':``,
+                    cookie
+                }
+            )
+            for (let i of this.haskey(cashPrize, 'data.items')) {
+                if (i.prizeType == 4 && i.state == 0) {
+                    let sss = await this.algoCurl({
+                            'url': 'https://api.m.jd.com/',
+                            form: `functionId=apCashWithDraw&body={"businessSource":"JOY_PARK","base":{"id":${i.id},"business":"joyPark","poolBaseId":${i.poolBaseId},"prizeGroupId":${i.prizeGroupId},"prizeBaseId":${i.prizeBaseId},"prizeType":${i.prizeType},"activityId":"${i.activityId}"},"linkId":"${this.linkId}","inviter":""}&t=${new Date().getTime()}&appid=activities_platform&client=ios&clientVersion=${this.clientVersion}&cthr=1&uuid=db953e5e7cc5812dae6b5e45a04201cc4f3e2030&build=${this.build}&screen=375*667&networkType=wifi&d_brand=iPhone&d_model=iPhone8,1&lang=zh_CN&osVersion=13.7&partner=&eid=eidI16fe81226asdsrs6k2OTTyOBBbhCfGtXwbK7PBFBEWxOgr9KLEUyLLuTguf4fW8nrXFjtSacDPyb%2FWv6KWmFaBUhrlMiSnB5H42FsBr2f72YyFA4`,
+                            cookie
+                        }
+                    )
+                    if (this.haskey(sss, 'data.message'), "无效的openId，当前pin尚未绑定微信") {
+                        console.log("无效的openId，当前pin尚未绑定微信")
+                        break
+                    }
+                    this.print(`提现${i.prizeValue} ${this.haskey(sss, 'data.message')}`, p.user)
+                    await this.wait(5000)
+                }
+            }
         } catch (e) {
         }
-        clearInterval(reports)
     }
 
     async two(p) {
-        if (this.profile.merge) {
-            await this.one(p)
-            let cookie = p.cookie
-            let joy = this.dict[p.user].joy || {}
-            for (let i = 0; i<30; i++) {
-                if (this.dict[p.user].coin>this.dict[p.user].buyCoin) {
-                    if (this.dict[p.user].number>9) {
-                        console.log("不能再养狗子了...")
-                        break
-                    }
-                    let i = this.dict[p.user].buyLevel
-                    let buy = await this.algoCurl({
-                            'url': `https://api.m.jd.com/`,
-                            'form': `functionId=joyBuy&body={"level":${i},"linkId":"${this.linkId}"}&t=1681023733345&appid=activities_platform&client=ios&clientVersion=${this.clientVersion}&cthr=1&uuid=bd573a56457eba54de7a6c0787c1fbb4fde28eb2&build=${this.build}&screen=375*667&networkType=wifi&d_brand=iPhone&d_model=iPhone8,1&lang=zh_CN&osVersion=15.1.1&partner=&eid=eidI08a2812293saa9h49%2BwmQbOdWcGqiWsHQ2vYen7SFhReSdDTvgVd9CzRHKrkpiAq6WU2YgJf8TchQcbWEAdBOCTuiYEdV5DxTHW0eO1PylPf2QAx`,
-                            cookie,
-                            algo: {
-                                'appId': 'ffb36'
-                            }
-                        }
-                    )
-                    await this.baseInfo(p)
-                    await this.joyList(p)
-                    await this.shopList(p)
-                    if (this.haskey(buy, 'data')) {
-                        // console.log(`购买等级${i}的狗子成功...`, this.dict[p.user].joy[i])
-                        console.log(`购买等级${i}的狗子成功...`, JSON.stringify(this.dict[p.user].joy))
-                    }
-                    else {
-                        console.log(`购买等级${i}的狗子失败...`)
-                        break
-                    }
-                }
-                else {
-                    console.log(this.dict[p.user].buyLevel ? `购买等级${this.dict[p.user].buyLevel}的牛牛金币不足...` : '金币不足...')
+        await this.one(p)
+        let cookie = p.cookie
+        let joy = this.dict[p.user].joy || {}
+        for (let i = 0; i<30; i++) {
+            if (this.dict[p.user].coin>this.dict[p.user].buyCoin) {
+                if (this.dict[p.user].number>9) {
+                    console.log("不能再养狗子了...")
                     break
                 }
-                await this.one(p)
+                let i = this.dict[p.user].buyLevel
+                let buy = await this.algoCurl({
+                        'url': `https://api.m.jd.com/`,
+                        'form': `functionId=joyBuy&body={"level":${i},"linkId":"${this.linkId}"}&t=1681023733345&appid=activities_platform&client=ios&clientVersion=${this.clientVersion}&cthr=1&uuid=bd573a56457eba54de7a6c0787c1fbb4fde28eb2&build=${this.build}&screen=375*667&networkType=wifi&d_brand=iPhone&d_model=iPhone8,1&lang=zh_CN&osVersion=15.1.1&partner=&eid=eidI08a2812293saa9h49%2BwmQbOdWcGqiWsHQ2vYen7SFhReSdDTvgVd9CzRHKrkpiAq6WU2YgJf8TchQcbWEAdBOCTuiYEdV5DxTHW0eO1PylPf2QAx`,
+                        cookie,
+                        algo: {
+                            'appId': 'ffb36'
+                        }
+                    }
+                )
+                await this.baseInfo(p)
+                await this.joyList(p)
+                await this.shopList(p)
+                if (this.haskey(buy, 'data')) {
+                    // console.log(`购买等级${i}的狗子成功...`, this.dict[p.user].joy[i])
+                    console.log(`购买等级${i}的狗子成功...`, JSON.stringify(this.dict[p.user].joy))
+                }
+                else {
+                    console.log(`购买等级${i}的狗子失败...`)
+                    break
+                }
             }
+            else {
+                console.log(this.dict[p.user].buyLevel ? `购买等级${this.dict[p.user].buyLevel}的牛牛金币不足...` : '金币不足...')
+                break
+            }
+            await this.one(p)
         }
     }
 
@@ -483,7 +306,7 @@ class Main extends Template {
                             'url': `https://api.m.jd.com/?functionId=joyMergeGet&body={"joyOneId":${kk[0]},"joyTwoId":${kk[1]},"linkId":"${this.linkId}"}&t=1681023762664&appid=activities_platform&client=ios&clientVersion=${this.clientVersion}&cthr=1&uuid=bd573a56457eba54de7a6c0787c1fbb4fde28eb2&build=${this.build}&screen=375*667&networkType=wifi&d_brand=iPhone&d_model=iPhone8,1&lang=zh_CN&osVersion=15.1.1&partner=&eid=eidI08a2812293saa9h49%2BwmQbOdWcGqiWsHQ2vYen7SFhReSdDTvgVd9CzRHKrkpiAq6WU2YgJf8TchQcbWEAdBOCTuiYEdV5DxTHW0eO1PylPf2QAx`,
                             cookie,
                             algo: {
-                                'appId': 'b08cf'
+                                'appId': 'c3beb'
                             }
                         }
                     )
@@ -520,6 +343,9 @@ class Main extends Template {
         }
         if (joy["25"] && joy["26"] && joy["27"] && joy["28"] && joy["29"] && joy["25"].length>0 && joy["26"].length>0 && joy["27"].length>0 && joy["28"].length>0 && joy["29"].length>0) {
             for (let i = 21; i<25; i++) {
+                if ((joy["25"].length + joy["26"].length + joy["27"].length + joy["28"].length + joy["29"].length)>5) {
+                    break
+                }
                 if (!this.haskey(joy, `${i}.0`)) {
                     // if (this.dict[p.user].joy && (this.dict[p.user].joy[i] && this.dict[p.user].joy[i].length == 0) || !this.dict[p.user].joy[i]) {
                     let joyInfo = this.dict[p.user].shop[i]
@@ -600,7 +426,7 @@ class Main extends Template {
                                     'url': `https://api.m.jd.com/?functionId=joyMergeGet&body={"joyOneId":${kk[0]},"joyTwoId":${kk[1]},"linkId":"${this.linkId}"}&t=1681023762664&appid=activities_platform&client=ios&clientVersion=${this.clientVersion}&cthr=1&uuid=bd573a56457eba54de7a6c0787c1fbb4fde28eb2&build=${this.build}&screen=375*667&networkType=wifi&d_brand=iPhone&d_model=iPhone8,1&lang=zh_CN&osVersion=15.1.1&partner=&eid=eidI08a2812293saa9h49%2BwmQbOdWcGqiWsHQ2vYen7SFhReSdDTvgVd9CzRHKrkpiAq6WU2YgJf8TchQcbWEAdBOCTuiYEdV5DxTHW0eO1PylPf2QAx`,
                                     cookie,
                                     algo: {
-                                        'appId': 'b08cf'
+                                        'appId': 'c3beb'
                                     }
                                 }
                             )
@@ -640,7 +466,7 @@ class Main extends Template {
                                 'url': `https://api.m.jd.com/?functionId=joyMergeGet&body={"joyOneId":${kk[0]},"joyTwoId":${kk[1]},"linkId":"${this.linkId}"}&t=1681023762664&appid=activities_platform&client=ios&clientVersion=${this.clientVersion}&cthr=1&uuid=bd573a56457eba54de7a6c0787c1fbb4fde28eb2&build=${this.build}&screen=375*667&networkType=wifi&d_brand=iPhone&d_model=iPhone8,1&lang=zh_CN&osVersion=15.1.1&partner=&eid=eidI08a2812293saa9h49%2BwmQbOdWcGqiWsHQ2vYen7SFhReSdDTvgVd9CzRHKrkpiAq6WU2YgJf8TchQcbWEAdBOCTuiYEdV5DxTHW0eO1PylPf2QAx`,
                                 cookie,
                                 algo: {
-                                    'appId': 'b08cf'
+                                    'appId': 'c3beb'
                                 }
                             }
                         )
@@ -697,7 +523,7 @@ class Main extends Template {
                                             'url': `https://api.m.jd.com/?functionId=joyMergeGet&body={"joyOneId":${kk[0]},"joyTwoId":${kk[1]},"linkId":"${this.linkId}"}&t=1681023762664&appid=activities_platform&client=ios&clientVersion=${this.clientVersion}&cthr=1&uuid=bd573a56457eba54de7a6c0787c1fbb4fde28eb2&build=${this.build}&screen=375*667&networkType=wifi&d_brand=iPhone&d_model=iPhone8,1&lang=zh_CN&osVersion=15.1.1&partner=&eid=eidI08a2812293saa9h49%2BwmQbOdWcGqiWsHQ2vYen7SFhReSdDTvgVd9CzRHKrkpiAq6WU2YgJf8TchQcbWEAdBOCTuiYEdV5DxTHW0eO1PylPf2QAx`,
                                             cookie,
                                             algo: {
-                                                'appId': 'b08cf'
+                                                'appId': 'c3beb'
                                             }
                                         }
                                     )
@@ -955,102 +781,6 @@ class Main extends Template {
         }
         else {
             var s = await this.algo.curl(p)
-        }
-        let query = this.query((p.form || p.url), '&', 'split')
-        if (query.functionId && this.haskey(s, 'success')) {
-            let eventParam = {
-                'functionId': query.functionId,
-                'data': this.dumps({
-                    "functionId": query.functionId,
-                    "body": query.body || '{}',
-                    "t": new Date().getTime()
-                }),
-                'response': s
-            }
-            let log1 = await this.curl({
-                    'url': `https://httpfereport.jd.com/log`,
-                    'body': encodeURIComponent(this.dumps({
-                        "params": [{
-                            "logType": "_trackEvent",
-                            "eventId": query.functionId,
-                            "eventParam": this.dumps(eventParam),
-                            "resolution": {"availHeight": 844, "availWidth": 390, "clientHeight": 753, "clientWidth": 390},
-                            "defaultErrorMsg": "",
-                            "currentUrl": `https://joypark.jd.com/?activityId=${this.linkId}&channel=icon&lng=0.000000&lat=0.000000&sid=28d4e35a571883929c3cdff02e6f626w`,
-                            "appId": "166",
-                            "identity": "6e4a0d9d-bdbf-4246-c442-2202bd988c38",
-                            "deviceInfo": {
-                                "environment": "other",
-                                "network": "unknown",
-                                "appVersion": "other",
-                                "deviceType": "ios",
-                                "osVersion": "ios 15_1_1",
-                                "deviceModel": "iphone",
-                                "deviceBrand": "iPhone"
-                            }
-                        }]
-                    })),
-                    cookie,
-                    delay: 10,
-                    headers: {
-                        ...this.options.headers, ...{
-                            'Host':
-                                'httpfereport.jd.com',
-                            'accept':
-                                '*/*',
-                            'content-type':
-                                'text/plain;charset=UTF-8',
-                            'origin':
-                                'https://joypark.jd.com',
-                            'accept-language':
-                                'zh-CN,zh-Hans;q=0.9',
-                            'referer': 'https://joypark.jd.com/'
-                        }
-                    }
-                }
-            )
-            let log2 = await this.curl({
-                    'url': `https://httpfereport.jd.com/log`,
-                    'body': encodeURIComponent(this.dumps({
-                        "params": [{
-                            "logType": "_trackPerformance",
-                            "apiName": query.functionId,
-                            "apiTime": 1161,
-                            "resolution": {"availHeight": 844, "availWidth": 390, "clientHeight": 753, "clientWidth": 390},
-                            "defaultErrorMsg": "",
-                            "currentUrl": `https://joypark.jd.com/?activityId=${this.linkId}&channel=icon&lng=0.000000&lat=0.000000&sid=28d4e35a571883929c3cdff02e6f626w`,
-                            "appId": "166",
-                            "identity": "6e4a0d9d-bdbf-4246-c442-2202bd988c38",
-                            "deviceInfo": {
-                                "environment": "other",
-                                "network": "unknown",
-                                "appVersion": "other",
-                                "deviceType": "ios",
-                                "osVersion": "ios 15_1_1",
-                                "deviceModel": "iphone",
-                                "deviceBrand": "iPhone"
-                            }
-                        }]
-                    })),
-                    cookie,
-                    delay: 10,
-                    headers: {
-                        ...this.options.headers, ...{
-                            'Host':
-                                'httpfereport.jd.com',
-                            'accept':
-                                '*/*',
-                            'content-type':
-                                'text/plain;charset=UTF-8',
-                            'origin':
-                                'https://joypark.jd.com',
-                            'accept-language':
-                                'zh-CN,zh-Hans;q=0.9',
-                            'referer': 'https://joypark.jd.com/'
-                        }
-                    }
-                }
-            )
         }
         return s
     }
