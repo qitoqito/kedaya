@@ -10,6 +10,9 @@ class Main extends Template {
         this.import = ['jdAlgo', 'fs']
         this.delay = 600
         this.interval = 3000
+        this.hint = {
+            merge: '1 # 执行购买与合成任务',
+        }
     }
 
     async prepare() {
@@ -254,42 +257,44 @@ class Main extends Template {
     }
 
     async two(p) {
-        await this.one(p)
-        let cookie = p.cookie
-        let joy = this.dict[p.user].joy || {}
-        for (let i = 0; i<30; i++) {
-            if (this.dict[p.user].coin>this.dict[p.user].buyCoin) {
-                if (this.dict[p.user].number>9) {
-                    console.log("不能再养狗子了...")
-                    break
-                }
-                let i = this.dict[p.user].buyLevel
-                let buy = await this.algoCurl({
-                        'url': `https://api.m.jd.com/`,
-                        'form': `functionId=joyBuy&body={"level":${i},"linkId":"${this.linkId}"}&t=1681023733345&appid=activities_platform&client=ios&clientVersion=${this.clientVersion}&cthr=1&uuid=bd573a56457eba54de7a6c0787c1fbb4fde28eb2&build=${this.build}&screen=375*667&networkType=wifi&d_brand=iPhone&d_model=iPhone8,1&lang=zh_CN&osVersion=15.1.1&partner=&eid=eidI08a2812293saa9h49%2BwmQbOdWcGqiWsHQ2vYen7SFhReSdDTvgVd9CzRHKrkpiAq6WU2YgJf8TchQcbWEAdBOCTuiYEdV5DxTHW0eO1PylPf2QAx`,
-                        cookie,
-                        algo: {
-                            'appId': 'ffb36'
-                        }
+        if (this.profile.merge) {
+            await this.one(p)
+            let cookie = p.cookie
+            let joy = this.dict[p.user].joy || {}
+            for (let i = 0; i<30; i++) {
+                if (this.dict[p.user].coin>this.dict[p.user].buyCoin) {
+                    if (this.dict[p.user].number>9) {
+                        console.log("不能再养狗子了...")
+                        break
                     }
-                )
-                await this.baseInfo(p)
-                await this.joyList(p)
-                await this.shopList(p)
-                if (this.haskey(buy, 'data')) {
-                    // console.log(`购买等级${i}的狗子成功...`, this.dict[p.user].joy[i])
-                    console.log(`购买等级${i}的狗子成功...`, JSON.stringify(this.dict[p.user].joy))
+                    let i = this.dict[p.user].buyLevel
+                    let buy = await this.algoCurl({
+                            'url': `https://api.m.jd.com/`,
+                            'form': `functionId=joyBuy&body={"level":${i},"linkId":"${this.linkId}"}&t=1681023733345&appid=activities_platform&client=ios&clientVersion=${this.clientVersion}&cthr=1&uuid=bd573a56457eba54de7a6c0787c1fbb4fde28eb2&build=${this.build}&screen=375*667&networkType=wifi&d_brand=iPhone&d_model=iPhone8,1&lang=zh_CN&osVersion=15.1.1&partner=&eid=eidI08a2812293saa9h49%2BwmQbOdWcGqiWsHQ2vYen7SFhReSdDTvgVd9CzRHKrkpiAq6WU2YgJf8TchQcbWEAdBOCTuiYEdV5DxTHW0eO1PylPf2QAx`,
+                            cookie,
+                            algo: {
+                                'appId': 'ffb36'
+                            }
+                        }
+                    )
+                    await this.baseInfo(p)
+                    await this.joyList(p)
+                    await this.shopList(p)
+                    if (this.haskey(buy, 'data')) {
+                        // console.log(`购买等级${i}的狗子成功...`, this.dict[p.user].joy[i])
+                        console.log(`购买等级${i}的狗子成功...`, JSON.stringify(this.dict[p.user].joy))
+                    }
+                    else {
+                        console.log(`购买等级${i}的狗子失败...`)
+                        break
+                    }
                 }
                 else {
-                    console.log(`购买等级${i}的狗子失败...`)
+                    console.log(this.dict[p.user].buyLevel ? `购买等级${this.dict[p.user].buyLevel}的牛牛金币不足...` : '金币不足...')
                     break
                 }
+                await this.one(p)
             }
-            else {
-                console.log(this.dict[p.user].buyLevel ? `购买等级${this.dict[p.user].buyLevel}的牛牛金币不足...` : '金币不足...')
-                break
-            }
-            await this.one(p)
         }
     }
 
