@@ -42,7 +42,7 @@ class Main extends Template {
 
     async main(p) {
         let cookie = p.cookie;
-        let floor = await this.curl({
+        let floor = await this.algo.curl({
                 'url': `https://api.m.jd.com/?functionId=qryH5BabelFloors`,
                 'form': `functionId=qryH5BabelFloors&appid=newtry&body={"activityId":"${this.linkId}","pageId":"4810055","queryFloorsParam":{"floorParams":{},"type":2}}`,
                 cookie,
