@@ -1,5 +1,19 @@
+# Bug龙订阅
+```
+添加环境变量: QITOQITO_PLATFORM=qinglong
+Nodejs添加依赖: crypto-js axios request node-file-cache
+
+链接: https://github.com/qitoqito/kedaya.git
+定时类型: crontab
+定时规则: 自定(23 23 * * *)
+白名单: kedaya
+执行后: cp -a /ql/data/repo/qitoqito_kedaya/. /ql/data/scripts && task qitoCreat.js now
+```
+![图片](https://github.com/user-attachments/assets/c2c0473e-54cb-4588-988f-a8fc85208080)
+
+
 # 注意事项
-	此项目与单脚本结构不同,请不要将无关文件放进parse目录
+	此项目与单文件脚本结构不同,请不要将无关文件放进parse目录
 	请不要将parse目录文件放scripts目录运行
 	某些面板不支持项目文件整体拉取,会破坏拉取的项目结构,请先翻阅README了解
 	环境变量不能有shareCode 
@@ -25,7 +39,7 @@
 	QITOQITO_SYNC=1 当有此变量时,面板定时会与项目定时同步,如需自行修改,请勿添加该字段
 	QITOQITO_COVER=1 当有此变量时候,qitoCreat会强制覆盖之前生成的入口文件
 	
-	初始安装请确保nodejs安装了axios request crypto-js模块
+	初始安装请确保nodejs安装了axios request crypto-js node-file-cache模块
 
 # 环境变量
 	# COOKIE
@@ -58,19 +72,6 @@
     
     # 其他面板
     同步解压到scripts目录,运行creat.js生成入口文件
-# Bug龙订阅
-```
-添加环境变量: QITOQITO_PLATFORM=qinglong
-Nodejs添加依赖: crypto-js axios request
-
-链接: https://github.com/qitoqito/kedaya.git
-定时类型: crontab
-定时规则: 自定(23 23 * * *)
-白名单: kedaya
-执行后: cp -a /ql/data/repo/qitoqito_kedaya/. /ql/data/scripts && task qitoCreat.js now
-```
-![图片](https://github.com/user-attachments/assets/c2c0473e-54cb-4588-988f-a8fc85208080)
-
 
 
 # 定时任务
@@ -89,7 +90,7 @@ docker run -dit \
   --restart always \
   --hostname official \
   -p 9527:80 \
-  qninq/signapi:latest
+  seansuny/signapi:latest
   
 添加环境变量 QITOQITO_JDSIGN=http://ip:9527/jd/sign
 ```
