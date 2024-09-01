@@ -6,6 +6,7 @@ class Main extends Template {
         this.title = "京东惊喜红包"
         this.cron = "6 6 6 6 6"
         this.task = 'local'
+        this.interval = 2000
         this.import = ['jdAlgo']
         this.readme = "一次性脚本"
     }
