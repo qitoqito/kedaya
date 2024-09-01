@@ -52,10 +52,10 @@ class Main extends Template {
                     "encryptAssignmentId": "gm9yNeFrcD9KLtZAV1gZQfNX3ux",
                     "sourceCode": "ace20230504MZPD"
                 },
-                // "机车装备管": {
-                //     "encryptProjectId": "2KFZNTJxMgZyFRaTHnDJk14qtsPL",
-                //     "encryptAssignmentId": "2Yb6YbUd11jj1DGP2Y9dhqCfW5AD"
-                // },
+                "机车装备管": {
+                    "encryptProjectId": "2KFZNTJxMgZyFRaTHnDJk14qtsPL",
+                    "encryptAssignmentId": "2Yb6YbUd11jj1DGP2Y9dhqCfW5AD"
+                },
                 "京东电器": {
                     "encryptProjectId": "3ynRTVVTYz8QbESaXbu8i3XC3TLo",
                     "encryptAssignmentId": "2pv61FSzJ9QZTiQ3r5HSigG87aAM"
@@ -67,6 +67,18 @@ class Main extends Template {
                 "小魔方": {
                     "encryptProjectId": "3b3eCQtp6QpSP7SASCPQMbW3Y6Ff",
                     "encryptAssignmentId": "2adXGHCEQyKuvG2K7rQffGkGKNjv"
+                },
+                "大牌奥莱": {
+                    "encryptProjectId": "2RGPKYMhgVCTm1HDEQ2sgEV4wmXv",
+                    "encryptAssignmentId": "3AZkFUUN65sEKjXEBGgDvfpFmKt"
+                },
+                "户外馆": {
+                    "encryptProjectId": "19UJ6ikVsBDj8ERop16qH6RDy3r",
+                    "encryptAssignmentId": "4K4hg4CjivKFRAfuQ41JYtP8yuK8"
+                },
+                "五金城2": {
+                    "encryptProjectId": "cLL8ubm28wZ2kSs4YEq4rf61tFa",
+                    "encryptAssignmentId": "2aZUnxTZKBb8pYQQtiEqGYELvvB4"
                 }
             }
         }
