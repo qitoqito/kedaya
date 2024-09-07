@@ -19,7 +19,7 @@ class Main extends Template {
         for (let cookie of this.cookies.help) {
             let s = await this.algo.curl({
                     'url': `https://api.m.jd.com/api?functionId=fissionHome`,
-                    'form': `functionId=fissionHome&body={"linkId":"RAXK1uc0RfxJl7dS25LI6g","isJDApp":true}&t=1725631688407&appid=activities_platform&client=ios&clientVersion=13.2.6&loginType=2&loginWQBiz=wegame`,
+                    'form': `functionId=fissionHome&body={"linkId":"RAXK1uc0RfxJl7dS25LI6g","isJDApp":true,"manual":true,"helpPin":""}&t=1725631688407&appid=activities_platform&client=ios&clientVersion=13.2.6&loginType=2&loginWQBiz=wegame`,
                     cookie,
                     algo: {
                         appId: '973a9'
@@ -27,10 +27,12 @@ class Main extends Template {
                 }
             )
             if (this.haskey(s, 'data.sharePin')) {
-                this.shareCode.push({
-                    sharePin: s.data.sharePin,
-                    user: this.userName(cookie)
-                })
+                if (s.data.status != 2) {
+                    this.shareCode.push({
+                        sharePin: s.data.sharePin,
+                        user: this.userName(cookie)
+                    })
+                }
             }
         }
     }
