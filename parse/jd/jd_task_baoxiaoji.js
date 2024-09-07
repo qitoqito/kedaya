@@ -26,6 +26,17 @@ class Main extends Template {
                     }
                 }
             )
+            if (this.haskey(s, 'code', 600001)) {
+                s = await this.algo.curl({
+                        'url': `https://api.m.jd.com/api?functionId=fissionHome`,
+                        'form': `functionId=fissionHome&body={"linkId":"RAXK1uc0RfxJl7dS25LI6g","isJDApp":true,"manual":false,"helpPin":""}&t=1725631688407&appid=activities_platform&client=ios&clientVersion=13.2.6&loginType=2&loginWQBiz=wegame`,
+                        cookie,
+                        algo: {
+                            appId: '973a9'
+                        }
+                    }
+                )
+            }
             if (this.haskey(s, 'data.sharePin')) {
                 if (s.data.status != 2) {
                     this.shareCode.push({
