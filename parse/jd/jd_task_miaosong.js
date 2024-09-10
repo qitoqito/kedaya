@@ -39,7 +39,8 @@ class Main extends Template {
                 cookie,
                 algo: {
                     appId: '4dea1'
-                }
+                },
+                ciphers: "TLS_AES_256_GCM_SHA384"
             }
         )
         console.log(this.haskey(reward, 'result.message') || '失败了')
