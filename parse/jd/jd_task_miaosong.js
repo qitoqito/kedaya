@@ -40,15 +40,20 @@ class Main extends Template {
                 algo: {
                     appId: '4dea1'
                 },
-                ciphers: "TLS_AES_256_GCM_SHA384"
+                ciphers: "TLS_CHACHA20_POLY1305_SHA256:TLS_AES_256_GCM_SHA384"
             }
         )
         console.log(this.haskey(reward, 'result.message') || '失败了')
-        let lobby = await this.curl({
+        let lobby = await this.algo.curl({
                 'url': `https://api.m.jd.com/client.action?functionId=dj_interact_games_lobby&appid=game-fun-zone`,
                 'form': `body=%7B%22refreshType%22%3A2%2C%22source%22%3A%221%22%7D&clientVersion=13.2.6&client=iOS&d_model=iPhone8%2C1&d_brand=iPhone&osVersion=15.7.5&build=169490&uuid=713528612071b94e23fcd28144db476f856f9fc5&appId=game-fun-zone`,
-                cookie
-            }
+                cookie,
+               algo: {
+                    appId: '4dea1'
+                },
+                  ciphers: "TLS_CHACHA20_POLY1305_SHA256:TLS_AES_256_GCM_SHA384"
+                }
+
         )
         let text = []
         for (let i of this.haskey(lobby, 'userAsset') || []) {
