@@ -11,7 +11,8 @@ class Main extends Template {
         this.delay = 500
         this.hint = {
             turnNum: '翻倍奖票数,默认10',
-            turnDouble: '翻倍奖票次数,默认1'
+            turnDouble: '翻倍奖票次数,默认1',
+            turnJump: "部分号翻倍一直失败,可以只做任务跳过翻倍,pin1|pin2"
         }
         this.model = 'shuffle'
         this.help = "3"
@@ -174,63 +175,68 @@ class Main extends Template {
                         console.log(a.data)
                     }
                 }
-                let turn = await this.algo.curl({
-                        'url': `https://api.m.jd.com/client.action`,
-                        'form': `functionId=turnHappyHome&body={"linkId":"CDv-TaCmVcD0sxAI_HE2RQ","turnNum":"10"}&t=1715954317613&appid=activities_platform&client=apple&clientVersion=13.2.2`,
-                        cookie,
-                        algo: {
-                            appId: '614f1'
-                        }
-                    }
-                )
-                if (this.haskey(turn, 'data.leftTime')) {
-                    console.log("剩余翻倍时间:", parseInt(turn.data.leftTime / 1000))
-                }
-                else if (this.haskey(turn, 'data.reachDayLimit')) {
-                    console.log("翻倍次数上限")
+                if (this.profile.turnJump && this.profile.turnJump.includes(this.userPin(cookie))) {
+                    console.log("该账号跳过翻倍")
                 }
                 else {
-                    let num = this.profile.turnNum || 10
-                    if (oldScore && num>oldScore) {
-                        num = oldScore
-                    }
-                    console.log("开始翻倍,使用奖票数量:", num)
-                    let count = this.profile.turnDouble || 1
-                    let ok = 1
-                    for (let _ = 1; _<=count; _++) {
-                        var turnNum = (_ == 1) ? num : "-1"
-                        let double = await this.algo.curl({
-                                'url': `https://api.m.jd.com/client.action`,
-                                'form': `functionId=turnHappyDouble&body={"linkId":"CDv-TaCmVcD0sxAI_HE2RQ","turnNum":"${turnNum}"}&t=1715954317613&appid=activities_platform&client=apple&clientVersion=13.2.2`,
-                                cookie,
-                                algo: {
-                                    appId: '614f1'
-                                }
+                    let turn = await this.algo.curl({
+                            'url': `https://api.m.jd.com/client.action`,
+                            'form': `functionId=turnHappyHome&body={"linkId":"CDv-TaCmVcD0sxAI_HE2RQ","turnNum":"10"}&t=1715954317613&appid=activities_platform&client=apple&clientVersion=13.2.2`,
+                            cookie,
+                            algo: {
+                                appId: '614f1'
                             }
-                        )
-                        console.log("翻倍中...", this.haskey(double, 'data.rewardValue'))
-                        if (this.haskey(double, 'data.rewardState', 3)) {
-                            console.log("翻倍失败...")
-                            ok = 0
-                            break
                         }
-                        else if (this.haskey(double, 'code', 220001)) {
-                            console.log("今日参与已达上限...")
-                            break
-                        }
-                        await this.wait(3000)
+                    )
+                    if (this.haskey(turn, 'data.leftTime')) {
+                        console.log("剩余翻倍时间:", parseInt(turn.data.leftTime / 1000))
                     }
-                    if (ok) {
-                        let rec = await this.algo.curl({
-                                'url': `https://api.m.jd.com/client.action`,
-                                'form': `functionId=turnHappyReceive&body={"linkId":"CDv-TaCmVcD0sxAI_HE2RQ"}&t=1715954317613&appid=activities_platform&client=apple&clientVersion=13.2.2`,
-                                cookie,
-                                algo: {
-                                    appId: '25fac'
+                    else if (this.haskey(turn, 'reachDayLimit')) {
+                        console.log("翻倍次数上限")
+                    }
+                    else {
+                        let num = this.profile.turnNum || 10
+                        if (oldScore && num>oldScore) {
+                            num = oldScore
+                        }
+                        console.log("开始翻倍,使用奖票数量:", num)
+                        let count = this.profile.turnDouble || 1
+                        let ok = 1
+                        for (let _ = 1; _<=count; _++) {
+                            var turnNum = (_ == 1) ? num : "-1"
+                            let double = await this.algo.curl({
+                                    'url': `https://api.m.jd.com/client.action`,
+                                    'form': `functionId=turnHappyDouble&body={"linkId":"CDv-TaCmVcD0sxAI_HE2RQ","turnNum":"${turnNum}"}&t=1715954317613&appid=activities_platform&client=apple&clientVersion=13.2.2`,
+                                    cookie,
+                                    algo: {
+                                        appId: '614f1'
+                                    }
                                 }
+                            )
+                            console.log("翻倍中...", this.haskey(double, 'data.rewardValue'))
+                            if (this.haskey(double, 'data.rewardState', 3)) {
+                                console.log("翻倍失败...")
+                                ok = 0
+                                break
                             }
-                        )
-                        console.log("结束翻倍...", this.haskey(rec, 'data.rewardValue'))
+                            else if (this.haskey(double, 'code', 220001)) {
+                                console.log("今日参与已达上限...")
+                                break
+                            }
+                            await this.wait(3000)
+                        }
+                        if (ok) {
+                            let rec = await this.algo.curl({
+                                    'url': `https://api.m.jd.com/client.action`,
+                                    'form': `functionId=turnHappyReceive&body={"linkId":"CDv-TaCmVcD0sxAI_HE2RQ"}&t=1715954317613&appid=activities_platform&client=apple&clientVersion=13.2.2`,
+                                    cookie,
+                                    algo: {
+                                        appId: '25fac'
+                                    }
+                                }
+                            )
+                            console.log("结束翻倍...", this.haskey(rec, 'data.rewardValue'))
+                        }
                     }
                 }
             }
