@@ -21,7 +21,7 @@ class Main extends Template {
 
     async prepare() {
         this.algo = new this.modules.jdAlgo({
-            version: "lastest",
+            version: "latest",
             type: "main",
             headers: {
                 referer: 'https://pro.m.jd.com/mall/active/3fcyrvLZALNPWCEDRvaZJVrzek8v/index.html',
