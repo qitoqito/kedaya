@@ -21,7 +21,7 @@ class Main extends Template {
         this.algo = new this.modules.jdAlgo({
             appId: "c57f6",
             type: 'main',
-            version: "4.7",
+            version: "4.8",
             refere: 'https://h5.m.jd.com/pb/015686010/Bc9WX7MpCW7nW9QjZ5N3fFeJXMH/index.html'
         })
         this._cc = 0
@@ -586,7 +586,7 @@ class Main extends Template {
         }
         // 等运行完其他任务再浇水10次,获取的水滴数才是正确的
         for (let i of this.haskey(taskList, 'data.result.taskList')) {
-            if (i.mainTitle.includes("浇水10次")) {
+            if (i.mainTitle.includes("浇水20次")) {
                 if (i.taskDoTimes != i.taskLimitTimes) {
                     console.log("正在运行:", i.mainTitle)
                     for (let _ of Array(i.taskLimitTimes - i.taskDoTimes)) {
