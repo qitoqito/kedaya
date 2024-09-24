@@ -21,7 +21,7 @@ class Main extends Template {
         this.algo = new this.modules.jdAlgo({
             appId: "c57f6",
             type: 'main',
-            version: "4.8",
+            version: "4.7",
             refere: 'https://h5.m.jd.com/pb/015686010/Bc9WX7MpCW7nW9QjZ5N3fFeJXMH/index.html'
         })
         this._cc = 0
@@ -685,7 +685,7 @@ class Main extends Template {
             }
             else {
                 console.log("剩余水滴:", bottleWater, '保留水滴数:', stock)
-                let count = parseInt((bottleWater - stock) / 20)
+                let count = parseInt((bottleWater - stock) / 10)
                 console.log("剩余可浇水次数:", count)
                 let waterError = 0
                 for (let _ of Array(count)) {
@@ -1043,4 +1043,3 @@ class Main extends Template {
 
 module
     .exports = Main;
-
