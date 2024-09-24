@@ -727,7 +727,7 @@ class Main extends Template {
                                     algo: {},
                                     cookie
                                 })
-                                let skus = board.data.result.farmTreeLevels[0].farmLevelTrees[0]
+                                let skus = board.data.result.farmTreeLevels[2].farmLevelTrees[0]
                                 console.log("正在种树,选择商品:", skus.skuName)
                                 let tree = await this.wget({
                                     fn: 'farm_plant_tree',
