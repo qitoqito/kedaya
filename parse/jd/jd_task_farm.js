@@ -560,7 +560,7 @@ cache=1                          # 缓存助力code
                     'url': `https://api.m.jd.com/client.action?functionId=initForFarm&body={"mpin":"","utm_campaign":"t_335139774","utm_medium":"appshare","shareCode":"${code.shareCode}","utm_term":"Wxfriends","utm_source":"iosapp","imageUrl":"","nickName":"${p.user}","version":19,"channel":2,"babelChannel":0}&appid=signed_mp&osVersion=iOS%2013.7&screen=375*667&networkType=true&timestamp=1662220836165&d_brand=iPhone&d_model=iPhone%206s%3CiPhone8%2C1%3E&wqDefault=true&client=ios&clientVersion=8.0.29`,
                     'cookie': p.cookie,
                     algo: {
-                        type: "wechat",
+                        type: "weixin",
                         appId: "235ec",
                     },
                     referer: "https://servicewechat.com/wx91d27dbf599dff74/672/page-frame.html",
