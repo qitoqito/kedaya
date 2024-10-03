@@ -9,7 +9,7 @@ class Main extends Template {
         this.verify = 1
         this.model = 'user'
         this.import = ['jdAlgo', 'fileCache']
-        this.delay = 500
+        this.delay = 2000
         this.hint = {
             token: "token1|token2"
         }
@@ -20,7 +20,7 @@ class Main extends Template {
         await this.cache.connect({file: `${this.dirname}/temp/jd_task_shopSign.json`})
         this.algo = new this.modules.jdAlgo({
             type: "main",
-            version: "4.7",
+            version: "latest",
             appId: '4da33'
         })
         let array = []
@@ -43,9 +43,10 @@ class Main extends Template {
         for (let i of this.unique(array)) {
             if (i.length == 32) {
                 try {
-                    var ss = await this.cache.get(i)
-                    if (ss) {
-                        var info = this.jsonParse(ss)
+                    var ss = await this.cache.get(i) || {}
+                    var info = this.jsonParse(ss)
+                    if (this.haskey(info, 'continuePrizeRuleList')) {
+                        this.shareCode.push(info)
                     }
                     else {
                         console.log("正在获取:", i)
@@ -56,24 +57,28 @@ class Main extends Template {
                         if (!this.haskey(s, 'data.id')) {
                             console.log("获取错误:", i)
                         }
-                        var info = {
-                            'activityId': s.data.id,
-                            'venderId': s.data.venderId,
-                            'token': i,
-                            continuePrizeRuleList: s.data.continuePrizeRuleList
-                        }
-                        let shopInfo = await this.algo.curl({
-                                'url': `https://api.m.jd.com/?functionId=lite_getShopHomeBaseInfo&body={"venderId":"${s.data.venderId}","source":"appshop"}&t=1646398923902&appid=jdlite-shop-app&client=H5`,
+                        else {
+                            var info = {
+                                'activityId': s.data.id,
+                                'venderId': s.data.venderId,
+                                'token': i,
+                                continuePrizeRuleList: s.data.continuePrizeRuleList
                             }
-                        )
-                        if (this.haskey(shopInfo, 'result.shopInfo.shopName')) {
-                            info.shopName = shopInfo.result.shopInfo.shopName
+                            let shopInfo = await this.algo.curl({
+                                    'url': `https://api.m.jd.com/`,
+                                    form: `functionId=whx_getMShopOutlineInfo&body={"venderId":"${s.data.venderId}","originReferer":"shopx","source":"m-shop"}&t=1727955137220&avifSupport=0&webpSupport=0&appid=wx_mini_app&clientVersion=11.0.0&client=wh5&uuid=08635116374331727444274533&loginType=11&area=&fp=c68b3c68639ae2d76f00dfb51e463e08f251bf09&x-api-eid-token=jdd01w4AJW3WEWJIK2JVHDEVNCEUOOF435MZ7XHM5J34FASC5FO6ESP46WE3GVA2M2U4NSY3HURCBUZP4QS7IHYFLNEFH5Z542NGUVUVRAZAVQYD3SBE7MD4ZHPQANBIRQCXUT32`,
+                                    referer: 'https://servicewechat.com/wx91d27dbf599dff74/765/page-frame.html'
+                                }
+                            )
+                            if (this.haskey(shopInfo, 'data.shopInfo.shopName')) {
+                                info.shopName = shopInfo.data.shopInfo.shopName
+                            }
+                            await this.cache.set(i, info, (s.data.endTime - this.timestamp) / 1000)
+                            await this.wait(1000)
+                            this.shareCode.push(info)
+                            this.plan.valid.push(i)
                         }
-                        await this.cache.set(i, info, (s.data.endTime - this.timestamp) / 1000)
-                        await this.wait(1000)
                     }
-                    this.shareCode.push(info)
-                    this.plan.valid.push(i)
                 } catch (e) {
                     this.plan.expire.push(i)
                 }
