@@ -17,8 +17,8 @@ class Main extends Template {
         this.algo = new this.modules.jdAlgo()
         this.algo.set({
             'appId': '60d61',
-            'type': 'wechat',
-            version: "4.7",
+            // 'type': 'weixin',
+            version: "latest",
             headers: {
                 'referer': "https://servicewechat.com/wx91d27dbf599dff74/654/page-frame.html",
                 "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 11_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15F79 MicroMessenger/8.0.15(0x18000f2e) NetType/4G Language/zh_CN"
