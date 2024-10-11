@@ -16,8 +16,8 @@ class Main extends Template {
 
     async prepare() {
         this.algo = new this.modules.jdAlgo({
-            version: "4.7",
-            type: 'main'
+            version: "latest",
+
         })
         try {
             let txt = this.modules.fs.readFileSync(`${this.dirname}/invite/jd_task_superMarket.json`).toString()
@@ -30,16 +30,14 @@ class Main extends Template {
         let cookie = p.cookie;
         let data = {}
         for (let o of Array(3)) {
-            var html = await this.curl({
+            var html = await this.algo.curl({
                     'url': `https://pro.m.jd.com/mall/active/3nh7HzSjYemGqAHSbktTrf8rrH8M/index.html?stath=20&navh=44&babelChannel=ttt1&tttparams=zZ1qguleyJnTGF0IjozOS45NjEwNTQsInVuX2FyZWEiOiIxXzI4MDBfNTU4MzhfMCIsImRMYXQiOiIiLCJwcnN0YXRlIjoiMCIsImFkZHJlc3NJZCI6IjUzODg3NDg3NyIsImxhdCI6IiIsInBvc0xhdCI6MzkuOTYxMDU0LCJwb3NMbmciOjExNi4zMjIwNjEsImdwc19hcmVhIjoiMF8wXzBfMCIsImxuZyI6IiIsInVlbXBzIjoiMC0wLTAiLCJnTG5nIjoxMTYuMzIyMDYxLCJtb2RlbCI6ImlQaG9uZTEzLDMiLCJkTG5nIjoiIn70=`,
                     cookie,
                     referer: 'https://pro.m.jd.com/mall/active/3nh7HzSjYemGqAHSbktTrf8rrH8M/index.html?stath=20&navh=44&babelChannel=ttt1&tttparams=zZ1qguleyJnTGF0IjozOS45NjEwNTQsInVuX2FyZWEiOiIxXzI4MDBfNTU4MzhfMCIsImRMYXQiOiIiLCJwcnN0YXRlIjoiMCIsImFkZHJlc3NJZCI6IjUzODg3NDg3NyIsImxhdCI6IiIsInBvc0xhdCI6MzkuOTYxMDU0LCJwb3NMbmciOjExNi4zMjIwNjEsImdwc19hcmVhIjoiMF8wXzBfMCIsImxuZyI6IiIsInVlbXBzIjoiMC0wLTAiLCJnTG5nIjoxMTYuMzIyMDYxLCJtb2RlbCI6ImlQaG9uZTEzLDMiLCJkTG5nIjoiIn70='
                 }
             )
-
             try {
-                data = this.jsonParse(this.match([/__react_data__\s*=\s*(.*?)\s*;\n+/,/__api_data__\s*=\s*(.*?)\s*;\s*\n*window/], html))
-
+                data = this.jsonParse(this.match([ /__api_data__\s*=\s*(.*?)\s*;\s*\n*window/,/__react_data__\s*=\s*(.*?)\s*;\n+/,], html))
             } catch (e) {
                 await this.wait(500)
             }
@@ -68,8 +66,8 @@ class Main extends Template {
                 console.log(this.haskey(sign, 'message') || sign)
             }
         }
-        if (this.haskey(data,'activityData.floorList')) {
-            data=data.activityData 
+        if (this.haskey(data, 'activityData.floorList')) {
+            data = data.activityData
         }
         for (let ii in data) {
             if (ii == 'floorList') {
@@ -144,7 +142,7 @@ class Main extends Template {
                                                     console.log(this.haskey(d, 'data.msg') || this.haskey(d, 'message'))
                                                     await this.wait((i.ext.waitDuration || 0) * 1000 + 500)
                                                 }
-                                                let s = await this.curl({
+                                                let s = await this.algo.curl({
                                                         'url': `https://api.m.jd.com/client.action?functionId=atop_channel_complete_task`,
                                                         'form': `appid=jd-super-market&body=${this.dumps(
                                                             {
@@ -194,20 +192,20 @@ class Main extends Template {
         await this.algo.set({
             version: "3.1"
         })
-        let temp = await this.curl({
+        let temp = await this.algo.curl({
                 'url': `https://api.m.jd.com/api/meta2GetRoomListByTemplateId`,
                 'form': `appid=commonActivity&functionId=meta2GetRoomListByTemplateId&body={"templateId":"793888596"}&t=1713402796644`,
                 cookie
             }
         )
         // console.log(temp)
-        let login = await this.curl({
+        let login = await this.algo.curl({
                 'url': `https://api.m.jd.com/api/meta2LoginGame`,
                 'form': `appid=commonActivity&functionId=meta2LoginGame&body={"channel":"2","roomId":"125"}&t=1713402797289`,
                 cookie
             }
         )
-        let getToken = await this.curl({
+        let getToken = await this.algo.curl({
                 'url': `https://api.m.jd.com/api/arvr_getRequestToken`,
                 'form': `appid=commonActivity&functionId=arvr_getRequestToken&body=${this.body({
                     "rewardType": 6,
@@ -219,7 +217,7 @@ class Main extends Template {
         )
         let accessToken = this.haskey(getToken, 'data')
         // 奖项目-正式
-        let info3 = await this.curl({
+        let info3 = await this.algo.curl({
                 'url': `https://api.m.jd.com/api/arvr_queryInteractiveInfoNew`,
                 'form': `appid=commonActivity&functionId=arvr_queryInteractiveInfoNew&body=${this.body({
                     "projectId": "2177780",
@@ -260,7 +258,7 @@ class Main extends Template {
             }
         }
         // 东东超市-体力任务
-        let info2 = await this.curl({
+        let info2 = await this.algo.curl({
                 'url': `https://api.m.jd.com/api/arvr_queryInteractiveInfoNew`,
                 'form': `appid=commonActivity&functionId=arvr_queryInteractiveInfoNew&body=${this.body({
                     "projectId": "1753589",
@@ -482,7 +480,7 @@ class Main extends Template {
         var score = this.haskey(ri, 'scoreInfoMap.usable') || 0
         console.log("当前体力:", score)
         // 东东超市-汪贝任务
-        let info1 = await this.curl({
+        let info1 = await this.algo.curl({
                 'url': `https://api.m.jd.com/api/arvr_queryInteractiveInfoNew`,
                 'form': `appid=commonActivity&functionId=arvr_queryInteractiveInfoNew&body=${this.body({
                     "projectId": "1764671",
