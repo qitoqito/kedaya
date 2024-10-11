@@ -21,7 +21,7 @@ class Main extends Template {
 
     async prepare() {
         this.algo = new this.modules.jdAlgo({
-            version: "4.8",
+            version: "latest",
             type: "main",
             headers: {
                 referer: 'https://pro.m.jd.com/mall/active/3fcyrvLZALNPWCEDRvaZJVrzek8v/index.html',
@@ -191,7 +191,7 @@ class Main extends Template {
                     if (this.haskey(turn, 'data.leftTime')) {
                         console.log("剩余翻倍时间:", parseInt(turn.data.leftTime / 1000))
                     }
-                    else if (this.haskey(turn, 'reachDayLimit')) {
+                    else if (this.haskey(turn, 'data.reachDayLimit')) {
                         console.log("翻倍次数上限")
                     }
                     else {
