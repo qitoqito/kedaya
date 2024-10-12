@@ -46,10 +46,11 @@ class Main extends Template {
             for (let i of Array(3)) {
                 var home = await this.algo.curl({
                         'url': `https://api.m.jd.com/client.action`,
-                        'form': `functionId=wanyiwan_home&appid=signed_wh5&body={"outsite":0,"firstCall":1,"version":3,"lbsSwitch":false,"babelChannel":"ttt4"}&rfs=0000&openudid=674ce0d97511f5ed054c3dc0af093b3b245ab68d&screen=390*844&build=169480&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=13.2.2`,
+                        'form': `functionId=wanyiwan_home&appid=signed_wh5&body={"outsite":0,"firstCall":0,"version":7,"babelChannel":"ttt10"}&rfs=0000&openudid=674ce0d97511f5ed054c3dc0af093b3b245ab68d&screen=390*844&build=169480&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=13.2.2`,
                         cookie,
                         algo: {
-                            appId: 'c81ad'
+                            appId: 'c81ad',
+                            // algoTk:1
                         }
                     }
                 )
@@ -108,17 +109,70 @@ class Main extends Template {
                 console.log("签到中...", this.haskey(sign, 'data.result'))
             }
             if (status>0) {
-                for (let i of result.taskBoard) {
-                    if (i.title.includes('下单')) {
+                let taskList = await this.algo.curl({
+                        'url': `https://api.m.jd.com/client.action`,
+                        'form': `functionId=wanyiwan_task_list&appid=signed_wh5&body={"showShortcut":true,"version":7,"lbsSwitch":true}&rfs=0000`,
+                        cookie,
                     }
-                    else if (i.title.includes('助力')) {
-                        if (this.cookies.help.includes(p.cookie) && this.haskey(i, 'taskDetail.0.itemId')) {
-                            this.code.push({
-                                user: this.userPin(cookie),
-                                itemId: i.taskDetail[0].itemId
-                            })
+                )
+                for (let i of this.haskey(taskList, 'data.result.taskList')) {
+                    if (i.status == 3) {
+                        console.log("任务完成:", i.title)
+                    }
+                    else {
+                        if (i.title.includes('下单')) {
                         }
-                        for (let _ of Array(i.finishTimes)) {
+                        else if (i.title.includes('助力')) {
+                            if (this.cookies.help.includes(p.cookie) && this.haskey(i, 'taskDetail.0.itemId')) {
+                                this.code.push({
+                                    user: this.userPin(cookie),
+                                    itemId: i.taskDetail[0].itemId
+                                })
+                            }
+                            for (let _ of Array(i.finishTimes)) {
+                                let a = await this.algo.curl({
+                                        'url': `https://api.m.jd.com/client.action`,
+                                        'form': `functionId=wanyiwan_task_receive_award&appid=signed_wh5&body={"taskType":${i.taskType},"assignmentId":"${i.encryptAssignmentId}","version":1}&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168960&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=13.2.2`,
+                                        cookie,
+                                        algo: {
+                                            appId: 'd12dd'
+                                        },
+                                    }
+                                )
+                                if (this.haskey(a, 'data.bizCode', -7004)) {
+                                    break
+                                }
+                                else {
+                                    console.log("助力奖励:", this.haskey(a, 'data.result') || a)
+                                    await this.wait(1000)
+                                }
+                            }
+                        }
+                        else {
+                            console.log("正在运行:", i.title)
+                            let d = await this.algo.curl({
+                                    'url': `https://api.m.jd.com/client.action`,
+                                    'form': `functionId=wanyiwan_do_task&appid=signed_wh5&body={"itemId":"${this.haskey(i, 'taskDetail.0.itemId') || 0}","taskType":${i.taskType},"assignmentId":"${i.encryptAssignmentId}","actionType":1,"version":1}&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168960&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=13.2.2`,
+                                    cookie,
+                                    algo: {
+                                        appId: '89db2'
+                                    }
+                                }
+                            )
+                            // console.log(d.data)
+                            if (i.limitTime) {
+                                await this.wait(i.limitTime * 1000)
+                            }
+                            let r = await this.algo.curl({
+                                    'url': `https://api.m.jd.com/client.action`,
+                                    'form': `functionId=wanyiwan_do_task&appid=signed_wh5&body={"itemId":"${this.haskey(i, 'taskDetail.0.itemId') || 0}","taskType":${i.taskType},"assignmentId":"${i.encryptAssignmentId}","actionType":0,"version":1}&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168858&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=13.2.2`,
+                                    cookie,
+                                    algo: {
+                                        appId: '89db2'
+                                    }
+                                }
+                            )
+                            // console.log(r.data)
                             let a = await this.algo.curl({
                                     'url': `https://api.m.jd.com/client.action`,
                                     'form': `functionId=wanyiwan_task_receive_award&appid=signed_wh5&body={"taskType":${i.taskType},"assignmentId":"${i.encryptAssignmentId}","version":1}&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168960&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=13.2.2`,
@@ -126,53 +180,11 @@ class Main extends Template {
                                     algo: {
                                         appId: 'd12dd'
                                     },
+                                    // referer: 'https://pro.m.jd.com/mall/active/3fcyrvLZALNPWCEDRvaZJVrzek8v/index.html'
                                 }
                             )
-                            if (this.haskey(a, 'data.bizCode', -7004)) {
-                                break
-                            }
-                            else {
-                                console.log("助力奖励:", this.haskey(a, 'data.result') || a)
-                                await this.wait(1000)
-                            }
+                            console.log(a.data)
                         }
-                    }
-                    else {
-                        console.log("正在运行:", i.title)
-                        let d = await this.algo.curl({
-                                'url': `https://api.m.jd.com/client.action`,
-                                'form': `functionId=wanyiwan_do_task&appid=signed_wh5&body={"itemId":"${this.haskey(i, 'taskDetail.0.itemId') || 0}","taskType":${i.taskType},"assignmentId":"${i.encryptAssignmentId}","actionType":1,"version":1}&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168960&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=13.2.2`,
-                                cookie,
-                                algo: {
-                                    appId: '89db2'
-                                }
-                            }
-                        )
-                        // console.log(d.data)
-                        if (i.limitTime) {
-                            await this.wait(i.limitTime * 1000)
-                        }
-                        let r = await this.algo.curl({
-                                'url': `https://api.m.jd.com/client.action`,
-                                'form': `functionId=wanyiwan_do_task&appid=signed_wh5&body={"itemId":"${this.haskey(i, 'taskDetail.0.itemId') || 0}","taskType":${i.taskType},"assignmentId":"${i.encryptAssignmentId}","actionType":0,"version":1}&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168858&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=13.2.2`,
-                                cookie,
-                                algo: {
-                                    appId: '89db2'
-                                }
-                            }
-                        )
-                        // console.log(r.data)
-                        let a = await this.algo.curl({
-                                'url': `https://api.m.jd.com/client.action`,
-                                'form': `functionId=wanyiwan_task_receive_award&appid=signed_wh5&body={"taskType":${i.taskType},"assignmentId":"${i.encryptAssignmentId}","version":1}&rfs=0000&openudid=de21c6604748f97dd3977153e51a47f4efdb9a47&screen=390*844&build=168960&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=13.2.2`,
-                                cookie,
-                                algo: {
-                                    appId: 'd12dd'
-                                },
-                                // referer: 'https://pro.m.jd.com/mall/active/3fcyrvLZALNPWCEDRvaZJVrzek8v/index.html'
-                            }
-                        )
-                        console.log(a.data)
                     }
                 }
                 if (this.profile.turnJump && this.profile.turnJump.includes(this.userPin(cookie))) {
@@ -273,7 +285,7 @@ class Main extends Template {
         for (let i of Array(3)) {
             var home = await this.algo.curl({
                     'url': `https://api.m.jd.com/client.action`,
-                    'form': `functionId=wanyiwan_home&appid=signed_wh5&body={"outsite":0,"firstCall":1,"version":3,"lbsSwitch":false,"babelChannel":"ttt4"}&rfs=0000&openudid=674ce0d97511f5ed054c3dc0af093b3b245ab68d&screen=390*844&build=169480&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=13.2.2`,
+                    'form': `functionId=wanyiwan_home&appid=signed_wh5&body={"outsite":0,"firstCall":0,"version":7,"babelChannel":"ttt10"}&rfs=0000&openudid=674ce0d97511f5ed054c3dc0af093b3b245ab68d&screen=390*844&build=169480&osVersion=15.1.1&networkType=wifi&d_brand=iPhone&d_model=iPhone13%2C3&client=apple&clientVersion=13.2.2`,
                     cookie,
                     algo: {
                         appId: 'c81ad'
