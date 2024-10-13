@@ -1,4 +1,5 @@
 module.exports = {
+    algoVersion: '4.8',
     globalSalt: 2876,
     hdIds: "h5-live|redrain-2021|wh5|SecKill2020|content_ecology|u|u_hongbao|babelh5|publicUseApi|newtry",
     keywords: ['model', 'task', 'thread', 'help', 'exit', 'limit', 'except', 'reward', 'loop', 'interval', 'cron', 'expand', 'custom', 'turn', 'endTime', 'send', 'work', 'msgNum', 'msgTotal', 'msgExcept', 'msgWork', 'count', 'proxy', 'timeout', 'skip', 'aid', 'hideCode', 'timer', 'delay', 'urlProxy', 'proxyUrl', 'proxyInterval', 'proxyProtocol', 'proxyVerify', 'proxyRetry'],
@@ -8,7 +9,7 @@ module.exports = {
         'baidu': /pin=([^;]+)/,
         'smzdm': /pin=([^;]+)/,
     },
-    communal: ['options', 'curl', 'jsonParse', 'uuid', 'response', 'location', 'dumps', 'loads', 'match', 'matchAll', 'md5', 'unique', 'rand', 'random', 'compact', 'column', 'wait', 'query', 'sha1', 'md5', 'sha256', 'hmacsha256', 'query', 'haskey', 'type', 'parseIni', 'redisCli', 'fileCache', 'userAgents', 'userName', 'userPin', 'userDict', 'userRegular', 'urlProxy', 'proxyRow', 'proxyList', 'delay', 'proxy', 'clientUa', 'QITOQITO_JDSIGN', 'JD_SIGN_API', 'JD_SIGN_KRAPI', 'procedure', 'dirname'],
+    communal: ['options', 'curl', 'jsonParse', 'uuid', 'response', 'location', 'dumps', 'loads', 'match', 'matchAll', 'md5', 'unique', 'rand', 'random', 'compact', 'column', 'wait', 'query', 'sha1', 'md5', 'sha256', 'hmacsha256', 'query', 'haskey', 'type', 'parseIni', 'redisCli', 'fileCache', 'userAgents', 'userName', 'userPin', 'userDict', 'userRegular', 'urlProxy', 'proxyRow', 'proxyList', 'delay', 'proxy', 'clientUa', 'QITOQITO_JDSIGN', 'JD_SIGN_API', 'JD_SIGN_KRAPI', 'procedure', 'dirname', 'algoVersion'],
     timerRegular: {
         jd: {
             wait: 120,
@@ -22,6 +23,6 @@ module.exports = {
         }
     },
     verifyUrl: 'https://api.m.jd.com/client.action?functionId=queryMaterialProducts&client=wh5',
-    unionId: 'kbDf60q',
-    unionShareId: ['FLp5i']
+    unionId: 'CruxAjw',
+    unionShareId: ['l4sgu', 'l4uC5']
 }
