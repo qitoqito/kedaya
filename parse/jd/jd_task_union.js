@@ -8,6 +8,7 @@ class Main extends Template {
         this.help = '3'
         this.import = ['jdAlgo', 'logBill']
         this.delay = 500
+        this.jdJdc = 123
         this.hint = {
             shareUrl: "分享链接"
         }
@@ -16,10 +17,10 @@ class Main extends Template {
     async prepare() {
         this.algo = new this.modules.jdAlgo({
             referer: 'https://pro.m.jd.com/mall/active/3Rztcv2tMwdpFqWiqaAUzBAToowC/index.html',
-            version: "4.7"
+            version: "latest"
         })
         try {
-            this.assert(0, "双十一再见...")
+            // this.assert(0, "双十一再见...")
             let cookie = ''
             let url = this.profile.shareUrl || `https://u.jd.com/${this.unionId}`
             let jda = await this.curl({
@@ -55,7 +56,7 @@ class Main extends Template {
             }
             for (let i of this.cookies.help) {
                 let shareUnion = await this.algo.curl({
-                        'url': `https://api.m.jd.com/api?functionId=shareUnionCoupon&appid=u_hongbao&_=1716943673297&loginType=2&body={"unionActId":"${unionActId}","actId":"${actId}","platform":4,"unionShareId":"","d":"${d}","supportPic":2}&client=apple&clientVersion=12.3.1&osVersion=15.1.1&screen=390*844&d_brand=iPhone&d_model=iPhone&lang=zh-CN&networkType=wifi&openudid=`,
+                        'url': `https://api.m.jd.com/api?functionId=shareUnionCoupon&appid=u_hongbao&_=1716943673297&loginType=2&body={"unionActId":"${unionActId}","actId":"${actId}","platform":4,"unionShareId":"","d":"${d}","supportPic":2}&client=apple&clientVersion=13.2.8&osVersion=15.1.1&screen=390*844&d_brand=iPhone&d_model=iPhone&lang=zh-CN&networkType=wifi&openudid=`,
                         cookie: `${i};${cookie}`,
                         appId: 'c10dc'
                     }
@@ -163,7 +164,7 @@ class Main extends Template {
             }
         }
         let qry = await this.algo.curl({
-                'url': `https://api.m.jd.com/api?functionId=queryFullGroupInfoMap&appid=u_hongbao&_=1716946027013&loginType=2&body={"actId":"${this.dict.actId}","unionActId":"${this.dict.unionActId}","platform":4,"d":"${this.dict.d}","taskType":1,"prstate":0}&client=apple&clientVersion=12.3.1&osVersion=15.1.1&screen=390*844&d_brand=iPhone&d_model=iPhone&lang=zh-CN&networkType=wifi&openudid=&aid=&oaid=`,
+                'url': `https://api.m.jd.com/api?functionId=queryFullGroupInfoMap&appid=u_hongbao&_=1716946027013&loginType=2&body={"actId":"${this.dict.actId}","unionActId":"${this.dict.unionActId}","platform":4,"d":"${this.dict.d}","taskType":1,"prstate":0}&client=apple&clientVersion=13.2.8&osVersion=15.1.1&screen=390*844&d_brand=iPhone&d_model=iPhone&lang=zh-CN&networkType=wifi&openudid=&aid=&oaid=`,
                 cookie,
                 algo: {appId: '7b74b'}
             }
@@ -175,7 +176,7 @@ class Main extends Template {
                     if (this.haskey(i, 'adInfo.target_url')) {
                         let apStart = await this.algo.curl({
                                 'url': `https://api.m.jd.com/api`,
-                                'form': `functionId=apStartTiming&appid=u_hongbao&_=1716946560092&loginType=2&body={"timerId":"${i.componentId}","uniqueId":"${i.taskId}","jumpUrl":"${encodeURIComponent(i.adInfo.target_url)}","jumpType":1}&client=apple&clientVersion=12.3.1&osVersion=15.1.1&screen=390*844&d_brand=iPhone&d_model=iPhone&lang=zh-CN&networkType=wifi&openudid=`,
+                                'form': `functionId=apStartTiming&appid=u_hongbao&_=1716946560092&loginType=2&body={"timerId":"${i.componentId}","uniqueId":"${i.taskId}","jumpUrl":"${encodeURIComponent(i.adInfo.target_url)}","jumpType":1}&client=apple&clientVersion=13.2.8&osVersion=15.1.1&screen=390*844&d_brand=iPhone&d_model=iPhone&lang=zh-CN&networkType=wifi&openudid=`,
                                 cookie,
                                 algo: {
                                     appId: '0d977'
@@ -187,14 +188,14 @@ class Main extends Template {
                     }
                     else if (i.info.includes("分享")) {
                         let shareUnion = await this.algo.curl({
-                                'url': `https://api.m.jd.com/api?functionId=shareUnionCoupon&appid=u_hongbao&_=1716943673297&loginType=2&body={"unionActId":"${this.dict.unionActId}","actId":"${this.dict.actId}","platform":4,"unionShareId":"","d":"${this.dict.d}","supportPic":2,"taskId":"${i.taskId}"}&client=apple&clientVersion=12.3.1&osVersion=15.1.1&screen=390*844&d_brand=iPhone&d_model=iPhone&lang=zh-CN&networkType=wifi&openudid=`,
+                                'url': `https://api.m.jd.com/api?functionId=shareUnionCoupon&appid=u_hongbao&_=1716943673297&loginType=2&body={"unionActId":"${this.dict.unionActId}","actId":"${this.dict.actId}","platform":4,"unionShareId":"","d":"${this.dict.d}","supportPic":2,"taskId":"${i.taskId}"}&client=apple&clientVersion=13.2.8&osVersion=15.1.1&screen=390*844&d_brand=iPhone&d_model=iPhone&lang=zh-CN&networkType=wifi&openudid=`,
                                 cookie,
                                 appId: 'c10dc'
                             }
                         )
                         // console.log(shareUnion)/
                         let share = await this.curl({
-                                'url': `https://api.m.jd.com/api?functionId=unionShare&appid=u_hongbao&_=1716949639549&loginType=2&body={"funName":"share","param":{"shareReq":[{"shareType":5,"plainUrl":"${this.haskey(shareUnion, 'data.shareUrl')}","command":1}]}}&client=apple&clientVersion=12.3.1&osVersion=15.1.1&screen=390*844&d_brand=iPhone&d_model=iPhone&lang=zh-CN&networkType=wifi`,
+                                'url': `https://api.m.jd.com/api?functionId=unionShare&appid=u_hongbao&_=1716949639549&loginType=2&body={"funName":"share","param":{"shareReq":[{"shareType":5,"plainUrl":"${this.haskey(shareUnion, 'data.shareUrl')}","command":1}]}}&client=apple&clientVersion=13.2.8&osVersion=15.1.1&screen=390*844&d_brand=iPhone&d_model=iPhone&lang=zh-CN&networkType=wifi`,
                                 // 'form':``,
                                 cookie, algo: {
                                     appId: '18813'
@@ -281,7 +282,7 @@ class Main extends Template {
             }
         }
         qry = await this.algo.curl({
-                'url': `https://api.m.jd.com/api?functionId=queryFullGroupInfoMap&appid=u_hongbao&_=1716946027013&loginType=2&body={"actId":"${this.dict.actId}","unionActId":"${this.dict.unionActId}","platform":4,"d":"${this.dict.d}","taskType":1,"prstate":0}&client=apple&clientVersion=12.3.1&osVersion=15.1.1&screen=390*844&d_brand=iPhone&d_model=iPhone&lang=zh-CN&networkType=wifi&openudid=&aid=&oaid=`,
+                'url': `https://api.m.jd.com/api?functionId=queryFullGroupInfoMap&appid=u_hongbao&_=1716946027013&loginType=2&body={"actId":"${this.dict.actId}","unionActId":"${this.dict.unionActId}","platform":4,"d":"${this.dict.d}","taskType":1,"prstate":0}&client=apple&clientVersion=13.2.8&osVersion=15.1.1&screen=390*844&d_brand=iPhone&d_model=iPhone&lang=zh-CN&networkType=wifi&openudid=&aid=&oaid=`,
                 cookie,
                 algo: {appId: '7b74b'}
             }
