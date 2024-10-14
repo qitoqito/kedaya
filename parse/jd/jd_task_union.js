@@ -6,14 +6,16 @@ class Main extends Template {
         this.title = "京东京享红包"
         this.cron = `${this.rand(0, 59)} ${this.rand(0, 22)} * * *`
         this.help = '3'
-        this.import = ['jdAlgo', 'logBill']
+        this.import = ['jdAlgo', 'logBill', 'jdSign']
         this.delay = 500
+        this.jdJdc = '123'
         this.hint = {
             shareUrl: "分享链接"
         }
     }
 
     async prepare() {
+        this.sign = new this.modules.jdSign()
         this.algo = new this.modules.jdAlgo({
             referer: 'https://pro.m.jd.com/mall/active/3Rztcv2tMwdpFqWiqaAUzBAToowC/index.html',
             version: "latest"
@@ -183,7 +185,26 @@ class Main extends Template {
                             }
                         )
                         console.log(this.haskey(apStart, 'errMsg') || apStart)
-                        // await this.wait(1000)
+                        if (this.match(/\d+秒/, i.info)) {
+                            let ts = (this.match(/(\d+)秒/, i.info))
+                            try {
+                                let z = await this.sign.jdCurl({
+                                    url: 'https://api.m.jd.com/client.action',
+                                    form: `functionId=apResetTiming&body={"timerId":"${i.componentId}","uniqueId":"${i.taskId}"}&build=169498&client=apple&clientVersion=13.2.8&d_brand=apple&d_model=iPhone13%2C3&ef=1`,
+                                    cookie
+                                })
+                                console.log("等待", ts)
+                                await this.wait(parseInt(ts) * 1000)
+                                let y = await this.sign.jdCurl({
+                                    url: 'https://api.m.jd.com/client.action',
+                                    form: `functionId=apCheckTimingEnd&body={"timerId":"${i.componentId}","uniqueId":"${i.taskId}"}&build=169498&client=apple&clientVersion=13.2.8&d_brand=apple&d_model=iPhone13%2C3&ef=1`,
+                                    cookie
+                                })
+                            } catch (e) {
+                            }
+                            // console.log(y)
+                        }
+                        await this.wait(1000)
                     }
                     else if (i.info.includes("分享")) {
                         let shareUnion = await this.algo.curl({
