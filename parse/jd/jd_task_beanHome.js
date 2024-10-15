@@ -12,21 +12,9 @@ class Main extends Template {
 
     async prepare() {
         this.algo = new this.modules.jdAlgo({
-            version: '4.7',
+            version: 'latest',
             type: 'main'
         })
-        // let feeds = await this.algo.curl({
-        //         'url': `https://api.m.jd.com/client.action?functionId=homeFeedsList&body={"page":1,"appid":"fd4bb","needSecurity":true,"bizId":"active","pageId":"JingDou_SceneHome"}&appid=signed_wh5&client=apple&clientVersion=11.8.2&networkType=wifi&osVersion=11.4&screen=320*504&uuid=434e858e755c9b1ec6e6d6abc0348d9b6d985300&openudid=434e858e755c9b1ec6e6d6abc0348d9b6d985300&d_model=iPhone8,4`,
-        //         algo: {
-        //             appId: "fd4bb",
-        //             type: '4.7'
-        //         }
-        //     }
-        // )
-        // this.feeds = []
-        // if (this.haskey(feeds, 'data.feedsList')) {
-        //     this.feeds = (this.column(feeds.data.feedsList, 'skuId'))
-        // }
     }
 
     async main(p) {
@@ -270,6 +258,7 @@ class Main extends Template {
                 },
             }
         )
+     
         if (this.haskey(signBeanAct, 'data.dailyAward.beanAward.beanCount')) {
             console.log(`领京豆: ${this.haskey(signBeanAct, 'data.dailyAward.beanAward.beanCount')}`)
             gifts.push(this.haskey(signBeanAct, 'data.dailyAward.beanAward.beanCount'))
