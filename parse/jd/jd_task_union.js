@@ -10,8 +10,10 @@ class Main extends Template {
         this.delay = 500
         this.jdJdc = '123'
         this.hint = {
-            shareUrl: "分享链接"
+            shareUrl: "分享链接",
+            known: '风控较严,订单有异常的风险,如订单一直异常,请停用此脚本'
         }
+        this.readme = "风控较严,算法经常变动,锁佣需谨慎,如还要使用此脚本请添加\n[jd_task_union]\nknown=1"
     }
 
     async uuaa() {
@@ -38,6 +40,10 @@ class Main extends Template {
     }
 
     async prepare() {
+        if (!this.profile.known) {
+            this.jump = 1
+            return
+        }
         var {ua, h5st} = await this.uuaa()
         this.sign = new this.modules.jdSign()
         this.algo = new this.modules.jdAlgo({
