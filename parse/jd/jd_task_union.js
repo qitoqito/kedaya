@@ -128,7 +128,7 @@ class Main extends Template {
             }
         }
         var {ua, h5st} = await this.uuaa()
-        await this.shareId() 
+        await this.shareId()
         for (let unionShareId of this.code.slice(0, 4)) {
             cookie = p.cookie
             if (this.dict.d) {
@@ -177,26 +177,26 @@ class Main extends Template {
                 referer: linkUrl,
                 ua
             })
-            let showCoupon = await this.algo.curl({
+            // let showCoupon = await this.algo.curl({
+            //         url: `https://api.m.jd.com/api`,
+            //         form: `functionId=showCoupon&appid=u_hongbao&_=1729029312285&loginType=2&body={"platform":5,"unionActId":"${unionActId}","actId":"${actId}","d":"${d}","unionShareId":"${unionShareId}","type":1,"qdPageId":"MO-J2011-1","mdClickId":"jxhongbao_ck","actType":1}&client=apple&clientVersion=1.1.0&osVersion=iOS&screen=390*844&d_brand=iPhone&d_model=iPhone&lang=zh-CN&networkType=&openudid=&uuid=1729028921991924762424&aid=&oaid=&ext={"idfa":""}`,
+            //         cookie,
+            //         algo: {
+            //             appId: 'c822a'
+            //         },
+            //     }
+            // )
+            let getCoupons = await this.algo.curl({
                     url: `https://api.m.jd.com/api`,
-                    form: `functionId=showCoupon&appid=u_hongbao&_=1729029312285&loginType=2&body={"platform":5,"unionActId":"${unionActId}","actId":"${actId}","d":"${d}","unionShareId":"${unionShareId}","type":1,"qdPageId":"MO-J2011-1","mdClickId":"jxhongbao_ck","actType":1}&client=apple&clientVersion=1.1.0&osVersion=iOS&screen=390*844&d_brand=iPhone&d_model=iPhone&lang=zh-CN&networkType=&openudid=&uuid=1729028921991924762424&aid=&oaid=&ext={"idfa":""}`,
+                    form: `functionId=getCoupons&appid=u_hongbao&_=1716912812082&loginType=2&body={"platform":5,"unionActId":"${unionActId}","actId":"${actId}","d":"${d}","unionShareId":"${unionShareId}","type":1,"qdPageId":"MO-J2011-1","mdClickId":"jxhongbao_ck","actType":1}&client=apple&clientVersion=1.1.0&osVersion=iOS&screen=390*844&d_brand=iPhone&d_model=iPhone&lang=zh-CN&networkType=&openudid=&uuid=17165464753211715186324&aid=&oaid=&ext={"idfa":""}&x-api-eid-token=`,
                     cookie,
                     algo: {
                         appId: 'c822a'
                     },
                 }
             )
-            let msg = this.haskey(showCoupon, 'msg')
+            let msg = this.haskey(getCoupons, 'msg')
             if (msg.includes('领取成功')) {
-                let getCoupons = await this.algo.curl({
-                        url: `https://api.m.jd.com/api`,
-                        form: `functionId=getCoupons&appid=u_hongbao&_=1716912812082&loginType=2&body={"platform":5,"unionActId":"${unionActId}","actId":"${actId}","d":"${d}","unionShareId":"${unionShareId}","type":1,"qdPageId":"MO-J2011-1","mdClickId":"jxhongbao_ck","actType":1}&client=apple&clientVersion=1.1.0&osVersion=iOS&screen=390*844&d_brand=iPhone&d_model=iPhone&lang=zh-CN&networkType=&openudid=&uuid=17165464753211715186324&aid=&oaid=&ext={"idfa":""}&x-api-eid-token=`,
-                        cookie,
-                        algo: {
-                            appId: 'c822a'
-                        },
-                    }
-                )
                 gift.call(this, getCoupons)
             }
             else {
