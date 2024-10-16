@@ -14,7 +14,7 @@ class Main extends Template {
         }
     }
 
-    async hashCode() {
+    async uuaa() {
         var ua = this.random([
             'Mozilla/5.0 (iPhone; CPU iPhone OS 15_1_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.33(0x18002129) NetType/WIFI Language/zh_CN',
             'Mozilla/5.0 (iPhone; CPU iPhone OS 17_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.49(0x18003127) NetType/WIFI Language/zh_CN',
@@ -38,7 +38,7 @@ class Main extends Template {
     }
 
     async prepare() {
-        var {ua, h5st} = await this.hashCode()
+        var {ua, h5st} = await this.uuaa()
         this.sign = new this.modules.jdSign()
         this.algo = new this.modules.jdAlgo({
             version: "latest",
@@ -71,7 +71,6 @@ class Main extends Template {
                 }
             )
             cookie = `${cookie};${scheme.cookie}`
-            // let linkUrl = this.match(/"url":"([^\"]+)"/, decodeURIComponent(scheme.location))
             let linkUrl = scheme.location
             await this.curl({
                 url: linkUrl,
@@ -128,7 +127,8 @@ class Main extends Template {
                 }
             }
         }
-        var {ua, h5st} = await this.hashCode()
+        var {ua, h5st} = await this.uuaa()
+        await this.shareId() 
         for (let unionShareId of this.code.slice(0, 4)) {
             cookie = p.cookie
             if (this.dict.d) {
@@ -171,7 +171,7 @@ class Main extends Template {
             await this.curl({
                 url: linkUrl,
                 referer: url,
-                'ua': ua
+                ua
             })
             await this.algo.set({
                 referer: linkUrl,
@@ -365,11 +365,13 @@ class Main extends Template {
     }
 
     async shareId() {
-        let c1 = this.code.slice(0, 2)
-        let c2 = this.code.slice(2)
-        c2.push(this.random(this.unionShareId, 1)[0])
-        c2 = this.random(c2, c2.length + 1)
-        this.code = this.unique([...c1, ...c2])
+        if (this.code.length>2) {
+            let c1 = this.code.slice(0, 2)
+            let c2 = this.code.slice(2)
+            c2.push(this.random(this.unionShareId, 1)[0])
+            c2 = this.random(c2, c2.length + 1)
+            this.code = this.unique([...c1, ...c2])
+        }
     }
 }
 
