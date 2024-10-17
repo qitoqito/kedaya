@@ -86,13 +86,14 @@ Nodejs添加依赖: crypto-js axios request node-file-cache
 
 ```
 docker run -dit \
-  --name official \
-  --restart always \
-  --hostname official \
-  -p 9527:80 \
+  -p 17840:17840 \
+  -e TZ=Asia/Shanghai \
+  --name Sign \
+  --hostname Sign \
+  --restart unless-stopped \
   seansuny/signapi:latest
   
-添加环境变量 QITOQITO_JDSIGN=http://ip:9527/jd/sign
+添加环境变量 QITOQITO_JDSIGN=http://ip:17840/sign
 ```
    
 	 
