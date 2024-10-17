@@ -23,7 +23,7 @@ class Main extends Template {
         this.clientVersion = '12.3.4'
         this.sign = new this.modules.jdSign()
         this.algo = new this.modules.jdAlgo({
-            verison: '4.7'
+            verison: 'latest'
         })
         let custom = this.getValue('custom')
         this.code = []
@@ -333,7 +333,7 @@ class Main extends Template {
     async main(p) {
         console.log("当前运行ID:", p.inviter.id)
         await this.algo.set({
-            version: '4.7',
+            version: "latest",
             type: "main",
             referer: `https://prodev.m.jd.com/mall/active/${p.inviter.id}/index.html`
         })
