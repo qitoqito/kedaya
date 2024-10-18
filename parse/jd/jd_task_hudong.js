@@ -706,15 +706,15 @@ class Main extends Template {
                                     if (taskItemList[j].pipeExt) {
                                         body2.pipeExt = {...taskItemList[j].pipeExt, ...body.pipeExt || {}}
                                     }
+                                    let apStart = await this.sign.curl({
+                                            'url': `https://api.m.jd.com/api`,
+                                            'form': `functionId=apStartTaskTime&body=${this.dumps(body2)}&t=1729173114208&appid=activities_platform&client=ios&clientVersion=13.1.0&loginType=2&loginWQBiz=wegame`,
+                                            referer: 'https://pro.m.jd.com/mall/active/rxfF5KGBpcxNQj3WvxFPg1F4Ne4/index.html',
+                                            cookie
+                                        }
+                                    )
+                                    // console.log(apStart)
                                     if (i.timeLimitPeriod) {
-                                        let apStart = await this.sign.curl({
-                                                'url': `https://api.m.jd.com/api`,
-                                                'form': `functionId=apStartTaskTime&body=${this.dumps(body2)}&t=1729173114208&appid=activities_platform&client=ios&clientVersion=13.1.0&loginType=2&loginWQBiz=wegame`,
-                                                referer: 'https://pro.m.jd.com/mall/active/rxfF5KGBpcxNQj3WvxFPg1F4Ne4/index.html',
-                                                cookie
-                                            }
-                                        )
-                                        // console.log(apStart)
                                         await this.wait(i.timeLimitPeriod * 1000)
                                     }
                                     let doTask = await this.wget({
