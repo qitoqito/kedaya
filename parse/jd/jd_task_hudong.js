@@ -322,6 +322,25 @@ class Main extends Template {
                                 }
                             }
                         }
+                        if (this.dumps(conf) == '{}') {
+                            let lids = (this.matchAll(/"linkId"\s*:\s*"(\w+)"/g, html))
+                            for (let i of this.unique(lids)) {
+                                let apTask = await this.wget({
+                                    fn: 'apTaskList',
+                                    body: {"linkId": i},
+                                    algo: {},
+                                })
+                                if (this.haskey(apTask, 'data')) {
+                                    conf = {
+                                        type: 'aptl',
+                                        id: linkId,
+                                        linkId: i
+                                    }
+                                    this.shareCode.push(conf)
+                                    break
+                                }
+                            }
+                        }
                     }
                 } catch (e) {
                 }
@@ -349,6 +368,9 @@ class Main extends Template {
                 break
             case 'inviteFission':
                 await this.infi(p)
+                break
+            case 'aptl':
+                await this.aptl(p)
                 break
             default:
                 switch (p.inviter.appid) {
@@ -610,6 +632,110 @@ class Main extends Template {
         }
         else if (bean.length>1) {
             this.print(`京豆: ${this.sum(bean, 2)}`, p.user)
+        }
+    }
+
+    async aptl(p) {
+        let cookie = p.cookie
+        let apTask = await this.wget({
+            fn: 'apTaskList',
+            body: {"linkId": p.inviter.linkId},
+            algo: {},
+            cookie
+        })
+        for (let i of this.haskey(apTask, 'data')) {
+            if (i.taskLimitTimes == i.taskDoTimes) {
+                console.log("任务已完成:", i.taskShowTitle)
+            }
+            else {
+                console.log(`正在运行:`, i.taskTitle || i.taskShowTitle, i.taskType)
+                switch (i.taskType) {
+                    case 'SIGN':
+                        let sign = await this.wget({
+                            fn: 'apsDoTask',
+                            body: {
+                                "taskType": "SIGN",
+                                "taskId": i.id,
+                                "channel": 4,
+                                "checkVersion": true,
+                                "linkId": p.inviter.linkId,
+                                pipeExt: i.pipeExt
+                            },
+                            algo: {
+                                appId: '54ed7'
+                            },
+                            cookie
+                        })
+                    case 'ORDER_MARK':
+                    case 'JOIN_BRAND':
+                        break
+                    case 'BROWSE_CHANNEL':
+                    case  'BROWSE_PRODUCT':
+                    case 'FOLLOW_SHOP':
+                    case 'FOLLOW_CHANNEL':
+                    case 'ADD_PURCHASE':
+                        let body = {
+                            "taskType": i.taskType,
+                            "taskId": i.id,
+                            "channel": 4,
+                            "checkVersion": true,
+                            "linkId": p.inviter.linkId,
+                        }
+                        if (i.pipeExt) {
+                            body.pipeExt = i.pipeExt
+                        }
+                        let apTaskDetail = await this.wget({
+                            fn: 'apTaskDetail',
+                            body,
+                            algo: {},
+                            cookie
+                        })
+                        let taskItemList = this.haskey(apTaskDetail, 'data.taskItemList')
+                        if (taskItemList) {
+                            for (let j in Array.from(Array(i.taskLimitTimes - i.taskDoTimes), (_val, index) => index)) {
+                                if (taskItemList[j] && taskItemList[j].itemId) {
+                                    let body2 = {
+                                        "taskType": i.taskType,
+                                        "taskId": i.id,
+                                        "channel": 4,
+                                        "checkVersion": true,
+                                        "linkId": p.inviter.linkId,
+                                        "taskInsert": false,
+                                        "itemId": encodeURIComponent(taskItemList[j].itemId)
+                                    }
+                                    if (taskItemList[j].pipeExt) {
+                                        body2.pipeExt = {...taskItemList[j].pipeExt, ...body.pipeExt || {}}
+                                    }
+                                    if (i.timeLimitPeriod) {
+                                        let apStart = await this.sign.curl({
+                                                'url': `https://api.m.jd.com/api`,
+                                                'form': `functionId=apStartTaskTime&body=${this.dumps(body2)}&t=1729173114208&appid=activities_platform&client=ios&clientVersion=13.1.0&loginType=2&loginWQBiz=wegame`,
+                                                referer: 'https://pro.m.jd.com/mall/active/rxfF5KGBpcxNQj3WvxFPg1F4Ne4/index.html',
+                                                cookie
+                                            }
+                                        )
+                                        // console.log(apStart)
+                                        await this.wait(i.timeLimitPeriod * 1000)
+                                    }
+                                    let doTask = await this.wget({
+                                        fn: 'apsDoTask',
+                                        body: body2,
+                                        algo: {'appId': '54ed7'},
+                                        cookie
+                                    })
+                                    if (this.haskey(doTask, 'success')) {
+                                        console.log("任务完成", `[${parseInt(j) + 1}/${i.taskLimitTimes - i.taskDoTimes}]`)
+                                    }
+                                    else {
+                                        console.log("任务失败:", this.haskey(doTask, 'errMsg') || doTask)
+                                    }
+                                    await this.wait(3000)
+                                }
+                            }
+                        }
+                        break
+                }
+            }
         }
     }
 
