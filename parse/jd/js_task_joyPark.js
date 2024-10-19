@@ -21,7 +21,7 @@ class Main extends Template {
         this.build = "1247"
         this.algo = new this.modules.jdAlgo({
             type: "main",
-            version: "4.7"
+            version: "latest"
         })
         this.inviteIds = []
         let fcode = []
@@ -34,7 +34,6 @@ class Main extends Template {
 
     async main(p) {
         let cookie = p.cookie;
-        var self = this
         try {
             this.dict[p.user] = {}
             await this.baseInfo(p)
