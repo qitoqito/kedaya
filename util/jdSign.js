@@ -138,8 +138,11 @@ class jdSign {
         }
     }
 
-    async curl(p) {
+    verify() {
+        return this.access ? true : false
+    }
 
+    async curl(p) {
         let array = [
             [
                 0,
@@ -220,6 +223,10 @@ class jdSign {
                 referer: 'https://m.jd.com'
             }
         }
+        else if (p.headers && !p.headers['user-agent']) {
+            p.headers['user-agent'] = process.communal.userAgents()['jd']
+        }
+        let append = p.append ? p.append : ''
         if (this.access) {
             if (p.form) {
                 var form = p.form
@@ -243,10 +250,10 @@ class jdSign {
                 )
                 if (process.communal.haskey(cs1, 'data.sign')) {
                     if (p.form) {
-                        p.form = `functionId=${cs1.data.functionId}&${cs1.data.convertUrl}`
+                        p.form = `functionId=${cs1.data.functionId}&${cs1.data.convertUrl}&${append}`
                     }
                     else {
-                        form = `functionId=${cs1.data.functionId}&${cs1.data.convertUrl}`
+                        form = `functionId=${cs1.data.functionId}&${cs1.data.convertUrl}&${append}`
                         p.url = `${spl[0]}?${form}`
                     }
                     return await process.communal.curl(p)
@@ -268,10 +275,10 @@ class jdSign {
                 )
                 if (process.communal.haskey(cs2, 'sign')) {
                     if (p.form) {
-                        p.form = cs2.params
+                        p.form = `${cs2.params}&${append}`
                     }
                     else {
-                        p.url = `${spl[0]}?${cs2.params}`
+                        p.url = `${spl[0]}?${cs2.params}&${append}`
                     }
                     return await process.communal.curl(p)
                 }
