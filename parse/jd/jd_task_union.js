@@ -41,8 +41,8 @@ class Main extends Template {
 
     async prepare() {
         if (!this.profile.known) {
-            this.jump = 1
-            return
+            // this.jump = 1
+            // return
         }
         var {ua, h5st} = await this.uuaa()
         this.sign = new this.modules.jdSign()
@@ -238,22 +238,37 @@ class Main extends Template {
                         console.log(this.haskey(apStart, 'errMsg') || apStart)
                         if (this.match(/\d+秒/, i.info)) {
                             let ts = (this.match(/(\d+)秒/, i.info))
-                            try {
-                                let z = await this.sign.jdCurl({
-                                    url: 'https://api.m.jd.com/client.action',
-                                    form: `functionId=apResetTiming&body={"timerId":"${i.componentId}","uniqueId":"${i.taskId}"}&build=169498&client=apple&clientVersion=13.2.8&d_brand=apple&d_model=iPhone13%2C3&ef=1`,
-                                    cookie
-                                })
+                            if (this.sign.verify()) {
+                                try {
+                                    let z = await this.sign.jdCurl({
+                                        url: 'https://api.m.jd.com/client.action',
+                                        form: `functionId=apResetTiming&body={"timerId":"${i.componentId}","uniqueId":"${i.taskId}"}&build=169498&client=apple&clientVersion=13.2.8&d_brand=apple&d_model=iPhone13%2C3&ef=1`,
+                                        cookie
+                                    })
+                                    console.log("等待", ts)
+                                    await this.wait(parseInt(ts) * 1000)
+                                    let y = await this.sign.jdCurl({
+                                        url: 'https://api.m.jd.com/client.action',
+                                        form: `functionId=apCheckTimingEnd&body={"timerId":"${i.componentId}","uniqueId":"${i.taskId}"}&build=169498&client=apple&clientVersion=13.2.8&d_brand=apple&d_model=iPhone13%2C3&ef=1`,
+                                        cookie
+                                    })
+                                } catch (e) {
+                                }
+                            }
+                            else {
                                 console.log("等待", ts)
                                 await this.wait(parseInt(ts) * 1000)
-                                let y = await this.sign.jdCurl({
-                                    url: 'https://api.m.jd.com/client.action',
-                                    form: `functionId=apCheckTimingEnd&body={"timerId":"${i.componentId}","uniqueId":"${i.taskId}"}&build=169498&client=apple&clientVersion=13.2.8&d_brand=apple&d_model=iPhone13%2C3&ef=1`,
-                                    cookie
-                                })
-                            } catch (e) {
+                                // console.log(i)
+                                let apsDoTask = await this.algo.curl({
+                                        'url': `https://api.m.jd.com/api`,
+                                        'form': `functionId=apCheckTimingEnd&appid=activities_platform&_=1716946560092&loginType=2&body={"timerId":"${i.componentId}","uniqueId":"${i.taskId}"}&build=169498&client=apple&clientVersion=13.2.8&d_brand=apple&d_model=iPhone13%2C3&ef=1`,
+                                        cookie,
+                                        algo: {
+                                            appId: '0d977'
+                                        }
+                                    }
+                                )
                             }
-                            // console.log(y)
                         }
                         await this.wait(1000)
                     }
