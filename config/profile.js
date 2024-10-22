@@ -1,4 +1,5 @@
 module.exports = {
+    qitoApi: new Buffer.from("aHR0cDovL2FwaS5xaXRvcWl0by5jb20vdG9vbGtpdC9qZC9hcGkucGhw", 'base64').toString(),
     algoVersion: '4.8',
     globalSalt: 2876,
     hdIds: "h5-live|redrain-2021|wh5|SecKill2020|content_ecology|u|u_hongbao|babelh5|publicUseApi|newtry",
