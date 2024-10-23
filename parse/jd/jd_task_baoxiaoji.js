@@ -14,7 +14,7 @@ class Main extends Template {
 
     async prepare() {
         this.algo = new this.modules.jdAlgo({
-            version: '4.7'
+            version: 'latest'
         })
         for (let cookie of this.cookies.help) {
             let s = await this.algo.curl({

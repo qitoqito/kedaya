@@ -14,7 +14,7 @@ class Main extends Template {
     async prepare() {
         this.clientVersion = "12.3.1"
         this.algo = new this.modules.jdAlgo({
-            version: '4.7',
+            version: 'latest',
             type: 'app',
             referer: 'https://jdbeantask-pro.pf.jd.com/',
         })

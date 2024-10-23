@@ -27,7 +27,7 @@ class Main extends Template {
         this.algo = new this.modules.jdAlgo({
             referer: 'https://pro.m.jd.com/mall/active/3BwUqhLsJYrHP4qgAgDDJGrSVngK/index.html',
             type: "main",
-            version: "4.7"
+            version: "latest"
         })
         console.log("获取助力码中...")
         for (let cookie of this.cookies.help) {

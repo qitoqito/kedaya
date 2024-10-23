@@ -13,7 +13,7 @@ class Main extends Template {
 
     async prepare() {
         this.algo = new this.modules.jdAlgo({
-            verison: '4.7'
+            verison: 'latest'
         })
     }
 

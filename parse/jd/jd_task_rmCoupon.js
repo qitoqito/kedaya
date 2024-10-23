@@ -15,7 +15,7 @@ class Main extends Template {
 
     async prepare() {
         this.algo = new this.modules.jdAlgo({
-            version: "4.7",
+            version: "latest",
             referer: 'https://servicewechat.com/wx91d27dbf599dff74/760/page-frame.html'
         })
         if (this.profile.custom) {

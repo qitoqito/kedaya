@@ -13,7 +13,7 @@ class Main extends Template {
         this.algo = new this.modules.jdAlgo({
             appId: "169f1",
             type: 'main',
-            version: "4.7"
+            version: "latest"
         })
     }
 

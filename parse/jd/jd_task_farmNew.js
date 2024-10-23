@@ -21,7 +21,7 @@ class Main extends Template {
         this.algo = new this.modules.jdAlgo({
             appId: "c57f6",
             type: 'main',
-            version: "4.8",
+            version: "latest",
             refere: 'https://h5.m.jd.com/pb/015686010/Bc9WX7MpCW7nW9QjZ5N3fFeJXMH/index.html'
         })
         this._cc = 0
