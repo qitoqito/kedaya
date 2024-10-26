@@ -44,7 +44,18 @@ class Main extends Template {
                         this.print(`京豆: ${sign.data.result.value}`, p.user)
                     }
                     else {
-                        console.log(sign)
+                        console.log(this.haskey(sign, 'data.bizMsg') || sign)
+                    }
+                    let reward = await this.algo.curl({
+                            'url': `https://api.m.jd.com/`,
+                            'form': `functionId=deliverySign_continue_award&appid=signed_wh5_ihub&body={"activityId":"2925"}&client=apple&uuid=674ce0d97511f5ed054c3dc0af093b3b245ab68d&clientVersion=13.2.8&d_model=&osVersion=15.1.1`,
+                            cookie, algo: {
+                                appId: 'e88fd'
+                            }
+                        }
+                    )
+                    if (this.haskey(reward, 'data.result.value')) {
+                        this.print(`京豆: ${reward.data.result.value}`, p.user)
                     }
                 }
                 else {
