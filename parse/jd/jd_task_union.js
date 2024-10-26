@@ -124,7 +124,7 @@ class Main extends Template {
         this.algo = new this.modules.jdAlgo({
             version: "latest",
             ua,
-            type: "wechat",
+            type: "main",
         })
         try {
             // this.assert(0, "双十一再见...")
