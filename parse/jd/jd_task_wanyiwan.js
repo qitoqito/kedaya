@@ -193,7 +193,7 @@ class Main extends Template {
                 else {
                     let turn = await this.algo.curl({
                             'url': `https://api.m.jd.com/client.action`,
-                            'form': `functionId=turnHappyHome&body={"linkId":"CDv-TaCmVcD0sxAI_HE2RQ","turnNum":"10"}&t=1715954317613&appid=activities_platform&client=apple&clientVersion=13.2.2`,
+                            'form': `functionId=turnHappyHome&body={"linkId":"-EMTEb8A0id6HvUY2qV7xQ","turnNum":"10"}&t=1715954317613&appid=activities_platform&client=apple&clientVersion=13.2.2`,
                             cookie,
                             algo: {
                                 appId: '614f1'
@@ -218,7 +218,7 @@ class Main extends Template {
                             var turnNum = (_ == 1) ? num : "-1"
                             let double = await this.algo.curl({
                                     'url': `https://api.m.jd.com/client.action`,
-                                    'form': `functionId=turnHappyDouble&body={"linkId":"CDv-TaCmVcD0sxAI_HE2RQ","turnNum":"${turnNum}"}&t=1715954317613&appid=activities_platform&client=apple&clientVersion=13.2.2`,
+                                    'form': `functionId=turnHappyDouble&body={"linkId":"-EMTEb8A0id6HvUY2qV7xQ","turnNum":"${turnNum}"}&t=1715954317613&appid=activities_platform&client=apple&clientVersion=13.2.2`,
                                     cookie,
                                     algo: {
                                         appId: '614f1'
@@ -240,7 +240,7 @@ class Main extends Template {
                         if (ok) {
                             let rec = await this.algo.curl({
                                     'url': `https://api.m.jd.com/client.action`,
-                                    'form': `functionId=turnHappyReceive&body={"linkId":"CDv-TaCmVcD0sxAI_HE2RQ"}&t=1715954317613&appid=activities_platform&client=apple&clientVersion=13.2.2`,
+                                    'form': `functionId=turnHappyReceive&body={"linkId":"-EMTEb8A0id6HvUY2qV7xQ"}&t=1715954317613&appid=activities_platform&client=apple&clientVersion=13.2.2`,
                                     cookie,
                                     algo: {
                                         appId: '25fac'
