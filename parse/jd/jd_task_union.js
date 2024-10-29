@@ -300,10 +300,10 @@ class Main extends Template {
             if (i.info) {
                 if (i.status == 1) {
                     console.log("正在运行:", i.info)
-                    if (this.haskey(i, 'adInfo.target_url')) {
+                    if (this.haskey(i, ['adInfo.target_url', 'taskTargetUrl'])) {
                         let apStart = await this.algo.curl({
                                 'url': `https://api.m.jd.com/api`,
-                                'form': `functionId=apStartTiming&appid=u_hongbao&_=1716946560092&loginType=2&body={"timerId":"${i.componentId}","uniqueId":"${i.taskId}","jumpUrl":"${encodeURIComponent(i.adInfo.target_url)}","jumpType":1}&client=apple&clientVersion=12.3.1&osVersion=15.1.1&screen=390*844&d_brand=iPhone&d_model=iPhone&lang=zh-CN&networkType=wifi&openudid=`,
+                                'form': `functionId=apStartTiming&appid=u_hongbao&_=1716946560092&loginType=2&body={"timerId":"${i.componentId}","uniqueId":"${i.taskId}","jumpUrl":"${encodeURIComponent(this.haskey(i, ['adInfo.target_url', 'taskTargetUrl']))}","jumpType":1}&client=apple&clientVersion=12.3.1&osVersion=15.1.1&screen=390*844&d_brand=iPhone&d_model=iPhone&lang=zh-CN&networkType=wifi&openudid=`,
                                 cookie,
                                 algo: {
                                     appId: '0d977'
