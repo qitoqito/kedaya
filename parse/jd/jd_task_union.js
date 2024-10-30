@@ -300,7 +300,46 @@ class Main extends Template {
             if (i.info) {
                 if (i.status == 1) {
                     console.log("正在运行:", i.info)
-                    if (this.haskey(i, ['adInfo.target_url', 'taskTargetUrl'])) {
+                    if (i.info.includes("点击") && i.taskTargetUrl) {
+                        let query = this.query(i.taskTargetUrl, '&', 'split')
+                        for (let zz = 0; zz<6; zz++) {
+                            let goods = await this.algo.curl({
+                                    'url': `https://api.m.jd.com/api?functionId=unionSearchRecommend&appid=u_activity_h5&loginType=2&client=apple&clientVersion=&body={"funName":"getSkuByMaterialId","page":{"pageNo":1,"pageSize":20},"param":{"materialId":12354,"sortName":null,"sortType":"","keyword":"","category1":null,"batchId":"","requestScene":1,"source":20200,"clientPageId":"union_activity_265222","packageName":""}}`,
+                                    cookie,
+                                    algo: {
+                                        appId: '66248'
+                                    }
+                                }
+                            )
+                            let goodList = this.haskey(goods, 'result.goodsSynopsisList') || []
+                            let z = goodList[zz]
+                            let couponUrl = this.haskey(z, `purchasePriceInfo.unionCouponList.0.couponLink`)
+                            if (couponUrl) {
+                                console.log("正在浏览:", z.skuName)
+                                let free = await this.algo.curl({
+                                        'url': `https://api.m.jd.com/api?functionId=getUnionFreeCoupon&appid=u_activity_h5&loginType=2&client=apple&clientVersion=&body={"couponUrl":"${couponUrl}","recommendCouponUrl":["${couponUrl}"],"skuPrice":${z.purchasePriceInfo.thresholdPrice},"pageId":${query.union_page_id},"pageType":5,"source":20221}`,
+                                        // 'form':``,
+                                        cookie,
+                                        algo: {
+                                            appI: '66248'
+                                        }
+                                    }
+                                )
+                            }
+                            await this.wait(1000)
+                        }
+                        let complete = await this.algo.curl({
+                                'url': `https://api.m.jd.com/api?functionId=completeUnionTask&appid=u_activity_h5&loginType=2&client=apple&clientVersion=&body={"unionActTask":"${query.unionActTask}"}`,
+                                // 'form':``,
+                                cookie,
+                                algo: {
+                                    appId: '66248'
+                                }
+                            }
+                        )
+                        console.log(complete)
+                    }
+                    else if (this.haskey(i, ['adInfo.target_url', 'taskTargetUrl'])) {
                         let apStart = await this.algo.curl({
                                 'url': `https://api.m.jd.com/api`,
                                 'form': `functionId=apStartTiming&appid=u_hongbao&_=1716946560092&loginType=2&body={"timerId":"${i.componentId}","uniqueId":"${i.taskId}","jumpUrl":"${encodeURIComponent(this.haskey(i, ['adInfo.target_url', 'taskTargetUrl']))}","jumpType":1}&client=apple&clientVersion=12.3.1&osVersion=15.1.1&screen=390*844&d_brand=iPhone&d_model=iPhone&lang=zh-CN&networkType=wifi&openudid=`,
