@@ -302,17 +302,16 @@ class Main extends Template {
                     console.log("正在运行:", i.info)
                     if (i.info.includes("点击") && i.taskTargetUrl) {
                         let query = this.query(i.taskTargetUrl, '&', 'split')
-                        for (let zz = 0; zz<6; zz++) {
-                            let goods = await this.algo.curl({
-                                    'url': `https://api.m.jd.com/api?functionId=unionSearchRecommend&appid=u_activity_h5&loginType=2&client=apple&clientVersion=&body={"funName":"getSkuByMaterialId","page":{"pageNo":1,"pageSize":20},"param":{"materialId":12354,"sortName":null,"sortType":"","keyword":"","category1":null,"batchId":"","requestScene":1,"source":20200,"clientPageId":"union_activity_265222","packageName":""}}`,
-                                    cookie,
-                                    algo: {
-                                        appId: '66248'
-                                    }
+                        let goods = await this.algo.curl({
+                                'url': `https://api.m.jd.com/api?functionId=unionSearchRecommend&appid=u_activity_h5&loginType=2&client=apple&clientVersion=&body={"funName":"getSkuByMaterialId","page":{"pageNo":1,"pageSize":20},"param":{"materialId":12354,"sortName":null,"sortType":"","keyword":"","category1":null,"batchId":"","requestScene":1,"source":20200,"clientPageId":"union_activity_265222","packageName":""}}`,
+                                cookie,
+                                algo: {
+                                    appId: '66248'
                                 }
-                            )
-                            let goodList = this.haskey(goods, 'result.goodsSynopsisList') || []
-                            let z = goodList[zz]
+                            }
+                        )
+                        let goodList = this.haskey(goods, 'result.goodsSynopsisList') || []
+                        for (let z of goodList.slice(0, 6)) {
                             let couponUrl = this.haskey(z, `purchasePriceInfo.unionCouponList.0.couponLink`)
                             if (couponUrl) {
                                 console.log("正在浏览:", z.skuName)
@@ -325,8 +324,8 @@ class Main extends Template {
                                         }
                                     }
                                 )
+                                await this.wait(1000)
                             }
-                            await this.wait(1000)
                         }
                         let complete = await this.algo.curl({
                                 'url': `https://api.m.jd.com/api?functionId=completeUnionTask&appid=u_activity_h5&loginType=2&client=apple&clientVersion=&body={"unionActTask":"${query.unionActTask}"}`,
