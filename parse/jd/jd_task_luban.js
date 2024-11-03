@@ -69,9 +69,10 @@ class Main extends Template {
                         }]
                     }
                     for (let j of vos.splice(0, i.assignmentTimesLimit - i.completionCnt)) {
+                        // console.log(j)
                         let doWork = await this.algo.curl({
                                 'url': `https://api.m.jd.com/?functionId=luban_executeWorkflow`,
-                                'form': `functionId=luban_executeWorkflow&appid=newtry&body={"workflowId":"${uuid}","action":1,"encAid":"${i.encryptAssignmentId}","itemId":"${j.itemId}"}`,
+                                'form': `functionId=luban_executeWorkflow&appid=newtry&client=ios&clientVersion=13.2.8&body={"workflowId":"${uuid}","action":1,"encAid":"${i.encryptAssignmentId}","itemId":"${j.itemId}","jumpUrl":"${encodeURIComponent(j.url)}"}`,
                                 cookie,
                                 algo: {
                                     appId: '35fa0'
@@ -92,7 +93,7 @@ class Main extends Template {
                         }
                         let r = await this.algo.curl({
                                 'url': `https://api.m.jd.com/?functionId=luban_executeWorkflow`,
-                                'form': `functionId=luban_executeWorkflow&appid=newtry&body={"workflowId":"${uuid}","action":0,"encAid":"${i.encryptAssignmentId}","itemId":"${j.itemId}","completionFlag":true}`,
+                                'form': `functionId=luban_executeWorkflow&appid=newtry&client=ios&clientVersion=13.2.8&body={"workflowId":"${uuid}","action":0,"encAid":"${i.encryptAssignmentId}","itemId":"${j.itemId}","completionFlag":true}`,
                                 cookie,
                                 algo: {
                                     appId: '35fa0'
@@ -121,8 +122,9 @@ class Main extends Template {
         for (let i of Array(3)) {
             let lottery = await this.algo.curl({
                     'url': `https://api.m.jd.com/?functionId=luban_executeWorkflow`,
-                    'form': `functionId=luban_executeWorkflow&appid=newtry&body={"workflowId":"${uuid}","action":2,"completionFlag":true}`,
-                    cookie, algo: {
+                    'form': `functionId=luban_executeWorkflow&appid=newtry&client=ios&clientVersion=13.2.8&body={"workflowId":"${uuid}","action":2,"completionFlag":true}`,
+                    cookie,
+                    algo: {
                         appId: '35fa0'
                     }
                 }
