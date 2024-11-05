@@ -24,6 +24,6 @@ module.exports = {
         }
     },
     verifyUrl: 'https://api.m.jd.com/client.action?functionId=queryMaterialProducts&client=wh5',
-    unionId: 'CruxAjw',
-    unionShareId: ['l4sgu', 'l4uC5']
+    unionId: 'wrags5I',
+    unionShareId: ['CeDkR', 'mZ7Vi']
 }
