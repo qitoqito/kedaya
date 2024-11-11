@@ -14,6 +14,7 @@ class Main extends Template {
             known: '风控较严,订单有异常的风险,如订单一直异常,请停用此脚本'
         }
         this.readme = "风控较严,算法经常变动,锁佣需谨慎,如还要使用此脚本请添加\n[jd_task_union]\nknown=1"
+        this.verify = 1
     }
 
     async uuaa() {
@@ -126,8 +127,8 @@ class Main extends Template {
             ua,
             type: "main",
         })
+        this.assert(0, "双十二再见...")
         try {
-            // this.assert(0, "双十一再见...")
             let cookie = ''
             let url = this.profile.shareUrl || `https://u.jd.com/${this.unionId}`
             let jda = await this.curl({
