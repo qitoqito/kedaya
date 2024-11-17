@@ -52,7 +52,7 @@ class Main extends Template {
                                 if (['shoppingActivity', 'productsInfo', 'browseShop', 'addCart'].includes(extraType)) {
                                     let fi = await this.algo.curl({
                                             'url': `https://api.m.jd.com/client.action`,
-                                            'form': `appid=home-channel&functionId=hc.doTaskColorJsf.finishTask&body=${this.dumps(
+                                            'form': `appid=home-channel&functionId=mt.zzj.DoTaskColorJsf.finishTask&body=${this.dumps(
                                                 {
                                                     "encryptAssignmentId": i.encryptAssignmentId,
                                                     "itemId": j.itemId,
@@ -84,8 +84,8 @@ class Main extends Template {
             console.log("抽奖中")
             for (let i of Array(20)) {
                 let r = await this.algo.curl({
-                        'url': `https://api.m.jd.com/client.action?functionId=hc.doTaskColorJsf.exchangePrizes`,
-                        'form': `appid=home-channel&functionId=hc.doTaskColorJsf.exchangePrizes&body={"encryptAssignmentId":"${lotteryId}","encryptProjectId":"6pvWvhxzcHzeEiWsqP5oKgUbHEy"}`,
+                        'url': `https://api.m.jd.com/client.action?functionId=mt.zzj.DoTaskColorJsf.exchangePrizes`,
+                        'form': `appid=home-channel&functionId=mt.zzj.DoTaskColorJsf.exchangePrizes&body={"encryptAssignmentId":"${lotteryId}","encryptProjectId":"6pvWvhxzcHzeEiWsqP5oKgUbHEy"}`,
                         cookie,
                         algo: {
                             appId: '4afaa'
