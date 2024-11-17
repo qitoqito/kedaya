@@ -20,8 +20,10 @@ class Main extends Template {
             // 'type': 'weixin',
             version: "latest",
             headers: {
-                'referer': "https://servicewechat.com/wx91d27dbf599dff74/654/page-frame.html",
-                "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 11_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15F79 MicroMessenger/8.0.15(0x18000f2e) NetType/4G Language/zh_CN"
+                referer: 'https://servicewechat.com/wx91d27dbf599dff74/770/page-frame.html',
+                'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_1_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.52(0x18003426) NetType/WIFI Language/zh_CN',
+                wqreferer: 'http://wq.jd.com/wxapp/pages/marketing/entry_task/channel',
+                'X-Rp-Client': 'mini_2.1.0'
             }
         })
         for (let cookie of this.cookies.help) {
@@ -81,14 +83,16 @@ class Main extends Template {
             }
         }
         else {
-            let assist = await this.algo.curl({
-                    'url': `https://api.m.jd.com/miniTask_assistCheck?g_ty=ls&g_tk=1236659202`,
-                    'form': `functionId=miniTask_doAssist&t=1673620049238&body={"itemId":"${p.inviter.itemId}"}&appid=hot_channel&loginType=11&clientType=wxapp&client=apple&clientVersion=7.21.80&build=&osVersion=iOS%2011.4&screen=320*568&networkType=4g&d_brand=iPhone&d_model=iPhone%20SE%3CiPhone8%2C4%3E&d_name=&lang=zh_CN`,
-                    cookie,
-                }
-            )
-            // console.log(assist)
-            console.log("正在助力:", p.inviter.user, this.haskey(assist, 'data') || this.haskey(assist, 'message'))
+            if (p.inviter.itemId) {
+                let assist = await this.algo.curl({
+                        'url': `https://api.m.jd.com/miniTask_assistCheck?g_ty=ls&g_tk=1236659202`,
+                        'form': `functionId=miniTask_doAssist&t=1673620049238&body={"itemId":"${p.inviter.itemId}"}&appid=hot_channel&loginType=11&clientType=wxapp&client=apple&clientVersion=7.21.80&build=&osVersion=iOS%2011.4&screen=320*568&networkType=4g&d_brand=iPhone&d_model=iPhone%20SE%3CiPhone8%2C4%3E&d_name=&lang=zh_CN`,
+                        cookie,
+                    }
+                )
+                // console.log(assist)
+                console.log("正在助力:", p.inviter.user, this.haskey(assist, 'data') || this.haskey(assist, 'message'))
+            }
             let sign = await this.algo.curl({
                     'url': `https://api.m.jd.com/mini_doSign?g_ty=ls&g_tk=1629788202`,
                     'form': `functionId=mini_doSign&t=1662909416431&body={"itemId":"1"}&appid=hot_channel&loginType=11&clientType=wxapp&client=apple&clientVersion=7.21.80&build=&osVersion=iOS%2011.4&screen=320*568&networkType=4g&d_brand=iPhone&d_model=iPhone%20SE%3CiPhone8%2C4%3E&d_name=&lang=zh_CN`,
@@ -144,6 +148,49 @@ class Main extends Template {
                 else {
                     console.log(`任务已完成: ${i.title}`)
                 }
+            }
+            let channel = await this.algo.curl({
+                    'url': `https://api.m.jd.com/MiniTask_ChannelPage?g_ty=ls&g_tk=1722006734`,
+                    'form': `loginType=11&clientType=wxapp&client=apple&clientVersion=9.23.140&build=&osVersion=iOS%2015.1.1&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone%2012%20Pro%3CiPhone13%2C3%3E&lang=zh_CN&uuid=oCwKwuBoW0okKEIIDlT5FXxscxcM&functionId=MiniTask_ChannelPage&t=1731719820513&body={"source":"task","silverHairInfo":{},"expose":false,"xyhfAuth":2,"xyhfShow":false,"businessSource":"2411shiyebuchuanbo","versionFlag":"new"}&appid=hot_channel`,
+                    cookie,
+                    algo: {
+                        appId: '60d61'
+                    }
+                }
+            )
+            let query = await this.algo.curl({
+                    'url': `https://api.m.jd.com/miniTask_queryMyRights?g_ty=ls&g_tk=1722006734`,
+                    'form': `loginType=11&clientType=wxapp&client=apple&clientVersion=9.23.140&build=&osVersion=iOS%2015.1.1&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone%2012%20Pro%3CiPhone13%2C3%3E&lang=zh_CN&uuid=oCwKwuBoW0okKEIIDlT5FXxscxcM&functionId=miniTask_queryMyRights&t=1731719821597&body={}&appid=hot_channel&d_name=`,
+                    cookie,
+                    algo: {
+                        appId: '1221c'
+                    }
+                }
+            )
+            let rights = await this.algo.curl({
+                    'url': `https://api.m.jd.com/miniTask_superSaveGetRights?g_ty=ls&g_tk=1722006734`,
+                    'form': `loginType=11&clientType=wxapp&client=apple&clientVersion=9.22.230&build=&osVersion=iOS%2015.1.1&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone%2012%20Pro%3CiPhone13%2C3%3E&lang=zh_CN&functionId=miniTask_superSaveGetRights&t=1731641417506&body={"itemId":"1"}&appid=hot_channel`,
+                    cookie: p.cookie,
+                    algo: {
+                        appId: '87bb2'
+                    },
+                }
+            )
+            if (this.haskey(rights, 'data.rights')) {
+                for (let i of this.haskey(rights, 'data.rights')) {
+                    if (i.rewardType == 1) {
+                        this.print(`红包: ${i.discount}`, p.user)
+                    }
+                    if (i.rewardType == 3) {
+                        console.log(`优惠券:${i.quota}-${i.discount}}(${i.category})`)
+                    }
+                    else {
+                        console.log(i)
+                    }
+                }
+            }
+            else {
+                console.log(this.haskey(rights, 'message') || rights)
             }
         }
     }
