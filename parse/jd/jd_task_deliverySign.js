@@ -8,6 +8,9 @@ class Main extends Template {
         this.task = 'local'
         this.import = ['jdAlgo']
         this.interval = 2000
+        this.hint = {
+            activityId: "活动id1|id2"
+        }
     }
 
     async prepare() {
@@ -15,13 +18,25 @@ class Main extends Template {
             type: "main",
             version: "latest"
         })
+        let code = [2775, 2925]
+        if (this.profile.custom) {
+            code = [this.profile.custom]
+        }
+        else if (this.profile.activityId) {
+            code = this.profile.activityId.split("|")
+        }
+        for (let activityId of code) {
+            this.shareCode.push({
+                activityId
+            })
+        }
     }
 
     async main(p) {
         let cookie = p.cookie;
         let home = await this.algo.curl({
                 'url': `https://api.m.jd.com/`,
-                'form': `functionId=deliverySign_home&appid=signed_wh5_ihub&body={"activityId":"2925"}&client=apple&clientVersion=13.2.8&d_model=&osVersion=15.1.1`,
+                'form': `functionId=deliverySign_home&appid=signed_wh5_ihub&body={"activityId":"${p.inviter.activityId}"}&client=apple&clientVersion=13.2.8&d_model=&osVersion=15.1.1`,
                 cookie,
                 algo: {
                     appId: 'e88fd'
@@ -33,7 +48,7 @@ class Main extends Template {
                 if (i.status == 1) {
                     let sign = await this.algo.curl({
                             'url': `https://api.m.jd.com/`,
-                            'form': `functionId=deliverySign_sign&appid=signed_wh5_ihub&body={"activityId":"2925"}&client=apple&clientVersion=13.2.8&d_model=&osVersion=15.1.1`,
+                            'form': `functionId=deliverySign_sign&appid=signed_wh5_ihub&body={"activityId":"${p.inviter.activityId}"}&client=apple&clientVersion=13.2.8&d_model=&osVersion=15.1.1`,
                             cookie,
                             algo: {
                                 appId: 'e88fd'
@@ -48,7 +63,7 @@ class Main extends Template {
                     }
                     let reward = await this.algo.curl({
                             'url': `https://api.m.jd.com/`,
-                            'form': `functionId=deliverySign_continue_award&appid=signed_wh5_ihub&body={"activityId":"2925"}&client=apple&uuid=674ce0d97511f5ed054c3dc0af093b3b245ab68d&clientVersion=13.2.8&d_model=&osVersion=15.1.1`,
+                            'form': `functionId=deliverySign_continue_award&appid=signed_wh5_ihub&body={"activityId":"${p.inviter.activityId}"}&client=apple&uuid=674ce0d97511f5ed054c3dc0af093b3b245ab68d&clientVersion=13.2.8&d_model=&osVersion=15.1.1`,
                             cookie, algo: {
                                 appId: 'e88fd'
                             }
