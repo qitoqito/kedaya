@@ -13,7 +13,7 @@ class Main extends Template {
     async prepare() {
         this.algo = new this.modules.jdAlgo({
             version: 'latest',
-            type: 'web'
+            type: 'wechat'
         })
     }
 
@@ -21,7 +21,7 @@ class Main extends Template {
         let cookie = p.cookie;
         let h5st = await this.algo.h5st({
                 'url': `https://api.m.jd.com/`,
-                'form': `appid=asset-h5&clientVersion=1.0.0&client=pc&body={"type":1}&functionId=jsfbox_bean_sign&uuid=${this.uuid(22, 'n')}&area=16_${this.rand(1000, 1300)}_${this.rand(1000, 1300)}_${this.rand(1, 19)}&loginType=2&t=${new Date().getTime()}`,
+                'form': `appid=asset-h5&clientVersion=1.0.0&client=pc&body={"type":1}&functionId=jsfbox_bean_sign`,
                 cookie,
                 algo: {
                     appId: '73c2f'
@@ -29,7 +29,7 @@ class Main extends Template {
                 referer: 'https://bean.jd.com/myJingBean/list'
             }
         )
-        h5st.form = `${h5st.form}`
+        h5st.form = `${h5st.form}&uuid=${this.uuid(22, 'n')}&area=16_${this.rand(1000, 1300)}_${this.rand(1000, 1300)}_${this.rand(1, 19)}&loginType=2&t=${new Date().getTime()}`
         let sign = await this.curl(h5st)
         if (this.haskey(sign, 'data.receiveBeanNum')) {
             this.print(`京豆: ${sign.data.receiveBeanNum}`, p.user)
