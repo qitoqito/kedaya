@@ -9,15 +9,14 @@ class Main extends Template {
         this.task = 'local'
         this.import = ['jdAlgo']
         this.model = 'shuffle'
-        this.turn = 2
+        // this.turn = 2
         this.delay = 1000
     }
 
     async prepare() {
-        this.algo = new this.modules.jdAlgo()
-        this.algo.set({
+        this.algo = new this.modules.jdAlgo({
             'appId': '60d61',
-            // 'type': 'weixin',
+            'type': 'weixin',
             version: "latest",
             headers: {
                 referer: 'https://servicewechat.com/wx91d27dbf599dff74/770/page-frame.html',
@@ -26,34 +25,33 @@ class Main extends Template {
                 'X-Rp-Client': 'mini_2.1.0'
             }
         })
-        for (let cookie of this.cookies.help) {
-            let s = await this.algo.curl({
-                    'url': `https://api.m.jd.com/MiniTask_ChannelPage?g_ty=ls&g_tk=1629788202`,
-                    'form': `functionId=MiniTask_ChannelPage&t=1662909377667&body=%7B%7D&appid=hot_channel&loginType=11&clientType=wxapp&client=apple&clientVersion=7.21.80&build=&osVersion=iOS%2011.4&screen=320*568&networkType=4g&d_brand=iPhone&d_model=iPhone%20SE%3CiPhone8%2C4%3E&d_name=&lang=zh_CN`,
-                    cookie,
-                }
-            )
-            let assist = this.haskey(s, 'data.assistTask')
-            if (assist && assist.assistNum != assist.completionCnt && assist.itemId) {
-                this.shareCode.push({
-                    user: this.userName(cookie),
-                    itemId: assist.itemId,
-                    assistNum: assist.assistNum,
-                    completionCnt: assist.completionCnt
-                })
-            }
-        }
+        // for (let cookie of this.cookies.help) {
+        //     let s = await this.algo.curl({
+        //             'url': `https://api.m.jd.com/MiniTask_ChannelPage?g_ty=ls&g_tk=1629788202`,
+        //             'form': `functionId=MiniTask_ChannelPage&t=1662909377667&body=%7B%7D&appid=hot_channel&loginType=11&clientType=wxapp&client=apple&clientVersion=7.21.80&build=&osVersion=iOS%2011.4&screen=320*568&networkType=4g&d_brand=iPhone&d_model=iPhone%20SE%3CiPhone8%2C4%3E&d_name=&lang=zh_CN`,
+        //             cookie,
+        //         }
+        //     )
+        //     let assist = this.haskey(s, 'data.assistTask')
+        //     if (assist && assist.assistNum != assist.completionCnt && assist.itemId) {
+        //         this.shareCode.push({
+        //             user: this.userName(cookie),
+        //             itemId: assist.itemId,
+        //             assistNum: assist.assistNum,
+        //             completionCnt: assist.completionCnt
+        //         })
+        //     }
+        // }
     }
 
     async main(p) {
         let cookie = `buildtime=20230103;wxapp_type=1;wxapp_version=8.13.30;wxapp_scene=1112;cid=5;pinStatus=4; ${p.cookie}`
         let s = await this.algo.curl({
                 'url': `https://api.m.jd.com/MiniTask_ChannelPage?g_ty=ls&g_tk=1629788202`,
-                'form': `functionId=MiniTask_ChannelPage&t=1662909377667&body=%7B%7D&appid=hot_channel&loginType=11&clientType=wxapp&client=apple&clientVersion=7.21.80&build=&osVersion=iOS%2011.4&screen=320*568&networkType=4g&d_brand=iPhone&d_model=iPhone%20SE%3CiPhone8%2C4%3E&d_name=&lang=zh_CN`,
+                'form': `loginType=11&clientType=wxapp&client=apple&clientVersion=9.23.200&build=&osVersion=iOS%2015.1.1&screen=390*844&networkType=wifi&d_brand=iPhone&d_model=iPhone%2012%20Pro%3CiPhone13%2C3%3E&lang=zh_CN&functionId=miniTask_hbChannelPage&t=1732259085779&body={"source":"task","businessSource":"bbxa"}&appid=hot_channel`,
                 cookie,
             }
         )
-        // console.log(s)
         let report = await this.curl({
                 'url': `https://api.m.jd.com/wechat/drainage/visitReport?g_ty=ls&g_tk=133291722`,
                 'form': `functionId=WechatDrainage_visitReport&appid=hot_channel&loginType=2`,
@@ -125,7 +123,12 @@ class Main extends Template {
                                 cookie,
                             }
                         )
-                        console.log(c)
+                        if (this.haskey(c, 'data.0.discount')) {
+                            console.log("金币:", c.data[0].discount)
+                        }
+                        else {
+                            console.log(c)
+                        }
                     }
                     else if (i.scanAssignmentId) {
                         console.log(`正在浏览: ${i.subTitle}`)
