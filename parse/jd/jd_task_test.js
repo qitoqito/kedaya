@@ -5,49 +5,92 @@ class Main extends Template {
         super()
         this.title = "框架测试"
         this.cron = "6 6 6 6 6"
-        this.help = 1
-        this.task = 'test'
         this.readme = "这里是测试信息"
+        this.work = '0'
+        this.import = ['jdAlgo', 'logBill', 'https']
     }
 
     async prepare() {
-        if (this.proxy) {
-            console.log("proxy检测")
-            let ip = await this.curl({
-                url: 'https://api.ipify.org/?format=json'
-            })
-            console.log("外网IP:", ip.ip)
-            let tbIp = await this.curl({
-                url: 'http://pv.sohu.com/cityjson?',
-            })
-            console.log("搜狐IP:", this.match(/"cip"\s*:\s*"([^\"]+)"/, tbIp))
-            console.log("\n")
-        }
-        let s = await this.curl({
-            'url': 'https://wq.jd.com/activep3/singjd/queryexpirejingdou?_=1637926089761&g_login_type=0&callback=jsonpCBKC&g_tk=353098972&g_ty=ls&sceneval=2&g_login_type=1',
+        this.algo = new this.modules.jdAlgo({
+            version: 'latest',
+            // type: 'wechat'
         })
-        console.log("JSONP测试,如果输出字典,框架正常")
-        console.log(s, "\n")
-        console.log("\n")
-        console.log("JSON测试,如果输出字典,框架正常")
-        let s2 = await this.curl({
-            url: 'https://api.m.jd.com/client.action?functionId=queryMaterialProducts&client=wh5'
-        })
-        console.log(s2)
-        for (let cookie of this.cookies['help']) {
-            this.shareCode.push({
-                user: this.userName(cookie)
-            })
-        }
     }
 
     async main(p) {
+        console.log(this.algo.fv)
+        // return
+        // process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
         let cookie = p.cookie;
-        this.print('框架测试', p.user)
-        console.log(this.profile)
-        if (this.profile.custom) {
-            this.print(`custom: ${this.profile.custom}`, p.user)
+        const {execSync} = require('child_process');
+        try {
+            for (let ciphers of "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256".split(":")) {
+                let sign = await this.algo.h5st({
+                        'url': `https://api.m.jd.com/api`,
+                        form: `appid=h5-sep&body=${this.dumps(await this.cmd5x())}&client=m&clientVersion=6.0.0&functionId=DATAWALLET_USER_SIGN`,
+                        cookie,
+                        algo: {
+                            appId: '60d0e'
+                        },
+                        referer: 'https://prodev.m.jd.com/mall/active/eEcYM32eezJB7YX4SBihziJCiGV/index.html',
+                        httpsAgent: new this.modules.https.Agent({
+                            // ciphers,
+                            secureProtocol: "TLSv1_2_method",
+                            http2: true,
+                            // maxVersion: 'TLSv1.2',
+                            ciphers: ciphers,
+                            honorCipherOrder: true,
+                            minVersion: "TLSv1.2",
+                        })
+                        // agentOptions: {
+                        //     http2: true,
+                        // }
+                    }
+                )
+                let kk = await this.curl(sign)
+                console.log(ciphers, kk)
+                await this.wait(2000)
+                var exec = `curl -H 'Accept: application/json, text/plain, */*' -H 'referer: ${sign.headers.referer}' -H 'user-agent: ${sign.headers['user-agent']}' -H 'cookie: ${cookie}' -H 'host: api.m.jd.com' --data "${sign.form}" --compressed 'https://api.m.jd.com/api'`
+            }
+            // console.log(sign)
+            // let output = execSync(exec);
+            // console.log('shell', output.toString());
+            let s2 = await this.algo.curl({
+                    'url': `https://api.m.jd.com/api`,
+                    form: `appid=h5-sep&body=${this.dumps(await this.cmd5x())}&client=m&clientVersion=6.0.0&functionId=DATAWALLET_USER_SIGN`,
+                    cookie,
+                    algo: {
+                        appId: '60d0e'
+                    },
+                    referer: 'https://prodev.m.jd.com/mall/active/eEcYM32eezJB7YX4SBihziJCiGV/index.html',
+                    httpsAgent: new this.modules.https.Agent({
+                        ciphers: [
+                            "TLS_CHACHA20_POLY1305_SHA256",
+                            "TLS_AES_128_GCM_SHA256",
+                            "TLS_AES_256_GCM_SHA384",
+                            "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256",
+                        ].join(":"),
+                        honorCipherOrder: true,
+                        minVersion: "TLSv1.2",
+                    })
+                }
+            )
+            console.log(s2)
+        } catch (error) {
+            console.error(`执行的错误: ${error}`);
         }
+    }
+
+    async cmd5x(params = {}) {
+        let p = Object.assign(params, {
+            t: new Date().getTime()
+        })
+        let str = p.id || ''
+        if (p.taskType) {
+            str = `${str}${p.taskType}`
+        }
+        p.encStr = this.md5(`${str}${p.t}e9c398ffcb2d4824b4d0a703e38yffdd`)
+        return p
     }
 }
 
