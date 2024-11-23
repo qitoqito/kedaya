@@ -8,6 +8,9 @@ class Main extends Template {
         this.task = 'local'
         this.interval = 20000
         this.import = ['jdAlgo']
+        this.hint = {
+            shell: '1 # 部分用户使用青龙环境无法签到,请在脚本节点添加shell=1'
+        }
     }
 
     async prepare() {
@@ -63,16 +66,36 @@ class Main extends Template {
                 await this.wait(1000)
             }
         }
-        let sign = await this.algo.curl({
-                'url': `https://api.m.jd.com/api?functionId=DATAWALLET_USER_SIGN`,
-                form: `appid=h5-sep&body=${this.dumps(await this.cmd5x())}&client=m&clientVersion=6.0.0`,
-                cookie,
-                algo: {
-                    appId: '60d0e'
-                },
-                referer: 'https://mypoint.jd.com/'
-            }
-        )
+        if (this.profile.shell) {
+            let {execSync} = require('child_process');
+            let proxy = this.proxy || this.options.proxy
+            let proxyText = proxy ? ` -x ${proxy} ` : ''
+            let s2 = await this.algo.h5st({
+                    'url': `https://api.m.jd.com/api`,
+                    form: `appid=h5-sep&body=${this.dumps(await this.cmd5x())}&client=m&clientVersion=6.0.0&functionId=DATAWALLET_USER_SIGN`,
+                    cookie,
+                    algo: {
+                        appId: '60d0e'
+                    },
+                    referer: 'https://prodev.m.jd.com/mall/active/eEcYM32eezJB7YX4SBihziJCiGV/index.html',
+                }
+            )
+            var exec = `curl -s ${proxyText}-H 'Accept: application/json, text/plain, */*' -H 'referer: ${s2.headers.referer}' -H 'user-agent: ${s2.headers['user-agent']}' -H 'cookie: ${cookie}' -H 'host: api.m.jd.com' --data "${s2.form}" --compressed 'https://api.m.jd.com/api'`
+            let output = execSync(exec);
+            var sign = this.jsonParse(output.toString())
+        }
+        else {
+            var sign = await this.algo.curl({
+                    'url': `https://api.m.jd.com/api`,
+                    form: `appid=h5-sep&body=${this.dumps(await this.cmd5x())}&client=m&clientVersion=6.0.0&functionId=DATAWALLET_USER_SIGN`,
+                    cookie,
+                    algo: {
+                        appId: '60d0e'
+                    },
+                    referer: 'https://mypoint.jd.com/'
+                }
+            )
+        }
         console.log(sign)
         let totalNum = 0
         if (this.haskey(sign, 'data.signInfo.signNum')) {
