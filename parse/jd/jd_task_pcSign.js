@@ -26,7 +26,8 @@ class Main extends Template {
                 algo: {
                     appId: '73c2f'
                 },
-                referer: 'https://bean.jd.com/myJingBean/list'
+                referer: 'https://bean.jd.com/myJingBean/list',
+                ua: "Mozilla/5.0(WindowsNT10.0;Win64;x64)AppleWebKit/537.36(KHTML,likeGecko)Chrome/" + 59 + Math.round(Math.random() * 10) + ".0.3497." + Math.round(Math.random() * 100) + "Safari/537.36"
             }
         )
         h5st.form = `${h5st.form}&uuid=${this.uuid(22, 'n')}&area=16_${this.rand(1000, 1300)}_${this.rand(1000, 1300)}_${this.rand(1, 19)}&loginType=2&t=${new Date().getTime()}`
