@@ -22,11 +22,10 @@ class Main extends Template {
         let cookie = p.cookie;
         let s = await this.algo.curl({
                 'url': `https://api.m.jd.com/`,
-                // 'form': `functionId=jutouDisplayIndex&appid=pages-factory&body={"channelId":"12128","lid":"MoIOQdTTwYxNCANy+PtpgKuTTLLFbZZT","ext":{"babelActivityId":"01678377"}}&client=wh5&loginWQBiz=618aa&loginType=2`,
-                'form': `functionId=jutouDisplayIndex&appid=pages-factory&body={"channelId":"12498","lid":"MoIOQdTTwYxNCANy+PtpgKuTTLLFbZZT","popupContentKey":"","ext":{"babelActivityId":"01713230"}}&client=wh5&loginWQBiz=618aa&loginType=2`,
+                'form': `functionId=jutouDisplayIndex&appid=pages-factory&body={"channelId":"12498","lid":"MoIOQdTTwYxNCANy+PtpgKuTTLLFbZZT","popupContentKey":"","adSkuId":"","ext":{"babelActivityId":"01713230"}}&client=wh5&loginWQBiz=618aa&loginType=2`,
                 cookie,
                 algo: {
-                    appId: '5fd3d'
+                    appId: '35fa0'
                 }
             }
         )
@@ -35,13 +34,25 @@ class Main extends Template {
             for (let j of i.materialInfo) {
                 if (this.haskey(j, 'materialDetail.discount')) {
                     n++
-                    this.print(`红包: ${j.materialDetail.discount}`, p.user)
+                    if (j.materialType == 6) {
+                        this.print(`红包: ${j.materialDetail.discount}`, p.user)
+                    }
+                    else if (j.materialType == 2) {
+                        console.log("优惠券:", j.materialDetail.discount)
+                    }
+                    else {
+                        console.log(j.materialDetail)
+                    }
+                }
+                else {
+                    console.log(j.materialDetail)
                 }
             }
         }
         if (!n) {
             console.log("本次执行没有获得红包")
         }
+        await this.wait(100)
     }
 }
 
