@@ -8,7 +8,7 @@ class Main extends Template {
         this.task = 'local'
         this.verify = 1
         this.model = 'user'
-        this.import = ['jdAlgo', 'fileCache']
+        this.import = ['jdAlgo', 'fileCache','logBill']
         this.delay = 2000
         this.hint = {
             token: "token1|token2"
@@ -21,8 +21,10 @@ class Main extends Template {
         this.algo = new this.modules.jdAlgo({
             type: "main",
             version: "latest",
-            appId: '4da33'
+            appId: '4da33',
+            referer:'https://h5.m.jd.com/'
         })
+         this.clientVersion="13.2.8"
         let array = []
         if (this.profile.token) {
             array = this.profile.token.split("|")
@@ -110,21 +112,30 @@ class Main extends Template {
         }
         let maxDay = this.sum(this.column(p.inviter.continuePrizeRuleList, 'days'))
         let s = await this.algo.curl({
-                'url': `https://api.m.jd.com/api?appid=interCenter_shopSign&loginType=2&functionId=interact_center_shopSign_getSignRecord&body={"token":"${p.inviter.token}","venderId":${p.inviter.venderId},"activityId":${p.inviter.activityId},"type":56,"actionType":7}&jsonp=jsonp1004`,
-                cookie
+                'url': `http://api.m.jd.com/api?appid=interCenter_shopSign&loginType=2&functionId=interact_center_shopSign_getSignRecord&body={"token":"${p.inviter.token}","venderId":${p.inviter.venderId},"activityId":${p.inviter.activityId},"type":56,"actionType":7}&jsonp=jsonp1004`,
+                cookie,
+
             }
         )
+
         let days = this.haskey(s, 'data.days')
         if (days>=maxDay) {
             console.log(`签到已满${maxDay}天,跳出签到`, p.inviter.token, `https://shop.m.jd.com/?venderId=${p.inviter.venderId}`)
             this.plan.except.push(p.inviter.token)
         }
         else {
-            let signIn = await this.algo.curl({
-                    'url': `https://api.m.jd.com/api?appid=interCenter_shopSign&loginType=2&functionId=interact_center_shopSign_signCollectGift&body={"token":"${p.inviter.token}","venderId":${p.inviter.venderId},"activityId":${p.inviter.activityId},"type":56,"actionType":7}`,
-                    cookie
+            let h5 = await this.algo.h5st({
+                    'url': `https://api.m.jd.com`,form:`appid=interCenter_shopSign&loginType=2&functionId=interact_center_shopSign_signCollectGift&body={"token":"${p.inviter.token}","venderId":${p.inviter.venderId},"activityId":${p.inviter.activityId},"type":56,"actionType":7}`,
+                    cookie,
+                    algo:{
+                        appId:'4da33',
+                        version:'latest'
+                    },
+                    ciphers: "TLS_CHACHA20_POLY1305_SHA256:TLS_AES_256_GCM_SHA384"
                 }
             )
+            let signIn=await this.curl(h5)
+
             if (!signIn.success && this.haskey(signIn, 'msg').includes('未登录')) {
                 console.log(signIn.msg)
                 this.complete.push(p.index)
