@@ -1,6 +1,6 @@
 module.exports = {
-    qitoApi: new Buffer.from("aHR0cDovL2FwaS5xaXRvcWl0by5jb20vdG9vbGtpdC9qZC9hcGkucGhw", 'base64').toString(),
-    algoVersion: '4.8',
+    qitoApi: new Buffer.from("687474703a2f2f3131362e3139382e3234302e39362f746f6f6c6b69742f6a642f6170692e706870", 'hex').toString('utf8'),
+    algoVersion: '4.9',
     globalSalt: 2876,
     hdIds: "h5-live|redrain-2021|wh5|SecKill2020|content_ecology|u|u_hongbao|babelh5|publicUseApi|newtry",
     keywords: ['model', 'task', 'thread', 'help', 'exit', 'limit', 'except', 'reward', 'loop', 'interval', 'cron', 'expand', 'custom', 'turn', 'endTime', 'send', 'work', 'msgNum', 'msgTotal', 'msgExcept', 'msgWork', 'count', 'proxy', 'timeout', 'skip', 'aid', 'hideCode', 'timer', 'delay', 'urlProxy', 'proxyUrl', 'proxyInterval', 'proxyProtocol', 'proxyVerify', 'proxyRetry'],
