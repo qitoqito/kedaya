@@ -42,7 +42,7 @@ class Main extends Template {
                     "action": "to"
                 }, 'post', wskey)
                 var x = await this.curl({
-                        'url': `https://api.m.jd.com/client.action?functionId=genToken`,
+                        'url': `http://api.m.jd.com/client.action?functionId=genToken`,
                         'form': params.form,
                         cookie: wskey,
                         response: 'all',
