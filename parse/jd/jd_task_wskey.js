@@ -40,7 +40,7 @@ class Main extends Template {
             }
         }
         if (dict.wskey && (dict.verify || this.profile.pass)) {
-            let s = await this.curl1({
+            let s = await this.curl({
                     'url': `https://plogin.m.jd.com/cgi-bin/ml/islogin`,
                     cookie
                 }
@@ -61,59 +61,52 @@ class Main extends Template {
                     let toUrl = "https:\/\/bean.m.jd.com\/beanDetail\/index.action"
                     console.log("使用App算法生成")
                     let ua = "Mozilla/5.0 (iPad; CPU OS 12_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1"
-                    var params = {}
-                    var x = await this.response({
-                        url: `https://api.m.jd.com/client.action?functionId=genToken`,
-                        form: this.random(this.code, 1)[0],
-                        cookie: wskey
-                    })
                     var params = this.modules.jdUrl.app('genToken', {
                         "to": toUrl,
                         "action": "to"
                     }, 'post', wskey)
-                    params.ua = 'JD4iPhone/168095%20(iPhone;%20iOS;%20Scale/3.00)'
-                    var x = await this.response(params)
-                    if (this.haskey(x, 'content.tokenKey', 'xxx') || this.haskey(x, 'content.tokenKey').includes("@")) {
-                        ua = 'okhttp/3.12.1;jdmall;android;version/12.0.0;build/98771;screen/1080x1920;os/6.0.1;'
-                        let headers = {
-                            'j-e-c': encodeURIComponent(this.dumps({
-                                "hdid": "JM9F1ywUPwflvMIpYPok0tt5k9kW4ArJEU3lfLhxBqw=",
-                                "ts": new Date().getTime(),
-                                "ridx": -1,
-                                "cipher": {"pin": this.eip(this.userPin(cookie), 'b64encode')},
-                                "ciphertype": 5,
-                                "version": "1.2.0",
-                                "appname": "com.jingdong.app.mall"
-                            })),
-                            'j-e-h': encodeURIComponent(this.dumps({
-                                "hdid": "JM9F1ywUPwflvMIpYPok0tt5k9kW4ArJEU3lfLhxBqw=",
-                                "ts": new Date().getTime(),
-                                "ridx": -1,
-                                "cipher": {"User-Agent": this.eip(ua, 'b64encode')},
-                                "ciphertype": 5,
-                                "version": "1.2.0",
-                                "appname": "com.jingdong.app.mall"
-                            })),
-                            'user-agent': ua,
-                            'x-rp-client': 'android_2.0.0',
-                            'x-referer-page': 'com.jingdong.app.mall.WebActivity',
-                            'x-referer-package': 'com.jingdong.app.mall',
-                            'charset': 'UTF-8',
-                            'content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
-                        }
-                        var x = await this.response({
-                                'url': `https://api.m.jd.com/client.action?functionId=genToken&lmt=0&clientVersion=12.0.0&build=98771&client=android&partner=au_jdbzlqj021&sdkVersion=23&lang=zh_CN&harmonyOs=0&networkType=wifi&uts=0f31TVRjBSsqndu4%2FjgUPz6uymy50MQJHLsrbzfFCJ3X4YwUMQU1aab%2Fu6I0Yb6H2lv5IwA8gfUtXIhwB%2FBDqaLFMxlR7%2FcDVln3Yo9V5XGZS5eiE%2FFR%2Fsu1VSyPNvXRRYb49tUpirBDvCWgDFhoFZDjmE24j15onqZaC7mJHzcQDVS1GbcYxJSPs%2FXElDVrves0DKxmDyYxweRJ%2BudCxg%3D%3D&uemps=2-0-2&ext=%7B%22prstate%22%3A%220%22%2C%22pvcStu%22%3A%221%22%2C%22cfgExt%22%3A%22%7B%5C%22privacyOffline%5C%22%3A%5C%220%5C%22%7D%22%7D&eid=eidA8ce481209bsa54Y%2Fp9A0RWWUDFBefT9wfeeGQS%2FLjxwIWCgR41Suz71f2hHQOf9E4GVFG4DFGmYyt52T4VnvRytnpAxFQES4AqvJdta%2FQ%2B87J2ZR&ef=1&ep=%7B%22hdid%22%3A%22JM9F1ywUPwflvMIpYPok0tt5k9kW4ArJEU3lfLhxBqw%3D%22%2C%22ts%22%3A1685720565577%2C%22ridx%22%3A-1%2C%22cipher%22%3A%7B%22d_brand%22%3A%22JWVfoxU%3D%22%2C%22openudid%22%3A%22DwUnZNHrZWG4ZtG4CJcnCq%3D%3D%22%2C%22screen%22%3A%22CJuyCMenCNqm%22%2C%22uuid%22%3A%22DwUnZNHrZWG4ZtG4CJcnCq%3D%3D%22%2C%22osVersion%22%3A%22Ds4mBtO%3D%22%2C%22wifiBssid%22%3A%22dW5hbw93bq%3D%3D%22%2C%22d_model%22%3A%22JJTP%22%2C%22aid%22%3A%22DwUnZNHrZWG4ZtG4CJcnCq%3D%3D%22%7D%2C%22ciphertype%22%3A5%2C%22version%22%3A%221.2.0%22%2C%22appname%22%3A%22com.jingdong.app.mall%22%7D&st=1685720803810&sign=c5fb839ce5a6664fc00c1b2a9fb78a2e&sv=122`,
-                                'form': `body=%7B%22action%22%3A%22to%22%2C%22to%22%3A%22https%253A%252F%252Fh5.m.jd.com%252Fpb%252F014685890%252F41rjX1vmJntJWv7zqmjYNtr4AARQ%252Findex.html%253FbabelChannel%253Dwojing%2523%252Fpages%252Findex%252Findex%22%7D&lmt=0&`,
-                                cookie: wskey,
-                                headers
+                    var x = await this.curl({
+                            'url': `https://api.m.jd.com/client.action?functionId=genToken`,
+                            'form': params.form,
+                            cookie: wskey,
+                            response: 'all',
+                            headers: {
+                                'j-e-c': encodeURIComponent(this.dumps({
+                                    "hdid": "JM9F1ywUPwflvMIpYPok0tt5k9kW4ArJEU3lfLhxBqw=",
+                                    "ts": new Date().getTime(),
+                                    "ridx": -1,
+                                    "cipher": {"pin": this.eip(this.userPin(cookie), 'b64encode')},
+                                    "ciphertype": 5,
+                                    "version": "1.2.0",
+                                    "appname": "com.jingdong.app.mall"
+                                })),
+                                'j-e-h': encodeURIComponent(this.dumps({
+                                    "hdid": "JM9F1ywUPwflvMIpYPok0tt5k9kW4ArJEU3lfLhxBqw=",
+                                    "ts": new Date().getTime(),
+                                    "ridx": -1,
+                                    "cipher": {"User-Agent": this.eip(ua, 'b64encode')},
+                                    "ciphertype": 5,
+                                    "version": "1.2.0",
+                                    "appname": "com.jingdong.app.mall"
+                                })),
+                                'user-agent': 'JD4iPhone/169635%20(iPhone;%20iOS;%20Scale/3.00);jdmall;iphone;version/13.8.1;build/169635;network/wifi;screen/1170x2532;os/15.1.1',
+                                'x-rp-client': 'ios_4.0.0',
+                                'x-referer-page': 'com.jingdong.app.mall.WebActivity',
+                                'x-referer-package': 'com.jingdong.app.mall',
+                                'charset': 'UTF-8',
+                                'content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
                             }
-                        )
-                    }
-                    console.log(x)
-                    let y = await this.response({
-                        url: `https://un.m.jd.com/cgi-bin/app/appjmp?tokenKey=${x.content.tokenKey}&lbs={"cityId":"","districtId":"","provinceId":"","districtName":"","lng":"0.000000","provinceName":"","lat":"0.000000","cityName":""}&to=${encodeURIComponent(toUrl)}`,
-                        'form': '',
-                    })
+                        }
+                    )
+                    let y = await this.curl({
+                            'url': `https://un.m.jd.com/cgi-bin/app/appjmp?tokenKey=${x.content.tokenKey}&&lbs={"cityId":"","districtId":"","provinceId":"","districtName":"","lng":"0.000000","provinceName":"","lat":"0.000000","cityName":""}&to=${encodeURIComponent(toUrl)}`,
+                            'form': ``,
+                            cookie,
+                            response: "all",
+                            maxRedirects: 0,
+                            scheme: 'http',
+                        }
+                    )
                     openKey = y.cookie || ''
                     if (!openKey.includes('app_open')) {
                         console.log("使用Lite算法生成")
