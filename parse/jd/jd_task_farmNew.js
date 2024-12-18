@@ -559,7 +559,7 @@ class Main extends Template {
 
     async wget(p) {
         let headers = p.headers
-        let url = p.url || `https://api.m.jd.com/client.action`
+        let url = p.url || `http://api.m.jd.com/client.action`
         return await this.algo.curl({
                 url,
                 'form': `appid=${p.appid || "signed_wh5"}&client=apple&clientVersion=${this.clientVersion}&screen=375*0&wqDefault=false&t=1698502026732&body=${typeof (p.body) == 'object' ? this.dumps(p.body) : p.body}&functionId=${p.fn}`,
