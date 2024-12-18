@@ -42,7 +42,7 @@ class Main extends Template {
     async main(p) {
         let cookie = p.cookie;
         console.log("正在助力:", p.inviter.user)
-        let help = await this.curl({
+        let help = await this.algo.curl({
                 'url': `https://api.m.jd.com/api?functionId=goldDumplingsHelp`,
                 'form': `functionId=goldDumplingsHelp&body={"envType":1,"linkId":"tCWe8wh2f-Lll_RNU1J2_g","isJdApp":true,"inviter":"${p.inviter.inviter}"}&t=1734530397943&appid=activities_platform&client=ios&clientVersion=13.8.1&loginType=2&loginWQBiz=wegame`,
                 cookie,
