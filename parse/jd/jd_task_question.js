@@ -74,6 +74,7 @@ class Main extends Template {
                     }
                     else {
                         console.log("答案还没更新,晚点再来....")
+                        this.jump = 1
                     }
                 }
             }
