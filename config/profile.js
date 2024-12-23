@@ -1,6 +1,6 @@
 module.exports = {
     qitoApi: new Buffer.from("687474703a2f2f3131362e3139382e3234302e39362f746f6f6c6b69742f6a642f6170692e706870", 'hex').toString('utf8'),
-    algoVersion: '4.9',
+    algoVersion: '5.0',
     globalSalt: 2876,
     hdIds: "h5-live|redrain-2021|wh5|SecKill2020|content_ecology|u|u_hongbao|babelh5|publicUseApi|newtry",
     keywords: ['model', 'task', 'thread', 'help', 'exit', 'limit', 'except', 'reward', 'loop', 'interval', 'cron', 'expand', 'custom', 'turn', 'endTime', 'send', 'work', 'msgNum', 'msgTotal', 'msgExcept', 'msgWork', 'count', 'proxy', 'timeout', 'skip', 'aid', 'hideCode', 'timer', 'delay', 'urlProxy', 'proxyUrl', 'proxyInterval', 'proxyProtocol', 'proxyVerify', 'proxyRetry'],
@@ -24,6 +24,6 @@ module.exports = {
         }
     },
     verifyUrl: 'https://api.m.jd.com/client.action?functionId=queryMaterialProducts&client=wh5',
-    unionId: 'wrags5I',
-    unionShareId: ['CeDkR', 'mZ7Vi']
+    unionId: new Buffer.from("733663597a6e78", 'hex').toString('utf8'),
+    unionShareId: new Buffer.from("79423550797c4e514152677c52455646597c343635535a", 'hex').toString('utf8').split("|"),
 }
