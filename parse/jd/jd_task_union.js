@@ -205,7 +205,7 @@ class Main extends Template {
             //     }
             // )
             let getCoupons = await this.algo.curl({
-                    url: `https://api.m.jd.com/api`,
+                    url: `http://api.m.jd.com/api`,
                     form: `functionId=getCoupons&appid=u_hongbao&_=1716912812082&loginType=2&body={"platform":5,"unionActId":"${unionActId}","actId":"${actId}","d":"${d}","unionShareId":"${unionShareId}","type":1,"qdPageId":"MO-J2011-1","mdClickId":"jxhongbao_ck","actType":1}&client=apple&clientVersion=1.1.0&osVersion=iOS&screen=390*844&d_brand=iPhone&d_model=iPhone&lang=zh-CN&networkType=&openudid=&uuid=17165464753211715186324&aid=&oaid=&ext={"idfa":""}&x-api-eid-token=`,
                     cookie,
                     algo: {
@@ -343,7 +343,7 @@ class Main extends Template {
                             }
                         )
                         let getCoupons = await this.algo.curl({
-                                url: `https://api.m.jd.com/api`,
+                                url: `http://api.m.jd.com/api`,
                                 form: `functionId=getCoupons&appid=u_hongbao&_=1716912812082&loginType=2&body={"actId":"${this.dict.actId}","unionActId":"${this.dict.unionActId}","platform":5,"d":"${this.dict.d}","unionShareId":"","type":8,"qdPageId":"MO-J2011-1","mdClickId":"jxhongbao_ck","actType":1,"taskId":"${i.taskId}","agreeState":0}&client=apple&clientVersion=1.1.0&osVersion=iOS&screen=390*844&d_brand=iPhone&d_model=iPhone&lang=zh-CN&networkType=&openudid=&uuid=17165464753211715186324&aid=&oaid=&ext={"idfa":""}&x-api-eid-token=`,
                                 cookie,
                                 algo: {
@@ -352,7 +352,7 @@ class Main extends Template {
                             }
                         )
                         let getCoupons2 = await this.algo.curl({
-                                url: `https://api.m.jd.com/api`,
+                                url: `http://api.m.jd.com/api`,
                                 form: `functionId=getCoupons&appid=u_hongbao&_=1716912812082&loginType=2&body={"actId":"${this.dict.actId}","unionActId":"${this.dict.unionActId}","platform":5,"d":"${this.dict.d}","unionShareId":"","type":8,"qdPageId":"MO-J2011-1","mdClickId":"jxhongbao_ck","actType":1,"taskId":"${i.taskId}","agreeState":1}&client=apple&clientVersion=1.1.0&osVersion=iOS&screen=390*844&d_brand=iPhone&d_model=iPhone&lang=zh-CN&networkType=&openudid=&uuid=17165464753211715186324&aid=&oaid=&ext={"idfa":""}&x-api-eid-token=`,
                                 cookie,
                                 algo: {
@@ -428,7 +428,7 @@ class Main extends Template {
             }
         )
         let getCoupons = await this.algo.curl({
-                url: `https://api.m.jd.com/api`,
+                url: `http://api.m.jd.com/api`,
                 form: `functionId=getCoupons&appid=u_hongbao&_=1716912812082&loginType=2&body={"actId":"${this.dict.actId}","unionActId":"${this.dict.unionActId}","platform":5,"d":"${this.dict.d}","unionShareId":"","type":3,"qdPageId":"MO-J2011-1","mdClickId":"jxhongbao_ck","actType":1}&client=apple&clientVersion=1.1.0&osVersion=iOS&screen=390*844&d_brand=iPhone&d_model=iPhone&lang=zh-CN&networkType=&openudid=&uuid=17165464753211715186324&aid=&oaid=&ext={"idfa":""}&x-api-eid-token=`,
                 cookie,
                 algo: {
