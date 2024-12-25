@@ -64,6 +64,43 @@ class Main extends Template {
             ua,
             type: "main",
         })
+        const {JSDOM} = this.modules.jsdom;
+        const virtualConsole = new this.modules.jsdom.VirtualConsole();
+        virtualConsole.on("jsdomError", (error) => {
+        });
+        const dom = new JSDOM(`<body><script src="https://storage.360buyimg.com/webcontainer/js_security_v3_lite_0.1.5.js"></script></body>`, {
+            url: `https://prodev.m.jd.com/`,
+            referrer: "https://prodev.m.jd.com/",
+            runScripts: "dangerously",
+            resources: "usable", virtualConsole
+        });
+        var ParamsSign
+        var ParamsSign
+        for (let i of Array(10)) {
+            await this.wait(500)
+            ParamsSign = dom.window.ParamsSignLite || dom.window.ParamsSign || dom.window.ParamsSignMain
+            if (ParamsSign) {
+                break
+            }
+        }
+        let equal = 0
+        if (ParamsSign) {
+            try {
+                let main = new ParamsSign({appId: 'abcde'})
+                if (main._algos.MD5('1').toString("") == this.algo._algoCrypto(this.algo.version).crypto.MD5('1').toString("")) {
+                    equal = 1
+                }
+            } catch (e) {
+            }
+        }
+        if (!equal) {
+            console.log("H5st: 当前H5ST版本可能不是最新,请确保升级了最新H5ST再执行脚本")
+            this.jump = 1
+            return
+        }
+        else {
+            console.log("H5st:", this.algo.fv)
+        }
         try {
             let cookie = ''
             let url = this.profile.shareUrl || `https://u.jd.com/${this.unionId}`
