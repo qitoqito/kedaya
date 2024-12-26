@@ -172,6 +172,41 @@ class Main extends Template {
                 await this.wait(2000)
             }
         }
+        let cardHome = await this.algo.curl({
+                'url': `https://api.m.jd.com/api?functionId=apCardHome`,
+                'form': `functionId=apCardHome&body={"envType":1,"linkId":"uSHMAJiDreKaZ0XDqSIeBA"}&t=1734706347873&appid=activities_platform&client=ios&clientVersion=13.8.1&loginType=2`,
+                cookie,
+                algo: {
+                    appId: "8d9d1"
+                }
+            }
+        )
+        let cardStatus = this.haskey(cardHome, 'data.cardStatus')
+        if (cardStatus == 1) {
+            console.log("正在合成京东黄金饺")
+            let compose = await this.algo.curl({
+                url: `https://api.m.jd.com/api?functionId=composeCard`,
+                form: `functionId=composeCard&body={"envType":1,"linkId":"uSHMAJiDreKaZ0XDqSIeBA"}&t=1734706657615&appid=activities_platform&client=ios&clientVersion=13.8.1&loginType=`,
+                algo: {
+                    appId: 'f326f'
+                },
+                cookie
+            })
+            if (this.haskey(compose, 'data.rewardPopInfo.drawList')) {
+                for (let i of compose.data.rewardPopInfo.drawList) {
+                    this.print(`${i.prizeDesc}: ${i.amount}`, p.user)
+                }
+            }
+            else {
+                console.log(this.haskey(compose, 'errMsg') || compose)
+            }
+        }
+        else if (cardStatus == 2) {
+            console.log("已集齐京东黄金饺")
+        }
+        else {
+            console.log("还没集齐卡片...")
+        }
     }
 }
 
