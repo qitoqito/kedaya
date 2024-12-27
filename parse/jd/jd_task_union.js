@@ -37,6 +37,7 @@ class Main extends Template {
                     console.log("Jsdom: 获取hashCode成功...")
                     this._hashCode = dom.window.hashCode
                 }
+                await dom.window.close()
             } catch (e) {
             }
         }
@@ -95,12 +96,13 @@ class Main extends Template {
         }
         if (!equal) {
             console.log("H5st: 当前H5ST版本可能不是最新,请确保升级了最新H5ST再执行脚本")
-            this.jump = 1
-            return
+            // this.jump = 1
+            // return
         }
         else {
             console.log("H5st:", this.algo.fv)
         }
+        await dom.window.close()
         try {
             let cookie = ''
             let url = this.profile.shareUrl || `https://u.jd.com/${this.unionId}`
