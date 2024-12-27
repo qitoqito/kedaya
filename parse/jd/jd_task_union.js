@@ -96,8 +96,8 @@ class Main extends Template {
         }
         if (!equal) {
             console.log("H5st: 当前H5ST版本可能不是最新,请确保升级了最新H5ST再执行脚本")
-            // this.jump = 1
-            // return
+            this.jump = 1
+            return
         }
         else {
             console.log("H5st:", this.algo.fv)
