@@ -53,7 +53,7 @@ class Main extends Template {
                     else {
                         console.log("正在获取:", i)
                         var s = await this.algo.curl({
-                            url: `https://api.m.jd.com/api?appid=interCenter_shopSign&t=${this.timestamp}&loginType=2&functionId=interact_center_shopSign_getActivityInfo&body={"token":"${i}","venderId":""}`,
+                            url: `http://api.m.jd.com/api?appid=interCenter_shopSign&t=${this.timestamp}&loginType=2&functionId=interact_center_shopSign_getActivityInfo&body={"token":"${i}","venderId":""}`,
                             referer: 'https://h5.m.jd.com/'
                         })
                         if (!this.haskey(s, 'data.id')) {
@@ -67,7 +67,7 @@ class Main extends Template {
                                 continuePrizeRuleList: s.data.continuePrizeRuleList
                             }
                             let shopInfo = await this.algo.curl({
-                                    'url': `https://api.m.jd.com/`,
+                                    'url': `http://api.m.jd.com/`,
                                     form: `functionId=whx_getMShopOutlineInfo&body={"venderId":"${s.data.venderId}","originReferer":"shopx","source":"m-shop"}&t=1727955137220&avifSupport=0&webpSupport=0&appid=wx_mini_app&clientVersion=11.0.0&client=wh5&uuid=08635116374331727444274533&loginType=11&area=&fp=c68b3c68639ae2d76f00dfb51e463e08f251bf09&x-api-eid-token=jdd01w4AJW3WEWJIK2JVHDEVNCEUOOF435MZ7XHM5J34FASC5FO6ESP46WE3GVA2M2U4NSY3HURCBUZP4QS7IHYFLNEFH5Z542NGUVUVRAZAVQYD3SBE7MD4ZHPQANBIRQCXUT32`,
                                     referer: 'https://servicewechat.com/wx91d27dbf599dff74/765/page-frame.html'
                                 }
@@ -125,7 +125,7 @@ class Main extends Template {
         }
         else {
             let h5 = await this.algo.h5st({
-                    'url': `https://api.m.jd.com`,form:`appid=interCenter_shopSign&loginType=2&functionId=interact_center_shopSign_signCollectGift&body={"token":"${p.inviter.token}","venderId":${p.inviter.venderId},"activityId":${p.inviter.activityId},"type":56,"actionType":7}`,
+                    'url': `http://api.m.jd.com`,form:`appid=interCenter_shopSign&loginType=2&functionId=interact_center_shopSign_signCollectGift&body={"token":"${p.inviter.token}","venderId":${p.inviter.venderId},"activityId":${p.inviter.activityId},"type":56,"actionType":7}`,
                     cookie,
                     algo:{
                         appId:'4da33',
