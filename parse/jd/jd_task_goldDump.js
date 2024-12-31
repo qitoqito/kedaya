@@ -12,7 +12,8 @@ class Main extends Template {
     async prepare() {
         this.algo = new this.modules.jdAlgo({
             version: 'latest',
-            type: 'main'
+            type: 'main',
+            shell: true
         })
         this.sign = new this.modules.jdSign()
     }
@@ -26,6 +27,28 @@ class Main extends Template {
                 }
             } catch (e) {
             }
+        }
+        let load = await this.algo.curl({
+                'url': `https://api.m.jd.com/client.action?functionId=comp_data_load`,
+                'form': `appid=day_day_reward&functionId=comp_data_load&loginType=2&loginWQBiz=tttwxapp&body={"token":"KYtyUzspPwotbioIoWYtD","commParams":{"ubbLoc":"ttf.kwhc","lid":"0_0_0_0","client":0,"sdkToken":"jdd01UZDEIGEQHEU3VWDGMYGXVPJ52YGPWPBX6PBNZGDS6IGZJVMF7345QLGXFCX66O6QA5AHCKRN7BXR73CQFNR2APXAHVD2TH4WIC2SIII01234567"},"bizParams":{"openChannel":"jdAppHome"}}&h5st=null&x-api-eid-token=jdd03FQ6Z2DTGYZSJM5FKY54JLAURRHP2UZHK2ID7554EMNWWNNSK3JBCTLTR45IOP3Z5K3YJHOG64SJAOB44KVS3RH7G2UAAAAMUCI2CU5AAAAAAD7V753GXKVKLYUX`,
+                cookie,
+                algo: {
+                    appId: 'ec373'
+                }
+            }
+        )
+        let rewardReceiveKey = this.match(/"rewardReceiveKey":"(\w+)"/, this.dumps(load))
+        if (rewardReceiveKey) {
+            let interact = await this.algo.curl({
+                    'url': `https://api.m.jd.com/client.action?functionId=comp_data_interact`,
+                    'form': `appid=day_day_reward&functionId=comp_data_interact&loginType=2&loginWQBiz=tttwxapp&body={"token":"KYtyUzspPwotbioIoWYtD","fnCode":"invoke","commParams":{"ubbLoc":"ttf.kwhc","lid":"0_0_0_0","client":0,"sdkToken":"jdd01CO63S53EDNECYV65ZKFRKYG4PYJG7AIX4L77Q2STOJ6JFZ6ZTRAP5ETLHDREYPOS4MJ7VFXEH7UBFVTMNKS22VWCXPE2X2BPMA4BALQ01234567"},"bizParams":{"rewardReceiveKey":"${rewardReceiveKey}","openChannel":"jdAppHome","actFlowCode":"receiveReward"}}`,
+                    cookie,
+                    algo: {
+                        appId: '93453'
+                    }
+                }
+            )
+            // console.log(this.haskey(interact,'data.rewardInfoList'))
         }
         let home = await this.algo.curl({
                 'url': `https://api.m.jd.com/api?functionId=goldDumplingsHome`,
@@ -206,6 +229,17 @@ class Main extends Template {
         }
         else {
             console.log("还没集齐卡片...")
+        }
+        if (this.haskey(cardHome, 'data.encryptStr')) {
+            let draw = await this.algo.curl({
+                    'url': `http://api.m.jd.com/api?functionId=cardDrawPrize`,
+                    'form': `functionId=cardDrawPrize&body={"envType":1,"linkId":"uSHMAJiDreKaZ0XDqSIeBA","area":"0_0_0_0","sourceKey":"${cardHome.data.encryptStr}","manualFlag":0}&t=1735645944230&appid=activities_platform&client=ios&clientVersion=13.8.1&platform=3`,
+                    cookie
+                }
+            )
+            for (let i of this.haskey(draw, 'data.prizeInfos')) {
+                this.print(`${i.prizeDesc}: ${i.amount}`, p.user)
+            }
         }
     }
 }
