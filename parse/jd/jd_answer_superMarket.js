@@ -76,6 +76,23 @@ class Main extends Template {
                 }
             }
         }
+        for (let i of Array(21)) {
+            let bet = await this.curl({
+                    'url': `https://api.m.jd.com/atop_channel_newyear_lottery_bet`,
+                    'form': `appid=jd-super-market&t=1735656483694&functionId=atop_channel_newyear_lottery_bet&client=m&uuid=60851eb2289770baca0cb3525ef19b4d2d51d666&body={"provinceId":16,"cityId":1341,"countyId":1347,"townId":44750,"bizCode":"cn_retail_jdsupermarket","scenario":"interactive","babelActivityId":"01722417","channelFollowStatus":1,"babelChannel":"ttt5","isJdApp":"1","isWx":"0"}&h5st=&x-api-eid-token=jdd03FQ6Z2DTGYZSJM5FKY54JLAURRHP2UZHK2ID7554EMNWWNNSK3JBCTLTR45IOP3Z5K3YJHOG64SJAOB44KVS3RH7G2UAAAAMUDS2HM3YAAAAACXDQ5P4VEVSNHEX`,
+                    cookie,
+                    algo: {
+                        appId: '32393'
+                    }
+                }
+            )
+            if (!this.haskey(bet, 'data.floorData.items.0.credits')) {
+                break
+            }
+            for (let i of this.haskey(bet, 'data.floorData.items.0.rewards')) {
+                this.print(`获得: ${i.rewardName} ${i.rewardValue}`, p.user)
+            }
+        }
     }
 }
 
