@@ -41,7 +41,7 @@ class Main extends Template {
         }
         if (dict.wskey && (dict.verify || this.profile.pass)) {
             let s = await this.curl({
-                    'url': `https://plogin.m.jd.com/cgi-bin/ml/islogin`,
+                    'url': `http://plogin.m.jd.com/cgi-bin/ml/islogin`,
                     cookie
                 }
             )
@@ -99,7 +99,7 @@ class Main extends Template {
                         }
                     )
                     let y = await this.curl({
-                            'url': `https://un.m.jd.com/cgi-bin/app/appjmp?tokenKey=${x.content.tokenKey}&&lbs={"cityId":"","districtId":"","provinceId":"","districtName":"","lng":"0.000000","provinceName":"","lat":"0.000000","cityName":""}&to=${encodeURIComponent(toUrl)}`,
+                            'url': `http://un.m.jd.com/cgi-bin/app/appjmp?tokenKey=${x.content.tokenKey}&&lbs={"cityId":"","districtId":"","provinceId":"","districtName":"","lng":"0.000000","provinceName":"","lat":"0.000000","cityName":""}&to=${encodeURIComponent(toUrl)}`,
                             'form': ``,
                             cookie,
                             response: "all",
@@ -118,7 +118,7 @@ class Main extends Template {
                         params.ua = 'JDMobileLite/3.8.20 (iPhone; iOS 15.1.1; Scale/3.00)'
                         x = await this.response(params)
                         y = await this.response({
-                            url: `https://un.m.jd.com/cgi-bin/app/appjmp?tokenKey=${x.content.tokenKey}&lbs={"cityId":"","districtId":"","provinceId":"","districtName":"","lng":"0.000000","provinceName":"","lat":"0.000000","cityName":""}&to=${encodeURIComponent(toUrl)}`,
+                            url: `http://un.m.jd.com/cgi-bin/app/appjmp?tokenKey=${x.content.tokenKey}&lbs={"cityId":"","districtId":"","provinceId":"","districtName":"","lng":"0.000000","provinceName":"","lat":"0.000000","cityName":""}&to=${encodeURIComponent(toUrl)}`,
                             'form': '',
                         })
                         openKey = y.cookie || ''
