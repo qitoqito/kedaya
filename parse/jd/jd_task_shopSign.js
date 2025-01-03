@@ -8,7 +8,7 @@ class Main extends Template {
         this.task = 'local'
         this.verify = 1
         this.model = 'user'
-        this.import = ['jdAlgo', 'fileCache','logBill']
+        this.import = ['jdAlgo', 'fileCache', 'logBill']
         this.delay = 2000
         this.hint = {
             token: "token1|token2"
@@ -17,20 +17,23 @@ class Main extends Template {
 
     async prepare() {
         this.cache = this.modules["fileCache"]
-        await this.cache.connect({file: `${this.dirname}/temp/jd_task_shopSign.json`})
+        await this.cache.connect({
+            file: `${this.dirname}/temp/jd_task_shopSign.json`
+        })
         this.algo = new this.modules.jdAlgo({
             type: "main",
             version: "latest",
             appId: '4da33',
-            referer:'https://h5.m.jd.com/'
+            referer: 'https://h5.m.jd.com/',
+            shell: true
         })
-         this.clientVersion="13.2.8"
+        this.clientVersion = "13.2.8"
         let array = []
-        if (this.profile.token) {
-            array = this.profile.token.split("|")
-        }
-        else if (this.custom) {
+        if (this.custom) {
             array = this.getValue('custom')
+        }
+        else if (this.profile.token) {
+            array = this.profile.token.split("|")
         }
         else if (this.expand) {
             let expand = this.getValue('expand')
@@ -53,7 +56,7 @@ class Main extends Template {
                     else {
                         console.log("正在获取:", i)
                         var s = await this.algo.curl({
-                            url: `http://api.m.jd.com/api?appid=interCenter_shopSign&t=${this.timestamp}&loginType=2&functionId=interact_center_shopSign_getActivityInfo&body={"token":"${i}","venderId":""}`,
+                            url: `https://api.m.jd.com/api?appid=interCenter_shopSign&t=${this.timestamp}&loginType=2&functionId=interact_center_shopSign_getActivityInfo&body={"token":"${i}","venderId":""}`,
                             referer: 'https://h5.m.jd.com/'
                         })
                         if (!this.haskey(s, 'data.id')) {
@@ -67,11 +70,10 @@ class Main extends Template {
                                 continuePrizeRuleList: s.data.continuePrizeRuleList
                             }
                             let shopInfo = await this.algo.curl({
-                                    'url': `http://api.m.jd.com/`,
-                                    form: `functionId=whx_getMShopOutlineInfo&body={"venderId":"${s.data.venderId}","originReferer":"shopx","source":"m-shop"}&t=1727955137220&avifSupport=0&webpSupport=0&appid=wx_mini_app&clientVersion=11.0.0&client=wh5&uuid=08635116374331727444274533&loginType=11&area=&fp=c68b3c68639ae2d76f00dfb51e463e08f251bf09&x-api-eid-token=jdd01w4AJW3WEWJIK2JVHDEVNCEUOOF435MZ7XHM5J34FASC5FO6ESP46WE3GVA2M2U4NSY3HURCBUZP4QS7IHYFLNEFH5Z542NGUVUVRAZAVQYD3SBE7MD4ZHPQANBIRQCXUT32`,
-                                    referer: 'https://servicewechat.com/wx91d27dbf599dff74/765/page-frame.html'
-                                }
-                            )
+                                'url': `https://api.m.jd.com/`,
+                                form: `functionId=whx_getMShopOutlineInfo&body={"venderId":"${s.data.venderId}","originReferer":"shopx","source":"m-shop"}&t=1727955137220&avifSupport=0&webpSupport=0&appid=wx_mini_app&clientVersion=11.0.0&client=wh5&uuid=08635116374331727444274533&loginType=11&area=&fp=c68b3c68639ae2d76f00dfb51e463e08f251bf09&x-api-eid-token=jdd01w4AJW3WEWJIK2JVHDEVNCEUOOF435MZ7XHM5J34FASC5FO6ESP46WE3GVA2M2U4NSY3HURCBUZP4QS7IHYFLNEFH5Z542NGUVUVRAZAVQYD3SBE7MD4ZHPQANBIRQCXUT32`,
+                                referer: 'https://servicewechat.com/wx91d27dbf599dff74/765/page-frame.html'
+                            })
                             if (this.haskey(shopInfo, 'data.shopInfo.shopName')) {
                                 info.shopName = shopInfo.data.shopInfo.shopName
                             }
@@ -112,12 +114,9 @@ class Main extends Template {
         }
         let maxDay = this.sum(this.column(p.inviter.continuePrizeRuleList, 'days'))
         let s = await this.algo.curl({
-                'url': `http://api.m.jd.com/api?appid=interCenter_shopSign&loginType=2&functionId=interact_center_shopSign_getSignRecord&body={"token":"${p.inviter.token}","venderId":${p.inviter.venderId},"activityId":${p.inviter.activityId},"type":56,"actionType":7}&jsonp=jsonp1004`,
-                cookie,
-
-            }
-        )
-
+            'url': `https://api.m.jd.com/api?appid=interCenter_shopSign&loginType=2&functionId=interact_center_shopSign_getSignRecord&body={"token":"${p.inviter.token}","venderId":${p.inviter.venderId},"activityId":${p.inviter.activityId},"type":56,"actionType":7}&jsonp=jsonp1004`,
+            cookie,
+        })
         let days = this.haskey(s, 'data.days')
         if (days>=maxDay) {
             console.log(`签到已满${maxDay}天,跳出签到`, p.inviter.token, `https://shop.m.jd.com/?venderId=${p.inviter.venderId}`)
@@ -125,17 +124,16 @@ class Main extends Template {
         }
         else {
             let h5 = await this.algo.h5st({
-                    'url': `http://api.m.jd.com`,form:`appid=interCenter_shopSign&loginType=2&functionId=interact_center_shopSign_signCollectGift&body={"token":"${p.inviter.token}","venderId":${p.inviter.venderId},"activityId":${p.inviter.activityId},"type":56,"actionType":7}`,
-                    cookie,
-                    algo:{
-                        appId:'4da33',
-                        version:'latest'
-                    },
-                    ciphers: "TLS_CHACHA20_POLY1305_SHA256:TLS_AES_256_GCM_SHA384"
-                }
-            )
-            let signIn=await this.curl(h5)
-
+                'url': `https://api.m.jd.com`,
+                form: `appid=interCenter_shopSign&loginType=2&functionId=interact_center_shopSign_signCollectGift&body={"token":"${p.inviter.token}","venderId":${p.inviter.venderId},"activityId":${p.inviter.activityId},"type":56,"actionType":7}`,
+                cookie,
+                algo: {
+                    appId: '4da33',
+                    version: 'latest'
+                },
+                ciphers: "TLS_CHACHA20_POLY1305_SHA256:TLS_AES_256_GCM_SHA384"
+            })
+            let signIn = await this.curl(h5)
             if (!signIn.success && this.haskey(signIn, 'msg').includes('未登录')) {
                 console.log(signIn.msg)
                 this.complete.push(p.index)
