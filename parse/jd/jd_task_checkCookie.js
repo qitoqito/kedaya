@@ -16,9 +16,10 @@ class Main extends Template {
         let pin = this.userPin(cookie)
         let dict = this.userDict[pin]
         let s = await this.curl({
-                'url': `http://plogin.m.jd.com/cgi-bin/ml/islogin`,
+                'url': `https://plogin.m.jd.com/cgi-bin/ml/islogin`,
                 // 'form':``,
-                cookie
+                cookie,
+                shell: true
             }
         )
         if ((s.islogin == '0')) {
@@ -42,9 +43,9 @@ class Main extends Template {
                     "action": "to"
                 }, 'post', wskey)
                 var x = await this.curl({
-                        'url': `http://api.m.jd.com/client.action?functionId=genToken`,
+                        'url': `https://api.m.jd.com/client.action?functionId=genToken`,
                         'form': params.form,
-                        cookie: wskey,
+                        cookie: wskey, shell: true,
                         response: 'all',
                         headers: {
                             'j-e-c': encodeURIComponent(this.dumps({
@@ -75,12 +76,14 @@ class Main extends Template {
                     }
                 )
                 let y = await this.curl({
-                        'url': `http://un.m.jd.com/cgi-bin/app/appjmp?tokenKey=${x.content.tokenKey}&&lbs={"cityId":"","districtId":"","provinceId":"","districtName":"","lng":"0.000000","provinceName":"","lat":"0.000000","cityName":""}&to=${encodeURIComponent(toUrl)}`,
-                        'form': ``,
+                        'url': `https://un.m.jd.com/cgi-bin/app/appjmp`,
+                        form: `tokenKey=${x.content.tokenKey}&&lbs={"cityId":"","districtId":"","provinceId":"","districtName":"","lng":"0.000000","provinceName":"","lat":"0.000000","cityName":""}&to=${encodeURIComponent(toUrl)}`,
+                        // 'form': ``,
                         cookie,
                         response: "all",
                         maxRedirects: 0,
                         scheme: 'http',
+                        shell: 1,
                     }
                 )
                 let openKey = y.cookie || ''
@@ -94,7 +97,7 @@ class Main extends Template {
                     params.ua = 'JDMobileLite/3.8.20 (iPhone; iOS 15.1.1; Scale/3.00)'
                     x = await this.response(params)
                     y = await this.response({
-                        url: `http://un.m.jd.com/cgi-bin/app/appjmp?tokenKey=${x.content.tokenKey}&lbs={"cityId":"","districtId":"","provinceId":"","districtName":"","lng":"0.000000","provinceName":"","lat":"0.000000","cityName":""}&to=${encodeURIComponent(toUrl)}`,
+                        url: `https://un.m.jd.com/cgi-bin/app/appjmp?tokenKey=${x.content.tokenKey}&lbs={"cityId":"","districtId":"","provinceId":"","districtName":"","lng":"0.000000","provinceName":"","lat":"0.000000","cityName":""}&to=${encodeURIComponent(toUrl)}`,
                         'form': '',
                     })
                     openKey = y.cookie || ''
