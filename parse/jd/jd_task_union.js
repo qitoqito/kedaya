@@ -6,7 +6,7 @@ class Main extends Template {
         this.title = "京东京享红包"
         this.cron = `${this.rand(0, 59)} ${this.rand(0, 22)} * * *`
         this.help = '3'
-        this.import = ['jdAlgo', 'logBill', 'jdSign', 'jsdom']
+        this.import = ['jdAlgo', 'logBill', 'jdSign', 'vm']
         this.delay = 500
         this.jdJdc = '123'
         this.hint = {
@@ -19,34 +19,10 @@ class Main extends Template {
 
     async uuaa() {
         let ua = this.userAgents().wechat
-        if (!this._hashCode) {
-            try {
-                let url = this.profile.shareUrl || `https://u.jd.com/${this.unionId}`
-                const {
-                    JSDOM
-                } = this.modules.jsdom;
-                let virtualConsole = new this.modules.jsdom.VirtualConsole()
-                let resourceLoader = new this.modules.jsdom.ResourceLoader(this.options.headers);
-                var options = {
-                    runScripts: "dangerously",
-                    resources: resourceLoader,
-                    virtualConsole,
-                };
-                const dom = await JSDOM.fromURL(url, options);
-                if (dom.window.hashCode && typeof dom.window.hashCode == 'function') {
-                    console.log("Jsdom: 获取hashCode成功...")
-                    this._hashCode = dom.window.hashCode
-                }
-                await dom.window.close()
-            } catch (e) {
-            }
-        }
-        if (!this._hashCode) {
-            this._hashCode = s => s.split('').reduce((a, b) => {
-                a = ((a << 5) - a) + b.charCodeAt(0);
-                return a & a
-            }, 0);
-        }
+        this._hashCode = s => s.split('').reduce((a, b) => {
+            a = ((a << 5) - a) + b.charCodeAt(0);
+            return a & a
+        }, 0);
         return {
             ua,
             h5st: this._hashCode(ua)
@@ -65,44 +41,27 @@ class Main extends Template {
             ua,
             type: "main",
         })
-        const {JSDOM} = this.modules.jsdom;
-        const virtualConsole = new this.modules.jsdom.VirtualConsole();
-        virtualConsole.on("jsdomError", (error) => {
-        });
-        const dom = new JSDOM(`<body><script src="https://storage.360buyimg.com/webcontainer/js_security_v3_lite_0.1.5.js"></script></body>`, {
-            url: `https://prodev.m.jd.com/`,
-            referrer: "https://prodev.m.jd.com/",
-            runScripts: "dangerously",
-            resources: "usable", virtualConsole
-        });
-        var ParamsSign
-        var ParamsSign
-        for (let i of Array(10)) {
-            await this.wait(500)
-            ParamsSign = dom.window.ParamsSignLite || dom.window.ParamsSign || dom.window.ParamsSignMain
-            if (ParamsSign) {
-                break
-            }
-        }
-        let equal = 0
-        if (ParamsSign) {
-            try {
-                let main = new ParamsSign({appId: 'abcde'})
-                if (main._algos.MD5('1').toString("") == this.algo._algoCrypto(this.algo.version).crypto.MD5('1').toString("")) {
-                    equal = 1
+        let js = await this.curl('https://storage.360buyimg.com/webcontainer/js_security_v3_lite_0.1.5.js')
+        const script = new this.modules.vm.Script(`
+            var window = {
+                    document: {
+                        cookie: ""
+                    }
                 }
-            } catch (e) {
-            }
-        }
-        if (!equal) {
-            console.log("H5st: 当前H5ST版本可能不是最新,请确保升级了最新H5ST再执行脚本")
-            this.jump = 1
+            var document = window.document
+            var navigator = {};
+            window.navigator = navigator;
+            ${js};
+            new ParamsSignLite();`);
+        const result = script.runInNewContext();
+        if (this.algo.algos.MD5('1').toString("") != result._algos.MD5('1').toString()) {
+            this.jump = true
+            console.log("[Error] H5st: 当前H5ST版本可能不是最新,请确保升级了最新H5ST再执行脚本")
             return
         }
         else {
-            console.log("H5st:", this.algo.fv)
+            console.log("H5ST:", this.algo.fv)
         }
-        await dom.window.close()
         try {
             let cookie = ''
             let url = this.profile.shareUrl || `https://u.jd.com/${this.unionId}`
