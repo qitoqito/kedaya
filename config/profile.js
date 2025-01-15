@@ -24,7 +24,7 @@ module.exports = {
         }
     },
     verifyUrl: 'https://api.m.jd.com/client.action?functionId=queryMaterialProducts&client=wh5',
-    unionShare: "56059336a4a3d434d653e44426c73397074373a3e486f4a6a67426c76734e64373a396448525e47626c7d4e445a6d6a35486a467a67426",
+    unionShare: "f6d4052467a3556707d4c42717c793a72617a7a3b6468747c47617c72477156313a354133787467617c744f4635735a3664303d4c4f417",
     unionId: new Buffer.from("733663597a6e78", 'hex').toString('utf8'),
     unionShareId: new Buffer.from("79423550797c4e514152677c52455646597c343635535a", 'hex').toString('utf8').split("|"),
 }
