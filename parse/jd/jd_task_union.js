@@ -31,8 +31,8 @@ class Main extends Template {
 
     async prepare() {
         if (!this.profile.known) {
-            // this.jump = 1
-            // return
+            this.jump = 1
+            return
         }
         var {ua, h5st} = await this.uuaa()
         this.sign = new this.modules.jdSign()
