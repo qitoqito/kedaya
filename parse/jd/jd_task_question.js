@@ -22,7 +22,7 @@ class Main extends Template {
             }
         )
         if (this.haskey(s, 'data')) {
-            this.dict = s.data
+            this.dict = this.column(s.data, '', 'encryptAssignmentId')
         }
         else {
             console.log("没有获取到答案...")
