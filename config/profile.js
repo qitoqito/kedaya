@@ -24,5 +24,5 @@ module.exports = {
         }
     },
     verifyUrl: 'https://api.m.jd.com/client.action?functionId=queryMaterialProducts&client=wh5',
-    unionShare: "555424d624a337368727972717",
+    unionShare: "743694d605a375330394a52717",
 }
