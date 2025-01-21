@@ -30,7 +30,7 @@ class Main extends Template {
                                 "userId": 10299171
                             },
                             "admJson": {
-                                "actId": "1e4989503f2e4daab3_240423",
+                                "actId": i,
                                 "method": "/jdJoinCardtf/shop/shopProduct",
                                 "userId": 10299171,
                                 "pushWay": 1
@@ -58,7 +58,7 @@ class Main extends Template {
             console.log(`用户过期或者异常`)
             return
         }
-        for (let i of Array(5)) {
+        for (let i of Array(2)) {
             var load = await this.curl({
                     'url': `https://jinggengjcq-isv.isvjcloud.com/dm/front/jdJoinCardtf/activity/load?open_id=&mix_nick=&push_way=1&user_id=10299171`,
                     'json': {
@@ -92,6 +92,7 @@ class Main extends Template {
             return
         }
         let buyerNick = this.haskey(load, 'data.data.missionCustomer.buyerNick')
+        let missionCustome = load.data.data.missionCustomer
         let bean = 0
         let shopList = await this.curl({
                 'url': `https://jinggengjcq-isv.isvjcloud.com/dm/front/jdJoinCardtf/shop/shopList?open_id=&mix_nick=${buyerNick}&push_way=1&user_id=10299171`,
@@ -145,6 +146,9 @@ class Main extends Template {
             // console.log(this.dumps(s))
             let remark = this.haskey(s, 'data.data.remark') || ''
             console.log(remark)
+            if (this.haskey(s, 'data.data.sendStatus') == false) {
+                break
+            }
             if (this.haskey(s, 'data.data.sendStatus')) {
                 let num = this.match(/(\d+)个京豆/, remark)
                 bean += parseInt(num)
@@ -157,6 +161,12 @@ class Main extends Template {
             await this.wait(1000)
         }
         for (let _ of ['uniteAddCart', 'uniteCollectShop']) {
+            if (_ == 'uniteAddCart' && missionCustome.hasAddCart) {
+                continue
+            }
+            else if (_ == 'uniteCollectShop' && missionCustome.hasCollectShop) {
+                continue
+            }
             let collectShop = await this.curl({
                     'url': `https://jinggengjcq-isv.isvjcloud.com/dm/front/jdJoinCardtf/mission/completeMission?open_id=&mix_nick=${buyerNick}&push_way=1&user_id=10299171`,
                     json: {
