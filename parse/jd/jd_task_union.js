@@ -34,6 +34,9 @@ class Main extends Template {
             this.jump = 1
             return
         }
+        console.log("活动结束")
+        this.jump = 1
+        return
         var {ua, h5st} = await this.uuaa()
         this.sign = new this.modules.jdSign()
         this.algo = new this.modules.jdAlgo({
